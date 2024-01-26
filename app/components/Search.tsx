@@ -4,6 +4,7 @@ import {
   useParams,
   useFetcher,
   useFetchers,
+  useSubmit,
   type FormProps,
 } from '@remix-run/react';
 import {Image, Money, Pagination} from '@shopify/hydrogen';
@@ -15,6 +16,7 @@ import type {
   PredictiveArticleFragment,
   SearchQuery,
 } from 'storefrontapi.generated';
+import {Input} from './ui/input';
 
 type PredicticeSearchResultItemImage =
   | PredictiveCollectionFragment['image']
@@ -64,9 +66,8 @@ export const NO_PREDICTIVE_SEARCH_RESULTS: NormalizedPredictiveSearchResults = [
   {type: 'articles', items: []},
 ];
 
-export function SearchForm({searchTerm}: {searchTerm: string}) {
+export function SearchForm() {
   const inputRef = useRef<HTMLInputElement | null>(null);
-
   // focus the input when cmd+k is pressed
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
@@ -88,17 +89,39 @@ export function SearchForm({searchTerm}: {searchTerm: string}) {
   }, []);
 
   return (
-    <Form method="get">
-      <input
-        defaultValue={searchTerm}
+    <Form
+      method="get"
+      className="flex border border-input rounded-[62px] bg-input items-center px-4 py-[3px]"
+    >
+      <SearchIcon />
+      <Input
         name="q"
-        placeholder="Search…"
+        placeholder="Що ти шукаєш?"
         ref={inputRef}
         type="search"
       />
-      &nbsp;
-      <button type="submit">Search</button>
     </Form>
+  );
+}
+
+export function SearchIcon() {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+    >
+      <g opacity="0.5">
+        <path
+          d="M20 20L16.2223 16.2156M18.3158 11.1579C18.3158 13.0563 17.5617 14.8769 16.2193 16.2193C14.8769 17.5617 13.0563 18.3158 11.1579 18.3158C9.2595 18.3158 7.43886 17.5617 6.0965 16.2193C4.75413 14.8769 4 13.0563 4 11.1579C4 9.2595 4.75413 7.43886 6.0965 6.0965C7.43886 4.75413 9.2595 4 11.1579 4C13.0563 4 14.8769 4.75413 16.2193 6.0965C17.5617 7.43886 18.3158 9.2595 18.3158 11.1579V11.1579Z"
+          stroke="black"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+        />
+      </g>
+    </svg>
   );
 }
 
@@ -306,7 +329,7 @@ export function PredictiveSearchResults() {
     return <NoPredictiveSearchResults searchTerm={searchTerm} />;
   }
   return (
-    <div className="predictive-search-results">
+    <div className="">
       <div>
         {results.map(({type, items}) => (
           <PredictiveSearchResult
@@ -322,7 +345,7 @@ export function PredictiveSearchResults() {
       {searchTerm.current && (
         <Link onClick={goToSearchResult} to={`/search?q=${searchTerm.current}`}>
           <p>
-            View all results for <q>{searchTerm.current}</q>
+            До всіх результатів <q>{searchTerm.current}</q>
             &nbsp; →
           </p>
         </Link>

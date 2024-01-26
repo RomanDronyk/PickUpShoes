@@ -49,7 +49,6 @@ export async function action({request, params, context}: LoaderFunctionArgs) {
     request,
     context,
   });
-
   return json(search);
 }
 

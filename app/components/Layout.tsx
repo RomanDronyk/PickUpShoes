@@ -1,10 +1,11 @@
-import {Await} from '@remix-run/react';
+import {Await, useLocation} from '@remix-run/react';
 import {Suspense} from 'react';
 import type {
   CartApiQueryFragment,
   FooterQuery,
   HeaderQuery,
 } from 'storefrontapi.generated';
+import {AnimatePresence, motion} from 'framer-motion';
 import {Aside} from '~/components/Aside';
 import {Footer} from '~/components/Footer';
 import {Header, HeaderMenu} from '~/components/Header';
@@ -20,6 +21,7 @@ export type LayoutProps = {
   footer: Promise<FooterQuery>;
   header: HeaderQuery;
   isLoggedIn: boolean;
+  favorites?: boolean;
 };
 
 export function Layout({
@@ -30,18 +32,26 @@ export function Layout({
   isLoggedIn,
 }: LayoutProps) {
   return (
-    <>
-      <CartAside cart={cart} />
-      <SearchAside />
-      <MobileMenuAside menu={header?.menu} shop={header?.shop} />
+    <div className="px-24">
+      {/* <CartAside cart={cart} /> */}
+      {/* <MobileMenuAside menu={header?.menu} shop={header?.shop} /> */}
       {header && <Header header={header} cart={cart} isLoggedIn={isLoggedIn} />}
-      <main>{children}</main>
+      <AnimatePresence mode="wait" initial={false}>
+        <motion.main
+          key={useLocation().pathname}
+          initial={{x: '10%', opacity: 0}}
+          animate={{x: '0', opacity: 1}}
+          exit={{x: '-40%', opacity: 0}}
+        >
+          {children}
+        </motion.main>
+      </AnimatePresence>
       <Suspense>
         <Await resolve={footer}>
           {(footer) => <Footer menu={footer?.menu} shop={header?.shop} />}
         </Await>
       </Suspense>
-    </>
+    </div>
   );
 }
 
