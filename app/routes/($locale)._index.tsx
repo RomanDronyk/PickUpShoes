@@ -6,6 +6,7 @@ import type {
   FeaturedCollectionFragment,
   RecommendedProductsQuery,
 } from 'storefrontapi.generated';
+import {Hero} from '~/components/Hero';
 
 export const meta: MetaFunction = () => {
   return [{title: 'PickupShoes | Головна'}];
@@ -17,15 +18,16 @@ export async function loader({context}: LoaderFunctionArgs) {
   const featuredCollection = collections.nodes[0];
   const recommendedProducts = storefront.query(RECOMMENDED_PRODUCTS_QUERY);
 
-  return defer({featuredCollection, recommendedProducts});
+  const heroCollection = await storefront.query(HERO_QUERY);
+  return defer({featuredCollection, recommendedProducts, heroCollection});
 }
 
 export default function Homepage() {
-  const data = useLoaderData<typeof loader>();
+  const {heroCollection} = useLoaderData<typeof loader>();
   return (
     <div className="home">
-      <FeaturedCollection collection={data.featuredCollection} />
-      <RecommendedProducts products={data.recommendedProducts} />
+      <Hero heroData={heroCollection} />
+      {/* <RecommendedProducts products={data.recommendedProducts} /> */}
     </div>
   );
 }
@@ -139,6 +141,34 @@ const RECOMMENDED_PRODUCTS_QUERY = `#graphql
     products(first: 4, sortKey: UPDATED_AT, reverse: true) {
       nodes {
         ...RecommendedProduct
+      }
+    }
+  }
+` as const;
+
+const HERO_QUERY = `#graphql
+  query HomeHero ($country: CountryCode, $language: LanguageCode)
+   @inContext(country: $country, language: $language) {
+    collection(handle: "home-page") {
+      heading: metafield(namespace: "hero", key: "title") {
+        value
+      }
+      banner: metafield(namespace: "hero", key: "image") {
+        value
+        reference {
+          ... on MediaImage {
+            id
+            image {
+              altText
+              width
+              height
+              url
+            }
+          }
+        }
+      }
+      motto: metafield(namespace: "hero", key: "motto") {
+        value
       }
     }
   }

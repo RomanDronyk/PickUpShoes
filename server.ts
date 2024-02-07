@@ -33,15 +33,15 @@ export default {
       }
 
       const waitUntil = executionContext.waitUntil.bind(executionContext);
-      const [cache, session] = await Promise.all([
+      const [ cache, session ] = await Promise.all([
         caches.open('hydrogen'),
-        HydrogenSession.init(request, [env.SESSION_SECRET]),
+        HydrogenSession.init(request, [ env.SESSION_SECRET ]),
       ]);
 
       /**
        * Create Hydrogen's Storefront client.
        */
-      const {storefront} = createStorefrontClient({
+      const { storefront } = createStorefrontClient({
         cache,
         waitUntil,
         i18n: getLocaleFromRequest(request),
@@ -70,7 +70,7 @@ export default {
       const handleRequest = createRequestHandler({
         build: remixBuild,
         mode: process.env.NODE_ENV,
-        getLoadContext: () => ({session, storefront, cart, env, waitUntil}),
+        getLoadContext: () => ({ session, storefront, cart, env, waitUntil }),
       });
 
       const response = await handleRequest(request);
@@ -81,33 +81,33 @@ export default {
          * If the redirect doesn't exist, then `storefrontRedirect`
          * will pass through the 404 response.
          */
-        return storefrontRedirect({request, response, storefront});
+        return storefrontRedirect({ request, response, storefront });
       }
 
       return response;
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error(error);
-      return new Response('An unexpected error occurred', {status: 500});
+      return new Response('An unexpected error occurred', { status: 500 });
     }
   },
 };
 
 function getLocaleFromRequest(request: Request): I18nLocale {
   const url = new URL(request.url);
-  const firstPathPart = url.pathname.split('/')[1]?.toUpperCase() ?? '';
+  const firstPathPart = url.pathname.split('/')[ 1 ]?.toUpperCase() ?? '';
 
-  type I18nFromUrl = [I18nLocale['language'], I18nLocale['country']];
+  type I18nFromUrl = [ I18nLocale[ 'language' ], I18nLocale[ 'country' ] ];
 
   let pathPrefix = '';
-  let [language, country]: I18nFromUrl = ['EN', 'US'];
+  let [ language, country ]: I18nFromUrl = [ 'UK', 'UA' ];
 
   if (/^[A-Z]{2}-[A-Z]{2}$/i.test(firstPathPart)) {
     pathPrefix = '/' + firstPathPart;
-    [language, country] = firstPathPart.split('-') as I18nFromUrl;
+    [ language, country ] = firstPathPart.split('-') as I18nFromUrl;
   }
 
-  return {language, country, pathPrefix};
+  return { language, country, pathPrefix };
 }
 
 /**

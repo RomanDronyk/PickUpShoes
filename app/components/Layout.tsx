@@ -32,7 +32,7 @@ export function Layout({
   isLoggedIn,
 }: LayoutProps) {
   return (
-    <div className="px-24">
+    <div>
       {/* <CartAside cart={cart} /> */}
       {/* <MobileMenuAside menu={header?.menu} shop={header?.shop} /> */}
       {header && <Header header={header} cart={cart} isLoggedIn={isLoggedIn} />}
@@ -48,7 +48,7 @@ export function Layout({
       </AnimatePresence>
       <Suspense>
         <Await resolve={footer}>
-          {(footer) => <Footer menu={footer?.menu} shop={header?.shop} />}
+          {(footer) => <Footer menu={footer} shop={header?.shop} />}
         </Await>
       </Suspense>
     </div>

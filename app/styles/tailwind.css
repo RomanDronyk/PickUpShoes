@@ -62,8 +62,12 @@
     --ring: 0 0% 3.9%;
 
     --radius: 0.5rem;
-    --bg-input: 0 0% 94% 1;
+    --bg-input: 0 0% 94%;
     --black: 0 0% 0%;
+    --red: 0 100% 42%;
+    --dark-red: 0 100% 36%;
+    --placeholder-text: 0 0% 98%;
+    --bage-red: 0 68% 56%;
   }
 }
 

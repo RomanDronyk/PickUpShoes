@@ -21,8 +21,12 @@ module.exports = {
         sans: ['"Gilroy"', 'sans-serif'],
       },
       colors: {
+        bageRed: 'hsl(var(--bage-red))',
+        lightGray: 'hsl(var(--bg-input))',
+        darkRed: 'hsl(var(--dark-red))',
         border: 'hsl(var(--border))',
         input: 'hsl(var(--input))',
+        placeholderText: 'hsl(var(--placeholder-text))',
         ring: 'hsl(var(--ring))',
         background: 'hsl(var(--background))',
         foreground: 'hsl(var(--foreground))',
@@ -74,6 +78,13 @@ module.exports = {
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
+      },
+      backgroundImage: {
+        heroBg: "url('../assets/images/hero-left.png')",
+      },
+      dropShadow: {
+        '3xl': '0 4px 15px rgba(0,0,0,0.25)',
+        cart: 'o 4px 4px rgba(0,0,0,0.25)',
       },
     },
   },
