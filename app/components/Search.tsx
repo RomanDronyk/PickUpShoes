@@ -7,18 +7,17 @@ import {
   type FormProps,
 } from '@remix-run/react';
 import {Image, Money, Pagination} from '@shopify/hydrogen';
-import React, {useRef, useEffect} from 'react';
+import React, {useRef, useEffect, useState} from 'react';
+import clsx from 'clsx';
+import {motion} from 'framer-motion';
 
 import type {
   PredictiveProductFragment,
-  PredictiveCollectionFragment,
-  PredictiveArticleFragment,
   SearchQuery,
 } from 'storefrontapi.generated';
+import {Input} from './ui/input';
 
 type PredicticeSearchResultItemImage =
-  | PredictiveCollectionFragment['image']
-  | PredictiveArticleFragment['image']
   | PredictiveProductFragment['variants']['nodes'][0]['image'];
 
 type PredictiveSearchResultItemPrice =
@@ -36,11 +35,14 @@ export type NormalizedPredictiveSearchResultItem = {
 };
 
 export type NormalizedPredictiveSearchResults = Array<
-  | {type: 'queries'; items: Array<NormalizedPredictiveSearchResultItem>}
-  | {type: 'products'; items: Array<NormalizedPredictiveSearchResultItem>}
-  | {type: 'collections'; items: Array<NormalizedPredictiveSearchResultItem>}
-  | {type: 'pages'; items: Array<NormalizedPredictiveSearchResultItem>}
-  | {type: 'articles'; items: Array<NormalizedPredictiveSearchResultItem>}
+  | {
+      type: 'queries';
+      items: Array<NormalizedPredictiveSearchResultItem>;
+    }
+  | {
+      type: 'products';
+      items: Array<NormalizedPredictiveSearchResultItem>;
+    }
 >;
 
 export type NormalizedPredictiveSearch = {
@@ -59,14 +61,10 @@ type FetchSearchResultsReturn = {
 export const NO_PREDICTIVE_SEARCH_RESULTS: NormalizedPredictiveSearchResults = [
   {type: 'queries', items: []},
   {type: 'products', items: []},
-  {type: 'collections', items: []},
-  {type: 'pages', items: []},
-  {type: 'articles', items: []},
 ];
 
 export function SearchForm({searchTerm}: {searchTerm: string}) {
   const inputRef = useRef<HTMLInputElement | null>(null);
-
   // focus the input when cmd+k is pressed
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
@@ -88,17 +86,40 @@ export function SearchForm({searchTerm}: {searchTerm: string}) {
   }, []);
 
   return (
-    <Form method="get">
-      <input
-        defaultValue={searchTerm}
+    <Form
+      method="get"
+      className="flex border border-input rounded-[62px] bg-input items-center px-4 py-[3px]"
+    >
+      <SearchIcon />
+      <Input
         name="q"
-        placeholder="Search…"
+        placeholder="Що ти шукаєш?"
         ref={inputRef}
         type="search"
+        defaultValue={searchTerm}
       />
-      &nbsp;
-      <button type="submit">Search</button>
     </Form>
+  );
+}
+
+export function SearchIcon() {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+    >
+      <g opacity="0.5">
+        <path
+          d="M20 20L16.2223 16.2156M18.3158 11.1579C18.3158 13.0563 17.5617 14.8769 16.2193 16.2193C14.8769 17.5617 13.0563 18.3158 11.1579 18.3158C9.2595 18.3158 7.43886 17.5617 6.0965 16.2193C4.75413 14.8769 4 13.0563 4 11.1579C4 9.2595 4.75413 7.43886 6.0965 6.0965C7.43886 4.75413 9.2595 4 11.1579 4C13.0563 4 14.8769 4.75413 16.2193 6.0965C17.5617 7.43886 18.3158 9.2595 18.3158 11.1579V11.1579Z"
+          stroke="black"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+        />
+      </g>
+    </svg>
   );
 }
 
@@ -114,14 +135,6 @@ export function SearchResults({
       {results &&
         keys.map((type) => {
           const resourceResults = results[type];
-
-          if (resourceResults.nodes[0]?.__typename === 'Page') {
-            const pageResults = resourceResults as SearchQuery['pages'];
-            return resourceResults.nodes.length ? (
-              <SearchResultPageGrid key="pages" pages={pageResults} />
-            ) : null;
-          }
-
           if (resourceResults.nodes[0]?.__typename === 'Product') {
             const productResults = resourceResults as SearchQuery['products'];
             return resourceResults.nodes.length ? (
@@ -131,17 +144,6 @@ export function SearchResults({
               />
             ) : null;
           }
-
-          if (resourceResults.nodes[0]?.__typename === 'Article') {
-            const articleResults = resourceResults as SearchQuery['articles'];
-            return resourceResults.nodes.length ? (
-              <SearchResultArticleGrid
-                key="articles"
-                articles={articleResults}
-              />
-            ) : null;
-          }
-
           return null;
         })}
     </div>
@@ -186,44 +188,8 @@ function SearchResultsProductsGrid({products}: Pick<SearchQuery, 'products'>) {
   );
 }
 
-function SearchResultPageGrid({pages}: Pick<SearchQuery, 'pages'>) {
-  return (
-    <div className="search-result">
-      <h2>Pages</h2>
-      <div>
-        {pages?.nodes?.map((page) => (
-          <div className="search-results-item" key={page.id}>
-            <Link prefetch="intent" to={`/pages/${page.handle}`}>
-              {page.title}
-            </Link>
-          </div>
-        ))}
-      </div>
-      <br />
-    </div>
-  );
-}
-
-function SearchResultArticleGrid({articles}: Pick<SearchQuery, 'articles'>) {
-  return (
-    <div className="search-result">
-      <h2>Articles</h2>
-      <div>
-        {articles?.nodes?.map((article) => (
-          <div className="search-results-item" key={article.id}>
-            <Link prefetch="intent" to={`/blog/${article.handle}`}>
-              {article.title}
-            </Link>
-          </div>
-        ))}
-      </div>
-      <br />
-    </div>
-  );
-}
-
 export function NoSearchResults() {
-  return <p>No results, try a different search.</p>;
+  return <p>Нічого не знайдено</p>;
 }
 
 type ChildrenRenderProps = {
@@ -235,8 +201,6 @@ type ChildrenRenderProps = {
 type SearchFromProps = {
   action?: FormProps['action'];
   method?: FormProps['method'];
-  className?: string;
-  children: (passedProps: ChildrenRenderProps) => React.ReactNode;
   [key: string]: unknown;
 };
 
@@ -245,14 +209,13 @@ type SearchFromProps = {
  **/
 export function PredictiveSearchForm({
   action,
-  children,
-  className = 'predictive-search-form',
   method = 'POST',
   ...props
 }: SearchFromProps) {
   const params = useParams();
   const fetcher = useFetcher<NormalizedPredictiveSearchResults>();
   const inputRef = useRef<HTMLInputElement | null>(null);
+  const [focusForm, setFocusForm] = useState<boolean>(false);
 
   function fetchResults(event: React.ChangeEvent<HTMLInputElement>) {
     const searchAction = action ?? '/api/predictive-search';
@@ -265,17 +228,24 @@ export function PredictiveSearchForm({
       {method, action: localizedAction},
     );
   }
+  const classes = clsx({
+    'border border-input rounded-[62px] bg-lightGray px-4 py-[3px] z-20 relative':
+      !focusForm,
+    'border border-input rounded-t-[21px]   bg-lightGray px-4 py-[3px] z-20  drop-shadow-3xl relative ':
+      focusForm,
+  });
 
-  // ensure the passed input has a type of search, because SearchResults
-  // will select the element based on the input
-  useEffect(() => {
-    inputRef?.current?.setAttribute('type', 'search');
-  }, []);
-
+  const handleStatusInput = (event: any) => {
+    if (event.target?.value === '') {
+      setFocusForm(false);
+    } else {
+      setFocusForm(true);
+    }
+  };
   return (
     <fetcher.Form
       {...props}
-      className={className}
+      className={classes}
       onSubmit={(event) => {
         event.preventDefault();
         event.stopPropagation();
@@ -284,8 +254,28 @@ export function PredictiveSearchForm({
         }
         inputRef.current.blur();
       }}
+      onFocus={(event) => {
+        handleStatusInput(event);
+      }}
+      onBlur={(event) => {
+        handleStatusInput(event);
+      }}
+      onChange={(event) => {
+        handleStatusInput(event);
+      }}
     >
-      {children({fetchResults, inputRef, fetcher})}
+      <div className="flex items-center">
+        <SearchIcon />
+        <Input
+          name="q"
+          placeholder="Що ти шукаєш?"
+          ref={inputRef}
+          onChange={fetchResults}
+          onFocus={fetchResults}
+          type="search"
+        />
+      </div>
+      <PredictiveSearchResults />
     </fetcher.Form>
   );
 }
@@ -305,8 +295,18 @@ export function PredictiveSearchResults() {
   if (!totalResults) {
     return <NoPredictiveSearchResults searchTerm={searchTerm} />;
   }
+  const variants = {
+    open: {top: '100%', opacity: 1},
+    closed: {top: '0%', opacity: 0},
+  };
   return (
-    <div className="predictive-search-results">
+    <motion.div
+      initial={false}
+      variants={variants}
+      animate={totalResults ? 'open' : 'closed'}
+      transition={{duration: 1}}
+      className="absolute left-0 z-20 bg-lightGray w-full rounded-b-[21px]"
+    >
       <div>
         {results.map(({type, items}) => (
           <PredictiveSearchResult
@@ -320,14 +320,18 @@ export function PredictiveSearchResults() {
       </div>
       {/* view all results /search?q=term */}
       {searchTerm.current && (
-        <Link onClick={goToSearchResult} to={`/search?q=${searchTerm.current}`}>
+        <Link
+          className="flex px-4 py-3 items-center justify-center"
+          onClick={goToSearchResult}
+          to={`/search?q=${searchTerm.current}`}
+        >
           <p>
-            View all results for <q>{searchTerm.current}</q>
+            До всіх результатів <q>{searchTerm.current}</q>
             &nbsp; →
           </p>
         </Link>
       )}
-    </div>
+    </motion.div>
   );
 }
 
@@ -340,8 +344,8 @@ function NoPredictiveSearchResults({
     return null;
   }
   return (
-    <p>
-      No results found for <q>{searchTerm.current}</q>
+    <p className="absolute bg-lightGray inline-flex w-full px-4 py-3 left-0 rounded-b-[21px] justify-center">
+      За запитом &nbsp; <q>{searchTerm.current}</q> &nbsp; нічого не знайдено
     </p>
   );
 }
@@ -365,10 +369,7 @@ function PredictiveSearchResult({
   }&type=${pluralToSingularSearchType(type)}`;
 
   return (
-    <div className="predictive-search-result" key={type}>
-      <Link prefetch="intent" to={categoryUrl} onClick={goToSearchResult}>
-        <h5>{isSuggestions ? 'Suggestions' : type}</h5>
-      </Link>
+    <div className="predictive-search-result px-4 py-3" key={type}>
       <ul>
         {items.map((item: NormalizedPredictiveSearchResultItem) => (
           <SearchResultItem
@@ -388,17 +389,18 @@ type SearchResultItemProps = Pick<SearchResultTypeProps, 'goToSearchResult'> & {
 
 function SearchResultItem({goToSearchResult, item}: SearchResultItemProps) {
   return (
-    <li className="predictive-search-result-item" key={item.id}>
-      <Link onClick={goToSearchResult} to={item.url}>
+    <li key={item.id}>
+      <Link onClick={goToSearchResult} to={item.url} className="flex w-full">
         {item.image?.url && (
           <Image
             alt={item.image.altText ?? ''}
             src={item.image.url}
-            width={50}
-            height={50}
+            width={70}
+            height={70}
+            className="rounded-[15px]"
           />
         )}
-        <div>
+        <div className="flex justify-between ml-[14px] w-full items-center">
           {item.styledTitle ? (
             <div
               dangerouslySetInnerHTML={{
@@ -406,13 +408,21 @@ function SearchResultItem({goToSearchResult, item}: SearchResultItemProps) {
               }}
             />
           ) : (
-            <span>{item.title}</span>
+            <span className="font-semibold tetx-[22px]">{item.title}</span>
           )}
-          {item?.price && (
-            <small>
-              <Money data={item.price} />
-            </small>
-          )}
+          <div className="font-semibold tetx-[22px]">
+            {item?.price && (
+              <span>
+                <Money
+                  as="span"
+                  withoutTrailingZeros={true}
+                  withoutCurrency={true}
+                  data={item.price}
+                />
+                грн
+              </span>
+            )}
+          </div>
         </div>
       </Link>
     </li>
@@ -463,9 +473,6 @@ function pluralToSingularSearchType(
     | Array<NormalizedPredictiveSearchResults[number]['type']>,
 ) {
   const plural = {
-    articles: 'ARTICLE',
-    collections: 'COLLECTION',
-    pages: 'PAGE',
     products: 'PRODUCT',
     queries: 'QUERY',
   };

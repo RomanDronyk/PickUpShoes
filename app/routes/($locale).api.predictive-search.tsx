@@ -6,34 +6,16 @@ import type {
 import {NO_PREDICTIVE_SEARCH_RESULTS} from '~/components/Search';
 
 import type {
-  PredictiveArticleFragment,
-  PredictiveCollectionFragment,
-  PredictivePageFragment,
   PredictiveProductFragment,
   PredictiveQueryFragment,
   PredictiveSearchQuery,
 } from 'storefrontapi.generated';
 
-type PredictiveSearchResultItem =
-  | PredictiveArticleFragment
-  | PredictiveCollectionFragment
-  | PredictivePageFragment
-  | PredictiveProductFragment;
+type PredictiveSearchResultItem = PredictiveProductFragment;
 
-type PredictiveSearchTypes =
-  | 'ARTICLE'
-  | 'COLLECTION'
-  | 'PAGE'
-  | 'PRODUCT'
-  | 'QUERY';
+type PredictiveSearchTypes = 'PRODUCT' | 'QUERY';
 
-const DEFAULT_SEARCH_TYPES: PredictiveSearchTypes[] = [
-  'ARTICLE',
-  'COLLECTION',
-  'PAGE',
-  'PRODUCT',
-  'QUERY',
-];
+const DEFAULT_SEARCH_TYPES: PredictiveSearchTypes[] = ['PRODUCT', 'QUERY'];
 
 /**
  * Fetches the search results from the predictive search API
@@ -49,7 +31,6 @@ export async function action({request, params, context}: LoaderFunctionArgs) {
     request,
     context,
   });
-
   return json(search);
 }
 
@@ -97,7 +78,6 @@ async function fetchPredictiveSearchResults({
   if (!data) {
     throw new Error('No data returned from Shopify API');
   }
-
   const searchResults = normalizePredictiveSearchResults(
     data.predictiveSearch,
     params.locale,
@@ -183,101 +163,10 @@ export function normalizePredictiveSearchResults(
     });
   }
 
-  if (predictiveSearch.collections.length) {
-    results.push({
-      type: 'collections',
-      items: predictiveSearch.collections.map(
-        (collection: PredictiveCollectionFragment) => {
-          totalResults++;
-          const trackingParams = applyTrackingParams(collection);
-          return {
-            __typename: collection.__typename,
-            handle: collection.handle,
-            id: collection.id,
-            image: collection.image,
-            title: collection.title,
-            url: `${localePrefix}/collections/${collection.handle}${trackingParams}`,
-          };
-        },
-      ),
-    });
-  }
-
-  if (predictiveSearch.pages.length) {
-    results.push({
-      type: 'pages',
-      items: predictiveSearch.pages.map((page: PredictivePageFragment) => {
-        totalResults++;
-        const trackingParams = applyTrackingParams(page);
-        return {
-          __typename: page.__typename,
-          handle: page.handle,
-          id: page.id,
-          image: undefined,
-          title: page.title,
-          url: `${localePrefix}/pages/${page.handle}${trackingParams}`,
-        };
-      }),
-    });
-  }
-
-  if (predictiveSearch.articles.length) {
-    results.push({
-      type: 'articles',
-      items: predictiveSearch.articles.map(
-        (article: PredictiveArticleFragment) => {
-          totalResults++;
-          const trackingParams = applyTrackingParams(article);
-          return {
-            __typename: article.__typename,
-            handle: article.handle,
-            id: article.id,
-            image: article.image,
-            title: article.title,
-            url: `${localePrefix}/blog/${article.handle}${trackingParams}`,
-          };
-        },
-      ),
-    });
-  }
-
   return {results, totalResults};
 }
 
 const PREDICTIVE_SEARCH_QUERY = `#graphql
-  fragment PredictiveArticle on Article {
-    __typename
-    id
-    title
-    handle
-    image {
-      url
-      altText
-      width
-      height
-    }
-    trackingParameters
-  }
-  fragment PredictiveCollection on Collection {
-    __typename
-    id
-    title
-    handle
-    image {
-      url
-      altText
-      width
-      height
-    }
-    trackingParameters
-  }
-  fragment PredictivePage on Page {
-    __typename
-    id
-    title
-    handle
-    trackingParameters
-  }
   fragment PredictiveProduct on Product {
     __typename
     id
@@ -320,15 +209,6 @@ const PREDICTIVE_SEARCH_QUERY = `#graphql
       query: $searchTerm,
       types: $types,
     ) {
-      articles {
-        ...PredictiveArticle
-      }
-      collections {
-        ...PredictiveCollection
-      }
-      pages {
-        ...PredictivePage
-      }
       products {
         ...PredictiveProduct
       }

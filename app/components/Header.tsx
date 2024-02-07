@@ -1,26 +1,44 @@
+import {Image} from '@shopify/hydrogen';
 import {Await, NavLink} from '@remix-run/react';
 import {Suspense} from 'react';
 import type {HeaderQuery} from 'storefrontapi.generated';
 import type {LayoutProps} from './Layout';
 import {useRootLoaderData} from '~/root';
+import {
+  NavigationMenu,
+  NavigationMenuList,
+  NavigationMenuItem,
+  NavigationMenuTrigger,
+} from './ui/navigation-menu';
+import {PredictiveSearchForm} from './Search';
+import {Button} from './ui/button';
+import {DropdownCart} from './DropdownCart';
 
-type HeaderProps = Pick<LayoutProps, 'header' | 'cart' | 'isLoggedIn'>;
+type HeaderProps = Pick<
+  LayoutProps,
+  'header' | 'cart' | 'isLoggedIn' | 'favorites'
+>;
 
 type Viewport = 'desktop' | 'mobile';
 
 export function Header({header, isLoggedIn, cart}: HeaderProps) {
   const {shop, menu} = header;
   return (
-    <header className="header">
-      <NavLink prefetch="intent" to="/" style={activeLinkStyle} end>
-        <strong>{shop.name}</strong>
-      </NavLink>
-      <HeaderMenu
-        menu={menu}
-        viewport="desktop"
-        primaryDomainUrl={header.shop.primaryDomain.url}
-      />
-      <HeaderCtas isLoggedIn={isLoggedIn} cart={cart} />
+    <header className="px-24">
+      <div className=" flex justify-between pt-[18px] pb-[25px] border-b border-black relative">
+        <NavLink prefetch="intent" to="/" style={activeLinkStyle} end>
+          <img src={shop.brand?.logo?.image?.url} alt="PickUpShoes" />
+        </NavLink>
+        <HeaderMenu
+          menu={menu}
+          primaryDomainUrl={header.shop.primaryDomain.url}
+        />
+        <div className="relative w-[427px]">
+          <PredictiveSearchForm />
+        </div>
+        <HeaderCtas isLoggedIn={isLoggedIn} cart={cart} />
+        <DropdownCart cart={cart} />
+      </div>
     </header>
   );
 }
@@ -28,60 +46,36 @@ export function Header({header, isLoggedIn, cart}: HeaderProps) {
 export function HeaderMenu({
   menu,
   primaryDomainUrl,
-  viewport,
 }: {
   menu: HeaderProps['header']['menu'];
   primaryDomainUrl: HeaderQuery['shop']['primaryDomain']['url'];
-  viewport: Viewport;
 }) {
   const {publicStoreDomain} = useRootLoaderData();
-  const className = `header-menu-${viewport}`;
-
-  function closeAside(event: React.MouseEvent<HTMLAnchorElement>) {
-    if (viewport === 'mobile') {
-      event.preventDefault();
-      window.location.href = event.currentTarget.href;
-    }
-  }
-
   return (
-    <nav className={className} role="navigation">
-      {viewport === 'mobile' && (
-        <NavLink
-          end
-          onClick={closeAside}
-          prefetch="intent"
-          style={activeLinkStyle}
-          to="/"
-        >
-          Home
-        </NavLink>
-      )}
-      {(menu || FALLBACK_HEADER_MENU).items.map((item) => {
-        if (!item.url) return null;
+    <NavigationMenu>
+      <NavigationMenuList>
+        {menu?.items.map((item) => {
+          if (!item.url) return null;
 
-        // if the url is internal, we strip the domain
-        const url =
-          item.url.includes('myshopify.com') ||
-          item.url.includes(publicStoreDomain) ||
-          item.url.includes(primaryDomainUrl)
-            ? new URL(item.url).pathname
-            : item.url;
-        return (
-          <NavLink
-            className="header-menu-item"
-            end
-            key={item.id}
-            onClick={closeAside}
-            prefetch="intent"
-            style={activeLinkStyle}
-            to={url}
-          >
-            {item.title}
-          </NavLink>
-        );
-      })}
-    </nav>
+          // if the url is internal, we strip the domain
+          const url =
+            item.url.includes('myshopify.com') ||
+            item.url.includes(publicStoreDomain) ||
+            item.url.includes(primaryDomainUrl)
+              ? new URL(item.url).pathname
+              : item.url;
+          return (
+            <NavigationMenuItem key={item.id}>
+              <NavigationMenuTrigger className="font-normal">
+                <NavLink prefetch="intent" to={url}>
+                  {item.title}
+                </NavLink>
+              </NavigationMenuTrigger>
+            </NavigationMenuItem>
+          );
+        })}
+      </NavigationMenuList>
+    </NavigationMenu>
   );
 }
 
@@ -91,30 +85,58 @@ function HeaderCtas({
 }: Pick<HeaderProps, 'isLoggedIn' | 'cart'>) {
   return (
     <nav className="header-ctas" role="navigation">
-      <HeaderMenuMobileToggle />
+      <CartToggle cart={cart} />
       <NavLink prefetch="intent" to="/account" style={activeLinkStyle}>
         {isLoggedIn ? 'Account' : 'Sign in'}
       </NavLink>
-      <SearchToggle />
-      <CartToggle cart={cart} />
     </nav>
   );
 }
 
-function HeaderMenuMobileToggle() {
-  return (
-    <a className="header-menu-mobile-toggle" href="#mobile-menu-aside">
-      <h3>☰</h3>
-    </a>
-  );
-}
-
-function SearchToggle() {
-  return <a href="#search-aside">Search</a>;
-}
-
 function CartBadge({count}: {count: number}) {
-  return <a href="#cart-aside">Cart {count}</a>;
+  return (
+    <Button variant="ghost" className="relative">
+      <svg
+        width="32"
+        height="32"
+        viewBox="0 0 32 32"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M11 27C11.5523 27 12 26.5523 12 26C12 25.4477 11.5523 25 11 25C10.4477 25 10 25.4477 10 26C10 26.5523 10.4477 27 11 27Z"
+          stroke="black"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <path
+          d="M25 27C25.5523 27 26 26.5523 26 26C26 25.4477 25.5523 25 25 25C24.4477 25 24 25.4477 24 26C24 26.5523 24.4477 27 25 27Z"
+          stroke="black"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <path
+          d="M3 5H7L10 22H26"
+          stroke="black"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <path
+          d="M10 16.6666H25.59C25.7056 16.6667 25.8177 16.6267 25.9072 16.5534C25.9966 16.4802 26.0579 16.3781 26.0806 16.2648L27.8806 7.26475C27.8951 7.19218 27.8934 7.11729 27.8755 7.04548C27.8575 6.97368 27.8239 6.90675 27.7769 6.84952C27.73 6.7923 27.6709 6.74621 27.604 6.71458C27.5371 6.68295 27.464 6.66657 27.39 6.66663H8"
+          stroke="black"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+      <span className="inline-flex rounded-full bg-bageRed text-white text-xs text-center px-[5px] py-[1px] absolute right-3 bottom-0">
+        {count}
+      </span>
+    </Button>
+  );
 }
 
 function CartToggle({cart}: Pick<HeaderProps, 'cart'>) {
@@ -129,48 +151,6 @@ function CartToggle({cart}: Pick<HeaderProps, 'cart'>) {
     </Suspense>
   );
 }
-
-const FALLBACK_HEADER_MENU = {
-  id: 'gid://shopify/Menu/199655587896',
-  items: [
-    {
-      id: 'gid://shopify/MenuItem/461609500728',
-      resourceId: null,
-      tags: [],
-      title: 'Collections',
-      type: 'HTTP',
-      url: '/collections',
-      items: [],
-    },
-    {
-      id: 'gid://shopify/MenuItem/461609533496',
-      resourceId: null,
-      tags: [],
-      title: 'Blog',
-      type: 'HTTP',
-      url: '/blogs/journal',
-      items: [],
-    },
-    {
-      id: 'gid://shopify/MenuItem/461609566264',
-      resourceId: null,
-      tags: [],
-      title: 'Policies',
-      type: 'HTTP',
-      url: '/policies',
-      items: [],
-    },
-    {
-      id: 'gid://shopify/MenuItem/461609599032',
-      resourceId: 'gid://shopify/Page/92591030328',
-      tags: [],
-      title: 'About',
-      type: 'PAGE',
-      url: '/pages/about',
-      items: [],
-    },
-  ],
-};
 
 function activeLinkStyle({
   isActive,

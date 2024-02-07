@@ -97,20 +97,6 @@ const SEARCH_QUERY = `#graphql
       }
     }
   }
-  fragment SearchPage on Page {
-     __typename
-     handle
-    id
-    title
-    trackingParameters
-  }
-  fragment SearchArticle on Article {
-    __typename
-    handle
-    id
-    title
-    trackingParameters
-  }
   query search(
     $country: CountryCode
     $endCursor: String
@@ -142,27 +128,6 @@ const SEARCH_QUERY = `#graphql
         endCursor
       }
     }
-    pages: search(
-      query: $query,
-      types: [PAGE],
-      first: 10
-    ) {
-      nodes {
-        ...on Page {
-          ...SearchPage
-        }
-      }
-    }
-    articles: search(
-      query: $query,
-      types: [ARTICLE],
-      first: 10
-    ) {
-      nodes {
-        ...on Article {
-          ...SearchArticle
-        }
-      }
-    }
+    
   }
 ` as const;
