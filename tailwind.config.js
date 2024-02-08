@@ -18,7 +18,7 @@ module.exports = {
     },
     extend: {
       fontFamily: {
-        sans: ['"Gilroy"', 'sans-serif'],
+        sans: ["'Gilroy'"],
       },
       colors: {
         red: 'hsl(var(--red))',

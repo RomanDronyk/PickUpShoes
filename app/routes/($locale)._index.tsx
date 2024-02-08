@@ -6,6 +6,7 @@ import type {
   FeaturedCollectionFragment,
   RecommendedProductsQuery,
 } from 'storefrontapi.generated';
+
 import {Hero} from '~/components/Hero';
 
 export const meta: MetaFunction = () => {

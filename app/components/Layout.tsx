@@ -14,6 +14,7 @@ import {
   PredictiveSearchForm,
   PredictiveSearchResults,
 } from '~/components/Search';
+import {Breadcrumbs} from './Breadcrumbs';
 
 export type LayoutProps = {
   cart: Promise<CartApiQueryFragment | null>;
@@ -34,6 +35,7 @@ export function Layout({
   return (
     <div>
       {header && <Header header={header} cart={cart} isLoggedIn={isLoggedIn} />}
+      {/* <Breadcrumbs /> */}
       <AnimatePresence mode="popLayout" initial={false}>
         <motion.main
           key={useLocation().pathname}
