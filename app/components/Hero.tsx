@@ -47,7 +47,7 @@ export function Hero({heroData}: {heroData: HomeHeroQuery}) {
           <div className="mt-10">
             <Button
               asChild
-              className="flex items-center gap-[15px] bg-gradient-to-r from-[#F50606] to-[#B80000] text-white rounded-[60px] py-[9px] px-[85px]"
+              className="flex items-center gap-[15px] bg-gradient-to-r from-[#F50606] to-[#B80000] text-white rounded-[60px] py-[9px] h-[60px] px-[85px] max-w-[370px]"
             >
               <Link prefetch="intent" to="/collections">
                 <span className="font-medium text-[28px]">До каталогу</span>

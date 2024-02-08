@@ -46,12 +46,11 @@ const cartVariants = {
 
 export function DropDownCart({cart, active, handleShow}: DropdownCartProps) {
   const lines = Boolean(cart?.lines?.nodes?.length || 0);
-  const ref = useClickAway(() => {
+  /* const ref = useClickAway(() => {
     handleShow(false);
-  }) as React.RefObject<HTMLDivElement>;
+  }) as React.RefObject<HTMLDivElement>; */
   return (
     <motion.div
-      ref={ref}
       initial={false}
       variants={cartVariants}
       animate={active ? 'open' : 'closed'}

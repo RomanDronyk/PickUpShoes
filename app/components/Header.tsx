@@ -12,7 +12,6 @@ import {
 import {PredictiveSearchForm} from './Search';
 import {Button} from './ui/button';
 import {DropDownCart} from './DropdownCart';
-import {useToggle} from '@uidotdev/usehooks';
 
 type HeaderProps = Pick<
   LayoutProps,
@@ -20,9 +19,16 @@ type HeaderProps = Pick<
 >;
 
 export function Header({header, isLoggedIn, cart}: HeaderProps) {
-  const [cartShow, setCartShow] = useToggle(false);
+  const [cartShow, setCartShow] = useState(false);
   const {shop, menu} = header;
   const {key} = useLocation();
+
+  const handleShowCart = (value?: boolean) => {
+    setCartShow((prevState) => (value !== undefined ? value : !prevState));
+  };
+  useEffect(() => {
+    console.log('cartShow has been updated:', cartShow);
+  }, [cartShow]);
   useEffect(() => {
     if (cartShow) setCartShow(false);
   }, [key]);
@@ -45,11 +51,11 @@ export function Header({header, isLoggedIn, cart}: HeaderProps) {
             <Await resolve={cart}>
               {(cart) => {
                 if (!cart)
-                  return <CartBadge count={0} handleShow={setCartShow} />;
+                  return <CartBadge count={0} handleShow={handleShowCart} />;
                 return (
                   <CartBadge
                     count={cart.totalQuantity}
-                    handleShow={setCartShow}
+                    handleShow={handleShowCart}
                   />
                 );
               }}
@@ -88,7 +94,7 @@ export function Header({header, isLoggedIn, cart}: HeaderProps) {
               <DropDownCart
                 cart={cart}
                 active={cartShow}
-                handleShow={() => setCartShow()}
+                handleShow={() => handleShowCart()}
               />
             )}
           </Await>
@@ -98,51 +104,15 @@ export function Header({header, isLoggedIn, cart}: HeaderProps) {
   );
 }
 
-export function HeaderMenu({
-  menu,
-  primaryDomainUrl,
-}: {
-  menu: HeaderProps['header']['menu'];
-  primaryDomainUrl: HeaderQuery['shop']['primaryDomain']['url'];
-}) {
-  const {publicStoreDomain} = useRootLoaderData();
-  return (
-    <NavigationMenu>
-      <NavigationMenuList>
-        {menu?.items.map((item) => {
-          if (!item.url) return null;
-
-          // if the url is internal, we strip the domain
-          const url =
-            item.url.includes('myshopify.com') ||
-            item.url.includes(publicStoreDomain) ||
-            item.url.includes(primaryDomainUrl)
-              ? new URL(item.url).pathname
-              : item.url;
-          return (
-            <NavigationMenuItem key={item.id}>
-              <NavigationMenuTrigger className="font-normal">
-                <NavLink prefetch="intent" to={url}>
-                  {item.title}
-                </NavLink>
-              </NavigationMenuTrigger>
-            </NavigationMenuItem>
-          );
-        })}
-      </NavigationMenuList>
-    </NavigationMenu>
-  );
-}
-
 function CartBadge({
   count,
   handleShow,
 }: {
   count: number;
-  handleShow: (newValue?: boolean | undefined) => void;
+  handleShow: () => void;
 }) {
   return (
-    <Button variant="ghost" className="relative" onClick={handleShow()}>
+    <Button variant="ghost" className="relative" onClick={() => handleShow()}>
       <svg
         width="32"
         height="32"
@@ -185,7 +155,41 @@ function CartBadge({
     </Button>
   );
 }
+export function HeaderMenu({
+  menu,
+  primaryDomainUrl,
+}: {
+  menu: HeaderProps['header']['menu'];
+  primaryDomainUrl: HeaderQuery['shop']['primaryDomain']['url'];
+}) {
+  const {publicStoreDomain} = useRootLoaderData();
+  return (
+    <NavigationMenu>
+      <NavigationMenuList>
+        {menu?.items.map((item) => {
+          if (!item.url) return null;
 
+          // if the url is internal, we strip the domain
+          const url =
+            item.url.includes('myshopify.com') ||
+            item.url.includes(publicStoreDomain) ||
+            item.url.includes(primaryDomainUrl)
+              ? new URL(item.url).pathname
+              : item.url;
+          return (
+            <NavigationMenuItem key={item.id}>
+              <NavigationMenuTrigger className="font-normal">
+                <NavLink prefetch="intent" to={url}>
+                  {item.title}
+                </NavLink>
+              </NavigationMenuTrigger>
+            </NavigationMenuItem>
+          );
+        })}
+      </NavigationMenuList>
+    </NavigationMenu>
+  );
+}
 function activeLinkStyle({
   isActive,
   isPending,
