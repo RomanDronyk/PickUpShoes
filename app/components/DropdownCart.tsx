@@ -58,7 +58,7 @@ export function DropDownCart({cart, active, handleShow}: DropdownCartProps) {
       className="absolute z-20 w-full flex-col  bg-white/95 backdrop-blur-lg drop-shadow-cart rounded-b-[30px]  p-[30px] text-black"
     >
       {!lines && <EmptyCart />}
-      <DropDownCartDetail lines={cart?.lines} />
+      {lines && <DropDownCartDetail lines={cart?.lines} />}
     </motion.div>
   );
 }
