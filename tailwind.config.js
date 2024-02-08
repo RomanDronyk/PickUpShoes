@@ -21,6 +21,7 @@ module.exports = {
         sans: ['"Gilroy"', 'sans-serif'],
       },
       colors: {
+        red: 'hsl(var(--red))',
         bageRed: 'hsl(var(--bage-red))',
         lightGray: 'hsl(var(--bg-input))',
         darkRed: 'hsl(var(--dark-red))',
@@ -84,7 +85,7 @@ module.exports = {
       },
       dropShadow: {
         '3xl': '0 4px 15px rgba(0,0,0,0.25)',
-        cart: 'o 4px 4px rgba(0,0,0,0.25)',
+        cart: '0 4px 4px rgba(0, 0, 0, 0.25)',
       },
     },
   },

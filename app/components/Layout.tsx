@@ -33,15 +33,13 @@ export function Layout({
 }: LayoutProps) {
   return (
     <div>
-      {/* <CartAside cart={cart} /> */}
-      {/* <MobileMenuAside menu={header?.menu} shop={header?.shop} /> */}
       {header && <Header header={header} cart={cart} isLoggedIn={isLoggedIn} />}
-      <AnimatePresence mode="wait" initial={false}>
+      <AnimatePresence mode="popLayout" initial={false}>
         <motion.main
           key={useLocation().pathname}
-          initial={{x: '10%', opacity: 0}}
+          initial={false}
           animate={{x: '0', opacity: 1}}
-          exit={{x: '-40%', opacity: 0}}
+          exit={{x: '0%', opacity: 0}}
         >
           {children}
         </motion.main>

@@ -1,6 +1,5 @@
-import {Image} from '@shopify/hydrogen';
-import {Await, NavLink} from '@remix-run/react';
-import {Suspense} from 'react';
+import {Await, NavLink, useLocation} from '@remix-run/react';
+import {Suspense, useState, useLayoutEffect} from 'react';
 import type {HeaderQuery} from 'storefrontapi.generated';
 import type {LayoutProps} from './Layout';
 import {useRootLoaderData} from '~/root';
@@ -12,20 +11,28 @@ import {
 } from './ui/navigation-menu';
 import {PredictiveSearchForm} from './Search';
 import {Button} from './ui/button';
-import {DropdownCart} from './DropdownCart';
+import {DropDownCart} from './DropdownCart';
 
 type HeaderProps = Pick<
   LayoutProps,
   'header' | 'cart' | 'isLoggedIn' | 'favorites'
 >;
 
-type Viewport = 'desktop' | 'mobile';
-
 export function Header({header, isLoggedIn, cart}: HeaderProps) {
+  const [cartShow, setCartShow] = useState(true);
   const {shop, menu} = header;
+  const toggleCart = () => setCartShow(!cartShow);
+  const outsideCart = (value: boolean) => setCartShow(value);
+
+  const {key} = useLocation();
+
+  useLayoutEffect(() => {
+    if (cartShow) setCartShow(false);
+  }, [key]);
+
   return (
     <header className="px-24">
-      <div className=" flex justify-between pt-[18px] pb-[25px] border-b border-black relative">
+      <div className=" flex justify-between pt-[18px] pb-[25px] border-b border-black/20 relative">
         <NavLink prefetch="intent" to="/" style={activeLinkStyle} end>
           <img src={shop.brand?.logo?.image?.url} alt="PickUpShoes" />
         </NavLink>
@@ -36,8 +43,61 @@ export function Header({header, isLoggedIn, cart}: HeaderProps) {
         <div className="relative w-[427px]">
           <PredictiveSearchForm />
         </div>
-        <HeaderCtas isLoggedIn={isLoggedIn} cart={cart} />
-        <DropdownCart cart={cart} />
+        <nav className="header-ctas" role="navigation">
+          <Suspense>
+            <Await resolve={cart}>
+              {(cart) => {
+                if (!cart)
+                  return (
+                    <CartBadge count={0} handleShow={() => toggleCart()} />
+                  );
+                return (
+                  <CartBadge
+                    count={cart.totalQuantity}
+                    handleShow={() => toggleCart()}
+                  />
+                );
+              }}
+            </Await>
+          </Suspense>
+          <Button variant="ghost" asChild>
+            <NavLink prefetch="intent" to="/account" style={activeLinkStyle}>
+              <svg
+                width="32"
+                height="32"
+                viewBox="0 0 32 32"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M24 27V24.3333C24 22.9188 23.5224 21.5623 22.6722 20.5621C21.8221 19.5619 20.669 19 19.4667 19H11.5333C10.331 19 9.17795 19.5619 8.32778 20.5621C7.47762 21.5623 7 22.9188 7 24.3333V27"
+                  stroke="black"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                <path
+                  d="M15.5 14C17.9853 14 20 11.9853 20 9.5C20 7.01472 17.9853 5 15.5 5C13.0147 5 11 7.01472 11 9.5C11 11.9853 13.0147 14 15.5 14Z"
+                  stroke="black"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </NavLink>
+          </Button>
+        </nav>
+        <Suspense>
+          <Await resolve={cart}>
+            {(cart) => (
+              <DropDownCart
+                cart={cart}
+                active={cartShow}
+                handleShow={(value) => outsideCart(value)}
+              />
+            )}
+          </Await>
+        </Suspense>
       </div>
     </header>
   );
@@ -79,23 +139,15 @@ export function HeaderMenu({
   );
 }
 
-function HeaderCtas({
-  isLoggedIn,
-  cart,
-}: Pick<HeaderProps, 'isLoggedIn' | 'cart'>) {
+function CartBadge({
+  count,
+  handleShow,
+}: {
+  count: number;
+  handleShow: () => void;
+}) {
   return (
-    <nav className="header-ctas" role="navigation">
-      <CartToggle cart={cart} />
-      <NavLink prefetch="intent" to="/account" style={activeLinkStyle}>
-        {isLoggedIn ? 'Account' : 'Sign in'}
-      </NavLink>
-    </nav>
-  );
-}
-
-function CartBadge({count}: {count: number}) {
-  return (
-    <Button variant="ghost" className="relative">
+    <Button variant="ghost" className="relative" onClick={handleShow}>
       <svg
         width="32"
         height="32"
@@ -139,13 +191,64 @@ function CartBadge({count}: {count: number}) {
   );
 }
 
-function CartToggle({cart}: Pick<HeaderProps, 'cart'>) {
+type ToggleCartItem = Pick<HeaderProps, 'cart'>;
+interface ICartToggle {
+  cart: ToggleCartItem;
+  toggleCart: () => void;
+}
+function CartToggle({cart, toggleCart}: ICartToggle) {
   return (
     <Suspense fallback={<CartBadge count={0} />}>
-      <Await resolve={cart}>
+      <Await resolve={cart.cart}>
         {(cart) => {
           if (!cart) return <CartBadge count={0} />;
-          return <CartBadge count={cart.totalQuantity || 0} />;
+          return (
+            <Button
+              variant="ghost"
+              className="relative"
+              onClick={() => toggleCart()}
+            >
+              <svg
+                width="32"
+                height="32"
+                viewBox="0 0 32 32"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M11 27C11.5523 27 12 26.5523 12 26C12 25.4477 11.5523 25 11 25C10.4477 25 10 25.4477 10 26C10 26.5523 10.4477 27 11 27Z"
+                  stroke="black"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                <path
+                  d="M25 27C25.5523 27 26 26.5523 26 26C26 25.4477 25.5523 25 25 25C24.4477 25 24 25.4477 24 26C24 26.5523 24.4477 27 25 27Z"
+                  stroke="black"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                <path
+                  d="M3 5H7L10 22H26"
+                  stroke="black"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                <path
+                  d="M10 16.6666H25.59C25.7056 16.6667 25.8177 16.6267 25.9072 16.5534C25.9966 16.4802 26.0579 16.3781 26.0806 16.2648L27.8806 7.26475C27.8951 7.19218 27.8934 7.11729 27.8755 7.04548C27.8575 6.97368 27.8239 6.90675 27.7769 6.84952C27.73 6.7923 27.6709 6.74621 27.604 6.71458C27.5371 6.68295 27.464 6.66657 27.39 6.66663H8"
+                  stroke="black"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+              <span className="inline-flex rounded-full bg-bageRed text-white text-xs text-center px-[5px] py-[1px] absolute right-3 bottom-0">
+                {cart.count}
+              </span>
+            </Button>
+          );
         }}
       </Await>
     </Suspense>
