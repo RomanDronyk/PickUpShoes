@@ -63,7 +63,6 @@ export function DropDownCart({cart, active, handleShow}: DropdownCartProps) {
 }
 function DropDownCartDetail({cart}: {cart: CartApiQueryFragment | null}) {
   const cost = cart?.cost;
-  console.log(cart);
   return (
     <div className="dropdown-detail">
       <div className="dropdown-table">
