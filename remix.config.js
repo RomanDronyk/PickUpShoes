@@ -6,6 +6,19 @@ module.exports = {
   server: './server.ts',
   tailwind: true,
   postcss: true,
+  optimize: {
+    bundle: {
+      external: {
+        include: [
+          '/public/fonts/Gilroy-Bold.woff2',
+          '/public/fonts/Gilroy-Light.woff2',
+          '/public/fonts/Gilroy-Medium.woff2',
+          '/public/fonts/Gilroy-Regular.woff2',
+          '/public/fonts/Gilroy-SemiBold.woff2',
+        ],
+      },
+    },
+  },
   /**
    * The following settings are required to deploy Hydrogen apps to Oxygen:
    */

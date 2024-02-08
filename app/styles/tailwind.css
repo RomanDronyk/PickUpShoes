@@ -1,36 +1,36 @@
+@font-face {
+  font-family: 'Gilroy';
+  font-style: normal;
+  font-weight: 300;
+  src: url('../../public/fonts/Gilroy-Light.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Gilroy';
+  font-style: normal;
+  font-weight: 400;
+  src: url('../../public/fonts/Gilroy-Regular.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Gilroy';
+  font-style: normal;
+  font-weight: 500;
+  src: url('../../public/fonts/Gilroy-Medium.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Gilroy';
+  font-style: normal;
+  font-weight: 600;
+  src: url('../../public/fonts/Gilroy-SemiBold.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Gilroy';
+  font-style: normal;
+  font-weight: 700;
+  src: url('../../public/fonts/Gilroy-Bold.woff2') format('woff2');
+}
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-@font-face {
-  font-family: 'Gilroy', sans-serif;
-  font-style: normal;
-  font-weight: 300;
-  src: local(''), url('/fonts/Gilroy-Light.woff2') format('woff2');
-}
-@font-face {
-  font-family: 'Gilroy', sans-serif;
-  font-style: normal;
-  font-weight: 400;
-  src: local(''), url('/fonts/Gilroy-Regular.woff2') format('woff2');
-}
-@font-face {
-  font-family: 'Gilroy', sans-serif;
-  font-style: normal;
-  font-weight: 500;
-  src: local(''), url('/fonts/Gilroy-Medium.woff2') format('woff2');
-}
-@font-face {
-  font-family: 'Gilroy', sans-serif;
-  font-style: normal;
-  font-weight: 600;
-  src: local(''), url('/fonts/Gilroy-SemiBold.woff2') format('woff2');
-}
-@font-face {
-  font-family: 'Gilroy', sans-serif;
-  font-style: normal;
-  font-weight: 700;
-  src: local(''), url('/fonts/Gilroy-Bold.woff2') format('woff2');
-}
 @layer base {
   :root {
     --background: 0 0% 100%;
@@ -68,6 +68,7 @@
     --dark-red: 0 100% 36%;
     --placeholder-text: 0 0% 98%;
     --bage-red: 0 68% 56%;
+    --base-font: 'Gilroy';
   }
 }
 

@@ -26,9 +26,7 @@ export function Header({header, isLoggedIn, cart}: HeaderProps) {
   const handleShowCart = (value?: boolean) => {
     setCartShow((prevState) => (value !== undefined ? value : !prevState));
   };
-  useEffect(() => {
-    console.log('cartShow has been updated:', cartShow);
-  }, [cartShow]);
+
   useEffect(() => {
     if (cartShow) setCartShow(false);
   }, [key]);

@@ -4,7 +4,6 @@ import {motion} from 'framer-motion';
 import {Button} from './ui/button';
 import {useVariantUrl} from '~/utils';
 import {ArrowRight, X, Plus, Minus} from 'lucide-react';
-import {useClickAway} from '@uidotdev/usehooks';
 import type {CartApiQueryFragment} from 'storefrontapi.generated';
 import type {Variants} from 'framer-motion';
 import type {CartLineUpdateInput} from '@shopify/hydrogen/storefront-api-types';
@@ -58,15 +57,12 @@ export function DropDownCart({cart, active, handleShow}: DropdownCartProps) {
       className="absolute z-20 w-full flex-col  bg-white/95 backdrop-blur-lg drop-shadow-cart rounded-b-[30px]  p-[30px] text-black"
     >
       {!lines && <EmptyCart />}
-      {lines && <DropDownCartDetail lines={cart?.lines} />}
+      {lines && <DropDownCartDetail cart={cart} />}
     </motion.div>
   );
 }
-function DropDownCartDetail({
-  lines,
-}: {
-  lines: CartApiQueryFragment['lines'] | undefined;
-}) {
+function DropDownCartDetail({cart}: {cart: CartApiQueryFragment | null}) {
+  const cost = cart?.cost;
   return (
     <div className="dropdown-detail">
       <div className="dropdown-table">
@@ -79,11 +75,42 @@ function DropDownCartDetail({
           <div className="text-xl text-center">Кількість</div>
           <div className="text-xl text-center">Вартість</div>
         </div>
-        <ul>
-          {lines?.nodes.map((line) => (
+        <ul className="flex flex-col gap-4">
+          {cart?.lines?.nodes.map((line) => (
             <CartLineItem key={line.id} line={line} />
           ))}
         </ul>
+      </div>
+      <div className="dropdown-bottom mt-12 flex flex-col gap-4">
+        <div className="flex items-center justify-end font-bold text-black text-[22px]">
+          <span className="mr-4">Підсумок: </span>
+          <Money
+            as="span"
+            withoutCurrency
+            withoutTrailingZeros
+            data={cost?.totalAmount}
+          />
+          &nbsp;грн
+        </div>
+        <div className="dropdown-checkout flex items-center justify-end">
+          <Button asChild className="rounded-[60px] px-[55px]">
+            <Link to={cart?.checkoutUrl} className="flex gap-5">
+              <span className="font-medium text-2xl">Оформити замовлення</span>
+              <svg
+                width="23"
+                height="23"
+                viewBox="0 0 23 23"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M0 11.5C0 13.7745 0.674463 15.9979 1.9381 17.8891C3.20174 19.7802 4.99779 21.2542 7.09914 22.1246C9.20049 22.995 11.5128 23.2228 13.7435 22.779C15.9743 22.3353 18.0234 21.24 19.6317 19.6317C21.24 18.0234 22.3353 15.9743 22.779 13.7435C23.2228 11.5128 22.995 9.20049 22.1246 7.09914C21.2542 4.99779 19.7802 3.20174 17.8891 1.9381C15.9979 0.674463 13.7745 0 11.5 0C8.45001 0 5.52494 1.2116 3.36827 3.36827C1.2116 5.52494 0 8.45001 0 11.5ZM4.92857 10.6786H14.9089L10.3254 6.07282L11.5 4.92857L18.0714 11.5L11.5 18.0714L10.3254 16.8992L14.9089 12.3214H4.92857V10.6786Z"
+                  fill="white"
+                />
+              </svg>
+            </Link>
+          </Button>
+        </div>
       </div>
     </div>
   );
@@ -95,7 +122,7 @@ function CartLineItem({line}: {line: DropDownCartLine}) {
   const lineItemUrl = useVariantUrl(product.handle, selectedOptions);
   return (
     <li key={id} className="grid grid-cols-12">
-      <div className="flex items-center col-span-9">
+      <div className="grid grid-cols-[70px_250px_110px] items-center gap-[14px] col-span-9">
         {image && (
           <Image
             alt={title}
@@ -110,7 +137,7 @@ function CartLineItem({line}: {line: DropDownCartLine}) {
         <Link prefetch="intent" to={lineItemUrl}>
           <span className="font-semibold text-[22px]">{product.title}</span>
         </Link>
-        <div className="ml-10">
+        <div className="">
           <ul>
             {selectedOptions.map((option) => (
               <li key={option.name}>

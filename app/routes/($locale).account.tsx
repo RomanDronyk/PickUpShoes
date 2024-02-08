@@ -1,10 +1,13 @@
-import {Form, NavLink, Outlet, useLoaderData} from '@remix-run/react';
+import {Form, Link, NavLink, Outlet, useLoaderData} from '@remix-run/react';
 import {json, redirect, type LoaderFunctionArgs} from '@shopify/remix-oxygen';
 import type {CustomerFragment} from 'storefrontapi.generated';
 
 export function shouldRevalidate() {
   return true;
 }
+export const handle = {
+  breadcrumb: () => <Link to="/account">Особистий кабінет</Link>,
+};
 
 export async function loader({request, context}: LoaderFunctionArgs) {
   const {session, storefront} = context;
