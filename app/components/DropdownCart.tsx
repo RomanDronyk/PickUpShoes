@@ -3,9 +3,8 @@ import {Link} from '@remix-run/react';
 import {motion} from 'framer-motion';
 import {Button} from './ui/button';
 import {useVariantUrl} from '~/utils';
-import {ArrowRight} from 'lucide-react';
+import {ArrowRight, X, Plus, Minus} from 'lucide-react';
 import {useClickAway} from '@uidotdev/usehooks';
-
 import type {CartApiQueryFragment} from 'storefrontapi.generated';
 import type {Variants} from 'framer-motion';
 import type {CartLineUpdateInput} from '@shopify/hydrogen/storefront-api-types';
@@ -14,7 +13,7 @@ type DropDownCartLine = CartApiQueryFragment['lines']['nodes'][0];
 type DropdownCartProps = {
   cart: CartApiQueryFragment | null;
   active: boolean;
-  handleShow: (boolean) => void;
+  handleShow: (arg0: boolean) => void;
 };
 
 type CartLine = CartApiQueryFragment['lines']['nodes'][0];
@@ -32,7 +31,7 @@ const cartVariants = {
     },
   },
   open: {
-    top: '100%',
+    top: '100.9%',
     display: 'flex',
     opacity: 1,
     transition: {
@@ -57,25 +56,36 @@ export function DropDownCart({cart, active, handleShow}: DropdownCartProps) {
       variants={cartVariants}
       animate={active ? 'open' : 'closed'}
       exit="closed"
-      className="absolute z-20 w-full flex-col  bg-white/95 backdrop-blur-lg drop-shadow-cart rounded-b-[30px] px-[30px] text-black"
+      className="absolute z-20 w-full flex-col  bg-white/95 backdrop-blur-lg drop-shadow-cart rounded-b-[30px]  p-[30px] text-black"
     >
       {!lines && <EmptyCart />}
-      <CartDetail lines={cart?.lines} />
+      <DropDownCartDetail lines={cart?.lines} />
     </motion.div>
   );
 }
-function CartDetail({
+function DropDownCartDetail({
   lines,
 }: {
   lines: CartApiQueryFragment['lines'] | undefined;
 }) {
   return (
-    <div aria-labelledby="cart-lines">
-      <ul>
-        {lines?.nodes.map((line) => (
-          <CartLineItem key={line.id} line={line} />
-        ))}
-      </ul>
+    <div className="dropdown-detail">
+      <div className="dropdown-table">
+        <div className="dropdown-header grid grid-cols-12">
+          <div className="dropdown-title col-span-9">
+            <span className="font-semibold text-[26px] col-span-6">
+              Корзина
+            </span>
+          </div>
+          <div className="text-xl text-center">Кількість</div>
+          <div className="text-xl text-center">Вартість</div>
+        </div>
+        <ul>
+          {lines?.nodes.map((line) => (
+            <CartLineItem key={line.id} line={line} />
+          ))}
+        </ul>
+      </div>
     </div>
   );
 }
@@ -86,7 +96,7 @@ function CartLineItem({line}: {line: DropDownCartLine}) {
   const lineItemUrl = useVariantUrl(product.handle, selectedOptions);
   return (
     <li key={id} className="grid grid-cols-12">
-      <div className="flex items-center col-span-4">
+      <div className="flex items-center col-span-9">
         {image && (
           <Image
             alt={title}
@@ -112,10 +122,12 @@ function CartLineItem({line}: {line: DropDownCartLine}) {
           </ul>
         </div>
       </div>
-      <div className="flex items-center">
+      <div className="grid grid-cols-3 col-span-3 gap-x-3">
         <CartLineQuantity line={line} />
         <CartLinePrice line={line} as="span" />
-        <CartLineRemoveButton lineIds={[line.id]} />
+        <div className="flex items-center justify-center">
+          <CartLineRemoveButton lineIds={[line.id]} />
+        </div>
       </div>
     </li>
   );
@@ -140,29 +152,29 @@ function CartLineQuantity({line}: {line: CartLine}) {
   const nextQuantity = Number((quantity + 1).toFixed(0));
 
   return (
-    <div className="cart-line-quantiy">
-      <small>Quantity: {quantity} &nbsp;&nbsp;</small>
+    <div className="flex self-center items-center justify-center gap-5 text-lg text-black bg-input rounded-[62px] px-5 py-2">
       <CartLineUpdateButton lines={[{id: lineId, quantity: prevQuantity}]}>
         <button
-          aria-label="Decrease quantity"
+          aria-label="Зменшити кількість"
           disabled={quantity <= 1}
           name="decrease-quantity"
           value={prevQuantity}
+          className="flex flex-col items-center cursor-pointer"
         >
-          <span>&#8722; </span>
+          <Minus />
         </button>
       </CartLineUpdateButton>
-      &nbsp;
+      <span>{quantity}</span>
       <CartLineUpdateButton lines={[{id: lineId, quantity: nextQuantity}]}>
         <button
-          aria-label="Increase quantity"
+          className="flex flex-col items-center cursor-pointer"
+          aria-label="Збільшити кількість"
           name="increase-quantity"
           value={nextQuantity}
         >
-          <span>&#43;</span>
+          <Plus />
         </button>
       </CartLineUpdateButton>
-      &nbsp;
     </div>
   );
 }
@@ -187,8 +199,14 @@ function CartLinePrice({
   }
 
   return (
-    <div>
-      <Money withoutTrailingZeros {...passthroughProps} data={moneyV2} />
+    <div className="self-center text-center font-semibold text-[22px]">
+      <Money
+        withoutTrailingZeros
+        withoutCurrency
+        {...passthroughProps}
+        data={moneyV2}
+      />
+      грн
     </div>
   );
 }
@@ -216,7 +234,12 @@ function CartLineRemoveButton({lineIds}: {lineIds: string[]}) {
       action={CartForm.ACTIONS.LinesRemove}
       inputs={{lineIds}}
     >
-      <button type="submit">Remove</button>
+      <Button
+        type="submit"
+        className="self-center w-[25px] h-[25px] p-[6px] rounded-full"
+      >
+        <X size={16} />
+      </Button>
     </CartForm>
   );
 }
