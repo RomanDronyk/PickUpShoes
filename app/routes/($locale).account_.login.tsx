@@ -318,11 +318,11 @@ export default function Login() {
           </Button>
         </Form>
       </div>
-      {/* <div>
+      <div>
         <p>
           <Link to="/account/recover">Forgot password →</Link>
         </p>
-      </div> */}
+      </div>
     </div>
   );
 }

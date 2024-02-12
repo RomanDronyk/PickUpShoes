@@ -33,7 +33,7 @@ export function Layout({
   isLoggedIn,
 }: LayoutProps) {
   return (
-    <div>
+    <div className="min-h-full flex flex-col">
       {header && <Header header={header} cart={cart} isLoggedIn={isLoggedIn} />}
       {/* <Breadcrumbs /> */}
       <AnimatePresence mode="popLayout" initial={false}>
@@ -42,6 +42,7 @@ export function Layout({
           initial={false}
           animate={{x: '0', opacity: 1}}
           exit={{x: '0%', opacity: 0}}
+          className="flex-auto items-start flex"
         >
           {children}
         </motion.main>
