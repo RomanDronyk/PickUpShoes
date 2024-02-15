@@ -14,8 +14,9 @@ import {
 import {PredictiveSearchForm} from './Search';
 import {Button} from './ui/button';
 import {DropDownCart} from './DropdownCart';
-import {useMediaQuery} from '@uidotdev/usehooks';
 import {MobileMenu} from './MobileMenu';
+import {isMobile} from 'react-device-detect';
+import {MobileCart} from './MobileCart';
 
 export type HeaderProps = Pick<
   LayoutProps,
@@ -26,11 +27,9 @@ export function Header({header, isLoggedIn, cart}: HeaderProps) {
   const [cartShow, setCartShow] = useState(false);
   const {shop, menu} = header;
   const {key} = useLocation();
-  // const isSmallDevice = useMediaQuery('only screen and (max-width : 768px)');
   const handleShowCart = (value?: boolean) => {
     setCartShow((prevState) => (value !== undefined ? value : !prevState));
   };
-
   useEffect(() => {
     if (cartShow) setCartShow(false);
   }, [key]);
@@ -53,20 +52,33 @@ export function Header({header, isLoggedIn, cart}: HeaderProps) {
           <PredictiveSearchForm />
         </div> */}
         <nav className="header-ctas flex gap-x-[15px]" role="navigation">
-          <Suspense>
-            <Await resolve={cart}>
-              {(cart) => {
-                if (!cart)
-                  return <CartBadge count={0} handleShow={handleShowCart} />;
-                return (
-                  <CartBadge
-                    count={cart.totalQuantity}
-                    handleShow={handleShowCart}
-                  />
-                );
-              }}
-            </Await>
-          </Suspense>
+          {!isMobile && (
+            <Suspense>
+              <Await resolve={cart}>
+                {(cart) => {
+                  if (!cart)
+                    return <CartBadge count={0} handleShow={handleShowCart} />;
+                  return (
+                    <CartBadge
+                      count={cart.totalQuantity}
+                      handleShow={handleShowCart}
+                    />
+                  );
+                }}
+              </Await>
+            </Suspense>
+          )}
+          {isMobile && (
+            <Suspense>
+              <Await resolve={cart}>
+                {(cart) => {
+                  if (!cart) return <MobileCart cart={cart} empty={true} />;
+                  return <MobileCart cart={cart} />;
+                }}
+              </Await>
+            </Suspense>
+          )}
+
           <Button variant="ghost" asChild className="p-0">
             <NavLink prefetch="intent" to="/account" style={activeLinkStyle}>
               <svg
@@ -94,17 +106,19 @@ export function Header({header, isLoggedIn, cart}: HeaderProps) {
             </NavLink>
           </Button>
         </nav>
-        <Suspense>
-          <Await resolve={cart}>
-            {(cart) => (
-              <DropDownCart
-                cart={cart}
-                active={cartShow}
-                handleShow={() => handleShowCart()}
-              />
-            )}
-          </Await>
-        </Suspense>
+        {!isMobile && (
+          <Suspense>
+            <Await resolve={cart}>
+              {(cart) => (
+                <DropDownCart
+                  cart={cart}
+                  active={cartShow}
+                  handleShow={() => handleShowCart()}
+                />
+              )}
+            </Await>
+          </Suspense>
+        )}
       </div>
     </header>
   );

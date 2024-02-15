@@ -12,7 +12,6 @@ import {Link} from '@remix-run/react';
 
 export function MobileMenu({menu}: {menu: HeaderProps['header']['menu']}) {
   const [open, setOpen] = useState(false);
-  console.log(menu);
   return (
     <Drawer open={open} onOpenChange={setOpen} direction="bottom">
       <DrawerTrigger asChild className="md:hidden">
@@ -34,7 +33,7 @@ export function MobileMenu({menu}: {menu: HeaderProps['header']['menu']}) {
           </svg>
         </Button>
       </DrawerTrigger>
-      <DrawerContent className="h-4/5 px-5">
+      <DrawerContent className="h-[90%] px-5">
         <Accordion type="single" collapsible className="w-full">
           {menu?.items.map((menuItem) => (
             <AccordionItem
