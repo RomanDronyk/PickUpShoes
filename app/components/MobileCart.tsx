@@ -252,14 +252,23 @@ function CartLinePrice({
   if (moneyV2 == null) {
     return null;
   }
-  const oldPrice = line.cost.compareAtAmountPerQuantity
-    ? line.cost.compareAtAmountPerQuantity
-    : null;
+
+  const oldTotalPrice = line.cost.compareAtAmountPerQuantity
+    ? parseInt(line.cost.compareAtAmountPerQuantity?.amount) * line.quantity
+    : '';
 
   const showDiscount = line.cost.compareAtAmountPerQuantity || false;
-  console.log(moneyV2);
-  function percentageDiscount(newPrice: number, oldPrice: number) {
-    return ((oldPrice - newPrice) / oldPrice) * 100;
+  function percentageDiscount(line: CartLine) {
+    const {
+      quantity,
+      cost: {amountPerQuantity, totalAmount, compareAtAmountPerQuantity},
+    } = line;
+
+    if (compareAtAmountPerQuantity) {
+      const oldCost = quantity * parseInt(compareAtAmountPerQuantity.amount);
+      return ((1 - parseInt(totalAmount.amount) / oldCost) * 100).toFixed();
+    }
+    return true;
   }
   return (
     <div className=" font-semibold max-[385px]:self-start">
@@ -285,18 +294,11 @@ function CartLinePrice({
             грн
           </div>
           <div className="line-through text-[#B3B3B3]">
-            <Money
-              withoutTrailingZeros
-              withoutCurrency
-              {...passthroughProps}
-              data={oldPrice}
-            />
+            {oldTotalPrice}
             грн
           </div>
           <div className="text-destructive bg-destructive/10 font-medium rounded-xl px-[9px]">
-            <span>
-              -{percentageDiscount(moneyV2?.amount, oldPrice?.amount)}%
-            </span>
+            <span>-{percentageDiscount(line)}%</span>
           </div>
         </div>
       )}

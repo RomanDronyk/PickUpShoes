@@ -230,7 +230,7 @@ export function PredictiveSearchForm({
   const fetcher = useFetcher<NormalizedPredictiveSearchResults>();
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [focusForm, setFocusForm] = useState<boolean>(false);
-  const [mobileOpen, setMobileOpen] = useState(true);
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   function fetchResults(event: React.ChangeEvent<HTMLInputElement>) {
     const searchAction = action ?? '/api/predictive-search';
@@ -363,18 +363,14 @@ export function PredictiveSearchForm({
             </div>
           </DrawerHeader>
 
-          <PredictiveSearchResults isMobile={isMobile} />
+          <PredictiveSearchResults />
         </DrawerContent>
       </Drawer>
     );
   }
 }
 
-export function PredictiveSearchResults({
-  isMobile = false,
-}: {
-  isMobile: boolean;
-}) {
+export function PredictiveSearchResults() {
   const {results, totalResults, searchInputRef, searchTerm} =
     usePredictiveSearch();
 
