@@ -109,6 +109,7 @@ export async function loader({context}: LoaderFunctionArgs) {
 export default function App() {
   const nonce = useNonce();
   const data = useLoaderData<typeof loader>();
+  console.log(data.header);
   return (
     <html lang="uk">
       <head>

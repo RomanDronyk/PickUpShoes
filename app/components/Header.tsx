@@ -1,4 +1,4 @@
-import {Await, NavLink, useLocation} from '@remix-run/react';
+import {Await, NavLink, Link, useLocation} from '@remix-run/react';
 import {Suspense, useState, useEffect} from 'react';
 import type {HeaderQuery} from 'storefrontapi.generated';
 import type {LayoutProps} from './Layout';
@@ -8,12 +8,16 @@ import {
   NavigationMenuList,
   NavigationMenuItem,
   NavigationMenuTrigger,
+  NavigationMenuContent,
+  NavigationMenuLink,
 } from './ui/navigation-menu';
 import {PredictiveSearchForm} from './Search';
 import {Button} from './ui/button';
 import {DropDownCart} from './DropdownCart';
+import {useMediaQuery} from '@uidotdev/usehooks';
+import {MobileMenu} from './MobileMenu';
 
-type HeaderProps = Pick<
+export type HeaderProps = Pick<
   LayoutProps,
   'header' | 'cart' | 'isLoggedIn' | 'favorites'
 >;
@@ -22,7 +26,7 @@ export function Header({header, isLoggedIn, cart}: HeaderProps) {
   const [cartShow, setCartShow] = useState(false);
   const {shop, menu} = header;
   const {key} = useLocation();
-
+  // const isSmallDevice = useMediaQuery('only screen and (max-width : 768px)');
   const handleShowCart = (value?: boolean) => {
     setCartShow((prevState) => (value !== undefined ? value : !prevState));
   };
@@ -32,19 +36,23 @@ export function Header({header, isLoggedIn, cart}: HeaderProps) {
   }, [key]);
 
   return (
-    <header className="px-24">
+    <header className="lg:px-24 px-6">
       <div className=" flex justify-between pt-[18px] pb-[25px] border-b border-black/20 relative">
-        <NavLink prefetch="intent" to="/" style={activeLinkStyle} end>
-          <img src={shop.brand?.logo?.image?.url} alt="PickUpShoes" />
-        </NavLink>
+        <div className="flex items-center gap-x-[35px]">
+          <MobileMenu menu={menu} />
+          <NavLink prefetch="intent" to="/" className="flex items-center">
+            <img src={shop.brand?.logo?.image?.url} alt="PickUpShoes" />
+          </NavLink>
+        </div>
         <HeaderMenu
           menu={menu}
           primaryDomainUrl={header.shop.primaryDomain.url}
         />
-        <div className="relative w-[427px]">
+
+        {/* <div className="relative w-[427px]">
           <PredictiveSearchForm />
-        </div>
-        <nav className="header-ctas" role="navigation">
+        </div> */}
+        <nav className="header-ctas flex gap-x-[15px]" role="navigation">
           <Suspense>
             <Await resolve={cart}>
               {(cart) => {
@@ -59,7 +67,7 @@ export function Header({header, isLoggedIn, cart}: HeaderProps) {
               }}
             </Await>
           </Suspense>
-          <Button variant="ghost" asChild>
+          <Button variant="ghost" asChild className="p-0">
             <NavLink prefetch="intent" to="/account" style={activeLinkStyle}>
               <svg
                 width="32"
@@ -110,7 +118,11 @@ function CartBadge({
   handleShow: () => void;
 }) {
   return (
-    <Button variant="ghost" className="relative" onClick={() => handleShow()}>
+    <Button
+      variant="ghost"
+      className="relative p-0"
+      onClick={() => handleShow()}
+    >
       <svg
         width="32"
         height="32"
@@ -162,11 +174,10 @@ export function HeaderMenu({
 }) {
   const {publicStoreDomain} = useRootLoaderData();
   return (
-    <NavigationMenu>
+    <NavigationMenu className="md:flex hidden">
       <NavigationMenuList>
         {menu?.items.map((item) => {
           if (!item.url) return null;
-
           // if the url is internal, we strip the domain
           const url =
             item.url.includes('myshopify.com') ||
@@ -177,10 +188,33 @@ export function HeaderMenu({
           return (
             <NavigationMenuItem key={item.id}>
               <NavigationMenuTrigger className="font-normal">
-                <NavLink prefetch="intent" to={url}>
-                  {item.title}
-                </NavLink>
+                {item.title}
               </NavigationMenuTrigger>
+              {item.items.length > 0 && (
+                <NavigationMenuContent>
+                  <ul className="flex py-[15px] px-[20px]  gap-x-[25px] gap-y-[15px] w-[390px] flex-wrap">
+                    {item.items.map((menuItem) => {
+                      const url =
+                        menuItem.url.includes('myshopify.com') ||
+                        menuItem.url.includes(publicStoreDomain) ||
+                        menuItem.url.includes(primaryDomainUrl)
+                          ? new URL(menuItem.url).pathname
+                          : menuItem.url;
+
+                      return (
+                        <li key={menuItem.id}>
+                          <NavigationMenuLink
+                            asChild
+                            className="text-base font-normal hover:underline"
+                          >
+                            <Link to={url}>{menuItem.title}</Link>
+                          </NavigationMenuLink>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </NavigationMenuContent>
+              )}
             </NavigationMenuItem>
           );
         })}
@@ -200,3 +234,5 @@ function activeLinkStyle({
     color: isPending ? 'grey' : 'black',
   };
 }
+
+function SubMenu() {}

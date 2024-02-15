@@ -17,6 +17,7 @@ export const handle = {
 };
 type ActionResponse = {
   error: string | null;
+  loginError: string | null;
 };
 
 export const meta: MetaFunction = () => {
@@ -31,7 +32,7 @@ export const meta: MetaFunction = () => {
 
 export async function loader({context}: LoaderFunctionArgs) {
   if (await context.session.get('customerAccessToken')) {
-    return redirect('/account');
+    return redirect('/account/profile');
   }
   return json({});
 }
@@ -54,10 +55,7 @@ export async function action({request, context}: ActionFunctionArgs) {
         const validInputs = Boolean(email && password);
 
         if (!validInputs) {
-          throw new Error('Please provide both an email and a password.');
-        }
-        switch (formName) {
-          case FormNames.LOGIN_FORM:
+          throw new Error('Будь ласка введіть email та пароль.');
         }
 
         const {customerAccessTokenCreate} = await storefront.mutate(
@@ -78,16 +76,16 @@ export async function action({request, context}: ActionFunctionArgs) {
         const {customerAccessToken} = customerAccessTokenCreate;
         session.set('customerAccessToken', customerAccessToken);
 
-        return redirect('/account', {
+        return redirect('/account/profile', {
           headers: {
             'Set-Cookie': await session.commit(),
           },
         });
       } catch (error: unknown) {
         if (error instanceof Error) {
-          return json({error: error.message}, {status: 400});
+          return json({loginError: error.message}, {status: 400});
         }
-        return json({error}, {status: 400});
+        return json({loginError: error}, {status: 400});
       }
     }
     case FormNames.REGISTER_FORM: {
@@ -105,11 +103,11 @@ export async function action({request, context}: ActionFunctionArgs) {
       const validInputs = Boolean(email && password);
       try {
         if (!validPasswords) {
-          throw new Error('Passwords do not match');
+          throw new Error('Паролі не співпадають');
         }
 
         if (!validInputs) {
-          throw new Error('Please provide both an email and a password.');
+          throw new Error('Будь ласка введіть email та пароль.');
         }
 
         const {customerCreate} = await storefront.mutate(
@@ -127,7 +125,7 @@ export async function action({request, context}: ActionFunctionArgs) {
 
         const newCustomer = customerCreate?.customer;
         if (!newCustomer?.id) {
-          throw new Error('Could not create customer');
+          throw new Error('Не можилво створити користувача');
         }
 
         // get an access token for the new customer
@@ -174,8 +172,9 @@ export async function action({request, context}: ActionFunctionArgs) {
 export default function Login() {
   const data = useActionData<ActionResponse>();
   const error = data?.error || null;
+  const loginError = data?.loginError || null;
   return (
-    <div className="contaier grid grid-cols-2 gap-x-10 px-24 my-10">
+    <div className="contaier grid grid-cols-2 gap-x-10 px-24 my-10 w-full">
       <div className="register rounded-[20px] border border-black/10 p-6 ">
         <h2 className="text-[32px]  font-medium mb-[25px]">Реєстрація</h2>
         <Form method="POST">
@@ -263,6 +262,7 @@ export default function Login() {
               aria-label="Email address"
               // eslint-disable-next-line jsx-a11y/no-autofocus
               autoFocus
+              error={loginError ? true : false}
               className="bg-input px-6 py-3 text-xl placeholder:text-xl h-[52px]"
             />
             <Input
@@ -275,21 +275,27 @@ export default function Login() {
               minLength={8}
               required
               className="bg-input px-6 py-3 text-xl placeholder:text-xl h-[52px]"
+              error={loginError ? true : false}
             />
           </fieldset>
-          {error ? (
-            <p>
-              <mark>
-                <small>{error}</small>
-              </mark>
+          {loginError ? (
+            <p className="inline-flex mt-4">
+              <small>Невірні ім`я користувача або пароль </small>
             </p>
           ) : (
-            <br />
+            ''
           )}
+          <div className="mt-3">
+            <p>
+              <Link to="/account/recover" className="underline">
+                Втратили свій пароль ?
+              </Link>
+            </p>
+          </div>
           <Button
             name="formName"
             value={FormNames.LOGIN_FORM}
-            className="flex items-center justify-center gap-5 py-[14px] font-medium text-xl  w-full rounded-[36px]"
+            className="flex items-center justify-center gap-5 py-[14px] font-medium text-xl  w-full rounded-[36px] mt-6"
           >
             Ввійти до особистого кабінету
             <svg
@@ -317,11 +323,6 @@ export default function Login() {
             </svg>
           </Button>
         </Form>
-      </div>
-      <div>
-        <p>
-          <Link to="/account/recover">Forgot password →</Link>
-        </p>
       </div>
     </div>
   );

@@ -10,7 +10,7 @@ export function SubscribeFooter() {
         <Input
           type="email"
           placeholder="Введіть свій e-mail"
-          className="placeholder:text-placeholderText"
+          className="placeholder:text-placeholderText border-none"
         />
         <svg
           width="24"

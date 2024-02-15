@@ -273,6 +273,7 @@ export function PredictiveSearchForm({
           onChange={fetchResults}
           onFocus={fetchResults}
           type="search"
+          className="border-none"
         />
       </div>
       <PredictiveSearchResults />
