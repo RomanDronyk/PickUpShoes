@@ -31,9 +31,9 @@ export function MobileCart({
   return (
     <Drawer open={open} onOpenChange={setOpen} direction="bottom">
       <DrawerTrigger asChild>
-        <div className="relative">
+        <Button variant="link" className="relative p-0">
           <svg
-            className="max-sm:w-7 max-sm:h-7"
+            className="max-sm:w-5 max-sm:h-5"
             width="32"
             height="32"
             viewBox="0 0 32 32"
@@ -72,7 +72,7 @@ export function MobileCart({
           <span className="inline-flex rounded-full bg-bageRed text-white text-xs text-center px-[5px] py-[1px] absolute right-0 bottom-0">
             {cart?.totalQuantity || 0}
           </span>
-        </div>
+        </Button>
       </DrawerTrigger>
       <DrawerContent className="h-[90%] px-5">
         <div className="overflow-y-auto overflow-x-hidden">

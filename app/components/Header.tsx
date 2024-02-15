@@ -47,26 +47,36 @@ export function Header({header, isLoggedIn, cart}: HeaderProps) {
           menu={menu}
           primaryDomainUrl={header.shop.primaryDomain.url}
         />
-
-        {/* <div className="relative w-[427px]">
-          <PredictiveSearchForm />
-        </div> */}
+        <div className="relative hidden md:w-[427px]">
+          <PredictiveSearchForm
+            isMobile={isMobile}
+            brandLogo={shop?.brand?.logo?.image}
+          />
+        </div>
         <nav className="header-ctas flex gap-x-[15px]" role="navigation">
+          <PredictiveSearchForm
+            isMobile={isMobile}
+            brandLogo={shop?.brand?.logo?.image}
+          />
           {!isMobile && (
-            <Suspense>
-              <Await resolve={cart}>
-                {(cart) => {
-                  if (!cart)
-                    return <CartBadge count={0} handleShow={handleShowCart} />;
-                  return (
-                    <CartBadge
-                      count={cart.totalQuantity}
-                      handleShow={handleShowCart}
-                    />
-                  );
-                }}
-              </Await>
-            </Suspense>
+            <>
+              <Suspense>
+                <Await resolve={cart}>
+                  {(cart) => {
+                    if (!cart)
+                      return (
+                        <CartBadge count={0} handleShow={handleShowCart} />
+                      );
+                    return (
+                      <CartBadge
+                        count={cart.totalQuantity}
+                        handleShow={handleShowCart}
+                      />
+                    );
+                  }}
+                </Await>
+              </Suspense>
+            </>
           )}
           {isMobile && (
             <Suspense>
@@ -82,7 +92,7 @@ export function Header({header, isLoggedIn, cart}: HeaderProps) {
           <Button variant="ghost" asChild className="p-0">
             <NavLink prefetch="intent" to="/account" style={activeLinkStyle}>
               <svg
-                className="max-sm:w-7 max-sm:h-7"
+                className="max-sm:w-5 max-sm:h-5"
                 width="32"
                 height="32"
                 viewBox="0 0 32 32"

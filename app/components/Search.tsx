@@ -10,12 +10,22 @@ import {Image, Money, Pagination} from '@shopify/hydrogen';
 import React, {useRef, useEffect, useState} from 'react';
 import clsx from 'clsx';
 import {motion} from 'framer-motion';
+import {
+  Drawer,
+  DrawerContent,
+  DrawerTrigger,
+  DrawerHeader,
+  DrawerClose,
+} from './ui/drawer';
 
 import type {
   PredictiveProductFragment,
   SearchQuery,
 } from 'storefrontapi.generated';
 import {Input} from './ui/input';
+import {Button} from './ui/button';
+import {X} from 'lucide-react';
+import {isMobile} from 'react-device-detect';
 
 type PredicticeSearchResultItemImage =
   | PredictiveProductFragment['variants']['nodes'][0]['image'];
@@ -201,6 +211,8 @@ type ChildrenRenderProps = {
 type SearchFromProps = {
   action?: FormProps['action'];
   method?: FormProps['method'];
+  isMobile: boolean;
+  brandLogo?: Maybe<Pick<Image, 'url'>> | undefined;
   [key: string]: unknown;
 };
 
@@ -210,12 +222,15 @@ type SearchFromProps = {
 export function PredictiveSearchForm({
   action,
   method = 'POST',
+  isMobile = false,
+  brandLogo,
   ...props
 }: SearchFromProps) {
   const params = useParams();
   const fetcher = useFetcher<NormalizedPredictiveSearchResults>();
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [focusForm, setFocusForm] = useState<boolean>(false);
+  const [mobileOpen, setMobileOpen] = useState(true);
 
   function fetchResults(event: React.ChangeEvent<HTMLInputElement>) {
     const searchAction = action ?? '/api/predictive-search';
@@ -242,46 +257,124 @@ export function PredictiveSearchForm({
       setFocusForm(true);
     }
   };
-  return (
-    <fetcher.Form
-      {...props}
-      className={classes}
-      onSubmit={(event) => {
-        event.preventDefault();
-        event.stopPropagation();
-        if (!inputRef?.current || inputRef.current.value === '') {
-          return;
-        }
-        inputRef.current.blur();
-      }}
-      onFocus={(event) => {
-        handleStatusInput(event);
-      }}
-      onBlur={(event) => {
-        handleStatusInput(event);
-      }}
-      onChange={(event) => {
-        handleStatusInput(event);
-      }}
-    >
-      <div className="flex items-center">
-        <SearchIcon />
-        <Input
-          name="q"
-          placeholder="Що ти шукаєш?"
-          ref={inputRef}
-          onChange={fetchResults}
-          onFocus={fetchResults}
-          type="search"
-          className="border-none"
-        />
-      </div>
-      <PredictiveSearchResults />
-    </fetcher.Form>
-  );
+  if (!isMobile) {
+    return (
+      <fetcher.Form
+        {...props}
+        className={classes}
+        onSubmit={(event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          if (!inputRef?.current || inputRef.current.value === '') {
+            return;
+          }
+          inputRef.current.blur();
+        }}
+        onFocus={(event) => {
+          handleStatusInput(event);
+        }}
+        onBlur={(event) => {
+          handleStatusInput(event);
+        }}
+        onChange={(event) => {
+          handleStatusInput(event);
+        }}
+      >
+        <div className="flex items-center">
+          <SearchIcon />
+          <Input
+            name="q"
+            placeholder="Що ти шукаєш?"
+            ref={inputRef}
+            onChange={fetchResults}
+            onFocus={fetchResults}
+            type="search"
+            className="border-none"
+          />
+        </div>
+        <PredictiveSearchResults />
+      </fetcher.Form>
+    );
+  } else {
+    return (
+      <Drawer open={mobileOpen} onOpenChange={setMobileOpen}>
+        <DrawerTrigger asChild>
+          <Button variant="link" className="p-0">
+            <svg
+              width="15"
+              height="16"
+              viewBox="0 0 15 16"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M14.5 15L11.1945 11.6886M13.0263 7.26316C13.0263 8.92425 12.3664 10.5173 11.1919 11.6919C10.0173 12.8664 8.42425 13.5263 6.76316 13.5263C5.10207 13.5263 3.50901 12.8664 2.33444 11.6919C1.15987 10.5173 0.5 8.92425 0.5 7.26316C0.5 5.60207 1.15987 4.00901 2.33444 2.83444C3.50901 1.65987 5.10207 1 6.76316 1C8.42425 1 10.0173 1.65987 11.1919 2.83444C12.3664 4.00901 13.0263 5.60207 13.0263 7.26316V7.26316Z"
+                stroke="black"
+                strokeLinecap="round"
+              />
+            </svg>
+          </Button>
+        </DrawerTrigger>
+        <DrawerContent className="px-5 h-full">
+          <DrawerHeader>
+            <div className="flex items-center justify-between">
+              <Image src={brandLogo?.url} className="max-w-[130px]" />
+              <DrawerClose asChild>
+                <Button className="rounded-full bg-[#535353] p-0 w-[28px] h-[28px]">
+                  <X size={18} />
+                </Button>
+              </DrawerClose>
+            </div>
+            <div className="search-block mt-6 mb-7">
+              <fetcher.Form
+                {...props}
+                className="border border-input rounded-[62px] bg-lightGray px-4 py-[3px] z-20 relative"
+                onSubmit={(event) => {
+                  event.preventDefault();
+                  event.stopPropagation();
+                  if (!inputRef?.current || inputRef.current.value === '') {
+                    return;
+                  }
+                  inputRef.current.blur();
+                }}
+                onFocus={(event) => {
+                  handleStatusInput(event);
+                }}
+                onBlur={(event) => {
+                  handleStatusInput(event);
+                }}
+                onChange={(event) => {
+                  handleStatusInput(event);
+                }}
+              >
+                <div className="flex items-center">
+                  <Input
+                    name="q"
+                    placeholder="Пошук..."
+                    ref={inputRef}
+                    onChange={fetchResults}
+                    onFocus={fetchResults}
+                    type="search"
+                    className="border-none placeholder:text-lg text-lg h-[52px]"
+                  />
+                  <SearchIcon />
+                </div>
+              </fetcher.Form>
+            </div>
+          </DrawerHeader>
+
+          <PredictiveSearchResults isMobile={isMobile} />
+        </DrawerContent>
+      </Drawer>
+    );
+  }
 }
 
-export function PredictiveSearchResults() {
+export function PredictiveSearchResults({
+  isMobile = false,
+}: {
+  isMobile: boolean;
+}) {
   const {results, totalResults, searchInputRef, searchTerm} =
     usePredictiveSearch();
 
@@ -300,13 +393,49 @@ export function PredictiveSearchResults() {
     open: {top: '100%', opacity: 1},
     closed: {top: '0%', opacity: 0},
   };
+  if (!isMobile) {
+    return (
+      <motion.div
+        initial={false}
+        variants={variants}
+        animate={totalResults ? 'open' : 'closed'}
+        transition={{duration: 1}}
+        className="absolute left-0 z-20 bg-lightGray w-full rounded-b-[21px]"
+      >
+        <div>
+          {results.map(({type, items}) => (
+            <PredictiveSearchResult
+              goToSearchResult={goToSearchResult}
+              items={items}
+              key={type}
+              searchTerm={searchTerm}
+              type={type}
+            />
+          ))}
+        </div>
+        {/* view all results /search?q=term */}
+        {searchTerm.current && (
+          <Link
+            className="flex px-4 py-3 items-center justify-center"
+            onClick={goToSearchResult}
+            to={`/search?q=${searchTerm.current}`}
+          >
+            <p>
+              До всіх результатів <q>{searchTerm.current}</q>
+              &nbsp; →
+            </p>
+          </Link>
+        )}
+      </motion.div>
+    );
+  }
   return (
     <motion.div
       initial={false}
       variants={variants}
       animate={totalResults ? 'open' : 'closed'}
       transition={{duration: 1}}
-      className="absolute left-0 z-20 bg-lightGray w-full rounded-b-[21px]"
+      className="overflow-y-auto overflow-x-hidden"
     >
       <div>
         {results.map(({type, items}) => (
@@ -344,8 +473,15 @@ function NoPredictiveSearchResults({
   if (!searchTerm.current) {
     return null;
   }
+  if (!isMobile) {
+    return (
+      <p className="absolute bg-lightGray inline-flex w-full px-4 py-3 left-0 rounded-b-[21px] justify-center">
+        За запитом &nbsp; <q>{searchTerm.current}</q> &nbsp; нічого не знайдено
+      </p>
+    );
+  }
   return (
-    <p className="absolute bg-lightGray inline-flex w-full px-4 py-3 left-0 rounded-b-[21px] justify-center">
+    <p className="inline-flex w-full px-4 py-3 left-0 rounded-b-[21px] justify-center">
       За запитом &nbsp; <q>{searchTerm.current}</q> &nbsp; нічого не знайдено
     </p>
   );
