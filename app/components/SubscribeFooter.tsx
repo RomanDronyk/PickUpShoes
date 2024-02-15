@@ -3,10 +3,10 @@ import {Input} from './ui/input';
 export function SubscribeFooter() {
   return (
     <div className="footer-subscribe flex flex-col gap-4">
-      <span className="text-white text-base font-medium">
+      <span className="text-white sm:text-sm lg:text-base text-base font-medium">
         Залиш свій email та отримуй знижки першим
       </span>
-      <div className="flex items-center justify-center rounded-[27px] border-placeholderText border max-w-[240px] px-[20px] py-[3px]">
+      <div className="flex items-center justify-center rounded-[27px] border-placeholderText border sm:max-w-[240px]  max-sm:max-w-full w-full px-[20px] py-[3px]">
         <Input
           type="email"
           placeholder="Введіть свій e-mail"

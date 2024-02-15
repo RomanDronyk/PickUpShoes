@@ -33,6 +33,7 @@ export function MobileCart({
       <DrawerTrigger asChild>
         <div className="relative">
           <svg
+            className="max-sm:w-7 max-sm:h-7"
             width="32"
             height="32"
             viewBox="0 0 32 32"

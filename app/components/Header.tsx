@@ -35,7 +35,7 @@ export function Header({header, isLoggedIn, cart}: HeaderProps) {
   }, [key]);
 
   return (
-    <header className="lg:px-24 px-6">
+    <header className="lg:px-24 px-5">
       <div className=" flex justify-between pt-[18px] pb-[25px] border-b border-black/20 relative">
         <div className="flex items-center gap-x-[35px]">
           <MobileMenu menu={menu} />
@@ -82,6 +82,7 @@ export function Header({header, isLoggedIn, cart}: HeaderProps) {
           <Button variant="ghost" asChild className="p-0">
             <NavLink prefetch="intent" to="/account" style={activeLinkStyle}>
               <svg
+                className="max-sm:w-7 max-sm:h-7"
                 width="32"
                 height="32"
                 viewBox="0 0 32 32"
@@ -134,7 +135,7 @@ function CartBadge({
   return (
     <Button
       variant="ghost"
-      className="relative p-0"
+      className="relative p-0 max-sm:w-[23px] max-sm:h-[18px]"
       onClick={() => handleShow()}
     >
       <svg
