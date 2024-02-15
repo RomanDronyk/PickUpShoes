@@ -5,6 +5,8 @@ import {
   type ActionFunctionArgs,
 } from '@shopify/remix-oxygen';
 import {Form, Link, useActionData} from '@remix-run/react';
+import {Input} from '~/components/ui/input';
+import {Button} from '~/components/ui/button';
 
 type ActionResponse = {
   error?: string;
@@ -51,40 +53,40 @@ export default function Recover() {
   const action = useActionData<ActionResponse>();
 
   return (
-    <div className="account-recover">
-      <div>
+    <div className="account-recover flex items-center justify-center self-stretch flex-col w-full">
+      <div className="w-2/4 rounded-[20px] border border-black/10 p-6">
         {action?.resetRequested ? (
           <>
-            <h1>Request Sent.</h1>
-            <p>
-              If that email address is in our system, you will receive an email
-              with instructions about how to reset your password in a few
-              minutes.
+            <h1 className="font-medium text-[32px]">Запит на відновлення</h1>
+            <p className="text-lg">
+              Якщо ця електронна адреса є в нашій системі, ви отримаєте
+              електронний лист з інструкціями щодо скидання пароля за кілька
+              хвилин.
             </p>
             <br />
-            <Link to="/account/login">Return to Login</Link>
+            <Link to="/account/login">Назад на сторінку входу</Link>
           </>
         ) : (
           <>
-            <h1>Forgot Password.</h1>
-            <p>
-              Enter the email address associated with your account to receive a
-              link to reset your password.
+            <h1 className="font-medium text-[32px]">Забули пароль?</h1>
+            <p className="text-lg">
+              Введіть поштову адресу вашого облікового запису щоб отримати
+              посилання для відновлення паролю.
             </p>
             <br />
             <Form method="POST">
               <fieldset>
-                <label htmlFor="email">Email</label>
-                <input
+                <Input
                   aria-label="Email address"
                   autoComplete="email"
                   // eslint-disable-next-line jsx-a11y/no-autofocus
                   autoFocus
                   id="email"
                   name="email"
-                  placeholder="Email address"
+                  placeholder="Email"
                   required
                   type="email"
+                  className="bg-input px-6 py-3 text-xl placeholder:text-xl h-[52px]"
                 />
               </fieldset>
               {action?.error ? (
@@ -96,12 +98,14 @@ export default function Recover() {
               ) : (
                 <br />
               )}
-              <button type="submit">Request Reset Link</button>
+              <Button className="flex items-center justify-center gap-5 py-[14px] font-medium text-xl w-full rounded-[36px]">
+                Відновити
+              </Button>
             </Form>
             <div>
               <br />
               <p>
-                <Link to="/account/login">Login →</Link>
+                <Link to="/account/login">На сторінку входу →</Link>
               </p>
             </div>
           </>

@@ -26,7 +26,7 @@ export async function loader({context}: LoaderFunctionArgs) {
 export default function Homepage() {
   const {heroCollection} = useLoaderData<typeof loader>();
   return (
-    <div className="home">
+    <div className="home w-full">
       <Hero heroData={heroCollection} />
       {/* <RecommendedProducts products={data.recommendedProducts} /> */}
     </div>

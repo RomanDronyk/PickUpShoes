@@ -1,6 +1,8 @@
 import {Form, Link, NavLink, Outlet, useLoaderData} from '@remix-run/react';
 import {json, redirect, type LoaderFunctionArgs} from '@shopify/remix-oxygen';
 import type {CustomerFragment} from 'storefrontapi.generated';
+import {Button} from '~/components/ui/button';
+import {cn} from '~/lib/utils';
 
 export function shouldRevalidate() {
   return true;
@@ -104,14 +106,22 @@ function AccountLayout({
 }) {
   const heading = customer
     ? customer.firstName
-      ? `Welcome, ${customer.firstName}`
-      : `Welcome to your account.`
-    : 'Account Details';
+      ? `Вітаю, ${customer.firstName}!`
+      : `Вітаю в особистому кабінеті.`
+    : 'Інформація про обліковий запис';
 
   return (
-    <div className="account">
-      <h1>{heading}</h1>
-      <br />
+    <div className="account px-24 pt-10 w-full">
+      <h1 className="text-[32px] font-medium">Особистий кабінет</h1>
+      <div className="flex justify-between items-center my-11">
+        <div>
+          <h2 className="text-[32px] font-semibold">{heading}</h2>
+          <span className="font-medium text-2xl">
+            Оберіть потрібний вам розділ
+          </span>
+        </div>
+        <Logout />
+      </div>
       <AccountMenu />
       {children}
     </div>
@@ -126,27 +136,26 @@ function AccountMenu() {
     isActive: boolean;
     isPending: boolean;
   }) {
-    return {
-      fontWeight: isActive ? 'bold' : undefined,
-      color: isPending ? 'grey' : 'black',
-    };
+    const active = isActive
+      ? 'bg-black text-white hover:bg-black hover:cursor-default'
+      : '';
+    return cn(
+      'text-xl text-black w-full text-center  rounded-t-[30px] py-4 transition-all ease hover:bg-input',
+      active,
+    );
   }
 
   return (
-    <nav role="navigation">
-      <NavLink to="/account/orders" style={isActiveStyle}>
-        Orders &nbsp;
+    <nav role="navigation" className="w-full flex justify-between gap-2">
+      <NavLink to="/account/profile" className={isActiveStyle}>
+        Особиста інформація
       </NavLink>
-      &nbsp;|&nbsp;
-      <NavLink to="/account/profile" style={isActiveStyle}>
-        &nbsp; Profile &nbsp;
+      <NavLink to="/account/orders" className={isActiveStyle}>
+        Історія замовлень
       </NavLink>
-      &nbsp;|&nbsp;
-      <NavLink to="/account/addresses" style={isActiveStyle}>
-        &nbsp; Addresses &nbsp;
-      </NavLink>
-      &nbsp;|&nbsp;
-      <Logout />
+      {/* <NavLink to="/account/addresses" style={isActiveStyle}>
+        Addresses
+      </NavLink> */}
     </nav>
   );
 }
@@ -154,7 +163,28 @@ function AccountMenu() {
 function Logout() {
   return (
     <Form className="account-logout" method="POST" action="/account/logout">
-      &nbsp;<button type="submit">Sign out</button>
+      <Button
+        type="submit"
+        variant="secondary"
+        className="flex gap-4 hover:bg-black hover:text-white"
+      >
+        <span className="text-xl font-medium">Вийти з кабінету</span>
+        <svg
+          width="44"
+          height="45"
+          viewBox="0 0 44 45"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+          className="fill-current"
+        >
+          <path
+            fillRule="evenodd"
+            clipRule="evenodd"
+            d="M17.7962 4.91651C16.5 6.06601 16.5 8.16885 16.5 12.3727V32.6273C16.5 36.8312 16.5 38.934 17.7962 40.0835C19.0923 41.233 21.0742 40.8883 25.0378 40.1972L29.3095 39.4528C33.6985 38.6865 35.893 38.3033 37.1965 36.6937C38.5 35.0822 38.5 32.7538 38.5 28.0953V16.9047C38.5 12.248 38.5 9.91968 37.1983 8.30818C35.893 6.69851 33.6967 6.31535 29.3077 5.55085L25.0397 4.80468C21.076 4.11351 19.0942 3.76885 17.798 4.91835M22 19.1432C22.759 19.1432 23.375 19.7867 23.375 20.5805V24.4195C23.375 25.2133 22.759 25.8568 22 25.8568C21.241 25.8568 20.625 25.2133 20.625 24.4195V20.5805C20.625 19.7867 21.241 19.1432 22 19.1432Z"
+          />
+          <path d="M13.8362 8.75C10.0632 8.7555 8.096 8.838 6.842 10.092C5.5 11.434 5.5 13.5937 5.5 17.9167V27.0833C5.5 31.4045 5.5 33.5642 6.842 34.908C8.096 36.1602 10.0632 36.2445 13.8362 36.25C13.75 35.106 13.75 33.786 13.75 32.3578V12.6422C13.75 11.2122 13.75 9.89217 13.8362 8.75Z" />
+        </svg>
+      </Button>
     </Form>
   );
 }

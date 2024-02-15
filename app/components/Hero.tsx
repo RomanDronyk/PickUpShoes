@@ -9,17 +9,17 @@ export function Hero({heroData}: {heroData: HomeHeroQuery}) {
   } = heroData;
   const mottoArr = JSON.parse(motto.value);
   return (
-    <div className="grid grid-cols-2">
-      <div className="flex flex-col justify-center items-center  bg-heroBg w-full h-full bg-contain bg-center bg-no-repeat">
-        <div>
-          <h1 className="font-semibold text-[27px] opacity-45">
+    <div className="grid md:grid-cols-2 grid-cols-1 w-full">
+      <div className="flex flex-col justify-center items-center  bg-heroBg w-full h-full md:bg-contain bg-cover bg-center bg-no-repeat">
+        <div className="w-full flex flex-col items-center justify-center pt-10 max-[390px]:px-5">
+          <h1 className="font-semibold text-[27px] md:text-2xl xl:text-[27px] opacity-45">
             {heading.value}
           </h1>
           <div className="mt-7">
-            <span className="inline-flex bg-white rounded-[30px] px-5 font-semibold text-black text-[42px] mr-3">
+            <span className="inline-flex bg-white rounded-[30px] px-5 font-semibold text-black  text-[26px]  md:text-3xl lg:text-4xl  xl:text-[42px] mr-3">
               Виділяйся
             </span>
-            <span className="text-accent font-semibold text-[42px]">
+            <span className="text-accent font-semibold text-[26px]  md:text-3xl lg:text-4xl xl:text-[42px]">
               з комфортом
             </span>
           </div>
@@ -39,7 +39,9 @@ export function Hero({heroData}: {heroData: HomeHeroQuery}) {
                       fill="#B80000"
                     />
                   </svg>
-                  <span className="font-semibold text-xl">{motto}</span>
+                  <span className="font-semibold text-lg   md:text-lg xl:text-xl">
+                    {motto}
+                  </span>
                 </li>
               ))}
             </ul>
@@ -47,10 +49,12 @@ export function Hero({heroData}: {heroData: HomeHeroQuery}) {
           <div className="mt-10">
             <Button
               asChild
-              className="flex items-center gap-[15px] bg-gradient-to-r from-[#F50606] to-[#B80000] text-white rounded-[60px] py-[9px] h-[60px] px-[85px] max-w-[370px]"
+              className="flex items-center gap-[15px] bg-gradient-to-r from-[#F50606] to-[#B80000] text-white rounded-[60px] py-[9px] h-[55px] xl:h-[60px] px-[85px] max-w-[370px]"
             >
               <Link prefetch="intent" to="/collections">
-                <span className="font-medium text-[28px]">До каталогу</span>
+                <span className="font-medium text-xl  md:text-2xl xl:text-[28px]">
+                  До каталогу
+                </span>
                 <svg
                   width="23"
                   height="23"

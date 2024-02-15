@@ -1,4 +1,4 @@
-import {Await, NavLink, useLocation} from '@remix-run/react';
+import {Await, NavLink, Link, useLocation} from '@remix-run/react';
 import {Suspense, useState, useEffect} from 'react';
 import type {HeaderQuery} from 'storefrontapi.generated';
 import type {LayoutProps} from './Layout';
@@ -8,12 +8,17 @@ import {
   NavigationMenuList,
   NavigationMenuItem,
   NavigationMenuTrigger,
+  NavigationMenuContent,
+  NavigationMenuLink,
 } from './ui/navigation-menu';
 import {PredictiveSearchForm} from './Search';
 import {Button} from './ui/button';
 import {DropDownCart} from './DropdownCart';
+import {MobileMenu} from './MobileMenu';
+import {isMobile} from 'react-device-detect';
+import {MobileCart} from './MobileCart';
 
-type HeaderProps = Pick<
+export type HeaderProps = Pick<
   LayoutProps,
   'header' | 'cart' | 'isLoggedIn' | 'favorites'
 >;
@@ -22,46 +27,72 @@ export function Header({header, isLoggedIn, cart}: HeaderProps) {
   const [cartShow, setCartShow] = useState(false);
   const {shop, menu} = header;
   const {key} = useLocation();
-
   const handleShowCart = (value?: boolean) => {
     setCartShow((prevState) => (value !== undefined ? value : !prevState));
   };
-
   useEffect(() => {
     if (cartShow) setCartShow(false);
   }, [key]);
 
   return (
-    <header className="px-24">
+    <header className="lg:px-24 px-5">
       <div className=" flex justify-between pt-[18px] pb-[25px] border-b border-black/20 relative">
-        <NavLink prefetch="intent" to="/" style={activeLinkStyle} end>
-          <img src={shop.brand?.logo?.image?.url} alt="PickUpShoes" />
-        </NavLink>
+        <div className="flex items-center gap-x-[35px]">
+          <MobileMenu menu={menu} />
+          <NavLink prefetch="intent" to="/" className="flex items-center">
+            <img src={shop.brand?.logo?.image?.url} alt="PickUpShoes" />
+          </NavLink>
+        </div>
         <HeaderMenu
           menu={menu}
           primaryDomainUrl={header.shop.primaryDomain.url}
         />
-        <div className="relative w-[427px]">
-          <PredictiveSearchForm />
+        <div className="relative hidden md:w-[427px]">
+          <PredictiveSearchForm
+            isMobile={isMobile}
+            brandLogo={shop?.brand?.logo?.image}
+          />
         </div>
-        <nav className="header-ctas" role="navigation">
-          <Suspense>
-            <Await resolve={cart}>
-              {(cart) => {
-                if (!cart)
-                  return <CartBadge count={0} handleShow={handleShowCart} />;
-                return (
-                  <CartBadge
-                    count={cart.totalQuantity}
-                    handleShow={handleShowCart}
-                  />
-                );
-              }}
-            </Await>
-          </Suspense>
-          <Button variant="ghost" asChild>
+        <nav className="header-ctas flex gap-x-[15px]" role="navigation">
+          <PredictiveSearchForm
+            isMobile={isMobile}
+            brandLogo={shop?.brand?.logo?.image}
+          />
+          {!isMobile && (
+            <>
+              <Suspense>
+                <Await resolve={cart}>
+                  {(cart) => {
+                    if (!cart)
+                      return (
+                        <CartBadge count={0} handleShow={handleShowCart} />
+                      );
+                    return (
+                      <CartBadge
+                        count={cart.totalQuantity}
+                        handleShow={handleShowCart}
+                      />
+                    );
+                  }}
+                </Await>
+              </Suspense>
+            </>
+          )}
+          {isMobile && (
+            <Suspense>
+              <Await resolve={cart}>
+                {(cart) => {
+                  if (!cart) return <MobileCart cart={cart} empty={true} />;
+                  return <MobileCart cart={cart} />;
+                }}
+              </Await>
+            </Suspense>
+          )}
+
+          <Button variant="ghost" asChild className="p-0">
             <NavLink prefetch="intent" to="/account" style={activeLinkStyle}>
               <svg
+                className="max-sm:w-5 max-sm:h-5"
                 width="32"
                 height="32"
                 viewBox="0 0 32 32"
@@ -86,17 +117,19 @@ export function Header({header, isLoggedIn, cart}: HeaderProps) {
             </NavLink>
           </Button>
         </nav>
-        <Suspense>
-          <Await resolve={cart}>
-            {(cart) => (
-              <DropDownCart
-                cart={cart}
-                active={cartShow}
-                handleShow={() => handleShowCart()}
-              />
-            )}
-          </Await>
-        </Suspense>
+        {!isMobile && (
+          <Suspense>
+            <Await resolve={cart}>
+              {(cart) => (
+                <DropDownCart
+                  cart={cart}
+                  active={cartShow}
+                  handleShow={() => handleShowCart()}
+                />
+              )}
+            </Await>
+          </Suspense>
+        )}
       </div>
     </header>
   );
@@ -110,7 +143,11 @@ function CartBadge({
   handleShow: () => void;
 }) {
   return (
-    <Button variant="ghost" className="relative" onClick={() => handleShow()}>
+    <Button
+      variant="ghost"
+      className="relative p-0 max-sm:w-[23px] max-sm:h-[18px]"
+      onClick={() => handleShow()}
+    >
       <svg
         width="32"
         height="32"
@@ -162,11 +199,10 @@ export function HeaderMenu({
 }) {
   const {publicStoreDomain} = useRootLoaderData();
   return (
-    <NavigationMenu>
+    <NavigationMenu className="md:flex hidden">
       <NavigationMenuList>
         {menu?.items.map((item) => {
           if (!item.url) return null;
-
           // if the url is internal, we strip the domain
           const url =
             item.url.includes('myshopify.com') ||
@@ -177,10 +213,33 @@ export function HeaderMenu({
           return (
             <NavigationMenuItem key={item.id}>
               <NavigationMenuTrigger className="font-normal">
-                <NavLink prefetch="intent" to={url}>
-                  {item.title}
-                </NavLink>
+                {item.title}
               </NavigationMenuTrigger>
+              {item.items.length > 0 && (
+                <NavigationMenuContent>
+                  <ul className="flex py-[15px] px-[20px]  gap-x-[25px] gap-y-[15px] w-[390px] flex-wrap">
+                    {item.items.map((menuItem) => {
+                      const url =
+                        menuItem.url.includes('myshopify.com') ||
+                        menuItem.url.includes(publicStoreDomain) ||
+                        menuItem.url.includes(primaryDomainUrl)
+                          ? new URL(menuItem.url).pathname
+                          : menuItem.url;
+
+                      return (
+                        <li key={menuItem.id}>
+                          <NavigationMenuLink
+                            asChild
+                            className="text-base font-normal hover:underline"
+                          >
+                            <Link to={url}>{menuItem.title}</Link>
+                          </NavigationMenuLink>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </NavigationMenuContent>
+              )}
             </NavigationMenuItem>
           );
         })}
@@ -200,3 +259,5 @@ function activeLinkStyle({
     color: isPending ? 'grey' : 'black',
   };
 }
+
+function SubMenu() {}

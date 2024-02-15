@@ -13,14 +13,20 @@ export function Footer({menu: footerMenu, shop}: Footer) {
   const {menu, secondMenu} = footerMenu;
   return (
     <footer className="bg-black pt-[81px] text-placeholderText">
-      <div className="flex justify-between px-24">
+      <div className="flex md:flex justify-between lg:px-24  px-5 sm:px-12 md:flex-row flex-col sm:grid sm:grid-cols-2 sm:gap-x-[20px] sm:gap-y-[30px] gap-x-[20px] gap-y-[45px]">
         <div className="flex flex-col gap-4">
-          <img src={footerLogo} alt="PickUp shoes" className="w-60" />
+          <img
+            src={footerLogo}
+            alt="PickUp shoes"
+            className="lg:w-60 md:w-40 w-52"
+          />
           <SubscribeFooter />
         </div>
         <div className="contacts flex flex-col gap-6">
-          <h3 className="font-semibold text-[22px]">Контакти</h3>
-          <ul className="flex flex-col gap-4 text-lg">
+          <h3 className="font-semibold text-[22px] sm:text-xl lg:text-[22px]">
+            Контакти
+          </h3>
+          <ul className="flex flex-col gap-4 lg:text-lg sm:text-sm text-lg">
             <li>
               <span>
                 м. Коломия вул. Чорновола <br /> 28 | Водолій 3 поверх
@@ -85,7 +91,9 @@ function FooterMenu({
   const {publicStoreDomain} = useRootLoaderData();
   return (
     <div>
-      <h3 className="font-semibold text-[22px]">{menu?.title}</h3>
+      <h3 className="font-semibold text-[22px] md:text-xl lg:text-[22px]">
+        {menu?.title}
+      </h3>
       <nav className="flex flex-col gap-4 mt-6" role="navigation">
         {(menu || FALLBACK_FOOTER_MENU).items.map((item) => {
           if (!item.url) return null;
@@ -103,6 +111,7 @@ function FooterMenu({
               key={item.id}
               rel="noopener noreferrer"
               target="_blank"
+              className="sm:text-sm lg:text-base text-lg"
             >
               {item.title}
             </a>
