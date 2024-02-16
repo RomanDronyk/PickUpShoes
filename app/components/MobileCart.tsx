@@ -29,7 +29,7 @@ export function MobileCart({
 }) {
   const [open, setOpen] = useState(false);
   return (
-    <Drawer open={open} onOpenChange={setOpen} direction="bottom">
+    <Drawer open={open} onOpenChange={setOpen} direction="right">
       <DrawerTrigger asChild>
         <Button variant="link" className="relative p-0">
           <svg
@@ -87,7 +87,7 @@ export function MobileCart({
 function MobileCartDetail({cart}: {cart: CartApiQueryFragment | null}) {
   const cost = cart?.cost;
   return (
-    <div className="cart-detail">
+    <>
       <DrawerHeader className="flex flex-row justify-between items-center px-0">
         <span className="font-semibold text-[22px]">Корзина</span>
         <DrawerClose asChild>
@@ -101,39 +101,7 @@ function MobileCartDetail({cart}: {cart: CartApiQueryFragment | null}) {
           <MobileCartLine key={line.id} line={line} />
         ))}
       </div>
-      <DrawerFooter className="px-0 mt-5">
-        <div className="flex items-center justify-end font-bold text-black text-[22px]">
-          <span className="mr-4">Підсумок: </span>
-          <Money
-            as="span"
-            withoutCurrency
-            withoutTrailingZeros
-            data={cost?.totalAmount}
-          />
-          &nbsp;грн
-        </div>
-        <div className="dropdown-checkout flex items-center justify-end">
-          <Button asChild className="rounded-[60px] w-full">
-            <Link to={cart?.checkoutUrl} className="flex gap-5 ">
-              <span className="font-medium text-xl">Оформити замовлення</span>
-              <svg
-                className="max-[385px]:hidden"
-                width="23"
-                height="23"
-                viewBox="0 0 23 23"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M0 11.5C0 13.7745 0.674463 15.9979 1.9381 17.8891C3.20174 19.7802 4.99779 21.2542 7.09914 22.1246C9.20049 22.995 11.5128 23.2228 13.7435 22.779C15.9743 22.3353 18.0234 21.24 19.6317 19.6317C21.24 18.0234 22.3353 15.9743 22.779 13.7435C23.2228 11.5128 22.995 9.20049 22.1246 7.09914C21.2542 4.99779 19.7802 3.20174 17.8891 1.9381C15.9979 0.674463 13.7745 0 11.5 0C8.45001 0 5.52494 1.2116 3.36827 3.36827C1.2116 5.52494 0 8.45001 0 11.5ZM4.92857 10.6786H14.9089L10.3254 6.07282L11.5 4.92857L18.0714 11.5L11.5 18.0714L10.3254 16.8992L14.9089 12.3214H4.92857V10.6786Z"
-                  fill="white"
-                />
-              </svg>
-            </Link>
-          </Button>
-        </div>
-      </DrawerFooter>
-    </div>
+    </>
   );
 }
 
