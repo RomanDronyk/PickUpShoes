@@ -17,6 +17,9 @@ module.exports = {
       },
     },
     extend: {
+      content: {
+        colorFilterActive: 'url("../assets/images/color-arrow.svg")',
+      },
       fontFamily: {
         sans: ["'Gilroy'"],
       },
