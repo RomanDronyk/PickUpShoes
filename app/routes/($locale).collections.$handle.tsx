@@ -1,113 +1,86 @@
-import {json, redirect, type LoaderFunctionArgs} from '@shopify/remix-oxygen';
-import {useLoaderData, Link, type MetaFunction} from '@remix-run/react';
+import { Link, type MetaFunction, useLoaderData } from "@remix-run/react";
 import {
-  Pagination,
-  getPaginationVariables,
-  Image,
-  Money,
-} from '@shopify/hydrogen';
-import type {ProductItemFragment} from 'storefrontapi.generated';
-import {useVariantUrl} from '~/utils';
+	Image,
+	Money,
+	Pagination,
+	getPaginationVariables,
+} from "@shopify/hydrogen";
+import { type LoaderFunctionArgs, json, redirect } from "@shopify/remix-oxygen";
+import type {
+	ProductCardFragment,
+	ProductItemFragment,
+} from "storefrontapi.generated";
+import { ProductCard } from "~/components/ProductCard";
+import { ProductFilter } from "~/components/ProductFilter";
+import { useVariantUrl } from "~/utils";
 
-export const meta: MetaFunction<typeof loader> = ({data}) => {
-  return [{title: `Hydrogen | ${data?.collection.title ?? ''} Collection`}];
+export const meta: MetaFunction<typeof loader> = ({ data }) => {
+	return [{ title: `Hydrogen | ${data?.collection.title ?? ""} Collection` }];
 };
 
-export async function loader({request, params, context}: LoaderFunctionArgs) {
-  const {handle} = params;
-  const {storefront} = context;
-  const paginationVariables = getPaginationVariables(request, {
-    pageBy: 8,
-  });
+export async function loader({ request, params, context }: LoaderFunctionArgs) {
+	const { handle } = params;
+	const { storefront } = context;
+	const paginationVariables = getPaginationVariables(request, {
+		pageBy: 8,
+	});
 
-  if (!handle) {
-    return redirect('/collections');
-  }
+	if (!handle) {
+		return redirect("/collections");
+	}
 
-  const {collection} = await storefront.query(COLLECTION_QUERY, {
-    variables: {handle, ...paginationVariables},
-  });
+	const { collection } = await storefront.query(COLLECTION_QUERY, {
+		variables: { handle, ...paginationVariables },
+	});
 
-  if (!collection) {
-    throw new Response(`Collection ${handle} not found`, {
-      status: 404,
-    });
-  }
-  return json({collection});
+	if (!collection) {
+		throw new Response(`Collection ${handle} not found`, {
+			status: 404,
+		});
+	}
+	return json({ collection });
 }
 
 export default function Collection() {
-  const {collection} = useLoaderData<typeof loader>();
+	const { collection } = useLoaderData<typeof loader>();
 
-  return (
-    <div className="collection">
-      <h1>{collection.title}</h1>
-      <p className="collection-description">{collection.description}</p>
-      <Pagination connection={collection.products}>
-        {({nodes, isLoading, PreviousLink, NextLink}) => (
-          <>
-            <PreviousLink>
-              {isLoading ? 'Loading...' : <span>↑ Load previous</span>}
-            </PreviousLink>
-            <ProductsGrid products={nodes} />
-            <br />
-            <NextLink>
-              {isLoading ? 'Loading...' : <span>Load more ↓</span>}
-            </NextLink>
-          </>
-        )}
-      </Pagination>
-    </div>
-  );
+	return (
+		<div className="grid grid-cols-[1fr_minmax(auto,_1030px)] gap-x-5 w-full px-24 pt-[30px] mb-8">
+			<div className="sidebar w-[250px] h-full">
+				<ProductFilter />
+			</div>
+			<div className="items">
+				<div className="title">
+					<h1 className="font-medium text-[32px]">{collection.title}</h1>
+				</div>
+
+				<Pagination connection={collection.products}>
+					{({ nodes, isLoading, PreviousLink, NextLink }) => (
+						<>
+							<PreviousLink>
+								{isLoading ? "Loading..." : <span>↑ Load previous</span>}
+							</PreviousLink>
+							<ProductsGrid products={nodes} />
+							<br />
+							<NextLink>
+								{isLoading ? "Loading..." : <span>Load more ↓</span>}
+							</NextLink>
+						</>
+					)}
+				</Pagination>
+			</div>
+		</div>
+	);
 }
 
-function ProductsGrid({products}: {products: ProductItemFragment[]}) {
-  return (
-    <div className="products-grid">
-      {products.map((product, index) => {
-        return (
-          <ProductItem
-            key={product.id}
-            product={product}
-            loading={index < 8 ? 'eager' : undefined}
-          />
-        );
-      })}
-    </div>
-  );
-}
-
-function ProductItem({
-  product,
-  loading,
-}: {
-  product: ProductItemFragment;
-  loading?: 'eager' | 'lazy';
-}) {
-  const variant = product.variants.nodes[0];
-  const variantUrl = useVariantUrl(product.handle, variant.selectedOptions);
-  return (
-    <Link
-      className="product-item"
-      key={product.id}
-      prefetch="intent"
-      to={variantUrl}
-    >
-      {product.featuredImage && (
-        <Image
-          alt={product.featuredImage.altText || product.title}
-          aspectRatio="1/1"
-          data={product.featuredImage}
-          loading={loading}
-          sizes="(min-width: 45em) 400px, 100vw"
-        />
-      )}
-      <h4>{product.title}</h4>
-      <small>
-        <Money data={product.priceRange.minVariantPrice} />
-      </small>
-    </Link>
-  );
+function ProductsGrid({ products }: { products: ProductCardFragment[] }) {
+	return (
+		<div className="product-grid grid grid-cols-3 auto-rows-[minmax(50px,_380px)] gap-x-[10px] gap-y-10 mt-5">
+			{products.map((product, index) => {
+				return <ProductCard product={product} key={product.id} />;
+			})}
+		</div>
+	);
 }
 
 const PRODUCT_ITEM_FRAGMENT = `#graphql
@@ -126,11 +99,12 @@ const PRODUCT_ITEM_FRAGMENT = `#graphql
       width
       height
     }
+    options {
+      name
+      values
+    }
     priceRange {
       minVariantPrice {
-        ...MoneyProductItem
-      }
-      maxVariantPrice {
         ...MoneyProductItem
       }
     }
@@ -140,6 +114,13 @@ const PRODUCT_ITEM_FRAGMENT = `#graphql
           name
           value
         }
+        price {
+          amount
+        }
+        compareAtPrice {
+          amount
+        }
+
       }
     }
   }
