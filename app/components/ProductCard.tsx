@@ -4,15 +4,13 @@ import {
   type VariantOption,
   VariantSelector,
 } from '@shopify/hydrogen';
-import {useState} from 'react';
 import {cn} from '~/lib/utils';
 
 import {Link} from '@remix-run/react';
-import type {ProductCardFragment} from 'storefrontapi.generated';
+import type {ProductItemFragment} from 'storefrontapi.generated';
 import {useVariantUrl} from '~/utils';
 
-export function ProductCard({product}: {product: ProductCardFragment}) {
-  const [hovered, setHovered] = useState(false);
+export function ProductCard({product}: {product: ProductItemFragment}) {
   const variant = product.variants.nodes[0];
   const variantUrl = useVariantUrl(product.handle, variant.selectedOptions);
   const percentageAmount = variant.compareAtPrice

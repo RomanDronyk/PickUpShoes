@@ -6,10 +6,7 @@ import {
   getPaginationVariables,
 } from '@shopify/hydrogen';
 import {type LoaderFunctionArgs, json, redirect} from '@shopify/remix-oxygen';
-import type {
-  ProductCardFragment,
-  ProductItemFragment,
-} from 'storefrontapi.generated';
+import type {ProductItemFragment} from 'storefrontapi.generated';
 import {ProductCard} from '~/components/ProductCard';
 import {ProductFilter} from '~/components/ProductFilter';
 import {useVariantUrl} from '~/utils';
@@ -74,7 +71,7 @@ export default function Collection() {
   );
 }
 
-function ProductsGrid({products}: {products: ProductCardFragment[]}) {
+function ProductsGrid({products}: {products: ProductItemFragment[]}) {
   return (
     <div className="product-grid grid md:grid-cols-3 xl:grid-cols-5 grid-cols-2 md:auto-rows-[minmax(50px,_450px)] gap-x-[20px] gap-y-10 mt-5">
       {products.map((product, index) => {
