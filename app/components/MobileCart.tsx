@@ -31,7 +31,7 @@ export function MobileCart({
   return (
     <Drawer open={open} onOpenChange={setOpen} direction="right">
       <DrawerTrigger asChild>
-        <Button variant="link" className="relative p-0">
+        <Button variant="ghost" className="relative p-0">
           <svg
             className="max-sm:w-5 max-sm:h-5"
             width="32"

@@ -232,7 +232,7 @@ function PriceFilter({min = 0, max = 0}: {min: number; max: number}) {
     </div>
   );
 }
-
+//create URL for sort products
 function getSortLink(
   sort: SortParam | string,
   params: URLSearchParams,
@@ -241,6 +241,7 @@ function getSortLink(
   params.set('sort', sort);
   return `${location.pathname}?${params.toString()}`;
 }
+// Sort menu component
 const sortMenu: {value: string; label: string}[] = [
   {
     label: 'Популярністю',

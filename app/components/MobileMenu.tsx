@@ -15,7 +15,7 @@ export function MobileMenu({menu}: {menu: HeaderProps['header']['menu']}) {
   return (
     <Drawer open={open} onOpenChange={setOpen} direction="bottom">
       <DrawerTrigger asChild className="md:hidden">
-        <Button variant="link" className="p-0">
+        <Button variant="ghost" className="p-0">
           <svg
             width="35"
             height="21"
