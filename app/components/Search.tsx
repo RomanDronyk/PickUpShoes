@@ -299,7 +299,7 @@ export function PredictiveSearchForm({
     return (
       <Drawer open={mobileOpen} onOpenChange={setMobileOpen}>
         <DrawerTrigger asChild>
-          <Button variant="link" className="p-0">
+          <Button variant="ghost" className="p-0">
             <svg
               width="15"
               height="16"

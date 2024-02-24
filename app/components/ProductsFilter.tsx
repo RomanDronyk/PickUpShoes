@@ -1,19 +1,43 @@
-import {useState} from 'react';
+import {useState, useEffect} from 'react';
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from './ui/accordion';
+import {Popover, PopoverTrigger, PopoverContent} from './ui/popover';
+import {Command, CommandItem, CommandGroup} from './ui/command';
 import {Input} from './ui/input';
 import {Slider} from './ui/slider';
 import {ToggleGroup, ToggleGroupItem} from './ui/toggle-group';
+import {
+  useSearchParams,
+  useLocation,
+  useNavigate,
+  type Location,
+} from '@remix-run/react';
+import type {
+  Filter,
+  ProductFilter,
+} from '@shopify/hydrogen/storefront-api-types';
+import type {SortParam} from '~/routes/($locale).collections.$handle';
+import {Button} from './ui/button';
+import {ChevronDown} from 'lucide-react';
 
-export function ProductFilter() {
+export function ProductsFilter({filters}: {filters: ProductFilter}) {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [priceRange, setPriceRange] = useState<number[]>([25, 75]);
+
+  console.log(filters);
   const priceValue = (value: number[]) => {
     setPriceRange(value);
   };
+
+  const setFilter = (value: string[]) => {
+    const searchStr = JSON.stringify(value);
+    setSearchParams({gender: searchStr});
+  };
+
   return (
     <div className="flex flex-col gap-6 border border-black/10 rounded-[20px] py-5 px-6 ">
       <div className="pb-6 border-b border-b-black/10 flex justify-between items-center">
@@ -32,38 +56,7 @@ export function ProductFilter() {
           />
         </svg>
       </div>
-      <div className="flex flex-col gap-[10px] pb-6 border-b border-b-black/10">
-        <div className="font-semibold text-xl mb-[10px]">
-          <span>Ціновий діапазон</span>
-        </div>
-        <div className="bg-input flex flex-row rounded-[40px] py-[5px]">
-          <div className="relative before:w-[1px] before:h-full before:bg-black before:right-0 before:block before:absolute">
-            <Input
-              defaultValue={`${priceRange[0]} грн`}
-              value={`${priceRange[0]} грн`}
-              type="text"
-              className="text-center h-5 "
-              readOnly
-            />
-          </div>
-          <div>
-            <Input
-              defaultValue={`${priceRange[1]} грн`}
-              type="text"
-              value={`${priceRange[1]} грн`}
-              className="text-center h-5"
-              readOnly
-            />
-          </div>
-        </div>
-        <Slider
-          onValueChange={priceValue}
-          minStepsBetweenThumbs={20}
-          defaultValue={[25, 75]}
-          max={100}
-          step={1}
-        />
-      </div>
+      <PriceFilter min={10} max={40} />
       <div className="pb-6">
         <Accordion type="single" collapsible className="w-full">
           <AccordionItem value="size">
@@ -77,6 +70,7 @@ export function ProductFilter() {
                 <ToggleGroup
                   type="multiple"
                   className="flex flex-wrap justify-start"
+                  onValueChange={setFilter}
                 >
                   <ToggleGroupItem
                     value="s"
@@ -195,5 +189,118 @@ export function ProductFilter() {
         </Accordion>
       </div>
     </div>
+  );
+}
+
+function FilterDraw() {
+  return <div className="flex flex-col "></div>;
+}
+
+function PriceFilter({min = 0, max = 0}: {min: number; max: number}) {
+  const [priceRange, setPriceRange] = useState([min, max]);
+
+  return (
+    <div className="flex flex-col gap-[10px] pb-6 border-b border-b-black/10">
+      <div className="font-semibold text-xl mb-[10px]">
+        <span>Ціновий діапазон</span>
+      </div>
+      <div className="bg-input flex flex-row rounded-[40px] py-[5px]">
+        <div className="relative before:w-[1px] before:h-full before:bg-black before:right-0 before:block before:absolute">
+          <Input
+            value={`${priceRange[0]} грн`}
+            type="text"
+            className="text-center h-5 "
+            readOnly={true}
+          />
+        </div>
+        <div>
+          <Input
+            value={`${priceRange[1]} грн`}
+            type="text"
+            className="text-center h-5"
+            readOnly={true}
+          />
+        </div>
+      </div>
+      <Slider
+        onValueChange={setPriceRange}
+        minStepsBetweenThumbs={10}
+        defaultValue={[min, max]}
+        max={max}
+        step={1}
+      />
+    </div>
+  );
+}
+
+function getSortLink(
+  sort: SortParam | string,
+  params: URLSearchParams,
+  location: Location,
+) {
+  params.set('sort', sort);
+  return `${location.pathname}?${params.toString()}`;
+}
+const sortMenu: {value: string; label: string}[] = [
+  {
+    label: 'Популярністю',
+    value: 'best-selling',
+  },
+  {
+    label: 'Ціною за спаданням',
+    value: 'price-high-low',
+  },
+  {
+    label: 'Ціною за зростанням',
+    value: 'price-low-high',
+  },
+];
+
+export function SortProducts() {
+  const [open, setOpen] = useState(false);
+  const [value, setValue] = useState('best-selling');
+  const [params] = useSearchParams();
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const handleSort = (newValue: SortParam | string) => {
+    setValue(newValue === value ? value : newValue);
+    setOpen(false);
+    navigate(getSortLink(newValue, params, location));
+  };
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button
+          variant="ghost"
+          role="combobox"
+          aria-expanded={open}
+          className="flex gap-[5px]"
+        >
+          <span className="text-black/60">Сортувати за: </span>
+          <span className="font-semibold text-base">
+            {sortMenu.find((item) => item.value === value)?.label}
+          </span>
+          <ChevronDown size={16} />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="p-2">
+        <Command>
+          <CommandGroup>
+            {sortMenu.map((item) => (
+              <CommandItem
+                className="font-semibold"
+                key={item.value}
+                value={item.value}
+                onSelect={handleSort}
+              >
+                {item.label}
+              </CommandItem>
+            ))}
+          </CommandGroup>
+        </Command>
+      </PopoverContent>
+    </Popover>
   );
 }
