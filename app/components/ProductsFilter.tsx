@@ -6,6 +6,7 @@ import {
 } from '@remix-run/react';
 import type {
   Filter,
+  FilterValue,
   ProductFilter,
 } from '@shopify/hydrogen/storefront-api-types';
 import {useDebounce, useSearchParam} from 'react-use';
@@ -60,56 +61,7 @@ export function ProductsFilter({
         </svg>
       </div>
       <FilterDraw initial={initialFilters} filters={filters} />
-      <div className="pb-6">
-        <Accordion type="single" collapsible className="w-full">
-          <AccordionItem value="size">
-            <AccordionTrigger>
-              <div className="font-semibold text-xl mb-[10px]">
-                <span>Розмір (см)</span>
-              </div>
-            </AccordionTrigger>
-            <AccordionContent>
-              <div>
-                <ToggleGroup
-                  type="multiple"
-                  className="flex flex-wrap justify-start"
-                >
-                  <ToggleGroupItem
-                    value="36"
-                    className="data-[state=on]:bg-black data-[state=on]:text-white rounded-[62px] text-black/60  bg-[#F0F0F0] px-5 py-1"
-                  >
-                    <span>36</span>
-                  </ToggleGroupItem>
-                  <ToggleGroupItem
-                    value="38"
-                    className="data-[state=on]:bg-black data-[state=on]:text-white rounded-[62px] text-black/60  bg-[#F0F0F0] px-5 py-1"
-                  >
-                    <span>38</span>
-                  </ToggleGroupItem>
-                  <ToggleGroupItem
-                    value="37/5"
-                    className="data-[state=on]:bg-black data-[state=on]:text-white rounded-[62px] text-black/60  bg-[#F0F0F0] px-5 py-1"
-                  >
-                    <span>37/5</span>
-                  </ToggleGroupItem>
-                  <ToggleGroupItem
-                    value="46"
-                    className="data-[state=on]:bg-black data-[state=on]:text-white rounded-[62px] text-black/60  bg-[#F0F0F0] px-5 py-1"
-                  >
-                    <span>46</span>
-                  </ToggleGroupItem>
-                  <ToggleGroupItem
-                    value="48"
-                    className="data-[state=on]:bg-black data-[state=on]:text-white rounded-[62px] text-black/60  bg-[#F0F0F0] px-5 py-1"
-                  >
-                    <span>48</span>
-                  </ToggleGroupItem>
-                </ToggleGroup>
-              </div>
-            </AccordionContent>
-          </AccordionItem>
-        </Accordion>
-      </div>
+
       <div className="pb-6">
         <Accordion type="single" collapsible className="w-full">
           <AccordionItem value="color">
@@ -158,7 +110,7 @@ function FilterDraw({
   const initialRangePrice = JSON.parse(
     initialFilterPrice?.values[0].input as string,
   ) as {price: {min: number; max: number}};
-
+  // console.log(filters);
   const markup = (filter: Filter) => {
     switch (filter.type) {
       case 'PRICE_RANGE':
@@ -176,8 +128,11 @@ function FilterDraw({
             value={price}
           />
         );
+      case 'LIST':
+        if (filter.id !== 'filter.v.option.color') {
+          return <ListFilter filter={filter} />;
+        }
     }
-    return <div>div</div>;
   };
   return (
     <div className="flex flex-col">
@@ -203,7 +158,6 @@ function PriceFilter({
     [location.search],
   );
   const navigate = useNavigate();
-  const filtredValue = value ? [value.min, value.max] : [];
 
   useDebounce(
     () => {
@@ -256,6 +210,84 @@ function PriceFilter({
   );
 }
 
+function ListFilter({filter}: {filter: Filter}) {
+  const [value, setValue] = useState<string[]>([]);
+  const location = useLocation();
+  const params = useMemo(
+    () => new URLSearchParams(location.search),
+    [location.search],
+  );
+  const navigate = useNavigate();
+
+  //get prefix fitler
+  const exampleValue = filter.values[0];
+  const exampleValueObj = JSON.parse(
+    exampleValue.input as string,
+  ) as ProductFilter;
+  const filterKey = Object.keys(exampleValueObj)[0];
+
+  const handleChange = (value: string[]) => {
+    setValue(value);
+  };
+
+  const selectedItems = useMemo(
+    () => filter.values.filter((item) => value.includes(item.label)),
+    [value],
+  );
+
+  useDebounce(
+    () => {
+      if (value.length === 0) {
+        params.delete(`${FILTER_URL_PREFIX}${filterKey}`);
+        navigate(`${location.pathname}?${params.toString()}`);
+        return;
+      }
+
+      console.log(selectedItems, 'selected items');
+      const a = selectedItems.map((item) => {
+        return getFilterLink(item.input as string, params, location);
+      });
+      console.log(a, 'search string');
+      // const data = getFilterLink(selectedItems, params, location);
+      navigate(`${a[a.length - 1].toString()}`);
+    },
+    100,
+    [selectedItems],
+  );
+  return (
+    <div className="pb-6">
+      <Accordion type="single" collapsible className="w-full">
+        <AccordionItem value="size">
+          <AccordionTrigger>
+            <div className="font-semibold text-xl mb-[10px]">
+              <span>{filter.label}</span>
+            </div>
+          </AccordionTrigger>
+          <AccordionContent>
+            <div>
+              <ToggleGroup
+                type="multiple"
+                className="flex flex-wrap justify-start"
+                onValueChange={handleChange}
+              >
+                {filter.values.map((filterItem) => (
+                  <ToggleGroupItem
+                    key={filterItem.id}
+                    value={filterItem.label}
+                    className="data-[state=on]:bg-black data-[state=on]:text-white rounded-[62px] text-black/60  bg-[#F0F0F0] px-5 py-1"
+                  >
+                    <span>{filterItem.label}</span>
+                  </ToggleGroupItem>
+                ))}
+              </ToggleGroup>
+            </div>
+          </AccordionContent>
+        </AccordionItem>
+      </Accordion>
+    </div>
+  );
+}
+
 function filterInputToParams(
   rawInput: string | ProductFilter,
   params: URLSearchParams,
@@ -264,6 +296,7 @@ function filterInputToParams(
     typeof rawInput === 'string'
       ? (JSON.parse(rawInput) as ProductFilter)
       : rawInput;
+
   Object.entries(input).forEach(([key, value]) => {
     if (params.has(`${FILTER_URL_PREFIX}${key}`, JSON.stringify(value))) {
       return;
@@ -278,7 +311,18 @@ function filterInputToParams(
 
   return params;
 }
+function getFilterLink(
+  rawInput: string | ProductFilter,
+  params: URLSearchParams,
+  location: ReturnType<typeof useLocation>,
+) {
+  const paramsClone = new URLSearchParams(params);
+  // const paramsCloneDecode = decodeURIComponent(paramsClone as string);
+  console.log(paramsClone.getAll('filter.variantOption'));
 
+  const newParams = filterInputToParams(rawInput, paramsClone);
+  return `${location.pathname}?${newParams.toString()}`;
+}
 //create URL for sort products
 function getSortLink(
   sort: SortParam | string,
