@@ -1,37 +1,40 @@
-import {useState, useEffect} from 'react';
 import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from './ui/accordion';
-import {Popover, PopoverTrigger, PopoverContent} from './ui/popover';
-import {Command, CommandItem, CommandGroup} from './ui/command';
-import {Input} from './ui/input';
-import {Slider} from './ui/slider';
-import {ToggleGroup, ToggleGroupItem} from './ui/toggle-group';
-import {
-  useSearchParams,
   useLocation,
   useNavigate,
+  useSearchParams,
   type Location,
 } from '@remix-run/react';
 import type {
   Filter,
   ProductFilter,
 } from '@shopify/hydrogen/storefront-api-types';
-import type {SortParam} from '~/routes/($locale).collections.$handle';
-import {Button} from './ui/button';
+import {useDebounce, useSearchParam} from 'react-use';
 import {ChevronDown} from 'lucide-react';
+import {useMemo, useState} from 'react';
+import type {SortParam} from '~/routes/($locale).collections.$handle';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from './ui/accordion';
+import {Button} from './ui/button';
+import {Command, CommandGroup, CommandItem} from './ui/command';
+import {Input} from './ui/input';
+import {Popover, PopoverContent, PopoverTrigger} from './ui/popover';
+import {Slider} from './ui/slider';
+import {ToggleGroup, ToggleGroupItem} from './ui/toggle-group';
 
-export function ProductsFilter({filters}: {filters: ProductFilter}) {
+export const FILTER_URL_PREFIX = 'filter.';
+
+export function ProductsFilter({
+  initialFilters,
+  filters,
+}: {
+  filters: Filter[];
+  initialFilters: Filter[];
+}) {
   const [searchParams, setSearchParams] = useSearchParams();
-  const [priceRange, setPriceRange] = useState<number[]>([25, 75]);
-
-  console.log(filters);
-  const priceValue = (value: number[]) => {
-    setPriceRange(value);
-  };
 
   const setFilter = (value: string[]) => {
     const searchStr = JSON.stringify(value);
@@ -56,58 +59,7 @@ export function ProductsFilter({filters}: {filters: ProductFilter}) {
           />
         </svg>
       </div>
-      <PriceFilter min={10} max={40} />
-      <div className="pb-6">
-        <Accordion type="single" collapsible className="w-full">
-          <AccordionItem value="size">
-            <AccordionTrigger>
-              <div className="font-semibold text-xl mb-[10px]">
-                <span>Розмір</span>
-              </div>
-            </AccordionTrigger>
-            <AccordionContent>
-              <div>
-                <ToggleGroup
-                  type="multiple"
-                  className="flex flex-wrap justify-start"
-                  onValueChange={setFilter}
-                >
-                  <ToggleGroupItem
-                    value="s"
-                    className="data-[state=on]:bg-black data-[state=on]:text-white rounded-[62px] text-black/60  bg-[#F0F0F0] px-5 py-1"
-                  >
-                    <span>S</span>
-                  </ToggleGroupItem>
-                  <ToggleGroupItem
-                    value="m"
-                    className="data-[state=on]:bg-black data-[state=on]:text-white rounded-[62px] text-black/60  bg-[#F0F0F0] px-5 py-1"
-                  >
-                    <span>M</span>
-                  </ToggleGroupItem>
-                  <ToggleGroupItem
-                    value="medium"
-                    className="data-[state=on]:bg-black data-[state=on]:text-white rounded-[62px] text-black/60  bg-[#F0F0F0] px-5 py-1"
-                  >
-                    <span>Medium</span>
-                  </ToggleGroupItem>
-                  <ToggleGroupItem
-                    value="3xl"
-                    className="data-[state=on]:bg-black data-[state=on]:text-white rounded-[62px] text-black/60  bg-[#F0F0F0] px-5 py-1"
-                  >
-                    <span>3XL</span>
-                  </ToggleGroupItem>
-                  <ToggleGroupItem
-                    value="xxl"
-                    className="data-[state=on]:bg-black data-[state=on]:text-white rounded-[62px] text-black/60  bg-[#F0F0F0] px-5 py-1"
-                  >
-                    <span>XXL</span>
-                  </ToggleGroupItem>
-                </ToggleGroup>
-              </div>
-            </AccordionContent>
-          </AccordionItem>
-        </Accordion>
-      </div>
+      <FilterDraw initial={initialFilters} filters={filters} />
       <div className="pb-6">
         <Accordion type="single" collapsible className="w-full">
           <AccordionItem value="size">
@@ -192,13 +144,84 @@ export function ProductsFilter({filters}: {filters: ProductFilter}) {
   );
 }
 
-function FilterDraw() {
-  return <div className="flex flex-col "></div>;
+function FilterDraw({
+  filters,
+  initial,
+}: {
+  filters: Filter[];
+  initial: Filter[];
+}) {
+  const [params] = useSearchParams();
+  const initialFilterPrice = initial.find(
+    (item) => item.type === 'PRICE_RANGE',
+  );
+  const initialRangePrice = JSON.parse(
+    initialFilterPrice?.values[0].input as string,
+  ) as {price: {min: number; max: number}};
+
+  const markup = (filter: Filter) => {
+    switch (filter.type) {
+      case 'PRICE_RANGE':
+        const priceFilterValue = params.get(`${FILTER_URL_PREFIX}price`);
+        const price = priceFilterValue
+          ? (JSON.parse(priceFilterValue) as {min: number; max: number})
+          : {
+              min: initialRangePrice.price.min,
+              max: initialRangePrice.price.max,
+            };
+        return (
+          <PriceFilter
+            min={initialRangePrice.price.min}
+            max={initialRangePrice.price.max}
+            value={price}
+          />
+        );
+    }
+    return <div>div</div>;
+  };
+  return (
+    <div className="flex flex-col">
+      {filters.map((item, index) => markup(item))}
+    </div>
+  );
 }
 
-function PriceFilter({min = 0, max = 0}: {min: number; max: number}) {
-  const [priceRange, setPriceRange] = useState([min, max]);
+function PriceFilter({
+  min = 0,
+  max = 0,
+  value,
+}: {
+  min: number;
+  max: number;
+  value: {min: number; max: number};
+}) {
+  const initialRangeValue = value ? [value.min, value.max] : [min, max];
+  const [priceRange, setPriceRange] = useState(initialRangeValue);
+  const location = useLocation();
+  const params = useMemo(
+    () => new URLSearchParams(location.search),
+    [location.search],
+  );
+  const navigate = useNavigate();
+  const filtredValue = value ? [value.min, value.max] : [];
 
+  useDebounce(
+    () => {
+      if (priceRange[0] === min && priceRange[1] === max) {
+        params.delete(`${FILTER_URL_PREFIX}price`);
+        navigate(`${location.pathname}?${params.toString()}`);
+        return;
+      }
+      const price = {
+        ...(priceRange[0] === undefined ? {} : {min: priceRange[0]}),
+        ...(priceRange[1] === undefined ? {} : {max: priceRange[1]}),
+      };
+      const newParams = filterInputToParams({price}, params);
+      navigate(`${location.pathname}?${newParams.toString()}`);
+    },
+    500,
+    [priceRange],
+  );
   return (
     <div className="flex flex-col gap-[10px] pb-6 border-b border-b-black/10">
       <div className="font-semibold text-xl mb-[10px]">
@@ -225,13 +248,37 @@ function PriceFilter({min = 0, max = 0}: {min: number; max: number}) {
       <Slider
         onValueChange={setPriceRange}
         minStepsBetweenThumbs={10}
-        defaultValue={[min, max]}
+        defaultValue={initialRangeValue}
         max={max}
         step={1}
       />
     </div>
   );
 }
+
+function filterInputToParams(
+  rawInput: string | ProductFilter,
+  params: URLSearchParams,
+) {
+  const input =
+    typeof rawInput === 'string'
+      ? (JSON.parse(rawInput) as ProductFilter)
+      : rawInput;
+  Object.entries(input).forEach(([key, value]) => {
+    if (params.has(`${FILTER_URL_PREFIX}${key}`, JSON.stringify(value))) {
+      return;
+    }
+    if (key === 'price') {
+      // For price, we want to overwrite
+      params.set(`${FILTER_URL_PREFIX}${key}`, JSON.stringify(value));
+    } else {
+      params.append(`${FILTER_URL_PREFIX}${key}`, JSON.stringify(value));
+    }
+  });
+
+  return params;
+}
+
 //create URL for sort products
 function getSortLink(
   sort: SortParam | string,

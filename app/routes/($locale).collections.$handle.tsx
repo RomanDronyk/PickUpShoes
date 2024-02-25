@@ -1,10 +1,5 @@
 import {Link, useLoaderData, type MetaFunction} from '@remix-run/react';
-import {
-  Image,
-  Money,
-  Pagination,
-  getPaginationVariables,
-} from '@shopify/hydrogen';
+import {Pagination, getPaginationVariables} from '@shopify/hydrogen';
 import type {
   ProductFilter,
   Collection,
@@ -12,10 +7,10 @@ import type {
   Filter,
 } from '@shopify/hydrogen/storefront-api-types';
 import {json, redirect, type LoaderFunctionArgs} from '@shopify/remix-oxygen';
-import {CopyCheck} from 'lucide-react';
 import type {
   CollectionQuery,
   ProductItemFragment,
+  CollectionFiltersQuery,
 } from 'storefrontapi.generated';
 import {ProductCard} from '~/components/ProductCard';
 import {ProductsFilter, SortProducts} from '~/components/ProductsFilter';
@@ -63,7 +58,13 @@ export async function loader({request, params, context}: LoaderFunctionArgs) {
   if (!handle) {
     return redirect('/collections');
   }
-
+  const {collection: filtersCollection} =
+    await storefront.query<CollectionFiltersQuery>(FILTER_QUERY, {
+      variables: {
+        handle,
+        first: 1,
+      },
+    });
   const {collection} = await storefront.query<CollectionQuery>(
     COLLECTION_QUERY,
     {
@@ -84,18 +85,19 @@ export async function loader({request, params, context}: LoaderFunctionArgs) {
       status: 404,
     });
   }
-  return json({collection});
+  return json({collection, filtersCollection});
 }
 
 export default function Collection() {
-  const {collection} = useLoaderData<typeof loader>();
-  const {
-    products: {filters},
-  } = collection;
+  const {collection, filtersCollection} = useLoaderData<typeof loader>();
+
   return (
     <div className="grid lg:grid-cols-[minmax(auto,_300px)_minmax(auto,_1fr)] grid-cols-1 gap-x-5 w-full lg:px-24 px-12 pt-[30px] mb-8">
       <div className="sidebar w-[300px] h-full lg:block hidden">
-        <ProductsFilter filters={filters} />
+        <ProductsFilter
+          initialFilters={filtersCollection?.products.filters as Filter[]}
+          filters={collection.products.filters as Filter[]}
+        />
       </div>
       <div className="items">
         <div className="title flex items-center justify-between">
@@ -173,6 +175,31 @@ const PRODUCT_ITEM_FRAGMENT = `#graphql
       }
     }
   }
+` as const;
+
+const FILTER_QUERY = `#graphql
+  query CollectionFilters(
+    $handle: String! 
+    $country: CountryCode 
+    $language: LanguageCode
+    $first: Int
+  ) @inContext(country: $country, language: $language){
+    collection(handle: $handle){
+      products(first: $first){
+        filters {
+          id
+          label
+          type
+          values {
+            id
+            label
+            input
+            count
+          }
+        }
+      }
+    }
+}
 ` as const;
 
 // NOTE: https://shopify.dev/docs/api/storefront/2022-04/objects/collection
