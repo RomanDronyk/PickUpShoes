@@ -2,6 +2,7 @@ import {
   useLocation,
   useNavigate,
   useSearchParams,
+  Link,
   type Location,
 } from '@remix-run/react';
 import type {
@@ -27,21 +28,20 @@ import {Slider} from './ui/slider';
 import {ToggleGroup, ToggleGroupItem} from './ui/toggle-group';
 
 export const FILTER_URL_PREFIX = 'filter.';
-
+export type AppliedFilter = {
+  label: string;
+  filter: ProductFilter;
+  name?: string;
+};
 export function ProductsFilter({
-  initialFilters,
   filters,
+  initialFilters,
+  appliedFilters = [],
 }: {
   filters: Filter[];
   initialFilters: Filter[];
+  appliedFilters?: AppliedFilter[];
 }) {
-  const [searchParams, setSearchParams] = useSearchParams();
-
-  const setFilter = (value: string[]) => {
-    const searchStr = JSON.stringify(value);
-    setSearchParams({gender: searchStr});
-  };
-
   return (
     <div className="flex flex-col gap-6 border border-black/10 rounded-[20px] py-5 px-6 ">
       <div className="pb-6 border-b border-b-black/10 flex justify-between items-center">
@@ -60,8 +60,13 @@ export function ProductsFilter({
           />
         </svg>
       </div>
-      <FilterDraw initial={initialFilters} filters={filters} />
+      {appliedFilters.length > 0 && (
+        <div className="pb-6">
+          <AppliedFilters filters={appliedFilters} />
+        </div>
+      )}
 
+      <FilterDraw initial={initialFilters} filters={filters} />
       <div className="pb-6">
         <Accordion type="single" collapsible className="w-full">
           <AccordionItem value="color">
@@ -110,7 +115,6 @@ function FilterDraw({
   const initialRangePrice = JSON.parse(
     initialFilterPrice?.values[0].input as string,
   ) as {price: {min: number; max: number}};
-  // console.log(filters);
   const markup = (filter: Filter) => {
     switch (filter.type) {
       case 'PRICE_RANGE':
@@ -130,7 +134,7 @@ function FilterDraw({
         );
       case 'LIST':
         if (filter.id !== 'filter.v.option.color') {
-          return <ListFilter filter={filter} />;
+          return <ListFilter key={filter.id} filter={filter} />;
         }
     }
   };
@@ -218,9 +222,9 @@ function ListFilter({filter}: {filter: Filter}) {
     [location.search],
   );
   const navigate = useNavigate();
-
   //get prefix fitler
   const exampleValue = filter.values[0];
+
   const exampleValueObj = JSON.parse(
     exampleValue.input as string,
   ) as ProductFilter;
@@ -230,11 +234,6 @@ function ListFilter({filter}: {filter: Filter}) {
     setValue(value);
   };
 
-  const selectedItems = useMemo(
-    () => filter.values.filter((item) => value.includes(item.label)),
-    [value],
-  );
-
   useDebounce(
     () => {
       if (value.length === 0) {
@@ -242,21 +241,20 @@ function ListFilter({filter}: {filter: Filter}) {
         navigate(`${location.pathname}?${params.toString()}`);
         return;
       }
+      const selectedItems = filter.values.filter((item) =>
+        value.includes(item.id),
+      );
 
-      console.log(selectedItems, 'selected items');
-      const a = selectedItems.map((item) => {
-        return getFilterLink(item.input as string, params, location);
-      });
-      console.log(a, 'search string');
-      // const data = getFilterLink(selectedItems, params, location);
-      navigate(`${a[a.length - 1].toString()}`);
+      const b = getFilterLink(selectedItems, params, location);
+      navigate(`${b}`);
     },
-    100,
-    [selectedItems],
+    0,
+    [value],
   );
+
   return (
     <div className="pb-6">
-      <Accordion type="single" collapsible className="w-full">
+      <Accordion type="single" className="w-full">
         <AccordionItem value="size">
           <AccordionTrigger>
             <div className="font-semibold text-xl mb-[10px]">
@@ -273,7 +271,7 @@ function ListFilter({filter}: {filter: Filter}) {
                 {filter.values.map((filterItem) => (
                   <ToggleGroupItem
                     key={filterItem.id}
-                    value={filterItem.label}
+                    value={filterItem.id}
                     className="data-[state=on]:bg-black data-[state=on]:text-white rounded-[62px] text-black/60  bg-[#F0F0F0] px-5 py-1"
                   >
                     <span>{filterItem.label}</span>
@@ -287,7 +285,46 @@ function ListFilter({filter}: {filter: Filter}) {
     </div>
   );
 }
-
+function AppliedFilters({filters = []}: {filters: AppliedFilter[]}) {
+  const [params] = useSearchParams();
+  const location = useLocation();
+  return (
+    <div>
+      <div className="flex flex-wrap gap-2">
+        {filters.map((filter: AppliedFilter) => {
+          return (
+            <Button
+              key={`${filter.label}-${JSON.stringify(filter.filter)}`}
+              variant="ghost"
+              className="bg-[#535353] rounded-2xl px-[10px] py-[5px] text-white hover:bg-[#535353]/60"
+            >
+              <Link
+                to={getAppliedFilterLink(filter, params, location)}
+                className="flex gap-2 items-center text-[12px] "
+              >
+                {filter.name && <span>{filter.name}: </span>}
+                <span className="flex-grow">{filter.label}</span>
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 14 14"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <rect width="14" height="14" rx="7" fill="white" />
+                  <path
+                    d="M7.44971 6.9982L10.8265 3.6181C10.8861 3.55823 10.9195 3.47719 10.9194 3.39274C10.9194 3.30828 10.8859 3.22729 10.8262 3.1675C10.7068 3.0487 10.4965 3.0481 10.3759 3.1681L7.00001 6.5482L3.62291 3.1672C3.50291 3.0487 3.29261 3.0493 3.17321 3.1678C3.14358 3.19732 3.12012 3.23244 3.1042 3.27112C3.08828 3.3098 3.08023 3.35127 3.08051 3.3931C3.08051 3.4783 3.11351 3.5581 3.17321 3.6172L6.55001 6.9979L3.17351 10.3789C3.11393 10.4389 3.08056 10.52 3.08073 10.6045C3.0809 10.6891 3.11459 10.7701 3.17441 10.8298C3.23231 10.8871 3.31421 10.9201 3.39881 10.9201H3.40061C3.48551 10.9198 3.56741 10.8865 3.62411 10.8286L7.00001 7.4485L10.3771 10.8295C10.4368 10.8889 10.5166 10.9219 10.6012 10.9219C10.643 10.922 10.6845 10.9139 10.7232 10.8979C10.7618 10.882 10.797 10.8585 10.8265 10.8289C10.8561 10.7994 10.8796 10.7642 10.8955 10.7255C10.9115 10.6869 10.9196 10.6454 10.9195 10.6036C10.9195 10.5187 10.8865 10.4386 10.8265 10.3795L7.44971 6.9982Z"
+                    fill="#535353"
+                  />
+                </svg>
+              </Link>
+            </Button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
 function filterInputToParams(
   rawInput: string | ProductFilter,
   params: URLSearchParams,
@@ -312,16 +349,32 @@ function filterInputToParams(
   return params;
 }
 function getFilterLink(
-  rawInput: string | ProductFilter,
+  rawInput: FilterValue[],
   params: URLSearchParams,
   location: ReturnType<typeof useLocation>,
 ) {
   const paramsClone = new URLSearchParams(params);
-  // const paramsCloneDecode = decodeURIComponent(paramsClone as string);
-  console.log(paramsClone.getAll('filter.variantOption'));
+  rawInput.forEach((item) => {
+    const input =
+      typeof item.input === 'string'
+        ? (JSON.parse(item.input) as ProductFilter)
+        : rawInput;
+    Object.entries(input).forEach(([key, value]) => {
+      if (
+        paramsClone.has(`${FILTER_URL_PREFIX}${key}`, JSON.stringify(value))
+      ) {
+        return;
+      }
+      if (key === 'price') {
+        // For price, we want to overwrite
+        paramsClone.set(`${FILTER_URL_PREFIX}${key}`, JSON.stringify(value));
+      } else {
+        paramsClone.append(`${FILTER_URL_PREFIX}${key}`, JSON.stringify(value));
+      }
+    });
+  });
 
-  const newParams = filterInputToParams(rawInput, paramsClone);
-  return `${location.pathname}?${newParams.toString()}`;
+  return `${location.pathname}?${paramsClone.toString()}`;
 }
 //create URL for sort products
 function getSortLink(
@@ -395,4 +448,18 @@ export function SortProducts() {
       </PopoverContent>
     </Popover>
   );
+}
+
+function getAppliedFilterLink(
+  filter: AppliedFilter,
+  params: URLSearchParams,
+  location: Location,
+) {
+  const paramsClone = new URLSearchParams(params);
+
+  Object.entries(filter.filter).forEach(([key, value]) => {
+    const fullKey = FILTER_URL_PREFIX + key;
+    paramsClone.delete(fullKey, JSON.stringify(value));
+  });
+  return `${location.pathname}?${paramsClone.toString()}`;
 }

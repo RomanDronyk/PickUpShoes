@@ -14,7 +14,7 @@ import type {
 } from 'storefrontapi.generated';
 import {ProductCard} from '~/components/ProductCard';
 import {ProductsFilter, SortProducts} from '~/components/ProductsFilter';
-import {useVariantUrl} from '~/utils';
+import {useVariantUrl, parseAsCurrency} from '~/utils';
 
 export type SortParam =
   | 'price-low-high'
@@ -37,7 +37,6 @@ export async function loader({request, params, context}: LoaderFunctionArgs) {
   });
   const locale = context.storefront.i18n;
   const searchParams = new URL(request.url).searchParams;
-
   const {sortKey, reverse} = getSortValuesFromParam(
     searchParams.get('sort') as SortParam,
   );
@@ -85,18 +84,65 @@ export async function loader({request, params, context}: LoaderFunctionArgs) {
       status: 404,
     });
   }
-  return json({collection, filtersCollection});
+  const allFilterValues = collection.products.filters.flatMap(
+    (filter) => filter.values,
+  );
+  const appliedFilters = filters
+    .map((filter) => {
+      const foundValue = allFilterValues.find((value) => {
+        const valueInput = JSON.parse(value.input as string) as ProductFilter;
+        // special case for price, the user can enter something freeform (still a number, though)
+        // that may not make sense for the locale/currency.
+        // Basically just check if the price filter is applied at all.
+        if (valueInput.price && filter.price) {
+          return true;
+        }
+        return (
+          // This comparison should be okay as long as we're not manipulating the input we
+          // get from the API before using it as a URL param.
+          JSON.stringify(valueInput) === JSON.stringify(filter)
+        );
+      });
+      if (!foundValue) {
+        // eslint-disable-next-line no-console
+        console.error('Could not find filter value for filter', filter);
+        return null;
+      }
+      if (foundValue.id === 'filter.v.price') {
+        // Special case for price, we want to show the min and max values as the label.
+        const input = JSON.parse(foundValue.input as string) as ProductFilter;
+        const min = parseAsCurrency(input.price?.min ?? 0, locale);
+        const max = input.price?.max
+          ? parseAsCurrency(input.price.max, locale)
+          : '';
+        const label = min && max ? `${min} - ${max}` : 'Price';
+
+        return {
+          filter,
+          label,
+          name: foundValue.label,
+        };
+      }
+      return {
+        filter,
+        label: foundValue.label,
+      };
+    })
+    .filter((filter): filter is NonNullable<typeof filter> => filter !== null);
+
+  return json({collection, filtersCollection, appliedFilters});
 }
 
 export default function Collection() {
-  const {collection, filtersCollection} = useLoaderData<typeof loader>();
-
+  const {collection, filtersCollection, appliedFilters} =
+    useLoaderData<typeof loader>();
   return (
     <div className="grid lg:grid-cols-[minmax(auto,_300px)_minmax(auto,_1fr)] grid-cols-1 gap-x-5 w-full lg:px-24 px-12 pt-[30px] mb-8">
       <div className="sidebar w-[300px] h-full lg:block hidden">
         <ProductsFilter
           initialFilters={filtersCollection?.products.filters as Filter[]}
           filters={collection.products.filters as Filter[]}
+          appliedFilters={appliedFilters}
         />
       </div>
       <div className="items">
