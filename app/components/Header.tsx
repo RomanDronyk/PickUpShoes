@@ -1,22 +1,22 @@
-import {Await, NavLink, Link, useLocation} from '@remix-run/react';
-import {Suspense, useState, useEffect} from 'react';
+import {Await, Link, NavLink, useLocation} from '@remix-run/react';
+import {Suspense, useEffect, useState} from 'react';
+import {isMobile} from 'react-device-detect';
 import type {HeaderQuery} from 'storefrontapi.generated';
-import type {LayoutProps} from './Layout';
 import {useRootLoaderData} from '~/root';
-import {
-  NavigationMenu,
-  NavigationMenuList,
-  NavigationMenuItem,
-  NavigationMenuTrigger,
-  NavigationMenuContent,
-  NavigationMenuLink,
-} from './ui/navigation-menu';
+import {DropDownCart} from './DropdownCart';
+import type {LayoutProps} from './Layout';
+import {MobileCart} from './MobileCart';
+import {MobileMenu} from './MobileMenu';
 import {PredictiveSearchForm} from './Search';
 import {Button} from './ui/button';
-import {DropDownCart} from './DropdownCart';
-import {MobileMenu} from './MobileMenu';
-import {isMobile} from 'react-device-detect';
-import {MobileCart} from './MobileCart';
+import {
+  NavigationMenu,
+  NavigationMenuContent,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuList,
+  NavigationMenuTrigger,
+} from './ui/navigation-menu';
 
 export type HeaderProps = Pick<
   LayoutProps,
@@ -33,12 +33,11 @@ export function Header({header, isLoggedIn, cart}: HeaderProps) {
   useEffect(() => {
     if (cartShow) setCartShow(false);
   }, [key]);
-
   return (
     <header className="lg:px-24 px-5">
       <div className=" flex justify-between pt-[18px] pb-[25px] border-b border-black/20 relative">
         <div className="flex items-center gap-x-[35px]">
-          <MobileMenu menu={menu} />
+          <MobileMenu menu={menu} logo={shop.brand?.logo?.image.url} />
           <NavLink prefetch="intent" to="/" className="flex items-center">
             <img src={shop.brand?.logo?.image?.url} alt="PickUpShoes" />
           </NavLink>
@@ -53,7 +52,7 @@ export function Header({header, isLoggedIn, cart}: HeaderProps) {
             brandLogo={shop?.brand?.logo?.image}
           />
         </div>
-        <nav className="header-ctas flex gap-x-[15px]" role="navigation">
+        <nav className="header-ctas flex gap-x-[15px]">
           <PredictiveSearchForm
             isMobile={isMobile}
             brandLogo={shop?.brand?.logo?.image}
@@ -184,8 +183,8 @@ function CartBadge({
           strokeLinejoin="round"
         />
       </svg>
-      <span className="inline-flex rounded-full bg-bageRed text-white text-xs text-center px-[5px] py-[1px] absolute right-3 bottom-0">
-        {count}
+      <span className="inline-flex rounded-full bg-bageRed min-w-[16px] min-h-[16px] text-white text-xs text-center px-[5px] py-[1px] absolute right-0 bottom-1 leading-none items-center justify-center">
+        <span>{count}</span>
       </span>
     </Button>
   );

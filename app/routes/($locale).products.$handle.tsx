@@ -26,7 +26,8 @@ import type {
   SelectedOption,
 } from '@shopify/hydrogen/storefront-api-types';
 import {getVariantUrl} from '~/utils';
-
+import {Tabs, TabsList, TabsTrigger, TabsContent} from '~/components/ui/tabs';
+import {cn} from '~/lib/utils';
 export const meta: MetaFunction<typeof loader> = ({data}) => {
   return [{title: `Hydrogen | ${data?.product.title ?? ''}`}];
 };
@@ -119,15 +120,48 @@ function redirectToFirstVariant({
 
 export default function Product() {
   const {product, variants} = useLoaderData<typeof loader>();
-  const {selectedVariant} = product;
+  const {selectedVariant, descriptionHtml} = product;
+  console.log(product);
   return (
-    <div className="product">
-      <ProductImage image={selectedVariant?.image} />
-      <ProductMain
-        selectedVariant={selectedVariant}
-        product={product}
-        variants={variants}
-      />
+    <div className="product px-24 w-full pt-10">
+      <div className="grid grid-cols-2 gap-x-10">
+        <ProductImage image={selectedVariant?.image} />
+        <ProductMain
+          selectedVariant={selectedVariant}
+          product={product}
+          variants={variants}
+        />
+      </div>
+      <div className="product-info mt-[25px]">
+        <Tabs defaultValue="product-payment">
+          <TabsList className="w-full bg-none justify-between bg-[#fff] border-b border-b-black/60 rounded-none h-[69px]">
+            <TabsTrigger
+              value="product-info"
+              className="text-[20px] text-black py-[20px] data-[state=active]:border data-[state=active]:border-b data-[state=active]:border-b-black"
+            >
+              Опис
+            </TabsTrigger>
+            <TabsTrigger
+              value="product-payment"
+              className="text-[20px] text-black py-[20px]"
+            >
+              Оплата і доставка
+            </TabsTrigger>
+            <TabsTrigger
+              value="product-delivery"
+              className="text-[20px] text-black py-[20px]"
+            >
+              Обмін та повернення
+            </TabsTrigger>
+          </TabsList>
+          <TabsContent
+            value="product-info"
+            className="flex items-center justify-center"
+          >
+            <div dangerouslySetInnerHTML={{__html: descriptionHtml}} />
+          </TabsContent>
+        </Tabs>
+      </div>
     </div>
   );
 }
@@ -137,13 +171,13 @@ function ProductImage({image}: {image: ProductVariantFragment['image']}) {
     return <div className="product-image" />;
   }
   return (
-    <div className="product-image">
+    <div className="product-image rounded-[20px]">
       <Image
         alt={image.altText || 'Product Image'}
         aspectRatio="1/1"
         data={image}
         key={image.id}
-        sizes="(min-width: 45em) 50vw, 100vw"
+        className="rounded-[20px] max-h-[830px]"
       />
     </div>
   );
@@ -161,7 +195,15 @@ function ProductMain({
   const {title, descriptionHtml} = product;
   return (
     <div className="product-main">
-      <h1>{title}</h1>
+      <h1 className="font-bold text-[40px]">{title}</h1>
+      <div className="flex items-center gap-x-[16px] mb-[30px]">
+        <span className="font-semibold text-[20px] text-black/50">
+          {product.selectedVariant?.sku}
+        </span>
+        <span className="text-white text-[16px] flex items-center jusity-center px-[14px] py-[5px] bg-black rounded-3xl self-start">
+          {product.vendor}
+        </span>
+      </div>
       <ProductPrice selectedVariant={selectedVariant} />
       <br />
       <Suspense
@@ -186,14 +228,6 @@ function ProductMain({
           )}
         </Await>
       </Suspense>
-      <br />
-      <br />
-      <p>
-        <strong>Description</strong>
-      </p>
-      <br />
-      <div dangerouslySetInnerHTML={{__html: descriptionHtml}} />
-      <br />
     </div>
   );
 }
@@ -203,22 +237,31 @@ function ProductPrice({
 }: {
   selectedVariant: ProductFragment['selectedVariant'];
 }) {
+  const percentageAmount = selectedVariant.compareAtPrice
+    ? (
+        (1 -
+          parseInt(selectedVariant.price.amount) /
+            parseInt(selectedVariant.compareAtPrice.amount)) *
+        100
+      ).toFixed()
+    : null;
   return (
-    <div className="product-price">
-      {selectedVariant?.compareAtPrice ? (
-        <>
-          <p>Sale</p>
-          <br />
-          <div className="product-price-on-sale">
-            {selectedVariant ? <Money data={selectedVariant.price} /> : null}
-            <s>
-              <Money data={selectedVariant.compareAtPrice} />
-            </s>
-          </div>
-        </>
-      ) : (
-        selectedVariant?.price && <Money data={selectedVariant?.price} />
-      )}
+    <div className="product-price price flex gap-x-[10px] md:font-medium md:text-2xl text-lg">
+      <div className="price flex gap-x-[10px] md:font-medium md:text-[32px] text-lg">
+        <span className="font-extrabold text-[32px]">
+          {selectedVariant?.price.amount} грн
+        </span>
+        {selectedVariant?.compareAtPrice && (
+          <>
+            <span className="line-through text-[#B3B3B3]">
+              {selectedVariant?.compareAtPrice.amount}
+            </span>
+            <span className="flex self-center py-1 items-center justify-center rounded-xl px-3 bg-darkRed/10 font-medium text-[16px] text-destructive">
+              {percentageAmount}%
+            </span>
+          </>
+        )}
+      </div>
     </div>
   );
 }
@@ -258,7 +301,9 @@ function ProductForm({
             : []
         }
       >
-        {selectedVariant?.availableForSale ? 'Add to cart' : 'Sold out'}
+        {selectedVariant?.availableForSale
+          ? 'Додати в корзину'
+          : 'Немає в наявності'}
       </AddToCartButton>
     </div>
   );
@@ -267,21 +312,20 @@ function ProductForm({
 function ProductOptions({option}: {option: VariantOption}) {
   return (
     <div className="product-options" key={option.name}>
-      <h5>{option.name}</h5>
-      <div className="product-options-grid">
+      <h5 className="text-[16px] text-black/60 mb-4">{option.name}</h5>
+      <div className="product-options-grid flex gap-[10px] items-start">
         {option.values.map(({value, isAvailable, isActive, to}) => {
           return (
             <Link
-              className="product-options-item"
               key={option.name + value}
               prefetch="intent"
               preventScrollReset
               replace
               to={to}
-              style={{
-                border: isActive ? '1px solid black' : '1px solid transparent',
-                opacity: isAvailable ? 1 : 0.3,
-              }}
+              className={cn(
+                'text-black text-[16px] px-[18px] py-[15px] rounded-[22px] flex self-start bg-[#F0F0F0]',
+                isActive && 'text-white bg-black',
+              )}
             >
               {value}
             </Link>
@@ -307,7 +351,12 @@ function AddToCartButton({
   onClick?: () => void;
 }) {
   return (
-    <CartForm route="/cart" inputs={{lines}} action={CartForm.ACTIONS.LinesAdd}>
+    <CartForm
+      route="/cart"
+      inputs={{lines}}
+      action={CartForm.ACTIONS.LinesAdd}
+      className="border-t border-t-black/50"
+    >
       {(fetcher: FetcherWithComponents<any>) => (
         <>
           <input
@@ -319,6 +368,7 @@ function AddToCartButton({
             type="submit"
             onClick={onClick}
             disabled={disabled ?? fetcher.state !== 'idle'}
+            className="bg-black text-white font-medium text-[18px] w-full rounded-[62px] py-[15px]"
           >
             {children}
           </button>

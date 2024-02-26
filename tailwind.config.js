@@ -17,6 +17,9 @@ module.exports = {
       },
     },
     extend: {
+      content: {
+        colorFilterActive: 'url("../assets/images/color-arrow.svg")',
+      },
       fontFamily: {
         sans: ["'Gilroy'"],
       },
@@ -89,5 +92,8 @@ module.exports = {
       },
     },
   },
-  plugins: [require('tailwindcss-animate')],
+  plugins: [
+    require('tailwindcss-animate'),
+    require('@tailwindcss/container-queries'),
+  ],
 };

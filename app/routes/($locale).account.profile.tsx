@@ -389,19 +389,3 @@ const CUSTOMER_UPDATE_MUTATION = `#graphql
     }
   }
 ` as const;
-
-const CUSTOMER_UPDATE_PASS = `#graphql
-  mutation customerUpdate(
-    $customerAccessToken: String!,
-    $customer: CustomerUpdateInput!
-  ) @inContext(language: $language, country: $country) {
-    customerUpdate(customerAccessToken: $customerAccessToken, customer:$customer) {
-      customer {
-        customerAccessToken {
-          accessToken
-          expiresAt
-        }
-      }
-    }
-  }
-`;

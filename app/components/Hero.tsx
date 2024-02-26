@@ -10,8 +10,8 @@ export function Hero({heroData}: {heroData: HomeHeroQuery}) {
   const mottoArr = JSON.parse(motto.value);
   return (
     <div className="grid md:grid-cols-2 grid-cols-1 w-full">
-      <div className="flex flex-col justify-center items-center  bg-heroBg w-full h-full md:bg-contain bg-cover bg-center bg-no-repeat">
-        <div className="w-full flex flex-col items-center justify-center pt-10 max-[390px]:px-5">
+      <div className="flex flex-col justify-center items-center md:items-start  bg-heroBg w-full h-full md:bg-contain bg-cover bg-center bg-no-repeat">
+        <div className="w-full sm:pl-5 lg:pl-24 sm:w-auto flex flex-col items-center justify-center md:items-start pt-10 md:pt-0 max-[390px]:px-5">
           <h1 className="font-semibold text-[27px] md:text-2xl xl:text-[27px] opacity-45">
             {heading.value}
           </h1>
@@ -51,7 +51,7 @@ export function Hero({heroData}: {heroData: HomeHeroQuery}) {
               asChild
               className="flex items-center gap-[15px] bg-gradient-to-r from-[#F50606] to-[#B80000] text-white rounded-[60px] py-[9px] h-[55px] xl:h-[60px] px-[85px] max-w-[370px]"
             >
-              <Link prefetch="intent" to="/collections">
+              <Link prefetch="intent" to="collections/catalog">
                 <span className="font-medium text-xl  md:text-2xl xl:text-[28px]">
                   До каталогу
                 </span>
