@@ -174,9 +174,11 @@ export default function Login() {
   const error = data?.error || null;
   const loginError = data?.loginError || null;
   return (
-    <div className="contaier grid grid-cols-2 gap-x-10 px-24 my-10 w-full">
+    <div className="contaier grid lg:grid-cols-2 grid-cols-1 gap-y-10 gap-x-10 sm:px-24 px-[10px] my-10 w-full">
       <div className="register rounded-[20px] border border-black/10 p-6 ">
-        <h2 className="text-[32px]  font-medium mb-[25px]">Реєстрація</h2>
+        <h2 className="xl:text-[32px] text-[24px]  font-medium mb-[25px]">
+          Реєстрація
+        </h2>
         <Form method="POST">
           <fieldset className="flex flex-col gap-[10px]">
             <Input
@@ -226,7 +228,7 @@ export default function Login() {
           <Button
             name="formName"
             value={FormNames.REGISTER_FORM}
-            className="flex items-center justify-center gap-5 py-[14px] font-medium text-xl w-full rounded-[36px]"
+            className="flex items-center justify-center gap-5 py-[14px] font-medium sm:text-xl text-lg w-full rounded-[36px]"
           >
             Зареєструватись
             <svg
@@ -247,7 +249,7 @@ export default function Login() {
         </Form>
       </div>
       <div className="login rounded-[20px] border border-black/10 p-6 ">
-        <h2 className="font-medium text-[32px] mb-[25px]">
+        <h2 className="font-medium xl:text-[32px] text-[24px] mb-[25px]">
           Вхід для зареєстрованих користувачів
         </h2>
         <Form method="POST">
@@ -295,7 +297,7 @@ export default function Login() {
           <Button
             name="formName"
             value={FormNames.LOGIN_FORM}
-            className="flex items-center justify-center gap-5 py-[14px] font-medium text-xl  w-full rounded-[36px] mt-6"
+            className="flex items-center justify-center gap-5 py-[14px] font-medium xl:text-xl sm:text-lg text-base w-full rounded-[36px] mt-6"
           >
             Ввійти до особистого кабінету
             <svg

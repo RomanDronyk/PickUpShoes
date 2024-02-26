@@ -122,7 +122,7 @@ export default function AccountProfile() {
   const customer = action?.customer ?? account?.customer;
 
   return (
-    <div className="contaier grid grid-cols-2 gap-x-10 my-10 w-full">
+    <div className="contaier grid md:grid-cols-2 grid-cols-1 gap-y-10 gap-x-10 my-10 w-full">
       <div className="account-profile rounded-[20px] border border-black/10 p-6">
         <h2 className="text-[32px]  font-medium mb-[25px]">
           Особиста інформація

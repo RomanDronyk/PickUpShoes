@@ -62,6 +62,7 @@ export function Header({header, isLoggedIn, cart}: HeaderProps) {
               <Suspense>
                 <Await resolve={cart}>
                   {(cart) => {
+                    console.log(cart);
                     if (!cart)
                       return (
                         <CartBadge count={0} handleShow={handleShowCart} />
