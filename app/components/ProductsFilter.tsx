@@ -55,6 +55,7 @@ export function ProductsFilter({
     <div className="flex flex-col gap-6 border border-black/10 rounded-[20px] py-5 px-6 ">
       <div className="pb-6 border-b border-b-black/10 flex justify-between items-center">
         <div className="font-semibold text-xl">Фільтрація товару</div>
+
         <svg
           width="24"
           height="24"

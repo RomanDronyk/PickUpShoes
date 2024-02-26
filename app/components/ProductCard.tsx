@@ -24,7 +24,7 @@ export function ProductCard({product}: {product: ProductItemFragment}) {
   const sizeOptions = [product.options[0]];
   return (
     <div className="group/card">
-      <div className="relative overflow-hidden">
+      <div className="relative overflow-hiddn">
         {product.featuredImage && (
           <Link to={variantUrl} className="block">
             <Image

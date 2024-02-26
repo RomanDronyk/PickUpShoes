@@ -8,6 +8,7 @@ import type {
 } from 'storefrontapi.generated';
 
 import {Hero} from '~/components/Hero';
+import {MainCollections} from '~/components/MainCollections';
 
 export const meta: MetaFunction = () => {
   return [{title: 'PickupShoes | Головна'}];
@@ -15,19 +16,32 @@ export const meta: MetaFunction = () => {
 
 export async function loader({context}: LoaderFunctionArgs) {
   const {storefront} = context;
+
   const {collections} = await storefront.query(FEATURED_COLLECTION_QUERY);
   const featuredCollection = collections.nodes[0];
   const recommendedProducts = storefront.query(RECOMMENDED_PRODUCTS_QUERY);
 
   const heroCollection = await storefront.query(HERO_QUERY);
-  return defer({featuredCollection, recommendedProducts, heroCollection});
+  const mainCollections = await storefront.query(MAIN_COOLLECTIONS, {
+    variables: {
+      country: context.storefront.i18n.country,
+      language: context.storefront.i18n.language,
+    },
+  });
+  return defer({
+    featuredCollection,
+    recommendedProducts,
+    heroCollection,
+    mainCollections,
+  });
 }
 
 export default function Homepage() {
-  const {heroCollection} = useLoaderData<typeof loader>();
+  const {heroCollection, mainCollections} = useLoaderData<typeof loader>();
   return (
-    <div className="home w-full">
+    <div className="home w-full flex flex-col items-center justify-center gap-y-[45px]">
       <Hero heroData={heroCollection} />
+      <MainCollections collection={mainCollections} />
       {/* <RecommendedProducts products={data.recommendedProducts} /> */}
     </div>
   );
@@ -173,4 +187,41 @@ const HERO_QUERY = `#graphql
       }
     }
   }
+` as const;
+
+const MAIN_COOLLECTIONS = `#graphql
+  query MainCollections($country: CountryCode, $language: LanguageCode)
+    @inContext(country: $country, language: $language){
+     men:collection(handle: "mens-shoes") {
+    handle
+    title
+    image {
+      url
+      width
+      height
+      altText
+    }
+  }
+  women:collection(handle: "women-shoes") {
+    handle
+    title
+    image {
+      url
+      width
+      height
+      altText
+    }
+  }
+  clothes:collection(handle: "clothes") {
+    handle
+    title
+    image {
+      url
+      width
+      height
+      altText
+    }
+  }
+
+}
 ` as const;
