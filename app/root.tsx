@@ -75,7 +75,6 @@ export async function loader({context}: LoaderFunctionArgs) {
     session,
     customerAccessToken,
   );
-  console.log(session);
   // defer the cart query by not awaiting it
   const cartPromise = cart.get();
 

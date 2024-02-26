@@ -255,6 +255,35 @@ export type HomeHeroQuery = {
   }>;
 };
 
+export type MainCollectionsQueryVariables = StorefrontAPI.Exact<{
+  country?: StorefrontAPI.InputMaybe<StorefrontAPI.CountryCode>;
+  language?: StorefrontAPI.InputMaybe<StorefrontAPI.LanguageCode>;
+}>;
+
+export type MainCollectionsQuery = {
+  men?: StorefrontAPI.Maybe<
+    Pick<StorefrontAPI.Collection, 'handle' | 'title'> & {
+      image?: StorefrontAPI.Maybe<
+        Pick<StorefrontAPI.Image, 'url' | 'width' | 'height' | 'altText'>
+      >;
+    }
+  >;
+  women?: StorefrontAPI.Maybe<
+    Pick<StorefrontAPI.Collection, 'handle' | 'title'> & {
+      image?: StorefrontAPI.Maybe<
+        Pick<StorefrontAPI.Image, 'url' | 'width' | 'height' | 'altText'>
+      >;
+    }
+  >;
+  clothes?: StorefrontAPI.Maybe<
+    Pick<StorefrontAPI.Collection, 'handle' | 'title'> & {
+      image?: StorefrontAPI.Maybe<
+        Pick<StorefrontAPI.Image, 'url' | 'width' | 'height' | 'altText'>
+      >;
+    }
+  >;
+};
+
 export type CustomerAddressUpdateMutationVariables = StorefrontAPI.Exact<{
   address: StorefrontAPI.MailingAddressInput;
   customerAccessToken: StorefrontAPI.Scalars['String']['input'];
@@ -1804,6 +1833,10 @@ interface GeneratedQueryTypes {
   '#graphql\n  query HomeHero ($country: CountryCode, $language: LanguageCode)\n   @inContext(country: $country, language: $language) {\n    collection(handle: "home-page") {\n      heading: metafield(namespace: "hero", key: "title") {\n        value\n      }\n      banner: metafield(namespace: "hero", key: "image") {\n        value\n        reference {\n          ... on MediaImage {\n            id\n            image {\n              altText\n              width\n              height\n              url\n            }\n          }\n        }\n      }\n      motto: metafield(namespace: "hero", key: "motto") {\n        value\n      }\n    }\n  }\n': {
     return: HomeHeroQuery;
     variables: HomeHeroQueryVariables;
+  };
+  '#graphql\n  query MainCollections($country: CountryCode, $language: LanguageCode)\n    @inContext(country: $country, language: $language){\n     men:collection(handle: "mens-shoes") {\n    handle\n    title\n    image {\n      url\n      width\n      height\n      altText\n    }\n  }\n  women:collection(handle: "women-shoes") {\n    handle\n    title\n    image {\n      url\n      width\n      height\n      altText\n    }\n  }\n  clothes:collection(handle: "clothes") {\n    handle\n    title\n    image {\n      url\n      width\n      height\n      altText\n    }\n  }\n\n}\n': {
+    return: MainCollectionsQuery;
+    variables: MainCollectionsQueryVariables;
   };
   '#graphql\n  fragment OrderMoney on MoneyV2 {\n    amount\n    currencyCode\n  }\n  fragment AddressFull on MailingAddress {\n    address1\n    address2\n    city\n    company\n    country\n    countryCodeV2\n    firstName\n    formatted\n    id\n    lastName\n    name\n    phone\n    province\n    provinceCode\n    zip\n  }\n  fragment DiscountApplication on DiscountApplication {\n    value {\n      __typename\n      ... on MoneyV2 {\n        ...OrderMoney\n      }\n      ... on PricingPercentageValue {\n        percentage\n      }\n    }\n  }\n  fragment OrderLineProductVariant on ProductVariant {\n    id\n    image {\n      altText\n      height\n      url\n      id\n      width\n    }\n    price {\n      ...OrderMoney\n    }\n    product {\n      handle\n    }\n    sku\n    title\n  }\n  fragment OrderLineItemFull on OrderLineItem {\n    title\n    quantity\n    discountAllocations {\n      allocatedAmount {\n        ...OrderMoney\n      }\n      discountApplication {\n        ...DiscountApplication\n      }\n    }\n    originalTotalPrice {\n      ...OrderMoney\n    }\n    discountedTotalPrice {\n      ...OrderMoney\n    }\n    variant {\n      ...OrderLineProductVariant\n    }\n  }\n  fragment Order on Order {\n    id\n    name\n    orderNumber\n    statusUrl\n    processedAt\n    fulfillmentStatus\n    totalTaxV2 {\n      ...OrderMoney\n    }\n    totalPriceV2 {\n      ...OrderMoney\n    }\n    subtotalPriceV2 {\n      ...OrderMoney\n    }\n    shippingAddress {\n      ...AddressFull\n    }\n    discountApplications(first: 100) {\n      nodes {\n        ...DiscountApplication\n      }\n    }\n    lineItems(first: 100) {\n      nodes {\n        ...OrderLineItemFull\n      }\n    }\n  }\n  query Order(\n    $country: CountryCode\n    $language: LanguageCode\n    $orderId: ID!\n  ) @inContext(country: $country, language: $language) {\n    order: node(id: $orderId) {\n      ... on Order {\n        ...Order\n      }\n    }\n  }\n': {
     return: OrderQuery;
