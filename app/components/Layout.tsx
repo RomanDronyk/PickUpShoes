@@ -39,9 +39,10 @@ export function Layout({
       <AnimatePresence mode="popLayout" initial={false}>
         <motion.main
           key={useLocation().pathname}
-          initial={false}
-          animate={{x: '0', opacity: 1}}
-          exit={{x: '0%', opacity: 0}}
+          initial={{opacity: 0}}
+          animate={{opacity: 1}}
+          exit={{opacity: 0}}
+          transition={{type: 'spring'}}
           className="flex-auto items-start flex"
         >
           {children}
@@ -67,53 +68,5 @@ function CartAside({cart}: {cart: LayoutProps['cart']}) {
         </Await>
       </Suspense>
     </Aside>
-  );
-}
-
-function SearchAside() {
-  return (
-    <Aside id="search-aside" heading="SEARCH">
-      <div className="predictive-search">
-        <br />
-        <PredictiveSearchForm>
-          {({fetchResults, inputRef}) => (
-            <div>
-              <input
-                name="q"
-                onChange={fetchResults}
-                onFocus={fetchResults}
-                placeholder="Search"
-                ref={inputRef}
-                type="search"
-              />
-              &nbsp;
-              <button type="submit">Search</button>
-            </div>
-          )}
-        </PredictiveSearchForm>
-        <PredictiveSearchResults />
-      </div>
-    </Aside>
-  );
-}
-
-function MobileMenuAside({
-  menu,
-  shop,
-}: {
-  menu: HeaderQuery['menu'];
-  shop: HeaderQuery['shop'];
-}) {
-  return (
-    menu &&
-    shop?.primaryDomain?.url && (
-      <Aside id="mobile-menu-aside" heading="MENU">
-        <HeaderMenu
-          menu={menu}
-          viewport="mobile"
-          primaryDomainUrl={shop.primaryDomain.url}
-        />
-      </Aside>
-    )
   );
 }
