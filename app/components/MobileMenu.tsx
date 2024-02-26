@@ -5,17 +5,31 @@ import {
   AccordionTrigger,
   AccordionContent,
 } from './ui/accordion';
+import {
+  Sheet,
+  SheetClose,
+  SheetHeader,
+  SheetContent,
+  SheetTrigger,
+} from './ui/sheet';
 import {useState} from 'react';
 import type {HeaderProps} from './Header';
 import {Button} from './ui/button';
 import {Link} from '@remix-run/react';
 
-export function MobileMenu({menu}: {menu: HeaderProps['header']['menu']}) {
+export function MobileMenu({
+  menu,
+  logo,
+}: {
+  menu: HeaderProps['header']['menu'];
+  logo: string | undefined;
+}) {
   const [open, setOpen] = useState(false);
   return (
-    <Drawer open={open} onOpenChange={setOpen} direction="bottom">
-      <DrawerTrigger asChild className="md:hidden">
+    <Sheet>
+      <SheetTrigger asChild className="md:hidden">
         <Button variant="ghost" className="p-0">
+          {/* <Lottie style={style} animationData={burger} loop={true} /> */}
           <svg
             width="35"
             height="21"
@@ -32,8 +46,15 @@ export function MobileMenu({menu}: {menu: HeaderProps['header']['menu']}) {
             />
           </svg>
         </Button>
-      </DrawerTrigger>
-      <DrawerContent className="h-[90%] px-5">
+      </SheetTrigger>
+      <SheetContent side="left" className="sm:max-w-full w-full px-5">
+        <SheetHeader>
+          {logo && (
+            <Link to="/" className="mb-10">
+              <img src={logo} alt="Pick Up Shoes" />
+            </Link>
+          )}
+        </SheetHeader>
         <Accordion type="single" collapsible className="w-full">
           {menu?.items.map((menuItem) => (
             <AccordionItem
@@ -63,7 +84,7 @@ export function MobileMenu({menu}: {menu: HeaderProps['header']['menu']}) {
             </AccordionItem>
           ))}
         </Accordion>
-      </DrawerContent>
-    </Drawer>
+      </SheetContent>
+    </Sheet>
   );
 }

@@ -13,8 +13,14 @@ import type {
   CollectionFiltersQuery,
 } from 'storefrontapi.generated';
 import {ProductCard} from '~/components/ProductCard';
-import {ProductsFilter, SortProducts} from '~/components/ProductsFilter';
+import {
+  ProductsFilter,
+  SortProducts,
+  AppliedFilters,
+  MobileFilters,
+} from '~/components/ProductsFilter';
 import {useVariantUrl, parseAsCurrency} from '~/utils';
+import {isMobile} from 'react-device-detect';
 
 export type SortParam =
   | 'price-low-high'
@@ -137,7 +143,7 @@ export default function Collection() {
   const {collection, filtersCollection, appliedFilters} =
     useLoaderData<typeof loader>();
   return (
-    <div className="grid lg:grid-cols-[minmax(auto,_300px)_minmax(auto,_1fr)] grid-cols-1 gap-x-5 w-full lg:px-24 px-12 pt-[30px] mb-8">
+    <div className="grid lg:grid-cols-[minmax(auto,_300px)_minmax(auto,_1fr)] grid-cols-1 gap-x-5 w-full lg:px-24 md:px-12 px-[10px] pt-[30px] mb-8">
       <div className="sidebar w-[300px] h-full lg:block hidden">
         <ProductsFilter
           initialFilters={filtersCollection?.products.filters as Filter[]}
@@ -146,11 +152,20 @@ export default function Collection() {
         />
       </div>
       <div className="items">
-        <div className="title flex items-center justify-between">
-          <h1 className="font-medium text-[32px]">{collection.title}</h1>
-          <SortProducts />
+        <div className="title flex items-center justify-between mb-[10px]">
+          <h1 className="font-medium lg:text-[32px] text-[22px]">
+            {collection.title}
+          </h1>
+          {!isMobile ? (
+            <SortProducts />
+          ) : (
+            <MobileFilters
+              filters={collection.products.filters as Filter[]}
+              initialFilters={filtersCollection?.products.filters as Filter[]}
+            />
+          )}
         </div>
-
+        {isMobile && <AppliedFilters filters={appliedFilters} />}
         <Pagination connection={collection.products}>
           {({nodes, isLoading, PreviousLink, NextLink}) => (
             <>

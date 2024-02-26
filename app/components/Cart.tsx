@@ -99,6 +99,7 @@ function CartLineItem({
           <p>
             <strong>{product.title}</strong>
           </p>
+          <p></p>
         </Link>
         <CartLinePrice line={line} as="span" />
         <ul>

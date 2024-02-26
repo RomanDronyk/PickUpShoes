@@ -67,13 +67,17 @@ function DropDownCartDetail({cart}: {cart: CartApiQueryFragment | null}) {
     <div className="dropdown-detail">
       <div className="dropdown-table">
         <div className="dropdown-header grid grid-cols-12">
-          <div className="dropdown-title col-span-9">
+          <div className="dropdown-title  2xl:col-span-9 lg:col-span-4">
             <span className="font-semibold text-[26px] col-span-6">
               Корзина
             </span>
           </div>
-          <div className="text-xl text-center">Кількість</div>
-          <div className="text-xl text-center">Вартість</div>
+          <div className="text-xl text-center w-[130px] xl:block hidden">
+            Кількість
+          </div>
+          <div className="text-xl text-center w-[130px] xl:block hidden">
+            Вартість
+          </div>
         </div>
         <ul className="flex flex-col gap-4">
           {cart?.lines?.nodes.map((line) => (
@@ -121,8 +125,8 @@ function CartLineItem({line}: {line: DropDownCartLine}) {
   const {product, title, image, selectedOptions} = merchandise;
   const lineItemUrl = useVariantUrl(product.handle, selectedOptions);
   return (
-    <li key={id} className="grid grid-cols-12">
-      <div className="grid grid-cols-[70px_250px_110px] items-center gap-[14px] col-span-9">
+    <li key={id} className="xl:grid xl:grid-cols-12 flex justify-between">
+      <div className="grid grid-cols-[70px_250px_110px] items-center gap-[14px] 2xl:col-span-9 xl:col-span-8 col-span-7">
         {image && (
           <Image
             alt={title}
@@ -135,7 +139,9 @@ function CartLineItem({line}: {line: DropDownCartLine}) {
           />
         )}
         <Link prefetch="intent" to={lineItemUrl}>
-          <span className="font-semibold text-[22px]">{product.title}</span>
+          <span className="font-semibold lg:text-[22px] text-lg">
+            {product.title}
+          </span>
         </Link>
         <div className="">
           <ul>
@@ -148,7 +154,7 @@ function CartLineItem({line}: {line: DropDownCartLine}) {
           </ul>
         </div>
       </div>
-      <div className="grid grid-cols-3 col-span-3 gap-x-3">
+      <div className="xl:grid xl:grid-cols-[130px_130px_130px] xl:col-span-3 flex  gap-x-3">
         <CartLineQuantity line={line} />
         <CartLinePrice line={line} as="span" />
         <div className="flex items-center justify-center">
@@ -178,7 +184,7 @@ function CartLineQuantity({line}: {line: CartLine}) {
   const nextQuantity = Number((quantity + 1).toFixed(0));
 
   return (
-    <div className="flex self-center items-center justify-center gap-5 text-lg text-black bg-input rounded-[62px] px-5 py-2">
+    <div className="flex self-center items-center justify-center lg:gap-5 gap-3 text-lg text-black bg-input rounded-[62px] lg:px-5 px-2 py-1">
       <CartLineUpdateButton lines={[{id: lineId, quantity: prevQuantity}]}>
         <button
           aria-label="Зменшити кількість"
@@ -225,7 +231,7 @@ function CartLinePrice({
   }
 
   return (
-    <div className="self-center text-center font-semibold text-[22px]">
+    <div className="self-center text-center font-semibold lg:text-[22px] text-lg">
       <Money
         withoutTrailingZeros
         withoutCurrency
