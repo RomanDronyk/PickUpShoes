@@ -1,5 +1,7 @@
+import {ScrollArea} from '@radix-ui/react-scroll-area';
 import {Form, Link, NavLink, Outlet, useLoaderData} from '@remix-run/react';
 import {json, redirect, type LoaderFunctionArgs} from '@shopify/remix-oxygen';
+import {Scroll} from 'lucide-react';
 import type {CustomerFragment} from 'storefrontapi.generated';
 import {Button} from '~/components/ui/button';
 import {cn} from '~/lib/utils';
@@ -111,12 +113,16 @@ function AccountLayout({
     : 'Інформація про обліковий запис';
 
   return (
-    <div className="account px-24 pt-10 w-full">
-      <h1 className="text-[32px] font-medium">Особистий кабінет</h1>
-      <div className="flex justify-between items-center my-11">
+    <div className="account lg:px-24 sm:px-10 px-[10px] pt-10 w-full overflow-x-hidden">
+      <h1 className="md:text-[32px] sm:text-[28px] text-[22px] font-medium px-[10px] sm:px-0">
+        Особистий кабінет
+      </h1>
+      <div className="flex justify-between items-center flex-wrap my-11 sm:px-0 px-[10px] gap-[10px]">
         <div>
-          <h2 className="text-[32px] font-semibold">{heading}</h2>
-          <span className="font-medium text-2xl">
+          <h2 className="md:text-[32px] sm:text-[28px] text-[20px] font-semibold">
+            {heading}
+          </h2>
+          <span className="font-medium sm:text-2xl text-lg">
             Оберіть потрібний вам розділ
           </span>
         </div>
@@ -140,13 +146,16 @@ function AccountMenu() {
       ? 'bg-black text-white hover:bg-black hover:cursor-default'
       : '';
     return cn(
-      'text-xl text-black w-full text-center  rounded-t-[30px] py-4 transition-all ease hover:bg-input',
+      'text-xl text-black  px-[30px] text-center  w-full sm:w-auto  rounded-t-[30px] py-4 transition-all ease hover:bg-input',
       active,
     );
   }
 
   return (
-    <nav role="navigation" className="w-full flex justify-between gap-2">
+    <nav
+      role="navigation"
+      className="flex flex-wrap flex-row justify-between min-w-0 shrink-0 gap-2"
+    >
       <NavLink to="/account/profile" className={isActiveStyle}>
         Особиста інформація
       </NavLink>
@@ -168,7 +177,9 @@ function Logout() {
         variant="secondary"
         className="flex gap-4 hover:bg-black hover:text-white"
       >
-        <span className="text-xl font-medium">Вийти з кабінету</span>
+        <span className="sm:text-xl text-base font-medium">
+          Вийти з кабінету
+        </span>
         <svg
           width="44"
           height="45"

@@ -32,7 +32,6 @@ export function Layout({
   header,
   isLoggedIn,
 }: LayoutProps) {
-  console.log(cart);
   return (
     <div className="min-h-full flex flex-col">
       {header && <Header header={header} cart={cart} isLoggedIn={isLoggedIn} />}

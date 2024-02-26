@@ -106,6 +106,7 @@ function FilterDraw({
             };
         return (
           <PriceFilter
+            key={filter.id}
             min={initialRangePrice.price.min}
             max={initialRangePrice.price.max}
             value={price}
