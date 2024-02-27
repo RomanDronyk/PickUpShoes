@@ -1,33 +1,41 @@
-import {Suspense} from 'react';
-import {defer, redirect, type LoaderFunctionArgs} from '@shopify/remix-oxygen';
 import {
   Await,
   Link,
   useLoaderData,
-  type MetaFunction,
   type FetcherWithComponents,
+  type MetaFunction,
 } from '@remix-run/react';
-import type {
-  ProductFragment,
-  ProductVariantsQuery,
-  ProductVariantFragment,
-} from 'storefrontapi.generated';
-
-import {
-  Image,
-  Money,
-  VariantSelector,
-  type VariantOption,
-  getSelectedProductOptions,
-  CartForm,
-} from '@shopify/hydrogen';
+import {MediaFile} from '@shopify/hydrogen';
 import type {
   CartLineInput,
   SelectedOption,
 } from '@shopify/hydrogen/storefront-api-types';
-import {getVariantUrl} from '~/utils';
-import {Tabs, TabsList, TabsTrigger, TabsContent} from '~/components/ui/tabs';
+import {defer, redirect, type LoaderFunctionArgs} from '@shopify/remix-oxygen';
+import {Suspense, useState, useCallback, useEffect} from 'react';
+import type {
+  ProductFragment,
+  ProductVariantFragment,
+  ProductVariantsQuery,
+} from 'storefrontapi.generated';
+
+import {
+  CartForm,
+  Image,
+  Money,
+  VariantSelector,
+  getSelectedProductOptions,
+  type VariantOption,
+} from '@shopify/hydrogen';
+import {Tabs, TabsContent, TabsList, TabsTrigger} from '~/components/ui/tabs';
 import {cn} from '~/lib/utils';
+import {getVariantUrl} from '~/utils';
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  type CarouselApi,
+} from '~/components/ui/carousel';
+
 export const meta: MetaFunction<typeof loader> = ({data}) => {
   return [{title: `Hydrogen | ${data?.product.title ?? ''}`}];
 };
@@ -39,7 +47,10 @@ export const handle = {
 export async function loader({params, request, context}: LoaderFunctionArgs) {
   const {handle} = params;
   const {storefront} = context;
+  const url = new URL(request.url);
 
+  // Get the accept-language header
+  const acceptLang = request.headers.get('accept-language');
   const selectedOptions = getSelectedProductOptions(request).filter(
     (option) =>
       // Filter out Shopify predictive search query params
@@ -55,10 +66,13 @@ export async function loader({params, request, context}: LoaderFunctionArgs) {
   if (!handle) {
     throw new Error('Expected product handle to be defined');
   }
-
+  const locale = context.storefront.i18n;
   // await the query for the critical product data
   const {product} = await storefront.query(PRODUCT_QUERY, {
-    variables: {handle, selectedOptions},
+    variables: {
+      handle,
+      selectedOptions,
+    },
   });
 
   if (!product?.id) {
@@ -121,11 +135,11 @@ function redirectToFirstVariant({
 export default function Product() {
   const {product, variants} = useLoaderData<typeof loader>();
   const {selectedVariant, descriptionHtml} = product;
-  console.log(product);
   return (
     <div className="product px-24 w-full pt-10">
       <div className="grid grid-cols-2 gap-x-10">
-        <ProductImage image={selectedVariant?.image} />
+        <ProductGalery media={product.media} />
+        {/* <ProductImage image={selectedVariant?.image} /> */}
         <ProductMain
           selectedVariant={selectedVariant}
           product={product}
@@ -179,6 +193,66 @@ function ProductImage({image}: {image: ProductVariantFragment['image']}) {
         key={image.id}
         className="rounded-[20px] max-h-[830px]"
       />
+    </div>
+  );
+}
+
+function ProductGalery({media}: {media: ProductFragment['media']}) {
+  const [selectedIndex, setSelectedIndex] = useState<number | undefined>(0);
+  const [api, setApi] = useState<CarouselApi>();
+  const [thumbApi, setThumbApi] = useState<CarouselApi>();
+
+  const handleThumbClick = useCallback(
+    (index: number) => {
+      if (!api) return;
+      api?.scrollTo(index);
+    },
+    [api],
+  );
+
+  const onSelect = useCallback(() => {
+    if (!api) return;
+    setSelectedIndex(api.selectedScrollSnap());
+    thumbApi?.scrollTo(api.selectedScrollSnap());
+  }, [api, thumbApi, setSelectedIndex]);
+
+  useEffect(() => {
+    onSelect();
+    if (!api) return;
+    api.on('select', onSelect);
+  }, [api, onSelect]);
+
+  return (
+    <div className="grid grid-cols-[minmax(100px,_152px)_1fr] gap-x-[14px]">
+      <Carousel
+        setApi={setThumbApi}
+        opts={{containScroll: 'keepSnaps', dragFree: true}}
+        orientation="vertical"
+      >
+        <CarouselContent className="gap-y-[14px] mt-0max-w-[152px]">
+          {media.nodes.map((item, index) => (
+            <CarouselItem
+              key={item.id}
+              className={cn(
+                'max-w-[152px] roundced-[20px] pt-0',
+                index === selectedIndex && 'border border-black',
+              )}
+              onClick={() => handleThumbClick(index)}
+            >
+              <MediaFile data={item} className=" basis-1/2 rounded-[20px]" />
+            </CarouselItem>
+          ))}
+        </CarouselContent>
+      </Carousel>
+      <Carousel setApi={setApi} opts={{loop: true, skipSnaps: false}}>
+        <CarouselContent>
+          {media.nodes.map((item, index) => (
+            <CarouselItem key={item.id}>
+              <MediaFile data={item} className="rounded-[20px]" />
+            </CarouselItem>
+          ))}
+        </CarouselContent>
+      </Carousel>
     </div>
   );
 }
@@ -237,7 +311,7 @@ function ProductPrice({
 }: {
   selectedVariant: ProductFragment['selectedVariant'];
 }) {
-  const percentageAmount = selectedVariant.compareAtPrice
+  const percentageAmount = selectedVariant?.compareAtPrice
     ? (
         (1 -
           parseInt(selectedVariant.price.amount) /
@@ -332,7 +406,6 @@ function ProductOptions({option}: {option: VariantOption}) {
           );
         })}
       </div>
-      <br />
     </div>
   );
 }
@@ -351,30 +424,31 @@ function AddToCartButton({
   onClick?: () => void;
 }) {
   return (
-    <CartForm
-      route="/cart"
-      inputs={{lines}}
-      action={CartForm.ACTIONS.LinesAdd}
-      className="border-t border-t-black/50"
-    >
-      {(fetcher: FetcherWithComponents<any>) => (
-        <>
-          <input
-            name="analytics"
-            type="hidden"
-            value={JSON.stringify(analytics)}
-          />
-          <button
-            type="submit"
-            onClick={onClick}
-            disabled={disabled ?? fetcher.state !== 'idle'}
-            className="bg-black text-white font-medium text-[18px] w-full rounded-[62px] py-[15px]"
-          >
-            {children}
-          </button>
-        </>
-      )}
-    </CartForm>
+    <div className="border-t border-t-black/50">
+      <CartForm
+        route="/cart"
+        inputs={{lines}}
+        action={CartForm.ACTIONS.LinesAdd}
+      >
+        {(fetcher: FetcherWithComponents<any>) => (
+          <>
+            <input
+              name="analytics"
+              type="hidden"
+              value={JSON.stringify(analytics)}
+            />
+            <button
+              type="submit"
+              onClick={onClick}
+              disabled={disabled ?? fetcher.state !== 'idle'}
+              className="bg-black text-white font-medium text-[18px] w-full rounded-[62px] py-[15px]"
+            >
+              {children}
+            </button>
+          </>
+        )}
+      </CartForm>
+    </div>
   );
 }
 
@@ -394,6 +468,7 @@ const PRODUCT_VARIANT_FRAGMENT = `#graphql
       width
       height
     }
+    
     price {
       amount
       currencyCode
@@ -433,6 +508,23 @@ const PRODUCT_FRAGMENT = `#graphql
     variants(first: 1) {
       nodes {
         ...ProductVariant
+      }
+    }
+    media(first: 10) {
+      nodes {
+        ... on MediaImage {
+          __typename
+          id
+          previewImage {
+            url
+            id
+            height
+            width
+          }
+          image {
+            url
+          }
+        }
       }
     }
     seo {

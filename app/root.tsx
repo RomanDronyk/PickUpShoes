@@ -22,7 +22,6 @@ import favicon from '../public/favicon.svg';
 import {Layout} from '~/components/Layout';
 import styles from 'app/styles/tailwind.css';
 import vaulStyles from 'vaul/dist/index.css';
-
 /**
  * This is important to avoid re-fetching root queries on sub-navigations
  */
@@ -48,6 +47,7 @@ export function links() {
   return [
     {rel: 'stylesheet', href: styles},
     {rel: 'stylesheet', href: vaulStyles},
+
     {
       rel: 'preconnect',
       href: 'https://cdn.shopify.com',
