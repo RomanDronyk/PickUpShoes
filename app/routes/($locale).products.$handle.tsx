@@ -234,7 +234,7 @@ function ProductGalery({media}: {media: ProductFragment['media']}) {
             <CarouselItem
               key={item.id}
               className={cn(
-                'max-w-[152px] roundced-[20px] pt-0',
+                'max-w-[152px] rounded-[20px] pt-0',
                 index === selectedIndex && 'border border-black',
               )}
               onClick={() => handleThumbClick(index)}
