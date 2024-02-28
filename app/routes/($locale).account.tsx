@@ -1,4 +1,4 @@
-import {ScrollArea} from '@radix-ui/react-scroll-area';
+import {ScrollArea, ScrollBar} from '~/components/ui/scroll-area';
 import {Form, Link, NavLink, Outlet, useLoaderData} from '@remix-run/react';
 import {json, redirect, type LoaderFunctionArgs} from '@shopify/remix-oxygen';
 import {Scroll} from 'lucide-react';
@@ -146,26 +146,29 @@ function AccountMenu() {
       ? 'bg-black text-white hover:bg-black hover:cursor-default'
       : '';
     return cn(
-      'text-xl text-black  px-[30px] text-center  w-full sm:w-auto  rounded-t-[30px] py-4 transition-all ease hover:bg-input',
+      'text-xl shrink-0 text-black  px-[30px] text-center  w-3/4 sm:w-auto  rounded-t-[30px] py-4 transition-all ease hover:bg-input',
       active,
     );
   }
 
   return (
-    <nav
-      role="navigation"
-      className="flex flex-wrap flex-row justify-between min-w-0 shrink-0 gap-2"
-    >
-      <NavLink to="/account/profile" className={isActiveStyle}>
-        Особиста інформація
-      </NavLink>
-      <NavLink to="/account/orders" className={isActiveStyle}>
-        Історія замовлень
-      </NavLink>
-      {/* <NavLink to="/account/addresses" style={isActiveStyle}>
+    <ScrollArea>
+      <nav
+        role="navigation"
+        className="flex flex-row justify-between min-w-0 shrink-0 gap-2"
+      >
+        <NavLink to="/account/profile" className={isActiveStyle}>
+          Особиста інформація
+        </NavLink>
+        <NavLink to="/account/orders" className={isActiveStyle}>
+          Історія замовлень
+        </NavLink>
+        {/* <NavLink to="/account/addresses" style={isActiveStyle}>
         Addresses
       </NavLink> */}
-    </nav>
+      </nav>
+      <ScrollBar orientation="horizontal" />
+    </ScrollArea>
   );
 }
 
