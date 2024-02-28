@@ -38,6 +38,8 @@ import {
 import monoLogo from '../assets/images/mono.svg';
 import shopLogo from '../assets/images/pickUpLogo.png';
 import {ScrollArea, ScrollBar} from '~/components/ui/scroll-area';
+import {isMobile} from 'react-device-detect';
+import {useMedia} from 'react-use';
 
 export const meta: MetaFunction<typeof loader> = ({data}) => {
   return [{title: `Hydrogen | ${data?.product.title ?? ''}`}];
@@ -138,7 +140,6 @@ function redirectToFirstVariant({
 export default function Product() {
   const {product, variants} = useLoaderData<typeof loader>();
   const {selectedVariant, descriptionHtml} = product;
-  console.log(descriptionHtml);
   return (
     <div className="product lg:px-24 md:px-10 px-[10px] w-full pt-10">
       <div className="sm:grid sm:grid-cols-2 flex flex-col gap-y-5 gap-x-10">
@@ -356,6 +357,8 @@ function ProductGalery({media}: {media: ProductFragment['media']}) {
   const [api, setApi] = useState<CarouselApi>();
   const [thumbApi, setThumbApi] = useState<CarouselApi>();
 
+  const isWide = useMedia('(min-width:1280px)');
+
   const handleThumbClick = useCallback(
     (index: number) => {
       if (!api) return;
@@ -377,18 +380,21 @@ function ProductGalery({media}: {media: ProductFragment['media']}) {
   }, [api, onSelect]);
 
   return (
-    <div className="lg:grid lg:grid-cols-[minmax(70px,_152px)_minmax(70%,_1fr)] flex flex-col-reverse gap-y-5 gap-x-[14px]">
+    <div className="xl:grid xl:grid-cols-[minmax(70px,_152px)_minmax(80%,_1fr)] flex flex-col-reverse gap-y-5 gap-x-[14px]">
       <Carousel
         setApi={setThumbApi}
-        opts={{containScroll: 'keepSnaps', dragFree: true}}
-        orientation="vertical"
+        opts={{
+          containScroll: 'keepSnaps',
+          dragFree: true,
+        }}
+        orientation={isWide ? 'vertical' : 'horizontal'}
       >
         <CarouselContent className="gap-y-[14px] mt-0 max-w-[152px]">
           {media.nodes.map((item, index) => (
             <CarouselItem
               key={item.id}
               className={cn(
-                'max-w-[152px] rounded-[20px] pt-0',
+                'xl:max-w-[152px] max-w-[100px] w-full rounded-[20px] pt-0 pl-0 ml-4 xl:ml-0',
                 index === selectedIndex && 'border border-black',
               )}
               onClick={() => handleThumbClick(index)}
@@ -401,7 +407,7 @@ function ProductGalery({media}: {media: ProductFragment['media']}) {
                   },
                 }}
                 data={item}
-                className=" basis-1/2 rounded-[20px]"
+                className="w-full rounded-[20px]"
               />
             </CarouselItem>
           ))}
@@ -462,7 +468,7 @@ function ProductMain({
         }
       >
         <Await
-          errorElement="ВиникВиникла помилка при завантажені варіантів товаруі"
+          errorElement="Виникла помилка при завантажені варіантів товару"
           resolve={variants}
         >
           {(data) => (
