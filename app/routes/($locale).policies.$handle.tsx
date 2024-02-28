@@ -7,8 +7,15 @@ type SelectedPolicies = keyof Pick<
   'privacyPolicy' | 'shippingPolicy' | 'termsOfService' | 'refundPolicy'
 >;
 
+const PoliciesTitle: {[key: string]: string} = {
+  'refund-policy': 'Обмін та повернення',
+  'privacy-policy': 'Політика конфіденційності',
+  'contact-information': 'Про магазин',
+  'terms-of-service': 'Угода користувача',
+};
+
 export const meta: MetaFunction<typeof loader> = ({data}) => {
-  return [{title: `Hydrogen | ${data?.policy.title ?? ''}`}];
+  return [{title: `Pick Up Shoes | ${data?.policy.title ?? ''}`}];
 };
 
 export async function loader({params, context}: LoaderFunctionArgs) {
@@ -43,17 +50,15 @@ export async function loader({params, context}: LoaderFunctionArgs) {
 
 export default function Policy() {
   const {policy} = useLoaderData<typeof loader>();
-
   return (
-    <div className="policy">
-      <br />
-      <br />
-      <div>
-        <Link to="/policies">← Back to Policies</Link>
-      </div>
-      <br />
-      <h1>{policy.title}</h1>
-      <div dangerouslySetInnerHTML={{__html: policy.body}} />
+    <div className="policy px-24 mb-12">
+      <h1 className="font-bold text-2xl my-6">
+        {PoliciesTitle[policy.handle]}
+      </h1>
+      <div
+        dangerouslySetInnerHTML={{__html: policy.body}}
+        className="flex flex-col gap-4"
+      />
     </div>
   );
 }
