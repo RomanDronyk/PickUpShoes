@@ -37,6 +37,7 @@ import {
 } from '~/components/ui/carousel';
 import monoLogo from '../assets/images/mono.svg';
 import shopLogo from '../assets/images/pickUpLogo.png';
+import {ScrollArea, ScrollBar} from '~/components/ui/scroll-area';
 
 export const meta: MetaFunction<typeof loader> = ({data}) => {
   return [{title: `Hydrogen | ${data?.product.title ?? ''}`}];
@@ -157,34 +158,39 @@ function ProductTabs({description}: {description: string}) {
   return (
     <div className="product-info my-6">
       <Tabs defaultValue="product-info">
-        <TabsList className="w-full bg-none justify-between bg-[#fff]  rounded-none h-[69px]">
-          <TabsTrigger
-            value="product-info"
-            className="w-full text-[20px] text-black py-[19px] data-[state=active]:rounded-none data-[state=active]:border-b-[2px] data-[state=active]:border-b-black"
-          >
-            Опис
-          </TabsTrigger>
-          <TabsTrigger
-            value="product-payment"
-            className="w-full text-[20px] text-black py-[19px] data-[state=active]:rounded-none data-[state=active]:border-b-[2px] data-[state=active]:border-b-black"
-          >
-            Оплата і доставка
-          </TabsTrigger>
-          <TabsTrigger
-            value="product-delivery"
-            className="w-full text-[20px] text-black py-[19px] data-[state=active]:rounded-none data-[state=active]:border-b-[2px] data-[state=active]:border-b-black"
-          >
-            Обмін та повернення
-          </TabsTrigger>
-        </TabsList>
+        <ScrollArea className="no-scrollbar" aria-orientation="horizontal">
+          <TabsList className="w-full bg-none justify-between gap-3 sm:gap-0 bg-[#fff]  rounded-none h-[69px]">
+            <TabsTrigger
+              value="product-info"
+              className="w-full text-[20px] text-black py-[19px] data-[state=active]:rounded-none data-[state=active]:border-b-[2px] data-[state=active]:border-b-black"
+            >
+              Опис
+            </TabsTrigger>
+            <TabsTrigger
+              value="product-payment"
+              className="w-full text-[20px] text-black py-[19px] data-[state=active]:rounded-none data-[state=active]:border-b-[2px] data-[state=active]:border-b-black"
+            >
+              Оплата і доставка
+            </TabsTrigger>
+            <TabsTrigger
+              value="product-delivery"
+              className="w-full text-[20px] text-black py-[19px] data-[state=active]:rounded-none data-[state=active]:border-b-[2px] data-[state=active]:border-b-black"
+            >
+              Обмін та повернення
+            </TabsTrigger>
+          </TabsList>
+          <ScrollBar orientation="horizontal" />
+        </ScrollArea>
         <TabsContent
           value="product-info"
           className="flex items-center mt-[34px]"
         >
           <div>
-            <h3 className="text-2xl font-bold mb-6">Опис товару</h3>
+            <h3 className="lg:text-2xl sm:text-xl text-lg font-bold mb-6">
+              Опис товару
+            </h3>
             <div
-              className="grid grid-cols-2 border border-black/10 rounded-[20px] px-[25px] py-[30px] [&>div]:flex [&>div]:flex-col [&>*:nth-child(even)]:font-medium text-2xl"
+              className="grid grid-cols-2 border border-black/10 rounded-[20px] px-[25px] py-[30px] [&>div]:flex [&>div]:flex-col [&>*:nth-child(even)]:font-medium lg:text-2xl text-base"
               dangerouslySetInnerHTML={{__html: description}}
             />
           </div>
@@ -193,7 +199,7 @@ function ProductTabs({description}: {description: string}) {
           <div className="p-6 border border-black/10 rounded-[20px] w-full">
             <div className="grid md:grid-cols-[1fr,_minmax(40%,_585px)] gap-x-5">
               <div className="flex flex-col gap-5">
-                <div className="bg-[#FAFAFA] rounded-[15px] p-5 text-xl">
+                <div className="bg-[#FAFAFA] rounded-[15px] p-5 md:text-xl text-base">
                   <span className="font-medium">Оплата</span>
                   <div className="grid grid-cols-[40px,_1fr] gap-x-8 items-center">
                     <img src={monoLogo} alt="MonoPay" />
@@ -206,7 +212,7 @@ function ProductTabs({description}: {description: string}) {
                     </div>
                   </div>
                 </div>
-                <div className="bg-[#FAFAFA] rounded-[15px] p-5 text-xl">
+                <div className="bg-[#FAFAFA] rounded-[15px] p-5 md:text-xl text-base">
                   <div className="flex items-center gap-3 font-medium">
                     <span>Доставка Новою Поштою по всій Україні </span>
                     <svg
@@ -241,7 +247,7 @@ function ProductTabs({description}: {description: string}) {
                   </p>
                 </div>
               </div>
-              <div className="bg-[#FAFAFA] rounded-[15px] p-5 text-xl">
+              <div className="bg-[#FAFAFA] rounded-[15px] p-5 md:text-xl text-base">
                 <div>
                   <h4 className=" font-medium">
                     Ціна доставки залежить від вашого замовлення
@@ -262,7 +268,7 @@ function ProductTabs({description}: {description: string}) {
                       <p>
                         Доставка +- 80грн + пакування 0 грн (ми пакуємо самі) +
                         страхування посилки 30/50грн ={' '}
-                        <span className="inline-flex text-white px-[10px] py-[5px] rounded-[15px] bg-[#2D2D2D] text-xl">
+                        <span className="inline-flex text-white px-[10px] py-[5px] rounded-[15px] bg-[#2D2D2D] md:text-xl text-base">
                           110/130грн
                         </span>
                       </p>
@@ -276,7 +282,7 @@ function ProductTabs({description}: {description: string}) {
                         Доставка +- 80 грн + пакування 0 грн (ми пакуємо самі) +
                         страухвання посилки 30/50 грн+ комісія за переказ коштів
                         45/60грн ={' '}
-                        <span className="inline-flex text-white px-[10px] py-[5px] rounded-[15px] bg-[#2D2D2D] text-xl">
+                        <span className="inline-flex text-white px-[10px] py-[5px] rounded-[15px] bg-[#2D2D2D] md:text-xl text-base">
                           145/190грн
                         </span>
                       </p>
@@ -286,7 +292,7 @@ function ProductTabs({description}: {description: string}) {
               </div>
             </div>
             <div className="grid md:grid-cols-[40%,_60%] grid-cols-1 gap-y-5 mt-5 gap-x-5">
-              <div className="bg-[#FAFAFA] rounded-[15px] p-5 text-xl">
+              <div className="bg-[#FAFAFA] rounded-[15px] p-5 md:text-xl text-base">
                 <div className="flex gap-[34px] w-full justify-between">
                   <p>
                     <span className="font-medium">
@@ -311,7 +317,7 @@ function ProductTabs({description}: {description: string}) {
                   </svg>
                 </div>
               </div>
-              <div className="bg-[#FAFAFA] rounded-[15px] p-5 text-xl">
+              <div className="bg-[#FAFAFA] rounded-[15px] p-5 md:text-xl text-base">
                 <div className="flex gap-[34px] w-full justify-between">
                   <p>
                     <span className="font-medium">Самовивіз -</span>
@@ -371,7 +377,7 @@ function ProductGalery({media}: {media: ProductFragment['media']}) {
   }, [api, onSelect]);
 
   return (
-    <div className="lg:grid lg:grid-cols-[minmax(70px,_152px)_1fr] flex flex-col-reverse gap-y-5 gap-x-[14px]">
+    <div className="lg:grid lg:grid-cols-[minmax(70px,_152px)_minmax(70%,_1fr)] flex flex-col-reverse gap-y-5 gap-x-[14px]">
       <Carousel
         setApi={setThumbApi}
         opts={{containScroll: 'keepSnaps', dragFree: true}}
