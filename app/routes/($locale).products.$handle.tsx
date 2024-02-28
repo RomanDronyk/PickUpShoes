@@ -11,7 +11,7 @@ import type {
   SelectedOption,
 } from '@shopify/hydrogen/storefront-api-types';
 import {defer, redirect, type LoaderFunctionArgs} from '@shopify/remix-oxygen';
-import {Suspense, useState, useCallback, useEffect} from 'react';
+import {Suspense, useCallback, useEffect, useState} from 'react';
 import type {
   ProductFragment,
   ProductVariantFragment,
@@ -21,25 +21,22 @@ import type {
 import {
   CartForm,
   Image,
-  Money,
   VariantSelector,
   getSelectedProductOptions,
   type VariantOption,
 } from '@shopify/hydrogen';
-import {Tabs, TabsContent, TabsList, TabsTrigger} from '~/components/ui/tabs';
-import {cn} from '~/lib/utils';
-import {getVariantUrl} from '~/utils';
+import {useMedia} from 'react-use';
 import {
   Carousel,
   CarouselContent,
   CarouselItem,
   type CarouselApi,
 } from '~/components/ui/carousel';
-import monoLogo from '../assets/images/mono.svg';
-import shopLogo from '../assets/images/pickUpLogo.png';
 import {ScrollArea, ScrollBar} from '~/components/ui/scroll-area';
-import {isMobile} from 'react-device-detect';
-import {useMedia} from 'react-use';
+import {Tabs, TabsContent, TabsList, TabsTrigger} from '~/components/ui/tabs';
+import {cn} from '~/lib/utils';
+import {getVariantUrl} from '~/utils';
+import monoLogo from '../assets/images/mono.svg';
 
 export const meta: MetaFunction<typeof loader> = ({data}) => {
   return [{title: `Hydrogen | ${data?.product.title ?? ''}`}];
@@ -55,7 +52,6 @@ export async function loader({params, request, context}: LoaderFunctionArgs) {
   const url = new URL(request.url);
 
   // Get the accept-language header
-  const acceptLang = request.headers.get('accept-language');
   const selectedOptions = getSelectedProductOptions(request).filter(
     (option) =>
       // Filter out Shopify predictive search query params
@@ -140,7 +136,6 @@ function redirectToFirstVariant({
 export default function Product() {
   const {product, variants} = useLoaderData<typeof loader>();
   const {selectedVariant, descriptionHtml} = product;
-  console.log(product);
   return (
     <div className="product lg:px-24 md:px-10 px-[10px] w-full pt-10">
       <div className="sm:grid sm:grid-cols-2 flex flex-col gap-y-5 gap-x-10">
@@ -156,10 +151,11 @@ export default function Product() {
     </div>
   );
 }
+
 function ProductTabs({description}: {description: string}) {
   return (
     <div className="product-info my-6">
-      <Tabs defaultValue="product-info">
+      <Tabs defaultValue="product-delivery">
         <ScrollArea className="scrollbar-none " aria-orientation="horizontal">
           <TabsList className="w-full bg-none justify-between gap-3 sm:gap-0 bg-[#fff]  rounded-none h-[69px]">
             <TabsTrigger
@@ -329,6 +325,109 @@ function ProductTabs({description}: {description: string}) {
                   </p>
                 </div>
               </div>
+            </div>
+          </div>
+        </TabsContent>
+        <TabsContent value="product-delivery">
+          <div className="p-6 border border-black/10 rounded-[20px] w-full">
+            <div className="grid md:grid-cols-2 grid-cols-1 gap-y-5 md:gap-y-0 md:gap-x-5">
+              <div className="bg-[#FAFAFA] rounded-[15px] p-5 md:text-xl text-base">
+                <div className="flex items-center text-2xl font-semibold">
+                  <h4>Обмін та повернення</h4>
+                  <svg
+                    width="30"
+                    height="30"
+                    viewBox="0 0 30 30"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M13.7499 21.875C13.7475 20.3244 14.1909 18.8057 15.0274 17.5H5.31488C4.56973 17.5003 3.85518 17.7965 3.32828 18.3234C2.80137 18.8503 2.50521 19.5648 2.50488 20.31V21.46C2.50488 22.175 2.72738 22.8725 3.14238 23.455C5.06988 26.16 8.22488 27.5 12.4999 27.5C13.6636 27.5 14.7449 27.4013 15.7399 27.2025C14.454 25.7259 13.7469 23.8331 13.7499 21.875ZM12.4999 2.505C14.1575 2.505 15.7472 3.16349 16.9193 4.33559C18.0914 5.50769 18.7499 7.0974 18.7499 8.755C18.7499 10.4126 18.0914 12.0023 16.9193 13.1744C15.7472 14.3465 14.1575 15.005 12.4999 15.005C10.8423 15.005 9.25257 14.3465 8.08047 13.1744C6.90836 12.0023 6.24988 10.4126 6.24988 8.755C6.24988 7.0974 6.90836 5.50769 8.08047 4.33559C9.25257 3.16349 10.8423 2.505 12.4999 2.505ZM28.7499 21.875C28.7499 23.6984 28.0256 25.4471 26.7362 26.7364C25.4469 28.0257 23.6982 28.75 21.8749 28.75C20.0515 28.75 18.3028 28.0257 17.0135 26.7364C15.7242 25.4471 14.9999 23.6984 14.9999 21.875C14.9999 20.0516 15.7242 18.303 17.0135 17.0136C18.3028 15.7243 20.0515 15 21.8749 15C23.6982 15 25.4469 15.7243 26.7362 17.0136C28.0256 18.303 28.7499 20.0516 28.7499 21.875ZM20.4424 19.1925C20.5597 19.0751 20.6257 18.916 20.6257 18.75C20.6257 18.584 20.5597 18.4249 20.4424 18.3075C20.325 18.1901 20.1659 18.1242 19.9999 18.1242C19.8339 18.1242 19.6747 18.1901 19.5574 18.3075L17.6824 20.1825C17.6242 20.2406 17.578 20.3095 17.5465 20.3855C17.515 20.4614 17.4988 20.5428 17.4988 20.625C17.4988 20.7072 17.515 20.7886 17.5465 20.8645C17.578 20.9405 17.6242 21.0094 17.6824 21.0675L19.5574 22.9425C19.6747 23.0599 19.8339 23.1258 19.9999 23.1258C20.1659 23.1258 20.325 23.0599 20.4424 22.9425C20.5597 22.8251 20.6257 22.666 20.6257 22.5C20.6257 22.334 20.5597 22.1749 20.4424 22.0575L19.6336 21.25H22.1874C22.5567 21.25 22.9225 21.3228 23.2637 21.4641C23.6049 21.6054 23.915 21.8126 24.1761 22.0738C24.4373 22.3349 24.6445 22.645 24.7858 22.9862C24.9271 23.3274 24.9999 23.6932 24.9999 24.0625V24.375C24.9999 24.5408 25.0657 24.6997 25.1829 24.8169C25.3002 24.9342 25.4591 25 25.6249 25C25.7906 25 25.9496 24.9342 26.0668 24.8169C26.184 24.6997 26.2499 24.5408 26.2499 24.375V24.0625C26.2499 22.9851 25.8219 21.9517 25.06 21.1899C24.2981 20.428 23.2648 20 22.1874 20H19.6336L20.4424 19.1925Z"
+                      fill="black"
+                    />
+                  </svg>
+                </div>
+                <br />
+                <div className="text-xl">
+                  <p>
+                    Повернення товару доступно на протязі 14 дінв (з дня
+                    отримання товару на Пошті або в Магазині)
+                  </p>
+                  <br />
+                  <p>
+                    Поверненню підлягає лише новий та неушкоджений товар, такий
+                    як ви отримали на пошті (якщо це кросівки тоді коробка
+                    обовʼязково має бути присутня, і бірки якщо вони були)
+                  </p>
+
+                  <br />
+                  <p className="text-balance">
+                    Якщо до прикладу в кросівках ви ходили тільки вдома декілька
+                    хвилин і зрозуміли що вам вони некомфортні тоді ми залюбки
+                    оформимо для вас повекрнення, звичайно якщо вони
+                    відповідають умовам що написані вище.
+                  </p>
+                </div>
+
+                <br />
+                <div className="bg-white px-[15px] py-[10px] rounded-[15px] w-fit">
+                  <span>Повернення відбувається за рахунок клієнта</span>
+                  <br />
+                  <span className="font-semibold">
+                    *крім випадків коли була наша помилка
+                  </span>
+                </div>
+              </div>
+              <div className="bg-[#FAFAFA] rounded-[15px] p-5 md:text-xl text-base">
+                <div className="flex items-center text-2xl font-semibold">
+                  <h4>Обмін</h4>
+                  <svg
+                    width="31"
+                    height="31"
+                    fill="none"
+                    viewBox="0 0 31 31"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M17.3789 1.21094C15.0095 1.24 12.5515 2.13713 10.2949 3.99234H15.1671V6.60724C18.3616 4.80597 22.1053 4.69469 25.0931 6.60906L23.9918 7.19757L27.9085 10.2685L27.6814 5.22411L26.0826 6.07939C23.9761 2.9542 20.8911 1.24993 17.6136 1.21094C17.5354 1.21 17.4572 1.21 17.379 1.21094H17.3789ZM1.15234 5.12378V18.0051H14.0356V5.12378H1.15246H1.15234ZM4.19676 6.69982H12.4595V15.1121H11.3262V7.83138H4.19682V6.69988L4.19676 6.69982ZM4.39923 9.00823L9.85414 14.5692L9.0462 15.362L3.59129 9.80103L4.39923 9.00823ZM16.9116 12.747V25.6303H29.793V12.7471H16.9116V12.747ZM19.9541 14.3251H28.2169V22.7354H27.0855V15.4564H19.9543L19.9541 14.325L19.9541 14.3251ZM20.1566 16.6316L25.6133 22.1943L24.8055 22.9852L19.3487 17.4243L20.1566 16.6316L20.1566 16.6316ZM3.29243 20.4857L3.51948 25.53L4.93095 24.775C8.61989 30.1417 15.2233 31.2223 20.6504 26.7618H15.7801V24.1469C12.6268 25.9257 8.93831 26.0568 5.9697 24.2188L7.20703 23.5566L3.29243 20.4857Z"
+                      fill="black"
+                    />
+                  </svg>
+                </div>
+                <br />
+                <div className="text-xl">
+                  <p className="text-balance">
+                    Обмін присутній в нас на протязі 14 днів (з дня отриманя
+                    товарну на Пошті або в Магазині)
+                    <span className="flex font-semibold">
+                      *можливі вийнятки по домовленності
+                    </span>
+                  </p>
+                  <br />
+                  <p className="text-balance">
+                    Обміну підлягає лише новий та неушкоджений товар, такий який
+                    ви отримали на пошті (якщо це кросівки тоді коробка
+                    обовʼязково має бути присутня, і бірки якщо вони були)
+                  </p>
+                  <br />
+                  <p className="text-balance">
+                    Також ми дорожимо нашими клієнтами і стараємося щоб вам було
+                    максимально комфортно.і
+                  </p>
+                </div>
+                <br />
+                <div className="bg-white px-[15px] py-[10px] rounded-[15px] w-fit">
+                  <p className="font-semibold">
+                    При обміні товару доставка в одну сторону
+                    <br /> буде за наш рахунок :)
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div className="bg-[#2D2D2D] rounded-[15px] py-5 flex items-center justify-center">
+              <span className="text-white font-semibold text-2xl">
+                Вживане взуття поверненню та обміну не підлягає!!!
+              </span>
             </div>
           </div>
         </TabsContent>
