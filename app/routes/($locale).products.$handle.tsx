@@ -140,6 +140,7 @@ function redirectToFirstVariant({
 export default function Product() {
   const {product, variants} = useLoaderData<typeof loader>();
   const {selectedVariant, descriptionHtml} = product;
+  console.log(product);
   return (
     <div className="product lg:px-24 md:px-10 px-[10px] w-full pt-10">
       <div className="sm:grid sm:grid-cols-2 flex flex-col gap-y-5 gap-x-10">
@@ -159,7 +160,7 @@ function ProductTabs({description}: {description: string}) {
   return (
     <div className="product-info my-6">
       <Tabs defaultValue="product-info">
-        <ScrollArea className="no-scrollbar" aria-orientation="horizontal">
+        <ScrollArea className="scrollbar-none " aria-orientation="horizontal">
           <TabsList className="w-full bg-none justify-between gap-3 sm:gap-0 bg-[#fff]  rounded-none h-[69px]">
             <TabsTrigger
               value="product-info"
@@ -180,7 +181,7 @@ function ProductTabs({description}: {description: string}) {
               Обмін та повернення
             </TabsTrigger>
           </TabsList>
-          <ScrollBar orientation="horizontal" />
+          <ScrollBar orientation="horizontal" className="scrollbar-none" />
         </ScrollArea>
         <TabsContent
           value="product-info"
@@ -447,17 +448,20 @@ function ProductMain({
   const {title, descriptionHtml} = product;
   return (
     <div className="product-main">
-      <h1 className="font-bold lg:text-[40px] md:text-3xl text-2xl">{title}</h1>
-      <div className="flex items-center gap-x-[16px] mb-[30px]">
-        <span className="font-semibold text-[20px] text-black/50">
-          {product.selectedVariant?.sku}
-        </span>
-        <span className="text-white text-[16px] flex items-center jusity-center px-[14px] py-[5px] bg-black rounded-3xl self-start">
-          {product.vendor}
-        </span>
+      <div className="flex flex-col border-b pb-6 border-b-black/10">
+        <h1 className="font-bold lg:text-[40px] md:text-3xl text-2xl">
+          {title}
+        </h1>
+        <div className="flex items-center gap-x-[16px] mb-[30px]">
+          <span className="font-semibold text-[20px] text-black/50">
+            {product.selectedVariant?.sku}
+          </span>
+          <span className="text-white text-[16px] flex items-center jusity-center px-[14px] py-[5px] bg-black rounded-3xl self-start">
+            {product.vendor}
+          </span>
+        </div>
+        <ProductPrice selectedVariant={selectedVariant} />
       </div>
-      <ProductPrice selectedVariant={selectedVariant} />
-      <br />
       <Suspense
         fallback={
           <ProductForm
@@ -528,7 +532,7 @@ function ProductForm({
   variants: Array<ProductVariantFragment>;
 }) {
   return (
-    <div className="product-form">
+    <div className=" product-form pt-6">
       <VariantSelector
         handle={product.handle}
         options={product.options}
@@ -536,27 +540,35 @@ function ProductForm({
       >
         {({option}) => <ProductOptions key={option.name} option={option} />}
       </VariantSelector>
+      {selectedVariant?.quantityAvailable === 1 && (
+        <span className="my-5 py-5 w-full inline-flex border-b border-b-black/10">
+          {' '}
+          - Останні в наявності
+        </span>
+      )}
       <br />
-      <AddToCartButton
-        disabled={!selectedVariant || !selectedVariant.availableForSale}
-        onClick={() => {
-          window.location.href = window.location.href + '#cart-aside';
-        }}
-        lines={
-          selectedVariant
-            ? [
-                {
-                  merchandiseId: selectedVariant.id,
-                  quantity: 1,
-                },
-              ]
-            : []
-        }
-      >
-        {selectedVariant?.availableForSale
-          ? 'Додати в корзину'
-          : 'Немає в наявності'}
-      </AddToCartButton>
+      <div className="grid md:grid-cols-2 grid-cols-1">
+        <AddToCartButton
+          disabled={!selectedVariant || !selectedVariant.availableForSale}
+          onClick={() => {
+            window.location.href = window.location.href + '#cart-aside';
+          }}
+          lines={
+            selectedVariant
+              ? [
+                  {
+                    merchandiseId: selectedVariant.id,
+                    quantity: 1,
+                  },
+                ]
+              : []
+          }
+        >
+          {selectedVariant?.availableForSale
+            ? 'Додати в корзину'
+            : 'Немає в наявності'}
+        </AddToCartButton>
+      </div>
     </div>
   );
 }
@@ -619,7 +631,10 @@ function AddToCartButton({
               type="submit"
               onClick={onClick}
               disabled={disabled ?? fetcher.state !== 'idle'}
-              className="bg-black text-white font-medium text-[18px] w-full rounded-[62px] py-[15px]"
+              className={cn(
+                'bg-black text-white font-medium text-[18px] w-full rounded-[62px] py-[15px] cursor-pointer',
+                disabled && 'bg-white text-black border border-black',
+              )}
             >
               {children}
             </button>
