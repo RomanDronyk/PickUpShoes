@@ -18,7 +18,7 @@ import {
   type ShouldRevalidateFunction,
 } from '@remix-run/react';
 import type {CustomerAccessToken} from '@shopify/hydrogen/storefront-api-types';
-import favicon from '../public/favicon.svg';
+import favicon from '../public/favicon.ico';
 import {Layout} from '~/components/Layout';
 import styles from 'app/styles/tailwind.css';
 import vaulStyles from 'vaul/dist/index.css';
