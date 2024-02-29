@@ -100,7 +100,7 @@ function MobileCartDetail({cart}: {cart: CartApiQueryFragment | null}) {
           <MobileCartLine key={line.id} line={line} />
         ))}
       </div>
-      <DrawerFooter>
+      <DrawerFooter className="px-0">
         <div className="flex items-center justify-end font-bold text-black text-[22px]">
           <span className="mr-4">Підсумок: </span>
           <Money
