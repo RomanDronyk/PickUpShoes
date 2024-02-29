@@ -42,7 +42,11 @@ export function Header({header, isLoggedIn, cart}: HeaderProps) {
             logo={shop.brand.logo.image.url}
             primaryDomainUrl={header.shop.primaryDomain.url}
           />
-          <NavLink prefetch="intent" to="/" className="flex items-center">
+          <NavLink
+            prefetch="intent"
+            to="/"
+            className="flex items-center md:w-auto w-[130px]"
+          >
             <img src={shop.brand?.logo?.image?.url} alt="PickUpShoes" />
           </NavLink>
         </div>
