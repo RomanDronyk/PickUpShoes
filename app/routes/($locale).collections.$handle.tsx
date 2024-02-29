@@ -144,7 +144,7 @@ export default function Collection() {
     useLoaderData<typeof loader>();
   return (
     <div className="grid lg:grid-cols-[minmax(auto,_300px)_minmax(auto,_1fr)] grid-cols-1 gap-x-5 w-full lg:px-24 md:px-12 px-[10px] pt-[30px] mb-8">
-      <div className="sidebar w-[300px] h-full lg:block hidden">
+      <div className="sidebar xl:w-[300px] h-full lg:block hidden">
         <ProductsFilter
           initialFilters={filtersCollection?.products.filters as Filter[]}
           filters={collection.products.filters as Filter[]}
@@ -187,7 +187,7 @@ export default function Collection() {
 
 function ProductsGrid({products}: {products: ProductItemFragment[]}) {
   return (
-    <div className="product-grid grid md:grid-cols-3 xl:grid-cols-4 grid-cols-2 md:auto-rows-[minmax(50px,_450px)] gap-x-[20px] gap-y-10 mt-5">
+    <div className="product-grid grid md:grid-cols-3 xl:grid-cols-3 grid-cols-2  gap-x-[20px] gap-y-10 mt-5">
       {products.map((product, index) => {
         return <ProductCard product={product} key={product.id} />;
       })}
@@ -228,9 +228,11 @@ const PRODUCT_ITEM_FRAGMENT = `#graphql
         }
         price {
           amount
+          currencyCode
         }
         compareAtPrice {
           amount
+          currencyCode
         }
 
       }

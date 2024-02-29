@@ -35,6 +35,7 @@ import {Popover, PopoverContent, PopoverTrigger} from './ui/popover';
 import {Slider} from './ui/slider';
 import {ToggleGroup, ToggleGroupItem} from './ui/toggle-group';
 import {ScrollArea} from './ui/scroll-area';
+import {cn} from '~/lib/utils';
 
 export const FILTER_URL_PREFIX = 'filter.';
 export type AppliedFilter = {
@@ -167,19 +168,19 @@ function PriceFilter({
         <span>Ціновий діапазон</span>
       </div>
       <div className="bg-input flex flex-row rounded-[40px] py-[5px]">
-        <div className="relative before:w-[1px] before:h-full before:bg-black before:right-0 before:block before:absolute">
+        <div className="w-2/4 relative before:w-[1px] before:h-full before:bg-black before:right-0 before:block before:absolute">
           <Input
             value={`${priceRange[0]} грн`}
             type="text"
-            className="text-center h-5 "
+            className="text-center h-5 w-full"
             readOnly={true}
           />
         </div>
-        <div>
+        <div className="w-2/4">
           <Input
             value={`${priceRange[1]} грн`}
             type="text"
-            className="text-center h-5"
+            className="text-center h-5 w-ful"
             readOnly={true}
           />
         </div>
@@ -197,6 +198,7 @@ function PriceFilter({
 
 function ListFilter({filter}: {filter: Filter}) {
   const [value, setValue] = useState<string[]>([]);
+
   const location = useLocation();
   const params = useMemo(
     () => new URLSearchParams(location.search),
@@ -214,6 +216,7 @@ function ListFilter({filter}: {filter: Filter}) {
   const handleChange = (value: string[]) => {
     setValue(value);
   };
+  const test = getFilterFromLink(filter, location);
 
   useDebounce(
     () => {
@@ -235,7 +238,7 @@ function ListFilter({filter}: {filter: Filter}) {
 
   return (
     <div className="md:pb-6">
-      <Accordion type="single" className="w-full">
+      <Accordion type="single" collapsible className="w-full">
         <AccordionItem value="size">
           <AccordionTrigger className="flex items-center">
             <div className="flex items-center font-semibold md:text-xl text-[16px] md:mb-[10px]">
@@ -253,7 +256,9 @@ function ListFilter({filter}: {filter: Filter}) {
                   <ToggleGroupItem
                     key={filterItem.id}
                     value={filterItem.id}
-                    className="data-[state=on]:bg-black data-[state=on]:text-white rounded-[62px] text-black/60  bg-[#F0F0F0] px-5 py-1"
+                    className={cn(
+                      'data-[state=on]:bg-black data-[state=on]:text-white rounded-[62px] text-black/60  bg-[#F0F0F0] px-5 py-1',
+                    )}
                   >
                     <span>{filterItem.label}</span>
                   </ToggleGroupItem>
@@ -356,6 +361,17 @@ function getFilterLink(
   });
 
   return `${location.pathname}?${paramsClone.toString()}`;
+}
+
+function getFilterFromLink(
+  filter: Filter,
+  location: ReturnType<typeof useLocation>,
+) {
+  const decodeSearchParams = decodeURIComponent(location.search);
+  const arrayDecodeSearchParams = decodeSearchParams
+    ? decodeSearchParams.split('&')
+    : [];
+  // console.log(filter);
 }
 //create URL for sort products
 function getSortLink(
@@ -475,7 +491,7 @@ export function MobileFilters({
         </Button>
       </SheetTrigger>
       <SheetContent className="sm:max-w-full w-full">
-        <SheetHeader className="mb-10">
+        <SheetHeader className="mb-10 flex justify-between items-center flex-row">
           <div className="text-[18px] font-semibold flex items-center gap-[10px]">
             <span>Фільтрація товару</span>
             <svg

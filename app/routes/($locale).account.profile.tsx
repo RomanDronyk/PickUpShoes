@@ -124,13 +124,13 @@ export default function AccountProfile() {
   return (
     <div className="contaier grid md:grid-cols-2 grid-cols-1 gap-y-10 gap-x-10 my-10 w-full">
       <div className="account-profile rounded-[20px] border border-black/10 p-6">
-        <h2 className="text-[32px]  font-medium mb-[25px]">
+        <h2 className="md:text-[32px] text-xl font-medium mb-[25px]">
           Особиста інформація
         </h2>
         <Form method="PUT">
           <fieldset>
             <label
-              className="text-xl pl-5 mb-[10px] inline-flex"
+              className="md:text-xl text-lg pl-5 md:mb-[10px] mb-1 inline-flex"
               htmlFor="firstName"
             >
               Ім`я
@@ -147,7 +147,7 @@ export default function AccountProfile() {
               className="bg-input px-6 py-3 text-xl placeholder:text-xl h-[52px] mb-[25px]"
             />
             <label
-              className="text-xl pl-5 mb-[10px] inline-flex"
+              className="md:text-xl text-lg pl-5 md:mb-[10px] mb-1 inline-flex"
               htmlFor="lastName"
             >
               Прізвище
@@ -164,7 +164,7 @@ export default function AccountProfile() {
               className="bg-input px-6 py-3 text-xl placeholder:text-xl h-[52px] mb-[25px]"
             />
             <label
-              className="text-xl pl-5 mb-[10px] inline-flex"
+              className="md:text-xl text-lg pl-5 md:mb-[10px] mb-1 inline-flex"
               htmlFor="phone"
             >
               Мобільний телефон
@@ -180,7 +180,7 @@ export default function AccountProfile() {
               className="bg-input px-6 py-3 text-xl placeholder:text-xl h-[52px] mb-[25px]"
             />
             <label
-              className="text-xl pl-5 mb-[10px] inline-flex"
+              className="text-lg md:text-xl pl-5 md:mb-[10px] mb-1 inline-flex"
               htmlFor="email"
             >
               Email
@@ -224,7 +224,7 @@ export default function AccountProfile() {
             name="formName"
             value={FormNames.INFO_FORM}
             disabled={state !== 'idle'}
-            className="flex items-center justify-center gap-5 py-[14px] font-medium text-xl w-full rounded-[36px]"
+            className="flex items-center justify-center gap-5 py-[14px] font-medium md:text-xl text-base w-full rounded-[36px] [&>svg]:w-[19px] md:[&>svg]:w-auto"
           >
             {state !== 'idle' ? 'Оновлення' : 'Підтвердити зміни'}
 
@@ -246,11 +246,15 @@ export default function AccountProfile() {
         </Form>
       </div>
       <div className="account-password rounded-[20px] border border-black/10 p-6">
-        <h2 className="text-[32px]  font-medium mb-[25px]">Зміна паролю</h2>
+        <h2 className="md:text-[32px] text-xl  font-medium ">Зміна паролю</h2>
+
+        <span className="mb-[25px] inline-flex">
+          Паролі мають бути не менше 8 символів.
+        </span>
         <Form method="PUT">
           <fieldset>
             <label
-              className="text-xl pl-5 mb-[10px] inline-flex"
+              className="text-lg md:text-xl pl-5 md:mb-[10px] mb-1 inline-flex"
               htmlFor="currentPassword"
             >
               Поточний пароль
@@ -267,7 +271,7 @@ export default function AccountProfile() {
             />
 
             <label
-              className="text-xl pl-5 mb-[10px] inline-flex"
+              className="text-lg md:text-xl pl-5 md:mb-[10px] mb-1 inline-flex"
               htmlFor="newPassword"
             >
               Новий пароль
@@ -283,7 +287,7 @@ export default function AccountProfile() {
             />
 
             <label
-              className="text-xl pl-5 mb-[10px] inline-flex"
+              className="text-lg md:text-xl pl-5 md:mb-[10px] mb-1 inline-flex"
               htmlFor="newPasswordConfirm"
             >
               Повторіть новий пароль
@@ -297,13 +301,12 @@ export default function AccountProfile() {
               minLength={8}
               className="bg-input px-6 py-3 text-xl placeholder:text-xl h-[52px] mb-[25px]"
             />
-            <span>Паролі мають бути не менше 8 символів.</span>
           </fieldset>
           <Button
             name="formName"
             value={FormNames.PASS_FROM}
             disabled={state !== 'idle'}
-            className="flex items-center justify-center gap-5 mt-51 py-[14px] font-medium text-xl w-full rounded-[36px]"
+            className="flex items-center justify-center gap-5 mt-51 py-[14px] font-medium md:text-xl text-base w-full rounded-[36px] [&>svg]:w-[19px] md:[&>svg]:w-auto"
           >
             {state !== 'idle' ? 'Оновлення' : 'Підтвердити зміни'}
 

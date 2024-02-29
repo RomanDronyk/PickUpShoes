@@ -152,7 +152,7 @@ function AccountMenu() {
   }
 
   return (
-    <ScrollArea>
+    <ScrollArea className="scrollbar-none">
       <nav
         role="navigation"
         className="flex flex-row justify-between min-w-0 shrink-0 gap-2"
@@ -167,7 +167,7 @@ function AccountMenu() {
         Addresses
       </NavLink> */}
       </nav>
-      <ScrollBar orientation="horizontal" />
+      <ScrollBar orientation="horizontal" className="scrollbar-none" />
     </ScrollArea>
   );
 }
