@@ -157,7 +157,7 @@ function ProductTabs({description}: {description: string}) {
     <div className="product-info my-6">
       <Tabs defaultValue="product-delivery">
         <ScrollArea className="scrollbar-none " aria-orientation="horizontal">
-          <TabsList className="w-full bg-none justify-between gap-3 sm:gap-0 bg-[#fff]  rounded-none h-[69px]">
+          <TabsList className="w-full bg-none justify-between gap-3 py-0 sm:gap-0 bg-[#fff]  rounded-none h-[69px]">
             <TabsTrigger
               value="product-info"
               className="w-full text-[20px] text-black py-[19px] data-[state=active]:rounded-none data-[state=active]:border-b-[2px] data-[state=active]:border-b-black"
@@ -486,10 +486,13 @@ function ProductGalery({media}: {media: ProductFragment['media']}) {
         opts={{
           containScroll: 'keepSnaps',
           dragFree: true,
+          loop: true,
+          duration: 20,
         }}
         orientation={isWide ? 'vertical' : 'horizontal'}
+        className="w-full h-full"
       >
-        <CarouselContent className="gap-y-[14px] mt-0 max-w-[152px]">
+        <CarouselContent className="gap-y-[14px] mt-0 xl:max-w-[152px] max-w-full">
           {media.nodes.map((item, index) => (
             <CarouselItem
               key={item.id}
@@ -513,7 +516,14 @@ function ProductGalery({media}: {media: ProductFragment['media']}) {
           ))}
         </CarouselContent>
       </Carousel>
-      <Carousel setApi={setApi} opts={{loop: true, skipSnaps: false}}>
+      <Carousel
+        setApi={setApi}
+        opts={{
+          containScroll: 'keepSnaps',
+          loop: true,
+          duration: 20,
+        }}
+      >
         <CarouselContent>
           {media.nodes.map((item, index) => (
             <CarouselItem key={item.id}>

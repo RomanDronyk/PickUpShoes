@@ -37,7 +37,11 @@ export function Header({header, isLoggedIn, cart}: HeaderProps) {
     <header className="lg:px-24 px-5">
       <div className=" flex justify-between pt-[18px] pb-[25px] border-b border-black/20 relative">
         <div className="flex items-center gap-x-[35px]">
-          <MobileMenu menu={menu} logo={shop.brand?.logo?.image.url} />
+          <MobileMenu
+            menu={menu}
+            logo={shop.brand.logo.image.url}
+            primaryDomainUrl={header.shop.primaryDomain.url}
+          />
           <NavLink prefetch="intent" to="/" className="flex items-center">
             <img src={shop.brand?.logo?.image?.url} alt="PickUpShoes" />
           </NavLink>
@@ -52,7 +56,7 @@ export function Header({header, isLoggedIn, cart}: HeaderProps) {
             brandLogo={shop?.brand?.logo?.image}
           />
         </div>
-        <nav className="header-ctas flex gap-x-[15px]">
+        <nav className="header-ctas flex md:gap-x-[15px] gap-x-2">
           <PredictiveSearchForm
             isMobile={isMobile}
             brandLogo={shop?.brand?.logo?.image}
@@ -87,8 +91,7 @@ export function Header({header, isLoggedIn, cart}: HeaderProps) {
               </Await>
             </Suspense>
           )}
-
-          <Button variant="ghost" asChild className="p-0">
+          <Button variant="ghost" asChild className="p-2">
             <NavLink prefetch="intent" to="/account" style={activeLinkStyle}>
               <svg
                 className="max-sm:w-5 max-sm:h-5"
@@ -144,7 +147,7 @@ function CartBadge({
   return (
     <Button
       variant="ghost"
-      className="relative p-0 max-sm:w-[23px] max-sm:h-[18px]"
+      className="relative px-2 py-2 max-sm:w-[23px] max-sm:h-[18px]"
       onClick={() => handleShow()}
     >
       <svg
@@ -219,9 +222,9 @@ export function HeaderMenu({
                   <ul className="flex py-[15px] px-[20px]  gap-x-[25px] gap-y-[15px] w-[390px] flex-wrap">
                     {item.items.map((menuItem) => {
                       const url =
-                        menuItem.url.includes('myshopify.com') ||
-                        menuItem.url.includes(publicStoreDomain) ||
-                        menuItem.url.includes(primaryDomainUrl)
+                        menuItem.url?.includes('myshopify.com') ||
+                        menuItem.url?.includes(publicStoreDomain) ||
+                        menuItem.url?.includes(primaryDomainUrl)
                           ? new URL(menuItem.url).pathname
                           : menuItem.url;
 

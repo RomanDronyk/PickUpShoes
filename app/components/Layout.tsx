@@ -39,10 +39,10 @@ export function Layout({
       <AnimatePresence mode="popLayout" initial={false}>
         <motion.main
           key={useLocation().pathname}
-          initial={{x: '20%', opacity: 0}}
-          animate={{x: 0, opacity: 1}}
-          exit={{x: '-20%', opacity: 0, transition: {duration: 0.2}}}
-          transition={{delay: 0, duration: 0.2}}
+          initial={{opacity: 0}}
+          animate={{opacity: 1}}
+          exit={{opacity: 0, transition: {duration: 0.2}}}
+          transition={{delay: 0, duration: 0.4}}
           className="fleo-auto items-start flex"
         >
           {children}

@@ -299,7 +299,7 @@ export function PredictiveSearchForm({
     return (
       <Drawer open={mobileOpen} onOpenChange={setMobileOpen}>
         <DrawerTrigger asChild>
-          <Button variant="ghost" className="p-0">
+          <Button variant="ghost" className="py-2 px-2">
             <svg
               width="15"
               height="16"
@@ -502,8 +502,11 @@ function PredictiveSearchResult({
   }&type=${pluralToSingularSearchType(type)}`;
 
   return (
-    <div className="predictive-search-result px-4 py-3" key={type}>
-      <ul>
+    <div
+      className="predictive-search-result px-4 py-3 overflow-y-auto"
+      key={type}
+    >
+      <ul className="flex flex-col gap-5">
         {items.map((item: NormalizedPredictiveSearchResultItem) => (
           <SearchResultItem
             goToSearchResult={goToSearchResult}
@@ -522,18 +525,21 @@ type SearchResultItemProps = Pick<SearchResultTypeProps, 'goToSearchResult'> & {
 
 function SearchResultItem({goToSearchResult, item}: SearchResultItemProps) {
   return (
-    <li key={item.id}>
+    <li
+      key={item.id}
+      className="border-b border-b-black/30 pb-5 md:pb-0 md:border-none"
+    >
       <Link onClick={goToSearchResult} to={item.url} className="flex w-full">
         {item.image?.url && (
           <Image
             alt={item.image.altText ?? ''}
             src={item.image.url}
-            width={70}
-            height={70}
+            width={isMobile ? 80 : 70}
+            height={isMobile ? 80 : 70}
             className="rounded-[15px]"
           />
         )}
-        <div className="flex justify-between ml-[14px] w-full items-center">
+        <div className="flex md:flex-row flex-col md:justify-between gap-y-2 ml-[14px] w-full md:items-center items-start">
           {item.styledTitle ? (
             <div
               dangerouslySetInnerHTML={{
@@ -541,9 +547,11 @@ function SearchResultItem({goToSearchResult, item}: SearchResultItemProps) {
               }}
             />
           ) : (
-            <span className="font-semibold tetx-[22px]">{item.title}</span>
+            <span className="font-semibold md:text-[22px] text-xl">
+              {item.title}
+            </span>
           )}
-          <div className="font-semibold tetx-[22px]">
+          <div className="font-semibold md:text-[22px] text-base">
             {item?.price && (
               <span>
                 <Money

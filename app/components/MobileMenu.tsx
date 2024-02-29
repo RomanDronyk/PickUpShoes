@@ -16,15 +16,20 @@ import {useState} from 'react';
 import type {HeaderProps} from './Header';
 import {Button} from './ui/button';
 import {Link} from '@remix-run/react';
+import {useRootLoaderData} from '~/root';
 
 export function MobileMenu({
   menu,
   logo,
+  primaryDomainUrl,
 }: {
   menu: HeaderProps['header']['menu'];
   logo: string | undefined;
+  primaryDomainUrl: string;
 }) {
   const [open, setOpen] = useState(false);
+
+  const {publicStoreDomain} = useRootLoaderData();
   return (
     <Sheet>
       <SheetTrigger asChild className="md:hidden">
@@ -48,41 +53,60 @@ export function MobileMenu({
         </Button>
       </SheetTrigger>
       <SheetContent side="left" className="sm:max-w-full w-full px-5">
-        <SheetHeader>
+        <SheetHeader className="flex items-center justify-between flex-row mb-10">
           {logo && (
-            <Link to="/" className="mb-10">
+            <Link to="/">
               <img src={logo} alt="Pick Up Shoes" />
             </Link>
           )}
         </SheetHeader>
         <Accordion type="single" collapsible className="w-full">
-          {menu?.items.map((menuItem) => (
-            <AccordionItem
-              key={menuItem.id}
-              value={menuItem.title}
-              className="border-b-black/30"
-            >
-              <AccordionTrigger className="sm:text-xl">
-                {menuItem.title}
-              </AccordionTrigger>
-              {menuItem.items.length > 0 && (
-                <AccordionContent>
-                  <ul className="flex flex-col gap-y-4">
-                    {menuItem.items.map((subMenuItem) => (
-                      <li key={subMenuItem.id}>
-                        <Link
-                          className="sm:text-lg text-base hover:underline"
-                          to={subMenuItem.url}
-                        >
-                          {subMenuItem.title}
-                        </Link>
-                      </li>
-                    ))}
-                  </ul>
-                </AccordionContent>
-              )}
-            </AccordionItem>
-          ))}
+          {menu?.items.map((menuItem) => {
+            if (!menuItem.url) return null;
+            // if the url is internal, we strip the domain
+            const url =
+              menuItem.url.includes('myshopify.com') ||
+              menuItem.url.includes(publicStoreDomain) ||
+              menuItem.url.includes(primaryDomainUrl)
+                ? new URL(menuItem.url).pathname
+                : menuItem.url;
+
+            return (
+              <AccordionItem
+                key={menuItem.id}
+                value={menuItem.title}
+                className="border-b-black/30"
+              >
+                <AccordionTrigger className="sm:text-xl">
+                  {menuItem.title}
+                </AccordionTrigger>
+                {menuItem.items.length > 0 && (
+                  <AccordionContent>
+                    <ul className="flex flex-col gap-y-4">
+                      {menuItem.items.map((subMenuItem) => {
+                        const url =
+                          subMenuItem.url?.includes('myshopify.com') ||
+                          subMenuItem.url?.includes(publicStoreDomain) ||
+                          subMenuItem.url?.includes(primaryDomainUrl)
+                            ? new URL(subMenuItem.url).pathname
+                            : subMenuItem.url;
+                        return (
+                          <li key={subMenuItem.id}>
+                            <Link
+                              className="sm:text-lg text-base hover:underline"
+                              to={url}
+                            >
+                              {subMenuItem.title}
+                            </Link>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </AccordionContent>
+                )}
+              </AccordionItem>
+            );
+          })}
         </Accordion>
       </SheetContent>
     </Sheet>

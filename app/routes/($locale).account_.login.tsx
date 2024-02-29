@@ -155,7 +155,7 @@ export async function action({request, context}: ActionFunctionArgs) {
             status: 302,
             headers: {
               'Set-Cookie': await session.commit(),
-              Location: '/account',
+              Location: '/account/profile',
             },
           },
         );
@@ -176,7 +176,7 @@ export default function Login() {
   return (
     <div className="contaier grid lg:grid-cols-2 grid-cols-1 gap-y-10 gap-x-10 sm:px-24 px-[10px] my-10 w-full">
       <div className="register rounded-[20px] border border-black/10 p-6 ">
-        <h2 className="xl:text-[32px] text-[24px]  font-medium mb-[25px]">
+        <h2 className="xl:text-[32px] text-[24px] md:text-left text-center  font-medium mb-[25px]">
           Реєстрація
         </h2>
         <Form method="POST">
@@ -249,7 +249,7 @@ export default function Login() {
         </Form>
       </div>
       <div className="login rounded-[20px] border border-black/10 p-6 ">
-        <h2 className="font-medium xl:text-[32px] text-[24px] mb-[25px]">
+        <h2 className="font-medium xl:text-[32px] text-[24px] mb-[25px] md:text-left text-center">
           Вхід для зареєстрованих користувачів
         </h2>
         <Form method="POST">
