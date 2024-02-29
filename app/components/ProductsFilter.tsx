@@ -76,7 +76,6 @@ export function ProductsFilter({
           <AppliedFilters filters={appliedFilters} />
         </div>
       )}
-
       <FilterDraw initial={initialFilters} filters={filters} />
     </div>
   );
@@ -490,7 +489,7 @@ export function MobileFilters({
           </svg>
         </Button>
       </SheetTrigger>
-      <SheetContent className="sm:max-w-full w-full">
+      <SheetContent className="sm:max-w-full w-full h-full overflow-y-auto">
         <SheetHeader className="mb-10 flex justify-between items-center flex-row">
           <div className="text-[18px] font-semibold flex items-center gap-[10px]">
             <span>Фільтрація товару</span>
@@ -508,9 +507,7 @@ export function MobileFilters({
             </svg>
           </div>
         </SheetHeader>
-        <ScrollArea>
-          <FilterDraw filters={filters} initial={initialFilters} />
-        </ScrollArea>
+        <FilterDraw filters={filters} initial={initialFilters} />
         <SheetClose asChild>
           <Button className="font-medium text-base text-white rounded-[30px] bg-black w-full mt-9 py-3">
             <span>Застосувати фільтри</span>

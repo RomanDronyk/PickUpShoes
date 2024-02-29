@@ -244,9 +244,9 @@ export function PredictiveSearchForm({
     );
   }
   const classes = clsx({
-    'border border-input rounded-[62px] bg-lightGray px-4 py-[3px] z-20 relative':
+    'border md:w-[427px] border-input rounded-[62px] bg-lightGray px-4 py-[3px] z-20 relative':
       !focusForm,
-    'border border-input rounded-t-[21px]   bg-lightGray px-4 py-[3px] z-20  drop-shadow-3xl relative ':
+    'border md:w-[427px] border-input rounded-t-[21px]   bg-lightGray px-4 py-[3px] z-20  drop-shadow-3xl relative ':
       focusForm,
   });
 
@@ -410,18 +410,18 @@ export function PredictiveSearchResults() {
           ))}
         </div>
         {/* view all results /search?q=term */}
-        {searchTerm.current && (
-          <Link
-            className="flex px-4 py-3 items-center justify-center"
-            onClick={goToSearchResult}
-            to={`/search?q=${searchTerm.current}`}
-          >
-            <p>
-              До всіх результатів <q>{searchTerm.current}</q>
-              &nbsp; →
-            </p>
-          </Link>
-        )}
+        {/* {searchTerm.current && ( */}
+        {/*   <Link */}
+        {/*     className="flex px-4 py-3 items-center justify-center" */}
+        {/*     onClick={goToSearchResult} */}
+        {/*     to={`/search?q=${searchTerm.current}`} */}
+        {/*   > */}
+        {/*     <p> */}
+        {/*       До всіх результатів <q>{searchTerm.current}</q> */}
+        {/*       &nbsp; → */}
+        {/*     </p> */}
+        {/*   </Link> */}
+        {/* )} */}
       </motion.div>
     );
   }
@@ -527,7 +527,7 @@ function SearchResultItem({goToSearchResult, item}: SearchResultItemProps) {
   return (
     <li
       key={item.id}
-      className="border-b border-b-black/30 pb-5 md:pb-0 md:border-none"
+      className="border-b border-b-black/30 pb-5 md:pb-[10px] last-of-type:border-none"
     >
       <Link onClick={goToSearchResult} to={item.url} className="flex w-full">
         {item.image?.url && (
@@ -547,7 +547,7 @@ function SearchResultItem({goToSearchResult, item}: SearchResultItemProps) {
               }}
             />
           ) : (
-            <span className="font-semibold md:text-[22px] text-xl">
+            <span className="font-semibold md:text-[22px] md:line-clamp-1 text-xl">
               {item.title}
             </span>
           )}

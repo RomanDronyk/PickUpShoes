@@ -50,13 +50,13 @@ export function Header({header, isLoggedIn, cart}: HeaderProps) {
           menu={menu}
           primaryDomainUrl={header.shop.primaryDomain.url}
         />
-        <div className="relative hidden md:w-[427px]">
+        <div className="relative hidden ">
           <PredictiveSearchForm
             isMobile={isMobile}
             brandLogo={shop?.brand?.logo?.image}
           />
         </div>
-        <nav className="header-ctas flex md:gap-x-[15px] gap-x-2">
+        <nav className="header-ctas  flex md:gap-x-[15px] gap-x-2">
           <PredictiveSearchForm
             isMobile={isMobile}
             brandLogo={shop?.brand?.logo?.image}
