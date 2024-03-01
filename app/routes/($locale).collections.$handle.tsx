@@ -31,6 +31,10 @@ export type SortParam =
 
 export const FILTER_URL_PREFIX = 'filter.';
 
+export const handle: {breadcrumb: string} = {
+  breadcrumb: 'collection',
+};
+
 export const meta: MetaFunction<typeof loader> = ({data}) => {
   return [{title: `Hydrogen | ${data?.collection.title ?? ''} Collection`}];
 };

@@ -35,7 +35,7 @@ export function Layout({
   return (
     <div className="min-h-full flex flex-col">
       {header && <Header header={header} cart={cart} isLoggedIn={isLoggedIn} />}
-      {/* <Breadcrumbs /> */}
+      <Breadcrumbs />
       <AnimatePresence mode="popLayout" initial={false}>
         <motion.main
           key={useLocation().pathname}
