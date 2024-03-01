@@ -20,6 +20,7 @@ module.exports = {
       content: {
         colorFilterActive: 'url("../assets/images/color-arrow.svg")',
       },
+
       fontFamily: {
         sans: ["'Gilroy'"],
       },
@@ -85,6 +86,9 @@ module.exports = {
       },
       backgroundImage: {
         heroBg: "url('../assets/images/hero-left.png')",
+        menCollection: 'url("../assets/images/men-collection.png")',
+        womenCollection: 'url("../assets/images/women-collection.png")',
+        wearCollection: 'url("../assets/images/wear-collection.png")',
       },
       dropShadow: {
         '3xl': '0 4px 15px rgba(0,0,0,0.25)',

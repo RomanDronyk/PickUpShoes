@@ -192,35 +192,17 @@ const HERO_QUERY = `#graphql
 const MAIN_COOLLECTIONS = `#graphql
   query MainCollections($country: CountryCode, $language: LanguageCode)
     @inContext(country: $country, language: $language){
-     men:collection(handle: "mens-shoes") {
-    handle
-    title
-    image {
-      url
-      width
-      height
-      altText
+    men:collection(handle: "mens-shoes") {
+      handle
+      title
     }
-  }
   women:collection(handle: "women-shoes") {
     handle
     title
-    image {
-      url
-      width
-      height
-      altText
-    }
   }
   clothes:collection(handle: "clothes") {
     handle
     title
-    image {
-      url
-      width
-      height
-      altText
-    }
   }
 
 }

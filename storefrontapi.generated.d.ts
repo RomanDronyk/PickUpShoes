@@ -261,26 +261,12 @@ export type MainCollectionsQueryVariables = StorefrontAPI.Exact<{
 }>;
 
 export type MainCollectionsQuery = {
-  men?: StorefrontAPI.Maybe<
-    Pick<StorefrontAPI.Collection, 'handle' | 'title'> & {
-      image?: StorefrontAPI.Maybe<
-        Pick<StorefrontAPI.Image, 'url' | 'width' | 'height' | 'altText'>
-      >;
-    }
-  >;
+  men?: StorefrontAPI.Maybe<Pick<StorefrontAPI.Collection, 'handle' | 'title'>>;
   women?: StorefrontAPI.Maybe<
-    Pick<StorefrontAPI.Collection, 'handle' | 'title'> & {
-      image?: StorefrontAPI.Maybe<
-        Pick<StorefrontAPI.Image, 'url' | 'width' | 'height' | 'altText'>
-      >;
-    }
+    Pick<StorefrontAPI.Collection, 'handle' | 'title'>
   >;
   clothes?: StorefrontAPI.Maybe<
-    Pick<StorefrontAPI.Collection, 'handle' | 'title'> & {
-      image?: StorefrontAPI.Maybe<
-        Pick<StorefrontAPI.Image, 'url' | 'width' | 'height' | 'altText'>
-      >;
-    }
+    Pick<StorefrontAPI.Collection, 'handle' | 'title'>
   >;
 };
 
@@ -1796,7 +1782,7 @@ interface GeneratedQueryTypes {
     return: HomeHeroQuery;
     variables: HomeHeroQueryVariables;
   };
-  '#graphql\n  query MainCollections($country: CountryCode, $language: LanguageCode)\n    @inContext(country: $country, language: $language){\n     men:collection(handle: "mens-shoes") {\n    handle\n    title\n    image {\n      url\n      width\n      height\n      altText\n    }\n  }\n  women:collection(handle: "women-shoes") {\n    handle\n    title\n    image {\n      url\n      width\n      height\n      altText\n    }\n  }\n  clothes:collection(handle: "clothes") {\n    handle\n    title\n    image {\n      url\n      width\n      height\n      altText\n    }\n  }\n\n}\n': {
+  '#graphql\n  query MainCollections($country: CountryCode, $language: LanguageCode)\n    @inContext(country: $country, language: $language){\n    men:collection(handle: "mens-shoes") {\n      handle\n      title\n    }\n  women:collection(handle: "women-shoes") {\n    handle\n    title\n  }\n  clothes:collection(handle: "clothes") {\n    handle\n    title\n  }\n\n}\n': {
     return: MainCollectionsQuery;
     variables: MainCollectionsQueryVariables;
   };

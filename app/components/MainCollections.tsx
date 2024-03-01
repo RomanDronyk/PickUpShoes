@@ -8,13 +8,8 @@ export function MainCollections({
 }) {
   const {men, women, clothes} = collection;
   return (
-    <div className="grid grid-cols-[minmax(150px,_610px)_minmax(150px,_540px)] gap-x-3 sm:gap-x-[32px] gap-y-5 pb-7 sm:px-10 px-[10px]">
-      <div className="relative col-span-1 sm:row-span-2 max-h-[170px] sm:max-h-full ">
-        <img
-          alt={men?.image?.altText ? men.image.altText : men?.title}
-          src={men?.image?.url}
-          className="rounded-[30px] h-full"
-        />
+    <div className="grid grid-cols-[minmax(150px,_610px)_minmax(150px,_540px)] gap-x-3 sm:gap-x-[32px] gap-y-[10px] pb-7 sm:px-10 px-[10px]">
+      <div className="relative col-span-1 sm:row-span-2 xl:h-[666px] lg:h-[450px] md:h-[350px]  sm:h-[300px] h-[160px]  rounded-[30px] bg-center bg-cover bg-menCollection">
         <div className="absolute top-0 lef-0 w-full h-full flex items-center justify-center hover:underline text-white font-medium lg:text-[42px] text-[28px] max-[450px]:text-base">
           <Link
             to={`/collections/${men?.handle}`}
@@ -24,12 +19,7 @@ export function MainCollections({
           </Link>
         </div>
       </div>
-      <div className="relative rounded-[30px] col-span-1 row-span-1 max-h-[170px] sm:max-h-full ">
-        <img
-          src={women?.image?.url}
-          alt={women?.image?.altText ? women.image.altText : women?.title}
-          className=" h-full flex rounded-[30px]"
-        />
+      <div className="bg-womenCollection bg-center bg-cover relative rounded-[30px] col-span-1 row-span-1 max-h-[170px] sm:max-h-full ">
         <div className="absolute top-0 lef-0 w-full h-full flex items-center justify-center hover:underline text-white font-medium lg:text-[42px] text-[28px] max-[450px]:text-base">
           <Link
             to={`/collections/${women?.handle}`}
@@ -39,12 +29,7 @@ export function MainCollections({
           </Link>
         </div>
       </div>
-      <div className="relative rounded-[30px] max-sm:col-span-2 row-span-1  max-h-[220px] sm:max-h-full ">
-        <img
-          src={clothes?.image?.url}
-          alt={clothes?.image?.altText ? clothes.image.altText : clothes?.title}
-          className=" h-full flex rounded-[30px] w-full"
-        />
+      <div className="relative rounded-[30px] max-sm:col-span-2 row-span-1  h-[180px] max-[450px]:h-[110px] sm:h-auto sm:max-h-full bg-wearCollection bg-center bg-cover">
         <div className="absolute top-0 lef-0 w-full h-full flex items-center justify-center hover:underline text-white font-medium lg:text-[42px] text-[28px] max-[450px]:text-base">
           <Link
             to={`/collections/${clothes?.handle}`}
