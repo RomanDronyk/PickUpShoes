@@ -48,13 +48,13 @@ export default function Policy() {
   const {policy} = useLoaderData<typeof loader>();
   if (policy) {
     return (
-      <div className="policy px-24 mb-12">
-        <h1 className="font-bold text-2xl my-6">
+      <div className="policy lg:px-24 md:px-10 px-[10px] mb-12">
+        <h1 className="font-bold sm:text-2xl text-lg my-6">
           {PoliciesTitle[policy.handle]}
         </h1>
         <div
           dangerouslySetInnerHTML={{__html: policy.body}}
-          className="flex flex-col gap-4"
+          className="flex flex-col gap-4 sm:text-xl text-sm"
         />
       </div>
     );
