@@ -10,6 +10,10 @@ import type {
 import {Hero} from '~/components/Hero';
 import {MainCollections} from '~/components/MainCollections';
 
+export const handle: {breadcrumb: string} = {
+  breadcrumb: 'home',
+};
+
 export const meta: MetaFunction = () => {
   return [{title: 'PickupShoes | Головна'}];
 };

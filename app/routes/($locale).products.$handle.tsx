@@ -43,7 +43,7 @@ export const meta: MetaFunction<typeof loader> = ({data}) => {
 };
 
 export const handle = {
-  breadcrumbType: 'product',
+  breadcrumb: 'product',
 };
 
 export async function loader({params, request, context}: LoaderFunctionArgs) {
@@ -137,7 +137,7 @@ export default function Product() {
   const {product, variants} = useLoaderData<typeof loader>();
   const {selectedVariant, descriptionHtml} = product;
   return (
-    <div className="product lg:px-24 md:px-10 px-[10px] w-full pt-10">
+    <div className="product lg:px-24 md:px-10 px-[10px] w-full ">
       <div className="sm:grid sm:grid-cols-2 flex flex-col gap-y-5 gap-x-10">
         <ProductGalery media={product.media} />
         {/* <ProductImage image={selectedVariant?.image} /> */}
@@ -834,6 +834,12 @@ const PRODUCT_FRAGMENT = `#graphql
     seo {
       description
       title
+    }
+    collections(first:1){
+      nodes {
+        title
+        handle
+      }
     }
   }
   ${PRODUCT_VARIANT_FRAGMENT}

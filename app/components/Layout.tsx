@@ -43,7 +43,7 @@ export function Layout({
           animate={{opacity: 1}}
           exit={{opacity: 0, transition: {duration: 0.2}}}
           transition={{delay: 0, duration: 0.4}}
-          className="fleo-auto items-start flex"
+          className="flex-auto items-start flex"
         >
           {children}
         </motion.main>

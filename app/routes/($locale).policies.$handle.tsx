@@ -14,6 +14,10 @@ const PoliciesTitle: {[key: string]: string} = {
   'terms-of-service': 'Угода користувача',
 };
 
+export const handle = {
+  breadcrumb: 'policies',
+};
+
 export const meta: MetaFunction<typeof loader> = ({data}) => {
   return [{title: `Pick Up Shoes | ${data?.policy?.title ?? 'Про магазин'}`}];
 };
