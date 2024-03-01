@@ -37,19 +37,28 @@ export function Header({header, isLoggedIn, cart}: HeaderProps) {
     <header className="lg:px-24 px-5">
       <div className=" flex justify-between pt-[18px] pb-[25px] border-b border-black/20 relative">
         <div className="flex items-center gap-x-[35px]">
-          <MobileMenu
-            menu={menu}
-            logo={shop.brand.logo.image.url}
-            primaryDomainUrl={header.shop.primaryDomain.url}
-          />
-          <NavLink prefetch="intent" to="/" className="flex items-center">
+          {isMobile && (
+            <MobileMenu
+              menu={menu}
+              logo={shop.brand.logo.image.url}
+              primaryDomainUrl={header.shop.primaryDomain.url}
+            />
+          )}
+          <NavLink
+            prefetch="intent"
+            to="/"
+            className="flex items-center md:w-auto w-[130px]"
+          >
             <img src={shop.brand?.logo?.image?.url} alt="PickUpShoes" />
           </NavLink>
         </div>
-        <HeaderMenu
-          menu={menu}
-          primaryDomainUrl={header.shop.primaryDomain.url}
-        />
+        {!isMobile && (
+          <HeaderMenu
+            menu={menu}
+            primaryDomainUrl={header.shop.primaryDomain.url}
+          />
+        )}
+
         <div className="relative hidden ">
           <PredictiveSearchForm
             isMobile={isMobile}

@@ -25,8 +25,11 @@ export function Hero({heroData}: {heroData: HomeHeroQuery}) {
           </div>
           <div className="mt-[22px]">
             <ul className="flex flex-col gap-[15px]">
-              {mottoArr.map((motto, index) => (
-                <li key={index} className="flex items-center gap-[17px] ">
+              {mottoArr.map((motto: string, index: number) => (
+                <li
+                  key={`motto-${index}`}
+                  className="flex items-center gap-[17px] "
+                >
                   <svg
                     width="20"
                     height="21"

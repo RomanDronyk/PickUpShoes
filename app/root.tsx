@@ -47,7 +47,6 @@ export function links() {
   return [
     {rel: 'stylesheet', href: styles},
     {rel: 'stylesheet', href: vaulStyles},
-
     {
       rel: 'preconnect',
       href: 'https://cdn.shopify.com',

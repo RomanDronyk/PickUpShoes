@@ -1,6 +1,7 @@
 import {json, type LoaderFunctionArgs} from '@shopify/remix-oxygen';
 import {Link, useLoaderData, type MetaFunction} from '@remix-run/react';
 import {type Shop} from '@shopify/hydrogen/storefront-api-types';
+import AboutShop from '../components/AboutShop';
 
 type SelectedPolicies = keyof Pick<
   Shop,
@@ -10,12 +11,11 @@ type SelectedPolicies = keyof Pick<
 const PoliciesTitle: {[key: string]: string} = {
   'refund-policy': 'Обмін та повернення',
   'privacy-policy': 'Політика конфіденційності',
-  'contact-information': 'Про магазин',
   'terms-of-service': 'Угода користувача',
 };
 
 export const meta: MetaFunction<typeof loader> = ({data}) => {
-  return [{title: `Pick Up Shoes | ${data?.policy.title ?? ''}`}];
+  return [{title: `Pick Up Shoes | ${data?.policy?.title ?? 'Про магазин'}`}];
 };
 
 export async function loader({params, context}: LoaderFunctionArgs) {
@@ -41,26 +41,26 @@ export async function loader({params, context}: LoaderFunctionArgs) {
 
   const policy = data.shop?.[policyName];
 
-  if (!policy) {
-    throw new Response('Could not find the policy', {status: 404});
-  }
-
   return json({policy});
 }
 
 export default function Policy() {
   const {policy} = useLoaderData<typeof loader>();
-  return (
-    <div className="policy px-24 mb-12">
-      <h1 className="font-bold text-2xl my-6">
-        {PoliciesTitle[policy.handle]}
-      </h1>
-      <div
-        dangerouslySetInnerHTML={{__html: policy.body}}
-        className="flex flex-col gap-4"
-      />
-    </div>
-  );
+  if (policy) {
+    return (
+      <div className="policy lg:px-24 md:px-10 px-[10px] mb-12">
+        <h1 className="font-bold sm:text-2xl text-lg my-6">
+          {PoliciesTitle[policy.handle]}
+        </h1>
+        <div
+          dangerouslySetInnerHTML={{__html: policy.body}}
+          className="flex flex-col gap-4 sm:text-xl text-sm"
+        />
+      </div>
+    );
+  }
+
+  return <AboutShop />;
 }
 
 // NOTE: https://shopify.dev/docs/api/storefront/latest/objects/Shop
