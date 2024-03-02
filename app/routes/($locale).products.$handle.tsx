@@ -457,7 +457,7 @@ function ProductGalery({media}: {media: ProductFragment['media']}) {
   const [api, setApi] = useState<CarouselApi>();
   const [thumbApi, setThumbApi] = useState<CarouselApi>();
 
-  const isWide = useMedia('(min-width:1280px)');
+  const isWide = useMedia('(min-width:1280px)', false);
 
   const handleThumbClick = useCallback(
     (index: number) => {

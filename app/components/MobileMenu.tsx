@@ -52,7 +52,11 @@ export function MobileMenu({
           </svg>
         </Button>
       </SheetTrigger>
-      <SheetContent side="left" className="sm:max-w-full w-full px-5">
+      <SheetContent
+        onOpenAutoFocus={(event) => event.preventDefault()}
+        side="left"
+        className="sm:max-w-full w-full px-5"
+      >
         <SheetHeader className="flex items-center justify-between flex-row mb-10">
           {logo && (
             <Link to="/">

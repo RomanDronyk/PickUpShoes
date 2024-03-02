@@ -1,4 +1,4 @@
-import {Link, useLoaderData, type MetaFunction} from '@remix-run/react';
+import {useLoaderData, type MetaFunction} from '@remix-run/react';
 import {Pagination, getPaginationVariables} from '@shopify/hydrogen';
 import type {
   ProductFilter,
@@ -19,8 +19,8 @@ import {
   AppliedFilters,
   MobileFilters,
 } from '~/components/ProductsFilter';
-import {useVariantUrl, parseAsCurrency} from '~/utils';
-import {isMobile} from 'react-device-detect';
+import {parseAsCurrency} from '~/utils';
+import {useMedia} from 'react-use';
 
 export type SortParam =
   | 'price-low-high'
@@ -146,6 +146,8 @@ export async function loader({request, params, context}: LoaderFunctionArgs) {
 export default function Collection() {
   const {collection, filtersCollection, appliedFilters} =
     useLoaderData<typeof loader>();
+  const isMobile = useMedia('(max-width: 767px)', false);
+
   return (
     <div className="grid lg:grid-cols-[minmax(auto,_300px)_minmax(auto,_1fr)] grid-cols-1 gap-x-5 w-full lg:px-24 md:px-12 px-[10px]  mb-8">
       <div className="sidebar xl:w-[300px] h-full lg:block hidden">

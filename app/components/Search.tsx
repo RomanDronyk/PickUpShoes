@@ -25,7 +25,7 @@ import type {
 import {Input} from './ui/input';
 import {Button} from './ui/button';
 import {X} from 'lucide-react';
-import {isMobile} from 'react-device-detect';
+import {useMedia} from 'react-use';
 
 type PredicticeSearchResultItemImage =
   | PredictiveProductFragment['variants']['nodes'][0]['image'];
@@ -244,9 +244,9 @@ export function PredictiveSearchForm({
     );
   }
   const classes = clsx({
-    'border md:w-[427px] border-input rounded-[62px] bg-lightGray px-4 py-[3px] z-20 relative':
+    'border md:max-w-[427px] md:w-full border-input rounded-[62px] bg-lightGray px-4 py-[3px] z-20 relative':
       !focusForm,
-    'border md:w-[427px] border-input rounded-t-[21px]   bg-lightGray px-4 py-[3px] z-20  drop-shadow-3xl relative ':
+    'border md:max-w-[427px] md:w-full border-input rounded-t-[21px]   bg-lightGray px-4 py-[3px] z-20  drop-shadow-3xl relative ':
       focusForm,
   });
 
@@ -374,6 +374,8 @@ export function PredictiveSearchResults() {
   const {results, totalResults, searchInputRef, searchTerm} =
     usePredictiveSearch();
 
+  const isMobile = useMedia('(max-width: 767px)', false);
+
   function goToSearchResult(event: React.MouseEvent<HTMLAnchorElement>) {
     if (!searchInputRef.current) return;
     searchInputRef.current.blur();
@@ -466,6 +468,8 @@ function NoPredictiveSearchResults({
 }: {
   searchTerm: React.MutableRefObject<string>;
 }) {
+  const isMobile = useMedia('(max-width: 767px)', false);
+
   if (!searchTerm.current) {
     return null;
   }
@@ -524,6 +528,7 @@ type SearchResultItemProps = Pick<SearchResultTypeProps, 'goToSearchResult'> & {
 };
 
 function SearchResultItem({goToSearchResult, item}: SearchResultItemProps) {
+  const isMobile = useMedia('(max-width: 767px)', false);
   return (
     <li
       key={item.id}
