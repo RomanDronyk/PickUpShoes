@@ -1,6 +1,5 @@
 import {Await, Link, NavLink, useLocation} from '@remix-run/react';
 import {Suspense, useEffect, useState} from 'react';
-import {isMobile} from 'react-device-detect';
 import type {HeaderQuery} from 'storefrontapi.generated';
 import {useRootLoaderData} from '~/root';
 import {DropDownCart} from './DropdownCart';
@@ -17,6 +16,7 @@ import {
   NavigationMenuList,
   NavigationMenuTrigger,
 } from './ui/navigation-menu';
+import {useMedia} from 'react-use';
 
 export type HeaderProps = Pick<
   LayoutProps,
@@ -24,15 +24,19 @@ export type HeaderProps = Pick<
 >;
 
 export function Header({header, isLoggedIn, cart}: HeaderProps) {
-  const [cartShow, setCartShow] = useState(false);
   const {shop, menu} = header;
+  const [cartShow, setCartShow] = useState(false);
   const {key} = useLocation();
+  const isMobile = useMedia('(max-width: 767px)', false);
+
   const handleShowCart = (value?: boolean) => {
     setCartShow((prevState) => (value !== undefined ? value : !prevState));
   };
+
   useEffect(() => {
     if (cartShow) setCartShow(false);
   }, [key]);
+
   return (
     <header className="lg:px-24 px-5">
       <div className=" flex justify-between pt-[18px] pb-[25px] border-b border-black/20 relative">
@@ -59,12 +63,6 @@ export function Header({header, isLoggedIn, cart}: HeaderProps) {
           />
         )}
 
-        <div className="relative hidden ">
-          <PredictiveSearchForm
-            isMobile={isMobile}
-            brandLogo={shop?.brand?.logo?.image}
-          />
-        </div>
         <nav className="header-ctas  flex md:gap-x-[15px] gap-x-2">
           <PredictiveSearchForm
             isMobile={isMobile}

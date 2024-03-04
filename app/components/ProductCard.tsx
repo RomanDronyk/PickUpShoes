@@ -9,11 +9,13 @@ import {cn} from '~/lib/utils';
 import {Link} from '@remix-run/react';
 import type {ProductItemFragment} from 'storefrontapi.generated';
 import {useVariantUrl} from '~/utils';
-import {isMobile} from 'react-device-detect';
+import {useMedia} from 'react-use';
 
 export function ProductCard({product}: {product: ProductItemFragment}) {
   const variant = product.variants.nodes[0];
   const variantUrl = useVariantUrl(product.handle, variant.selectedOptions);
+  const isMobile = useMedia('(max-width: 767px)', false);
+
   const percentageAmount = variant.compareAtPrice
     ? (
         (1 -

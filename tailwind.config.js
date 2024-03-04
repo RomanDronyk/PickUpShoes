@@ -89,6 +89,7 @@ module.exports = {
         menCollection: 'url("../assets/images/men-collection.png")',
         womenCollection: 'url("../assets/images/women-collection.png")',
         wearCollection: 'url("../assets/images/wear-collection.png")',
+        notFoundBg: 'url("../assets/images/404.jpg")',
       },
       dropShadow: {
         '3xl': '0 4px 15px rgba(0,0,0,0.25)',

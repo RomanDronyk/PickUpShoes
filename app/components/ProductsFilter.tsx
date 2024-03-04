@@ -489,7 +489,10 @@ export function MobileFilters({
           </svg>
         </Button>
       </SheetTrigger>
-      <SheetContent className="sm:max-w-full w-full h-full overflow-y-auto">
+      <SheetContent
+        onOpenAutoFocus={(event) => event.preventDefault()}
+        className="sm:max-w-full w-full h-full overflow-y-auto"
+      >
         <SheetHeader className="mb-10 flex justify-between items-center flex-row">
           <div className="text-[18px] font-semibold flex items-center gap-[10px]">
             <span>Фільтрація товару</span>
