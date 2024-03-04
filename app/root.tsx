@@ -22,6 +22,7 @@ import favicon from '../public/favicon.ico';
 import {Layout} from '~/components/Layout';
 import styles from 'app/styles/tailwind.css';
 import vaulStyles from 'vaul/dist/index.css';
+import NotFound from './components/NotFound';
 /**
  * This is important to avoid re-fetching root queries on sub-navigations
  */
@@ -153,15 +154,7 @@ export function ErrorBoundary() {
       </head>
       <body className="font-sans">
         <Layout {...rootData}>
-          <div className="route-error">
-            <h1>Oops</h1>
-            <h2>{errorStatus}</h2>
-            {errorMessage && (
-              <fieldset>
-                <pre>{errorMessage}</pre>
-              </fieldset>
-            )}
-          </div>
+          <NotFound />
         </Layout>
         <ScrollRestoration nonce={nonce} />
         <Scripts nonce={nonce} />

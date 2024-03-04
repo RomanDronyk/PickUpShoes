@@ -26,7 +26,8 @@ export function Breadcrumbs() {
   );
   const isValidBreadcrumb = parsedBreadcrumbType.success;
 
-  if (isValidBreadcrumb) {
+  console.log(deepsRoute.data);
+  if (isValidBreadcrumb && deepsRoute.data) {
     switch (parsedBreadcrumbType.data) {
       case 'collection':
         pages.push({
