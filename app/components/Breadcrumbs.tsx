@@ -6,6 +6,7 @@ const PoliciesTitle: {[key: string]: string} = {
   'refund-policy': 'Обмін та повернення',
   'privacy-policy': 'Політика конфіденційності',
   'terms-of-service': 'Угода користувача',
+  'shipping-policy': 'Умови доставки',
 };
 
 export const breadcrumbsSchema = z.enum([
@@ -29,6 +30,7 @@ export function Breadcrumbs() {
   );
   const isValidBreadcrumb = parsedBreadcrumbType.success;
 
+  console.log(deepsRoute);
   if (isValidBreadcrumb && deepsRoute.data) {
     switch (parsedBreadcrumbType.data) {
       case 'collection':
