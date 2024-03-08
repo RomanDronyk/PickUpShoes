@@ -13,7 +13,7 @@ enum FormNames {
   REGISTER_FORM = 'registerForm',
 }
 export const handle = {
-  breadcrumbType: 'login',
+  breadcrumb: 'login',
 };
 type ActionResponse = {
   error: string | null;

@@ -26,6 +26,11 @@ import NotFound from './components/NotFound';
 /**
  * This is important to avoid re-fetching root queries on sub-navigations
  */
+import {createAuthClient} from './utils.server';
+
+// export const action = async ({request, context}: ActionArgs) => {
+//   const authClient = await createAuthClient();
+// };
 export const shouldRevalidate: ShouldRevalidateFunction = ({
   formMethod,
   currentUrl,

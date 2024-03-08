@@ -12,6 +12,7 @@ const PoliciesTitle: {[key: string]: string} = {
   'refund-policy': 'Обмін та повернення',
   'privacy-policy': 'Політика конфіденційності',
   'terms-of-service': 'Угода користувача',
+  'shipping-policy': 'Умови доставки',
 };
 
 export const handle = {

@@ -3,6 +3,7 @@ import {
   useLocation,
   useNavigate,
   useSearchParams,
+  useMatches,
   type Location,
 } from '@remix-run/react';
 import type {
@@ -11,7 +12,7 @@ import type {
   ProductFilter,
 } from '@shopify/hydrogen/storefront-api-types';
 import {ChevronDown} from 'lucide-react';
-import {useMemo, useState} from 'react';
+import {useEffect, useMemo, useState} from 'react';
 import {useDebounce} from 'react-use';
 import type {SortParam} from '~/routes/($locale).collections.$handle';
 import {
@@ -23,7 +24,6 @@ import {
 import {
   Sheet,
   SheetClose,
-  SheetTitle,
   SheetHeader,
   SheetTrigger,
   SheetContent,
@@ -34,15 +34,16 @@ import {Input} from './ui/input';
 import {Popover, PopoverContent, PopoverTrigger} from './ui/popover';
 import {Slider} from './ui/slider';
 import {ToggleGroup, ToggleGroupItem} from './ui/toggle-group';
-import {ScrollArea} from './ui/scroll-area';
 import {cn} from '~/lib/utils';
 
 export const FILTER_URL_PREFIX = 'filter.';
+
 export type AppliedFilter = {
   label: string;
   filter: ProductFilter;
   name?: string;
 };
+
 export function ProductsFilter({
   filters,
   initialFilters,
@@ -203,6 +204,7 @@ function ListFilter({filter}: {filter: Filter}) {
     () => new URLSearchParams(location.search),
     [location.search],
   );
+
   const navigate = useNavigate();
   //get prefix fitler
   const exampleValue = filter.values[0];
@@ -210,12 +212,31 @@ function ListFilter({filter}: {filter: Filter}) {
   const exampleValueObj = JSON.parse(
     exampleValue.input as string,
   ) as ProductFilter;
+
+  const matches = useMatches();
+
+  const catalogMatch = matches.find(
+    (match) => match.id === 'routes/($locale).collections.$handle',
+  );
+
+  const filtersValue = catalogMatch?.data?.appliedFilters.map((filter) => {
+    return JSON.stringify(filter.filter);
+  });
+
   const filterKey = Object.keys(exampleValueObj)[0];
+
+  // console.log('Filter:', filter);
+  // console.log('Value:', value);
+  // console.log('Object from params:', catalogMatch);
+  // console.log(filtersValue);
+
+  const calculatedValues = filter.values.filter((value) =>
+    filtersValue.includes(value.input),
+  );
 
   const handleChange = (value: string[]) => {
     setValue(value);
   };
-  const test = getFilterFromLink(filter, location);
 
   useDebounce(
     () => {
@@ -228,12 +249,18 @@ function ListFilter({filter}: {filter: Filter}) {
         value.includes(item.id),
       );
 
-      const b = getFilterLink(selectedItems, params, location);
-      navigate(`${b}`);
+      const link = getFilterLink(selectedItems, params, location);
+      navigate(`${link}`);
     },
     0,
     [value],
   );
+
+  useEffect(() => {
+    const appliedValues = calculatedValues.map((item) => item.id);
+    const newValue = new Set(value.concat(appliedValues));
+    setValue([...newValue]);
+  }, []);
 
   return (
     <div className="md:pb-6">
@@ -250,6 +277,7 @@ function ListFilter({filter}: {filter: Filter}) {
                 type="multiple"
                 className="flex flex-wrap justify-start"
                 onValueChange={handleChange}
+                value={value}
               >
                 {filter.values.map((filterItem) => (
                   <ToggleGroupItem

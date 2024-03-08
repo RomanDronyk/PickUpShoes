@@ -6,6 +6,7 @@ const PoliciesTitle: {[key: string]: string} = {
   'refund-policy': 'Обмін та повернення',
   'privacy-policy': 'Політика конфіденційності',
   'terms-of-service': 'Угода користувача',
+  'shipping-policy': 'Умови доставки',
 };
 
 export const breadcrumbsSchema = z.enum([
@@ -13,6 +14,9 @@ export const breadcrumbsSchema = z.enum([
   'collection',
   'product',
   'policies',
+  'login',
+  'orders',
+  'profile',
 ]);
 export type TBreadcrumbsType = z.infer<typeof breadcrumbsSchema>;
 
@@ -26,7 +30,7 @@ export function Breadcrumbs() {
   );
   const isValidBreadcrumb = parsedBreadcrumbType.success;
 
-  console.log(deepsRoute.data);
+  console.log(deepsRoute);
   if (isValidBreadcrumb && deepsRoute.data) {
     switch (parsedBreadcrumbType.data) {
       case 'collection':
@@ -61,7 +65,30 @@ export function Breadcrumbs() {
             name: 'Про магазин',
           });
         }
+        break;
+      case 'login':
+        pages.push({
+          href: '/account/login',
+          name: 'Вхід до особистого кабінету',
+        });
 
+        break;
+      case 'profile':
+        pages.push({
+          href: `${deepsRoute?.pathname}`,
+          name: 'Особистиа інформація',
+        });
+        break;
+      case 'orders':
+        pages.push({
+          href: `/account/ptofile`,
+          name: 'Особистий кабінет',
+        });
+
+        pages.push({
+          href: `${deepsRoute?.pathname}`,
+          name: 'Історія замовлень',
+        });
         break;
       default:
         break;
