@@ -244,9 +244,9 @@ export function PredictiveSearchForm({
     );
   }
   const classes = clsx({
-    'border md:max-w-[427px] md:w-full border-input rounded-[62px] bg-lightGray px-4 py-[3px] z-20 relative':
+    'border xl:w-[427px]  border-input rounded-[62px] bg-lightGray px-4 py-[3px] z-20 relative':
       !focusForm,
-    'border md:max-w-[427px] md:w-full border-input rounded-t-[21px]   bg-lightGray px-4 py-[3px] z-20  drop-shadow-3xl relative ':
+    'border xl:w-[427px] border-input rounded-t-[21px]   bg-lightGray px-4 py-[3px] z-20  drop-shadow-3xl relative ':
       focusForm,
   });
 
