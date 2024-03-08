@@ -36,7 +36,7 @@ export const handle: {breadcrumb: string} = {
 };
 
 export const meta: MetaFunction<typeof loader> = ({data}) => {
-  return [{title: `Hydrogen | ${data?.collection.title ?? ''} Collection`}];
+  return [{title: `PickUpShoes | ${data?.collection.title ?? ''} Collection`}];
 };
 
 export async function loader({request, params, context}: LoaderFunctionArgs) {

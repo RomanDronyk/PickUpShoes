@@ -16,6 +16,10 @@ import {
 import {Button} from '~/components/ui/button';
 import {Input} from '~/components/ui/input';
 
+export const handle = {
+  breadcrumb: 'profile',
+};
+
 enum FormNames {
   INFO_FORM = 'infoForm',
   PASS_FROM = 'passForm',

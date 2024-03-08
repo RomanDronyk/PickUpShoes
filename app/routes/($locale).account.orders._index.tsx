@@ -6,8 +6,12 @@ import type {
   OrderItemFragment,
 } from 'storefrontapi.generated';
 
+export const handle = {
+  breadcrumb: 'orders',
+};
+
 export const meta: MetaFunction = () => {
-  return [{title: 'Orders'}];
+  return [{title: 'Історія замовлень'}];
 };
 
 export async function loader({request, context}: LoaderFunctionArgs) {
