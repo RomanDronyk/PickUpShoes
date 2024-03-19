@@ -155,7 +155,7 @@ function AccountMenu() {
     <ScrollArea className="scrollbar-none">
       <nav
         role="navigation"
-        className="flex flex-row justify-between min-w-0 shrink-0 gap-2"
+        className="flex flex-row justify-between min-w-0 shrink-0 gap-2 border-b border-b-[#666666]"
       >
         <NavLink to="/account/profile" className={isActiveStyle}>
           Особиста інформація

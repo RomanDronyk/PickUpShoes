@@ -638,11 +638,13 @@ export type OrderItemFragment = Pick<
   lineItems: {
     nodes: Array<
       Pick<StorefrontAPI.OrderLineItem, 'title'> & {
-        variant?: StorefrontAPI.Maybe<{
-          image?: StorefrontAPI.Maybe<
-            Pick<StorefrontAPI.Image, 'url' | 'altText' | 'height' | 'width'>
-          >;
-        }>;
+        variant?: StorefrontAPI.Maybe<
+          Pick<StorefrontAPI.ProductVariant, 'sku'> & {
+            image?: StorefrontAPI.Maybe<
+              Pick<StorefrontAPI.Image, 'url' | 'altText' | 'height' | 'width'>
+            >;
+          }
+        >;
       }
     >;
   };
@@ -671,14 +673,16 @@ export type CustomerOrdersFragment = Pick<
         lineItems: {
           nodes: Array<
             Pick<StorefrontAPI.OrderLineItem, 'title'> & {
-              variant?: StorefrontAPI.Maybe<{
-                image?: StorefrontAPI.Maybe<
-                  Pick<
-                    StorefrontAPI.Image,
-                    'url' | 'altText' | 'height' | 'width'
-                  >
-                >;
-              }>;
+              variant?: StorefrontAPI.Maybe<
+                Pick<StorefrontAPI.ProductVariant, 'sku'> & {
+                  image?: StorefrontAPI.Maybe<
+                    Pick<
+                      StorefrontAPI.Image,
+                      'url' | 'altText' | 'height' | 'width'
+                    >
+                  >;
+                }
+              >;
             }
           >;
         };
@@ -727,14 +731,16 @@ export type CustomerOrdersQuery = {
             lineItems: {
               nodes: Array<
                 Pick<StorefrontAPI.OrderLineItem, 'title'> & {
-                  variant?: StorefrontAPI.Maybe<{
-                    image?: StorefrontAPI.Maybe<
-                      Pick<
-                        StorefrontAPI.Image,
-                        'url' | 'altText' | 'height' | 'width'
-                      >
-                    >;
-                  }>;
+                  variant?: StorefrontAPI.Maybe<
+                    Pick<StorefrontAPI.ProductVariant, 'sku'> & {
+                      image?: StorefrontAPI.Maybe<
+                        Pick<
+                          StorefrontAPI.Image,
+                          'url' | 'altText' | 'height' | 'width'
+                        >
+                      >;
+                    }
+                  >;
                 }
               >;
             };
