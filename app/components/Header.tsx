@@ -145,7 +145,7 @@ export function Header({header, isLoggedIn, cart}: HeaderProps) {
 }
 
 function CartBadge({
-  count,
+  count = 0,
   handleShow,
 }: {
   count: number;

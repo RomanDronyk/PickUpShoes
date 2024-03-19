@@ -10,11 +10,19 @@ import {Link} from '@remix-run/react';
 import type {ProductItemFragment} from 'storefrontapi.generated';
 import {useVariantUrl} from '~/utils';
 import {useMedia} from 'react-use';
+import {useRef, useReducer, useEffect} from 'react';
 
 export function ProductCard({product}: {product: ProductItemFragment}) {
+  const [ignored, forceUpdate] = useReducer((x) => x + 1, 0);
+  const optionsRef = useRef(null);
+  const imageRef = useRef(null);
   const variant = product.variants.nodes[0];
   const variantUrl = useVariantUrl(product.handle, variant.selectedOptions);
   const isMobile = useMedia('(max-width: 767px)', false);
+
+  useEffect(() => {
+    forceUpdate();
+  }, []);
 
   const percentageAmount = variant.compareAtPrice
     ? (
@@ -24,23 +32,41 @@ export function ProductCard({product}: {product: ProductItemFragment}) {
         100
       ).toFixed()
     : null;
-  const sizeOptions = [product.options[0]];
+  const sizeOptions = product.options.filter(
+    (option) => option.name === 'Size',
+  );
+
   return (
     <div className="group/card">
-      <div className="relative overflow-hidden">
+      <div
+        className="relative overflow-hidden h-[var(--image-height)]"
+        style={
+          {
+            '--options-height': `${optionsRef.current?.clientHeight}px`,
+            '--image-height': `${imageRef.current?.clientHeight}px`,
+          } as React.CSSProperties
+        }
+      >
         {product.featuredImage && (
-          <Link to={variantUrl} className="block">
+          <Link
+            ref={imageRef}
+            to={variantUrl}
+            className="block rounded-[20px] overflow-hidden group-hover/card:h-[calc(var(--image-height)-var(--options-height)+10px)] relative w-full h-full transition-all duration-100 ease-in-out"
+          >
             <Image
               alt={product.featuredImage.altText || product.title}
               aspectRatio="1/1"
               data={product.featuredImage}
-              className="rounded-[20px] max-h-[400px] h-full"
+              className="rounded-[20px] object-cover"
               crop="bottom"
             />
           </Link>
         )}
         {!isMobile && (
-          <div className="absolute w-full top-full bg-white  transition-all ease-in-out  duration-100 group-hover/card:bottom-0 group-hover/card:top-[unset] ">
+          <div
+            ref={optionsRef}
+            className="w-full top-full bg-white  transition-all ease-in-out  duration-100 group-hover/card:bottom-0 group-hover/card:top-[unset] "
+          >
             <VariantSelector
               handle={product.handle}
               options={sizeOptions}

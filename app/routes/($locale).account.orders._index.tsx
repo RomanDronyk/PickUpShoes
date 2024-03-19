@@ -1,5 +1,10 @@
 import {Link, useLoaderData, type MetaFunction} from '@remix-run/react';
-import {Money, Pagination, getPaginationVariables} from '@shopify/hydrogen';
+import {
+  Money,
+  Pagination,
+  Image,
+  getPaginationVariables,
+} from '@shopify/hydrogen';
 import {json, redirect, type LoaderFunctionArgs} from '@shopify/remix-oxygen';
 import type {
   CustomerOrdersFragment,
@@ -54,11 +59,14 @@ export default function Orders() {
   const {customer} = useLoaderData<{customer: CustomerOrdersFragment}>();
   const {orders, numberOfOrders} = customer;
   return (
-    <div className="orders">
-      <h2>
-        Orders <small>({numberOfOrders})</small>
-      </h2>
-      <br />
+    <div className="rounded-[20px] border border-black/10 p-6 mb-10">
+      <div className="grid grid-cols-5 text-xl font-semibold border-b border-b-black/10 pb-[15px]">
+        <div>Товар(и)</div>
+        <div>Ціна</div>
+        <div>Статус замовлення</div>
+        <div>Дата купівлі</div>
+        <div>№ замовлення</div>
+      </div>
       {orders.nodes.length ? <OrdersTable orders={orders} /> : <EmptyOrders />}
     </div>
   );
@@ -94,30 +102,64 @@ function OrdersTable({orders}: Pick<CustomerOrdersFragment, 'orders'>) {
 
 function EmptyOrders() {
   return (
-    <div>
-      <p>You haven&apos;t placed any orders yet.</p>
-      <br />
+    <div className="rounded-[20px] border border-black/10 p-6 mb-10">
+      <p>Ви не зробили ще жодного замовлення </p>
       <p>
-        <Link to="/collections">Start Shopping →</Link>
+        <Link to="/collections/catalog">Почати покупки →</Link>
       </p>
     </div>
   );
 }
-
 function OrderItem({order}: {order: OrderItemFragment}) {
+  console.log(order);
   return (
     <>
-      <fieldset>
-        <Link to={`/account/orders/${order.id}`}>
+      <div className="grid grid-cols-5 items-center mt-5 pb-5 border-b border-b-black/10">
+        <div className="flex gap-[10px]">
+          <div>
+            <Image
+              data={order.lineItems.nodes[0].variant?.image}
+              aspectRatio="1/1"
+              width={70}
+              height={70}
+              className="rounded-[15px]"
+            />
+          </div>
+          <div className="flex flex-col">
+            <span className="font-semibold text-lg">
+              {order.lineItems.nodes[0].title}
+            </span>
+            <span className="text-black/60">
+              Артикул: {order.lineItems.nodes[0].variant?.sku}
+            </span>
+          </div>
+        </div>
+        <div>
+          <span className="font-semibold text-lg">
+            <Money
+              as="span"
+              withoutCurrency
+              withoutTrailingZeros
+              data={order.currentTotalPrice}
+            />
+            грн
+          </span>
+        </div>
+        <p>{order.financialStatus}</p>
+        <p>
+          {new Date(order.processedAt).toLocaleString('uk', {
+            day: 'numeric',
+            month: 'numeric',
+            year: 'numeric',
+          })}
+        </p>
+        <Link
+          className="underline cursor-pointer"
+          to={`/account/orders/${btoa(order.id)}`}
+        >
           <strong>#{order.orderNumber}</strong>
         </Link>
-        <p>{new Date(order.processedAt).toDateString()}</p>
-        <p>{order.financialStatus}</p>
-        <p>{order.fulfillmentStatus}</p>
-        <Money data={order.currentTotalPrice} />
-        <Link to={`/account/orders/${btoa(order.id)}`}>View Order →</Link>
-      </fieldset>
-      <br />
+      </div>
     </>
   );
 }
@@ -131,10 +173,11 @@ const ORDER_ITEM_FRAGMENT = `#graphql
     financialStatus
     fulfillmentStatus
     id
-    lineItems(first: 10) {
+    lineItems(first: 1) {
       nodes {
         title
         variant {
+          sku
           image {
             url
             altText

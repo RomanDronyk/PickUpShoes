@@ -21,6 +21,9 @@ import {
 } from '~/components/ProductsFilter';
 import {parseAsCurrency} from '~/utils';
 import {useMedia} from 'react-use';
+import {Button} from '~/components/ui/button';
+import {MoveDown, MoveUp} from 'lucide-react';
+import Loader from '~/components/Loader';
 
 export type SortParam =
   | 'price-low-high'
@@ -175,13 +178,18 @@ export default function Collection() {
         <Pagination connection={collection.products}>
           {({nodes, isLoading, PreviousLink, NextLink}) => (
             <>
-              <PreviousLink>
-                {isLoading ? 'Loading...' : <span>↑ Load previous</span>}
+              <PreviousLink className="flex w-full justify-center mb-10">
+                <Button className="flex gap-3 items-center rounded-[8px] border border-black/10 bg-white text-black hover:bg-black/10">
+                  {isLoading ? 'Завантажуємо...' : ' Завантажити попередні'}
+                  {isLoading ? <Loader /> : <MoveUp size={16} />}
+                </Button>
               </PreviousLink>
               <ProductsGrid products={nodes} />
-              <br />
-              <NextLink>
-                {isLoading ? 'Loading...' : <span>Load more ↓</span>}
+              <NextLink className="flex w-full justify-center mt-10">
+                <Button className="rounded-[8px] flex gap-3 items-center text-xl border border-black/10 bg-white text-black hover:bg-black/10">
+                  {isLoading ? 'Завантажуємо...' : ' Завантажити ще'}
+                  {isLoading ? <Loader /> : <MoveDown size={16} />}
+                </Button>
               </NextLink>
             </>
           )}
