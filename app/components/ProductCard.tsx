@@ -10,14 +10,19 @@ import {Link} from '@remix-run/react';
 import type {ProductItemFragment} from 'storefrontapi.generated';
 import {useVariantUrl} from '~/utils';
 import {useMedia} from 'react-use';
-import {useRef} from 'react';
+import {useRef, useReducer, useEffect} from 'react';
 
 export function ProductCard({product}: {product: ProductItemFragment}) {
+  const [ignored, forceUpdate] = useReducer((x) => x + 1, 0);
   const optionsRef = useRef(null);
   const imageRef = useRef(null);
   const variant = product.variants.nodes[0];
   const variantUrl = useVariantUrl(product.handle, variant.selectedOptions);
   const isMobile = useMedia('(max-width: 767px)', false);
+
+  useEffect(() => {
+    forceUpdate();
+  }, []);
 
   const percentageAmount = variant.compareAtPrice
     ? (
