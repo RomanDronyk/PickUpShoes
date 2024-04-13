@@ -115,9 +115,7 @@ function FilterDraw({
           />
         );
       case 'LIST':
-        if (filter.id !== 'filter.v.option.color') {
-          return <ListFilter key={filter.id} filter={filter} />;
-        }
+        return <ListFilter key={filter.id} filter={filter} />;
     }
   };
   return (
@@ -196,6 +194,24 @@ function PriceFilter({
   );
 }
 
+enum ColorFilter {
+  Black = '#010101',
+  White = '#FFFFFF',
+  Grey = '#A4A4A4',
+  Brown = '#7F571B',
+  Olive = '#808000',
+  Red = '#F50606',
+  Violet = '#7D06F5',
+  Beige = '#DDB77B',
+  Orange = '#F57906',
+  Blue = '#063AF5',
+  Pink = '#F506A4',
+  Yellow = '#FFDE33',
+  Khaki = '#78866B',
+  LightPink = '#FFF3E8',
+  Green = '#01AB31',
+}
+
 function ListFilter({filter}: {filter: Filter}) {
   const [value, setValue] = useState<string[]>([]);
 
@@ -261,6 +277,7 @@ function ListFilter({filter}: {filter: Filter}) {
     const newValue = new Set(value.concat(appliedValues));
     setValue([...newValue]);
   }, []);
+  console.log(filter);
 
   return (
     <div className="md:pb-6">
@@ -275,21 +292,35 @@ function ListFilter({filter}: {filter: Filter}) {
             <div>
               <ToggleGroup
                 type="multiple"
-                className="flex flex-wrap justify-start"
+                className={` ${
+                  filter.id === 'fitler.v.option.color'
+                    ? 'grid grid-cols-5 gap-[15px]'
+                    : 'flex flex-wrap justify-start'
+                }`}
                 onValueChange={handleChange}
                 value={value}
               >
-                {filter.values.map((filterItem) => (
-                  <ToggleGroupItem
-                    key={filterItem.id}
-                    value={filterItem.id}
-                    className={cn(
-                      'data-[state=on]:bg-black data-[state=on]:text-white rounded-[62px] text-black/60  bg-[#F0F0F0] px-5 py-1',
-                    )}
-                  >
-                    <span>{filterItem.label}</span>
-                  </ToggleGroupItem>
-                ))}
+                {filter.id !== 'filter.v.option.color'
+                  ? filter.values.map((filterItem) => (
+                      <ToggleGroupItem
+                        key={filterItem.id}
+                        value={filterItem.id}
+                        className={cn(
+                          'data-[state=on]:bg-black data-[state=on]:text-white rounded-[62px] text-black/60  bg-[#F0F0F0] px-5 py-1',
+                        )}
+                      >
+                        <span>{filterItem.label}</span>
+                      </ToggleGroupItem>
+                    ))
+                  : filter.values.map((filterItem) => (
+                      <ToggleGroupItem
+                        key={filterItem.id}
+                        value={filterItem.id}
+                        className={cn(
+                          'data-[state=on]:before:content-colorFilterActive data-[state=on]:before:absolute data-[state=on]:before:top-2/4 data-[state=on]:before:left-2/4 data-[state=on]:before:-translate-x-2/4 data-[state=on]:before:-translate-y-2/4 relative  rounded-full border box-border w-[37px] h-[37px]',
+                        )}
+                      ></ToggleGroupItem>
+                    ))}
               </ToggleGroup>
             </div>
           </AccordionContent>

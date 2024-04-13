@@ -5,10 +5,12 @@ import {Image, Money} from '@shopify/hydrogen';
 import type {
   FeaturedCollectionFragment,
   RecommendedProductsQuery,
+  BestSellersQuery,
 } from 'storefrontapi.generated';
 
 import {Hero} from '~/components/Hero';
 import {MainCollections} from '~/components/MainCollections';
+import BestSellers from '~/components/BestSellers';
 
 export const handle: {breadcrumb: string} = {
   breadcrumb: 'home',
@@ -32,20 +34,30 @@ export async function loader({context}: LoaderFunctionArgs) {
       language: context.storefront.i18n.language,
     },
   });
+
+  const bestSellers = await storefront.query(BEST_SELLERS, {
+    variables: {
+      country: context.storefront.i18n.country,
+      language: context.storefront.i18n.language,
+    },
+  });
   return defer({
     featuredCollection,
     recommendedProducts,
     heroCollection,
     mainCollections,
+    bestSellers,
   });
 }
 
 export default function Homepage() {
-  const {heroCollection, mainCollections} = useLoaderData<typeof loader>();
+  const {heroCollection, mainCollections, bestSellers} =
+    useLoaderData<typeof loader>();
   return (
     <div className="home w-full flex flex-col items-center justify-center gap-y-[45px]">
       <Hero heroData={heroCollection} />
       <MainCollections collection={mainCollections} />
+      <BestSellers items={bestSellers} />
       {/* <RecommendedProducts products={data.recommendedProducts} /> */}
     </div>
   );
@@ -110,6 +122,66 @@ function RecommendedProducts({
     </div>
   );
 }
+
+const PRODUCT_ITEM_FRAGMENT = `#graphql
+  fragment MoneyProductItem on MoneyV2 {
+    amount
+    currencyCode
+  }
+  fragment ProductItem on Product {
+    id
+    handle
+    title
+    featuredImage {
+      id
+      altText
+      url
+      width
+      height
+    }
+    options {
+      name
+      values
+    }
+    priceRange {
+      minVariantPrice {
+        ...MoneyProductItem
+      }
+    }
+    variants(first: 1) {
+      nodes {
+        selectedOptions {
+          name
+          value
+        }
+        price {
+          amount
+          currencyCode
+        }
+        compareAtPrice {
+          amount
+          currencyCode
+        }
+
+      }
+    }
+  }
+` as const;
+
+const BEST_SELLERS = `#graphql 
+${PRODUCT_ITEM_FRAGMENT}
+query BestSellers($country: CountryCode, $language: LanguageCode) 
+@inContext(country: $country, language: $language){
+  collection(handle: "bestsellers"){
+    products(first: 10) {
+      nodes {
+        ...ProductItem
+      }
+    }
+    
+  }
+}
+`;
 
 const FEATURED_COLLECTION_QUERY = `#graphql
   fragment FeaturedCollection on Collection {
@@ -208,6 +280,5 @@ const MAIN_COOLLECTIONS = `#graphql
     handle
     title
   }
-
 }
 ` as const;
