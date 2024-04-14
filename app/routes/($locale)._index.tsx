@@ -11,6 +11,7 @@ import type {
 import {Hero} from '~/components/Hero';
 import {MainCollections} from '~/components/MainCollections';
 import BestSellers from '~/components/BestSellers';
+import NewProducts from '~/components/NewProducts';
 
 export const handle: {breadcrumb: string} = {
   breadcrumb: 'home',
@@ -41,23 +42,32 @@ export async function loader({context}: LoaderFunctionArgs) {
       language: context.storefront.i18n.language,
     },
   });
+  const newProducts = await storefront.query(NEW_PRODUCTS, {
+    variables: {
+      country: context.storefront.i18n.country,
+      language: context.storefront.i18n.language,
+    },
+  });
+
   return defer({
     featuredCollection,
     recommendedProducts,
     heroCollection,
     mainCollections,
     bestSellers,
+    newProducts,
   });
 }
 
 export default function Homepage() {
-  const {heroCollection, mainCollections, bestSellers} =
+  const {heroCollection, mainCollections, bestSellers, newProducts} =
     useLoaderData<typeof loader>();
   return (
     <div className="home w-full flex flex-col items-center justify-center gap-y-[45px]">
       <Hero heroData={heroCollection} />
       <MainCollections collection={mainCollections} />
       <BestSellers items={bestSellers} />
+      <NewProducts items={newProducts} />
       {/* <RecommendedProducts products={data.recommendedProducts} /> */}
     </div>
   );
@@ -173,6 +183,20 @@ ${PRODUCT_ITEM_FRAGMENT}
 query BestSellers($country: CountryCode, $language: LanguageCode) 
 @inContext(country: $country, language: $language){
   collection(handle: "bestsellers"){
+    products(first: 10) {
+      nodes {
+        ...ProductItem
+      }
+    }
+    
+  }
+}
+`;
+const NEW_PRODUCTS = `#graphql 
+${PRODUCT_ITEM_FRAGMENT}
+query NewProducts($country: CountryCode, $language: LanguageCode) 
+@inContext(country: $country, language: $language){
+  collection(handle: "new"){
     products(first: 10) {
       nodes {
         ...ProductItem

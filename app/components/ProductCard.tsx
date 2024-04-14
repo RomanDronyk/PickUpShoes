@@ -168,6 +168,12 @@ function ProductLabel({label}: {label: Label}) {
           <span>{label}</span>
         </div>
       );
+    case Label.new:
+      return (
+        <div className="absolute top-3 left-3 bg-[#03963E] font-semibold text-sm text-white leading-[18px] px-3 py-1 rounded-[10px]">
+          <span>{label}</span>
+        </div>
+      );
     default:
       return '';
   }
