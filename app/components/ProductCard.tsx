@@ -12,7 +12,18 @@ import {useVariantUrl} from '~/utils';
 import {useMedia} from 'react-use';
 import {useRef, useReducer, useEffect} from 'react';
 
-export function ProductCard({product}: {product: ProductItemFragment}) {
+export enum Label {
+  bestseller = 'Хіт продажу',
+  new = 'Новинка',
+}
+
+export function ProductCard({
+  product,
+  label,
+}: {
+  product: ProductItemFragment;
+  label: Label;
+}) {
   const [ignored, forceUpdate] = useReducer((x) => x + 1, 0);
   const optionsRef = useRef(null);
   const imageRef = useRef(null);
@@ -51,7 +62,7 @@ export function ProductCard({product}: {product: ProductItemFragment}) {
           <Link
             ref={imageRef}
             to={variantUrl}
-            className="block rounded-[20px] overflow-hidden group-hover/card:h-[calc(var(--image-height)-var(--options-height)+10px)] relative w-full h-full transition-all duration-100 ease-in-out"
+            className="relative block rounded-[20px] overflow-hidden group-hover/card:h-[calc(var(--image-height)-var(--options-height)+10px)] w-full h-full transition-all duration-100 ease-in-out"
           >
             <Image
               alt={product.featuredImage.altText || product.title}
@@ -60,6 +71,7 @@ export function ProductCard({product}: {product: ProductItemFragment}) {
               className="rounded-[20px] object-cover"
               crop="bottom"
             />
+            <ProductLabel label={label} />
           </Link>
         )}
         {!isMobile && (
@@ -146,4 +158,17 @@ function ProductOptions({option}: {option: VariantOption}) {
       </div>
     </div>
   );
+}
+
+function ProductLabel({label}: {label: Label}) {
+  switch (label) {
+    case Label.bestseller:
+      return (
+        <div className="absolute top-3 left-3 bg-red font-semibold text-sm text-white leading-[18px] px-3 py-1 rounded-[10px]">
+          <span>{label}</span>
+        </div>
+      );
+    default:
+      return '';
+  }
 }

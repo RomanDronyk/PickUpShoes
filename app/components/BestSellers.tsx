@@ -1,6 +1,6 @@
 import {Link} from '@remix-run/react';
 import type {BestSellersQuery} from 'storefrontapi.generated';
-import {ProductCard} from './ProductCard';
+import {ProductCard, Label} from './ProductCard';
 import {
   Carousel,
   CarouselContent,
@@ -15,7 +15,6 @@ export default function BestSellers({items}: {items: BestSellersQuery}) {
       products: {nodes: bestsellers},
     },
   } = items;
-  console.log(items);
   return (
     <div className="flex flex-col w-full gap-[30px] max-w-[1240px] pb-[35px]">
       <div className="flex md:justify-between justify-center">
@@ -39,7 +38,7 @@ export default function BestSellers({items}: {items: BestSellersQuery}) {
                   key={item.id}
                   className="md:basis-1/4 basis-3/4 ml-1 md:px-0 px-3"
                 >
-                  <ProductCard product={item} />
+                  <ProductCard product={item} label={Label.bestseller} />
                 </CarouselItem>
               ))}
           </CarouselContent>
