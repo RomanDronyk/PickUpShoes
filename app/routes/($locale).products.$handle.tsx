@@ -2,6 +2,7 @@ import {
   Await,
   Link,
   useLoaderData,
+  useLocation,
   type FetcherWithComponents,
   type MetaFunction,
 } from '@remix-run/react';
@@ -555,7 +556,7 @@ function ProductMain({
   selectedVariant: ProductFragment['selectedVariant'];
   variants: Promise<ProductVariantsQuery>;
 }) {
-  const {title, descriptionHtml} = product;
+  const {title, descriptionHtml, vendor} = product;
   return (
     <div className="product-main">
       <div className="flex flex-col border-b pb-6 border-b-black/10">
@@ -594,6 +595,10 @@ function ProductMain({
           )}
         </Await>
       </Suspense>
+      <div className="w-[300x] text-2xl my-4">
+        <a href="#size-grid">Розмірна сітка</a>
+      </div>
+      <SizeGrid vendor={vendor} />
     </div>
   );
 }
@@ -652,7 +657,6 @@ function ProductForm({
       </VariantSelector>
       {selectedVariant?.quantityAvailable === 1 && (
         <span className="my-5 py-5 w-full inline-flex border-b border-b-black/10">
-          {' '}
           - Останні в наявності
         </span>
       )}
@@ -684,7 +688,6 @@ function ProductForm({
 }
 
 function ProductOptions({option}: {option: VariantOption}) {
-  console.log(option);
   return (
     <div className="product-options" key={option.name}>
       <h5 className="text-[16px] text-black/60 mb-4">{option.name}</h5>
@@ -754,6 +757,31 @@ function AddToCartButton({
       </CartForm>
     </div>
   );
+}
+
+const SizeGrid = ({vendor}: {vendor: string}) => {
+  const [sizeChart, setSizeChart] = useState();
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const data = await loadJSON(vendor);
+        setSizeChart(data);
+      } catch (error) {
+        console.error('Eror load size grid', error);
+      }
+    };
+    fetchData();
+  }, [vendor]);
+
+  return <div>{vendor}</div>;
+};
+
+async function loadJSON(vendorName: string) {
+  const url = `/size-charts/${vendorName}.json`;
+  const response = await fetch(url);
+  const data = await response.json();
+  return data;
 }
 
 const PRODUCT_VARIANT_FRAGMENT = `#graphql
@@ -843,6 +871,7 @@ const PRODUCT_FRAGMENT = `#graphql
         handle
       }
     }
+    tags
   }
   ${PRODUCT_VARIANT_FRAGMENT}
 ` as const;
