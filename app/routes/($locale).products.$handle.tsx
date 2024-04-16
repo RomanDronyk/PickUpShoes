@@ -71,6 +71,7 @@ export async function loader({params, request, context}: LoaderFunctionArgs) {
   // await the query for the critical product data
   const {product} = await storefront.query(PRODUCT_QUERY, {
     variables: {
+      language: locale.language,
       handle,
       selectedOptions,
     },
@@ -155,7 +156,7 @@ export default function Product() {
 function ProductTabs({description}: {description: string}) {
   return (
     <div className="product-info my-6">
-      <Tabs defaultValue="product-delivery">
+      <Tabs defaultValue="product-info">
         <ScrollArea className="scrollbar-none " aria-orientation="horizontal">
           <TabsList className="w-full bg-none justify-between gap-3 py-0 sm:gap-0 bg-[#fff]  rounded-none h-[69px]">
             <TabsTrigger
@@ -683,6 +684,7 @@ function ProductForm({
 }
 
 function ProductOptions({option}: {option: VariantOption}) {
+  console.log(option);
   return (
     <div className="product-options" key={option.name}>
       <h5 className="text-[16px] text-black/60 mb-4">{option.name}</h5>
