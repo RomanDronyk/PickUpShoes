@@ -65,7 +65,7 @@ export const SizeGrid = ({vendor}: {vendor: string}) => {
               )}
             </div>
           </div>
-          <ScrollBar orientation="horizontal" className="scrollbar-none" />
+          <ScrollBar orientation="vertical" className="scrollbar-none" />
         </ScrollArea>
       </DialogContent>
     </Dialog>
