@@ -18,7 +18,6 @@ import type {
   ProductVariantFragment,
   ProductVariantsQuery,
 } from 'storefrontapi.generated';
-
 import {
   CartForm,
   Image,
@@ -38,6 +37,7 @@ import {Tabs, TabsContent, TabsList, TabsTrigger} from '~/components/ui/tabs';
 import {cn} from '~/lib/utils';
 import {getVariantUrl} from '~/utils';
 import monoLogo from '../assets/images/mono.svg';
+import {SizeGrid} from '~/components/SizeGrid';
 
 export const meta: MetaFunction<typeof loader> = ({data}) => {
   return [{title: `Hydrogen | ${data?.product.title ?? ''}`}];
@@ -757,31 +757,6 @@ function AddToCartButton({
       </CartForm>
     </div>
   );
-}
-
-const SizeGrid = ({vendor}: {vendor: string}) => {
-  const [sizeChart, setSizeChart] = useState();
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const data = await loadJSON(vendor);
-        setSizeChart(data);
-      } catch (error) {
-        console.error('Eror load size grid', error);
-      }
-    };
-    fetchData();
-  }, [vendor]);
-
-  return <div>{vendor}</div>;
-};
-
-async function loadJSON(vendorName: string) {
-  const url = `/size-charts/${vendorName}.json`;
-  const response = await fetch(url);
-  const data = await response.json();
-  return data;
 }
 
 const PRODUCT_VARIANT_FRAGMENT = `#graphql

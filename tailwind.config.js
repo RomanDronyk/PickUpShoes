@@ -90,6 +90,10 @@ module.exports = {
         womenCollection: 'url("../assets/images/women-collection.png")',
         wearCollection: 'url("../assets/images/wear-collection.png")',
         notFoundBg: 'url("../assets/images/404.jpg")',
+        swtichMenWite: 'url("../assets/images/switch-user-white.svg")',
+        swtichMenBlack: 'url("../assets/images/switch-user-black.svg")',
+        switchWoomenBlack: 'url("../assets/images/switch-woomen-black.svg")',
+        switchWoomenWhite: 'url("../assets/images/switch-woomen-white.svg")',
       },
       dropShadow: {
         '3xl': '0 4px 15px rgba(0,0,0,0.25)',
