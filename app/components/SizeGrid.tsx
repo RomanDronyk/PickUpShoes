@@ -48,7 +48,7 @@ export const SizeGrid = ({vendor}: {vendor: string}) => {
       <DialogTrigger asChild>
         <Button variant="ghost">Розмірна сітка</Button>
       </DialogTrigger>
-      <DialogContent className="">
+      <DialogContent className="overflow-y-scroll max-h-screen">
         <ScrollArea>
           <DialogHeader className="flex items-center justify-center font-bold text-2xl">
             <DialogTitle>Розмірна сітка: {vendor}</DialogTitle>
