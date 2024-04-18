@@ -595,10 +595,6 @@ function ProductMain({
           )}
         </Await>
       </Suspense>
-      <div className="w-[300x] text-2xl my-4">
-        <a href="#size-grid">Розмірна сітка</a>
-      </div>
-      <SizeGrid vendor={vendor} />
     </div>
   );
 }
@@ -648,13 +644,18 @@ function ProductForm({
 }) {
   return (
     <div className=" product-form pt-6">
-      <VariantSelector
-        handle={product.handle}
-        options={product.options}
-        variants={variants}
-      >
-        {({option}) => <ProductOptions key={option.name} option={option} />}
-      </VariantSelector>
+      <div className="flex justify-between flex-wrap-reverse">
+        <VariantSelector
+          handle={product.handle}
+          options={product.options}
+          variants={variants}
+        >
+          {({option}) => <ProductOptions key={option.name} option={option} />}
+        </VariantSelector>
+        <div className="w-[300x] text-2xl my-4">
+          <SizeGrid vendor={product.vendor} />
+        </div>
+      </div>
       {selectedVariant?.quantityAvailable === 1 && (
         <span className="my-5 py-5 w-full inline-flex border-b border-b-black/10">
           - Останні в наявності
@@ -689,9 +690,9 @@ function ProductForm({
 
 function ProductOptions({option}: {option: VariantOption}) {
   return (
-    <div className="product-options" key={option.name}>
+    <div className="product-options max-w-[370px]" key={option.name}>
       <h5 className="text-[16px] text-black/60 mb-4">{option.name}</h5>
-      <div className="product-options-grid flex flex-wrap gap-[10px] items-start">
+      <div className="product-options-grid grid grid-cols-5 gap-y-[10px] gap-x-[10px] items-start">
         {option.values.map(({value, isAvailable, isActive, to}) => {
           return (
             <Link
@@ -701,7 +702,7 @@ function ProductOptions({option}: {option: VariantOption}) {
               replace
               to={to}
               className={cn(
-                'text-black text-[16px] px-[18px] py-[15px] rounded-[22px] flex self-start bg-[#F0F0F0]',
+                'text-black text-[16px] px-[18px] py-[15px] rounded-[22px] flex max-w-[76px] justify-center self-start bg-[#F0F0F0]',
                 isActive && 'text-white bg-black',
               )}
             >
