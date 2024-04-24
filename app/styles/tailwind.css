@@ -70,6 +70,21 @@
     --placeholder-text: 0 0% 98%;
     --bage-red: 0 68% 56%;
     --base-font: 'Gilroy';
+    --filter-black: #010101;
+    --filter-white: #ffffff;
+    --filter-grey: #a4a4a4;
+    --filter-brown: #7f571b;
+    --filter-olive: #808000;
+    --filter-red: #f50606;
+    --filter-fiolet: #7d06f5;
+    --filter-beige: #ddb77b;
+    --filter-orange: #f57906;
+    --filter-blue: #063af5;
+    --filter-pink: #f506a4;
+    --filter-yellow: #ffde33;
+    --filter-khaki: #78866b;
+    --filter-light-pink: #fff3e8;
+    --filter-green: #01ab31;
   }
 }
 

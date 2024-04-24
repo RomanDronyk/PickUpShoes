@@ -86,8 +86,6 @@ export async function loader({request, params, context}: LoaderFunctionArgs) {
         filters,
         sortKey,
         reverse,
-        country: context.storefront.i18n.country,
-        language: context.storefront.i18n.language,
       },
     },
   );
