@@ -26,6 +26,7 @@ import type {
   ProductVariantFragment,
   ProductVariantsQuery,
 } from 'storefrontapi.generated';
+import RecommendationProducts from '~/components/RecommendationProducts';
 import {SizeGrid} from '~/components/SizeGrid';
 import ViewedProducts from '~/components/ViewedProducts';
 import {
@@ -79,6 +80,15 @@ export async function loader({params, request, context}: LoaderFunctionArgs) {
     },
   });
 
+  const {productRecommendations} = await storefront.query(
+    RECOMMENDED_PRODUCTS,
+    {
+      variables: {
+        id: product.id,
+      },
+    },
+  );
+
   if (!product?.id) {
     throw new Response(null, {status: 404});
   }
@@ -123,7 +133,12 @@ export async function loader({params, request, context}: LoaderFunctionArgs) {
     },
   });
   return defer(
-    {product, variants, viewedProducts: viewed},
+    {
+      product,
+      variants,
+      viewedProducts: viewed,
+      recommendations: productRecommendations,
+    },
     {
       headers: {
         'Set-Cookie': await viewedProductsCookie.serialize(cookie),
@@ -156,7 +171,8 @@ function redirectToFirstVariant({
 }
 
 export default function Product() {
-  const {product, variants, viewedProducts} = useLoaderData<typeof loader>();
+  const {product, variants, viewedProducts, recommendations} =
+    useLoaderData<typeof loader>();
   const {selectedVariant, descriptionHtml} = product;
   return (
     <div className="product lg:px-24 md:px-10 px-[10px] w-full ">
@@ -170,8 +186,9 @@ export default function Product() {
         />
       </div>
       <ProductTabs description={descriptionHtml} />
-      <div className="flex my-4 pt-[50px] border-t border-r-black/10 mt-[50px]">
+      <div className="flex flex-col my-4 pt-[50px] border-t border-r-black/10 mt-[50px]">
         <ViewedProducts products={viewedProducts} />
+        <RecommendationProducts recommended={recommendations} />
       </div>
     </div>
   );
@@ -1001,9 +1018,52 @@ const VIEWED_PRODUCT = `#graphql
         }
       }
     }
+    }
+  }
+` as const;
 
+const RECOMMENDED_PRODUCTS = `#graphql
+  query RecomendedProducts($id: ID!){
+    productRecommendations(productId: $id){
+     ... on Product {
+      id
+      title
+      handle
+      featuredImage {
+        id
+        altText
+        url
+        width
+        height
+      }
+      options {
+        name
+        values
+      }
+      priceRange {
+        minVariantPrice {
+          amount
+          currencyCode
+        }
+      }
+      variants(first:1){
+        nodes{
+          selectedOptions{
+            name
+            value
+          }
+          price{
+            amount
+            currencyCode
+          }
+          compareAtPrice{
+            amount
+            currencyCode
+          }
+        }
+      }
+    } 
 
     }
   }
-
 ` as const;

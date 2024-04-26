@@ -24,7 +24,6 @@ export function Breadcrumbs() {
   const matches = useMatches();
   const deepsRoute = matches.at(-1);
   const pages: {href: string; name: string}[] = [{href: '/', name: 'Головна'}];
-  console.log('DeepsRoute', deepsRoute);
 
   const parsedBreadcrumbType = breadcrumbsSchema.safeParse(
     deepsRoute?.handle.breadcrumb,

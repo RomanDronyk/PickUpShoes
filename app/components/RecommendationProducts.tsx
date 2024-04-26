@@ -1,4 +1,3 @@
-import {Link} from '@remix-run/react';
 import {ProductCard} from './ProductCard';
 import {
   Carousel,
@@ -7,28 +6,26 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from './ui/carousel';
-import type {ViewedProductsQuery} from 'storefrontapi.generated';
+import type {RecommendedProductFragment} from 'storefrontapi.generated';
 
-export default function ViewedProducts({
-  products,
+export default function RecommendationProducts({
+  recommended,
 }: {
-  products: ViewedProductsQuery;
+  recommended: RecommendedProductFragment[];
 }) {
-  const {nodes: viewed} = products;
-
   return (
     <div className="flex flex-col w-full gap-[30px]  pb-[35px] px-5 md:px-0">
-      {viewed && (
+      {recommended && (
         <>
           <div className="flex md:justify-between justify-center">
             <div className="font-semibold mb-[30px] text-black text-[28px]">
-              <h3>Ви переглядали</h3>
+              <h3>Вам може сподобатись</h3>
             </div>
           </div>
           <Carousel>
             <CarouselContent>
-              {viewed &&
-                viewed.map((item) => (
+              {recommended &&
+                recommended.map((item) => (
                   <CarouselItem
                     key={item.id}
                     className="md:basis-1/4 basis-3/4 ml-1 px-3"
