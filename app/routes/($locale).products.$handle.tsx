@@ -6,26 +6,28 @@ import {
   type FetcherWithComponents,
   type MetaFunction,
 } from '@remix-run/react';
-import {MediaFile} from '@shopify/hydrogen';
+import {
+  CartForm,
+  Image,
+  MediaFile,
+  VariantSelector,
+  getSelectedProductOptions,
+  type VariantOption,
+} from '@shopify/hydrogen';
 import type {
   CartLineInput,
   SelectedOption,
 } from '@shopify/hydrogen/storefront-api-types';
 import {defer, redirect, type LoaderFunctionArgs} from '@shopify/remix-oxygen';
 import {Suspense, useCallback, useEffect, useState} from 'react';
+import {useMedia} from 'react-use';
 import type {
   ProductFragment,
   ProductVariantFragment,
   ProductVariantsQuery,
 } from 'storefrontapi.generated';
-import {
-  CartForm,
-  Image,
-  VariantSelector,
-  getSelectedProductOptions,
-  type VariantOption,
-} from '@shopify/hydrogen';
-import {useMedia} from 'react-use';
+import {SizeGrid} from '~/components/SizeGrid';
+import ViewedProducts from '~/components/ViewedProducts';
 import {
   Carousel,
   CarouselContent,
@@ -34,10 +36,10 @@ import {
 } from '~/components/ui/carousel';
 import {ScrollArea, ScrollBar} from '~/components/ui/scroll-area';
 import {Tabs, TabsContent, TabsList, TabsTrigger} from '~/components/ui/tabs';
+import {viewedProductsCookie} from '~/cookies.server';
 import {cn} from '~/lib/utils';
 import {getVariantUrl} from '~/utils';
 import monoLogo from '../assets/images/mono.svg';
-import {SizeGrid} from '~/components/SizeGrid';
 
 export const meta: MetaFunction<typeof loader> = ({data}) => {
   return [{title: `Hydrogen | ${data?.product.title ?? ''}`}];
@@ -51,7 +53,6 @@ export async function loader({params, request, context}: LoaderFunctionArgs) {
   const {handle} = params;
   const {storefront} = context;
   const url = new URL(request.url);
-
   // Get the accept-language header
   const selectedOptions = getSelectedProductOptions(request).filter(
     (option) =>
@@ -109,7 +110,26 @@ export async function loader({params, request, context}: LoaderFunctionArgs) {
     variables: {handle},
   });
 
-  return defer({product, variants});
+  const cookieHeader = request.headers.get('Cookie');
+  const cookie = (await viewedProductsCookie.parse(cookieHeader)) || [];
+
+  if (!cookie.includes(product.id)) {
+    cookie.push(product.id);
+  }
+
+  const viewed = await storefront.query(VIEWED_PRODUCT, {
+    variables: {
+      ids: cookie,
+    },
+  });
+  return defer(
+    {product, variants, viewedProducts: viewed},
+    {
+      headers: {
+        'Set-Cookie': await viewedProductsCookie.serialize(cookie),
+      },
+    },
+  );
 }
 
 function redirectToFirstVariant({
@@ -136,7 +156,7 @@ function redirectToFirstVariant({
 }
 
 export default function Product() {
-  const {product, variants} = useLoaderData<typeof loader>();
+  const {product, variants, viewedProducts} = useLoaderData<typeof loader>();
   const {selectedVariant, descriptionHtml} = product;
   return (
     <div className="product lg:px-24 md:px-10 px-[10px] w-full ">
@@ -150,6 +170,9 @@ export default function Product() {
         />
       </div>
       <ProductTabs description={descriptionHtml} />
+      <div className="flex my-4 pt-[50px] border-t border-r-black/10 mt-[50px]">
+        <ViewedProducts products={viewedProducts} />
+      </div>
     </div>
   );
 }
@@ -888,4 +911,99 @@ const VARIANTS_QUERY = `#graphql
       ...ProductVariants
     }
   }
+` as const;
+
+const PRODUCT_ITEM_FRAGMENT = `#graphql
+  fragment MoneyProductItem on MoneyV2 {
+    amount
+    currencyCode
+  }
+  fragment ProductItem on Product {
+    id
+    handle
+    title
+    featuredImage {
+      id
+      altText
+      url
+      width
+      height
+    }
+    options {
+      name
+      values
+    }
+    priceRange {
+      minVariantPrice {
+        ...MoneyProductItem
+      }
+    }
+    variants(first: 1) {
+      nodes {
+        selectedOptions {
+          name
+          value
+        }
+        price {
+          amount
+          currencyCode
+        }
+        compareAtPrice {
+          amount
+          currencyCode
+        }
+
+      }
+    }
+  }
+` as const;
+
+const VIEWED_PRODUCT = `#graphql
+  query ViewedProducts(
+    $ids: [ID!]!
+  ) {
+ nodes(ids: $ids) {
+    ... on Product {
+      id
+      title
+      handle
+      featuredImage {
+        id
+        altText
+        url
+        width
+        height
+      }
+      options {
+        name
+        values
+      }
+      priceRange {
+        minVariantPrice {
+          amount
+          currencyCode
+        }
+      }
+      variants(first:1){
+        nodes{
+          selectedOptions{
+            name
+            value
+          }
+          price{
+            amount
+            currencyCode
+          }
+          compareAtPrice{
+            amount
+            currencyCode
+          }
+        }
+      }
+    }
+
+
+    }
+  }
+
 ` as const;

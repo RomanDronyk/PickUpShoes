@@ -156,7 +156,6 @@ export default function OrderRoute() {
 }
 
 function OrderLineRow({lineItem}: {lineItem: OrderLineItemFullFragment}) {
-  console.log(lineItem);
   return (
     <div
       className="grid grid-cols-4 mt-5 pb-5 border-b border-b-black/10"

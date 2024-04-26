@@ -23,14 +23,11 @@ import {Layout} from '~/components/Layout';
 import styles from 'app/styles/tailwind.css';
 import vaulStyles from 'vaul/dist/index.css';
 import NotFound from './components/NotFound';
+import {google} from 'worker-auth-providers';
 /**
  * This is important to avoid re-fetching root queries on sub-navigations
  */
-import {createAuthClient} from './utils.server';
 
-// export const action = async ({request, context}: ActionArgs) => {
-//   const authClient = await createAuthClient();
-// };
 export const shouldRevalidate: ShouldRevalidateFunction = ({
   formMethod,
   currentUrl,
