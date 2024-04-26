@@ -259,7 +259,6 @@ function ListFilter({filter}: {filter: Filter}) {
     const newValue = new Set(value.concat(appliedValues));
     setValue([...newValue]);
   }, []);
-  console.log(filter);
 
   return (
     <div className="md:pb-6">

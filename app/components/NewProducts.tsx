@@ -38,7 +38,7 @@ export default function NewProducts({items}: {items: NewProductsQuery}) {
                   key={item.id}
                   className="md:basis-1/4 basis-3/4 ml-1 px-3"
                 >
-                  <ProductCard product={item} label={Label.new} />
+                  <ProductCard product={item} />
                 </CarouselItem>
               ))}
           </CarouselContent>

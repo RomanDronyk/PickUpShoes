@@ -22,7 +22,7 @@ export function ProductCard({
   label,
 }: {
   product: ProductItemFragment;
-  label: Label;
+  label?: Label;
 }) {
   const [ignored, forceUpdate] = useReducer((x) => x + 1, 0);
   const optionsRef = useRef(null);
@@ -160,7 +160,7 @@ function ProductOptions({option}: {option: VariantOption}) {
   );
 }
 
-function ProductLabel({label}: {label: Label}) {
+function ProductLabel({label}: {label?: Label}) {
   switch (label) {
     case Label.bestseller:
       return (
