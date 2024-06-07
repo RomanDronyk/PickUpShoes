@@ -25,8 +25,9 @@ export function ProductCard({
   label?: Label;
 }) {
   const [ignored, forceUpdate] = useReducer((x) => x + 1, 0);
-  const optionsRef = useRef(null);
-  const imageRef = useRef(null);
+  const optionsRef = useRef<HTMLDivElement>(null);
+  const imageRef = useRef<HTMLDivElement>(null);
+  const linkRef = useRef<HTMLAnchorElement>(null);
   const variant = product.variants.nodes[0];
   const variantUrl = useVariantUrl(product.handle, variant.selectedOptions);
   const isMobile = useMedia('(max-width: 767px)', false);
@@ -60,10 +61,16 @@ export function ProductCard({
       >
         {product.featuredImage && (
           <Link
-            ref={imageRef}
+            // ref={imageRef}
             to={variantUrl}
             className="relative block rounded-[20px] overflow-hidden group-hover/card:h-[calc(var(--image-height)-var(--options-height)+10px)] w-full h-full transition-all duration-100 ease-in-out"
           >
+            <div 
+             className="relative overflow-hidden"
+             style={{
+               height: 'var(--image-height)',
+             }}
+             ref={imageRef}>
             <Image
               alt={product.featuredImage.altText || product.title}
               aspectRatio="1/1"
@@ -72,6 +79,8 @@ export function ProductCard({
               crop="bottom"
             />
             <ProductLabel label={label} />
+            </div>
+
           </Link>
         )}
         {!isMobile && (

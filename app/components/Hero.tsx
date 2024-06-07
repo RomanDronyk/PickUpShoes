@@ -78,6 +78,7 @@ export function Hero({heroData}: {heroData: HomeHeroQuery}) {
       <div>
         <Image
           alt="hero"
+          style={{aspectRatio: "1420 / 1158"}}
           key={banner.reference.id}
           data={banner.reference.image}
         />
