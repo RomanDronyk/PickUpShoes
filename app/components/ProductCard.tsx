@@ -4,13 +4,13 @@ import {
   type VariantOption,
   VariantSelector,
 } from '@shopify/hydrogen';
-import {cn} from '~/lib/utils';
+import { cn } from '~/lib/utils';
 
-import {Link} from '@remix-run/react';
-import type {ProductItemFragment} from 'storefrontapi.generated';
-import {useVariantUrl} from '~/utils';
-import {useMedia} from 'react-use';
-import {useRef, useReducer, useEffect} from 'react';
+import { Link } from '@remix-run/react';
+import type { ProductItemFragment } from 'storefrontapi.generated';
+import { useVariantUrl } from '~/utils';
+import { useMedia } from 'react-use';
+import { useRef, useReducer, useEffect } from 'react';
 
 export enum Label {
   bestseller = 'Хіт продажу',
@@ -31,22 +31,28 @@ export function ProductCard({
   const variant = product.variants.nodes[0];
   const variantUrl = useVariantUrl(product.handle, variant.selectedOptions);
   const isMobile = useMedia('(max-width: 767px)', false);
-
+  
   useEffect(() => {
     forceUpdate();
+    console.log(product, "a;flk")
   }, []);
 
   const percentageAmount = variant.compareAtPrice
     ? (
-        (1 -
-          parseInt(variant.price.amount) /
-            parseInt(variant.compareAtPrice.amount)) *
-        100
-      ).toFixed()
+      (1 -
+        parseInt(variant.price.amount) /
+        parseInt(variant.compareAtPrice.amount)) *
+      100
+    ).toFixed()
     : null;
-  const sizeOptions = product.options.filter(
-    (option) => option.name === 'Size',
-  );
+  // const sizeOptions = product.options.filter(
+  //   (option) => option.name === 'Size',
+  // );
+  const sizeOptions = product.options.filter((option) => {
+    return option.name === 'Size' || option.name === 'Розмір';
+  });
+  
+  console.log(sizeOptions, product.options)
 
   return (
     <div className="group/card">
@@ -61,29 +67,28 @@ export function ProductCard({
       >
         {product.featuredImage && (
           <Link
-            // ref={imageRef}
+            ref={linkRef}
             to={variantUrl}
             className="relative block rounded-[20px] overflow-hidden group-hover/card:h-[calc(var(--image-height)-var(--options-height)+10px)] w-full h-full transition-all duration-100 ease-in-out"
           >
-            <div 
-             className="relative overflow-hidden"
-             style={{
-               height: 'var(--image-height)',
-             }}
-             ref={imageRef}>
-            <Image
-              alt={product.featuredImage.altText || product.title}
-              aspectRatio="1/1"
-              data={product.featuredImage}
-              className="rounded-[20px] object-cover"
-              crop="bottom"
-            />
-            <ProductLabel label={label} />
+            <div
+              className="relative overflow-hidden"
+              style={{
+                height: 'var(--image-height)',
+              }}
+              ref={imageRef}>
+              <Image
+                alt={product.featuredImage.altText || product.title}
+                aspectRatio="1/1"
+                data={product.featuredImage}
+                className="rounded-[20px] object-cover"
+                crop="bottom"
+              />
+              <ProductLabel label={label} />
             </div>
 
           </Link>
         )}
-        {!isMobile && (
           <div
             ref={optionsRef}
             className="w-full top-full bg-white  transition-all ease-in-out  duration-100 group-hover/card:bottom-0 group-hover/card:top-[unset] "
@@ -93,12 +98,15 @@ export function ProductCard({
               options={sizeOptions}
               variants={product.variants.nodes}
             >
-              {({option}) => (
+              {({ option }) => (
                 <ProductOptions key={option.name} option={option} />
               )}
             </VariantSelector>
           </div>
-        )}
+        {/* {!isMobile && (
+
+        )} */}
+
       </div>
       <div className="flex flex-col mt-3">
         <Link to={variantUrl}>
@@ -142,11 +150,11 @@ export function ProductCard({
     </div>
   );
 }
-function ProductOptions({option}: {option: VariantOption}) {
+function ProductOptions({ option }: { option: VariantOption }) {
   return (
     <div className="product-options" key={option.name}>
       <div className="grid grid-cols-6 gap-x-[5px] gap-y-[10px] items-center place-content-center  py-[10px]">
-        {option.values.map(({value, isAvailable, isActive, to}) => {
+        {option.values.map(({ value, isAvailable, isActive, to }) => {
           return (
             <div key={option.name + value}>
               <Link
@@ -169,7 +177,7 @@ function ProductOptions({option}: {option: VariantOption}) {
   );
 }
 
-function ProductLabel({label}: {label?: Label}) {
+function ProductLabel({ label }: { label?: Label }) {
   switch (label) {
     case Label.bestseller:
       return (
