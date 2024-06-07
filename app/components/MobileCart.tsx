@@ -189,7 +189,7 @@ function EmptyCart() {
         Схоже твоя корзина порожня
       </h3>
       <Button asChild className="bg-red font-medium hover:bg-darkRed text-xl">
-        <Link to="/collections">
+        <Link to="/collections/catalog">
           До каталогу <ArrowRight size={20} className="ml-2" />
         </Link>
       </Button>
