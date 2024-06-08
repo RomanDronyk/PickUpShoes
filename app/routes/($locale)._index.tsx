@@ -1,6 +1,7 @@
 import {defer, type LoaderFunctionArgs} from '@shopify/remix-oxygen';
 import {Await, useLoaderData, Link, type MetaFunction} from '@remix-run/react';
 import {Suspense} from 'react';
+import BlockNewsletter from '~/components/BlockNewsletter';
 import {Image, Money} from '@shopify/hydrogen';
 import type {
   FeaturedCollectionFragment,
@@ -69,6 +70,7 @@ export default function Homepage() {
       <BestSellers items={bestSellers} />
       <NewProducts items={newProducts} />
       {/* <RecommendedProducts products={data.recommendedProducts} /> */}
+      <BlockNewsletter/>
     </div>
   );
 }

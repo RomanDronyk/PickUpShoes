@@ -109,6 +109,9 @@ module.exports = {
         swtichMenBlack: 'url("../assets/images/switch-user-black.svg")',
         switchWoomenBlack: 'url("../assets/images/switch-woomen-black.svg")',
         switchWoomenWhite: 'url("../assets/images/switch-woomen-white.svg")',
+        smallLogoIcon: 'url("../assets/images/smallLogoIcon.png")',
+        PhotoSinsay: 'url("../assets/images/PhotoSinsay.jpeg")',
+
       },
       dropShadow: {
         '3xl': '0 4px 15px rgba(0,0,0,0.25)',

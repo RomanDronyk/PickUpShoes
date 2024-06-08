@@ -127,3 +127,90 @@
 .blockFirsSite:hover .underLineHover::before{
   opacity: 1;
 }
+
+.BlockNewsletter{
+  justify-content: space-between;
+  position: relative;
+
+}
+.BlockNewsletter::before{
+  position: absolute;
+  border-radius: 20px;
+  content: "";
+  left: 0;
+  bottom: 0;
+  right: 0;
+  top: 0;
+  background-color: #00000084;
+  z-index: 0;
+}
+.BlockNewsletter__image{
+  width: 90px;
+  height: 90px;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center center;
+}
+.BlockNewsletter__row{
+  display: flex;
+  z-index: 2;
+  align-items: center;
+  color: #fff;
+  gap: 29px;
+}
+.BlockNewsletter__text{
+  font-weight: 600;
+  z-index: 2;
+  font-size: 36px;
+  text-transform: uppercase;
+
+}
+.BlockNewsletter__collum{
+  z-index: 2;
+  width: 349px;
+}
+.BlockNewsletter_input{
+  width: 349px !important;
+  z-index: 2;
+  display: block;
+}
+.BlockNewsletter_input_block{
+  z-index: 2;
+  width: 349px ;
+  margin-bottom: 14px;
+
+  color: #000;
+  background-color: #fff ;
+}
+@media(max-width: 1024px){
+  .BlockNewsletter{
+    padding: 40px 20px !important;
+  }
+  .BlockNewsletter__text{
+    font-size: 26px;
+  }
+  .BlockNewsletter__image{
+    width: 60px;
+    height: 60px;
+  }
+  .BlockNewsletter__row{
+    gap: 15px;
+  }
+}
+@media(max-width: 768px){
+.BlockNewsletter_input_block,.BlockNewsletter__collum,.BlockNewsletter_input{
+  width: 100%;
+}
+  .BlockNewsletter{
+    padding: 36px 23px !important;
+    flex-direction: column;
+    align-items: center;
+  }
+  .BlockNewsletter__text{
+    font-size: 20px;
+  }
+  .BlockNewsletter__row{
+    gap: 15px;
+    margin-bottom: 30px;
+  }
+}

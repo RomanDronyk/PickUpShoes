@@ -365,6 +365,7 @@ function ProductTabs({description}: {description: string}) {
                     Ви залюбки моежет оплатити і забрати своє замовлення в
                     нашому магазині в м.Коломия
                   </p>
+                  <div className="bg-smallLogoIcon bg-no-repeat bg-center bg-cover min-w-[63px] h-[63px] md:min-w-[83px] md:h-[83px]"></div>
                 </div>
               </div>
             </div>
