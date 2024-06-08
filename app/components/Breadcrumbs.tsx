@@ -26,7 +26,7 @@ export function Breadcrumbs() {
   const pages: {href: string; name: string}[] = [{href: '/', name: 'Головна'}];
 
   const parsedBreadcrumbType = breadcrumbsSchema.safeParse(
-    deepsRoute?.handle.breadcrumb,
+    deepsRoute?.handle?.breadcrumb,
   );
   const isValidBreadcrumb = parsedBreadcrumbType.success;
 
