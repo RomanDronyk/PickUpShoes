@@ -174,6 +174,7 @@ export default function Product() {
   const {product, variants, viewedProducts, recommendations} =
     useLoaderData<typeof loader>();
   const {selectedVariant, descriptionHtml} = product;
+  console.log(product,variants,viewedProducts,recommendations, "isss")
   return (
     <div className="product lg:px-24 md:px-10 px-[10px] w-full ">
       <div className="sm:grid sm:grid-cols-2 flex flex-col gap-y-5 gap-x-10">
@@ -597,7 +598,8 @@ function ProductMain({
   selectedVariant: ProductFragment['selectedVariant'];
   variants: Promise<ProductVariantsQuery>;
 }) {
-  const {title, descriptionHtml, vendor} = product;
+  const {title, descriptionHtml, vendor,collections} = product;
+  console.log(product, "new product")
   return (
     <div className="product-main">
       <div className="flex flex-col border-b pb-6 border-b-black/10">
@@ -608,9 +610,11 @@ function ProductMain({
           <span className="font-semibold text-[20px] text-black/50">
             {product.selectedVariant?.sku}
           </span>
-          <span className="text-white text-[16px] flex items-center jusity-center px-[14px] py-[5px] bg-black rounded-3xl self-start">
+          <Link
+          to={`/collections/${collections.nodes[0].handle}?filter.productVendor="${vendor}"`}
+           className="text-white text-[16px] flex items-center jusity-center px-[14px] py-[5px] bg-black rounded-3xl self-start">
             {product.vendor}
-          </span>
+          </Link>
         </div>
         <ProductPrice selectedVariant={selectedVariant} />
       </div>
