@@ -29,13 +29,9 @@ export function ProductCard({
   const imageRef = useRef<HTMLDivElement>(null);
   const linkRef = useRef<HTMLAnchorElement>(null);
   const variant = product.variants.nodes[0];
+  console.log(product, "handle")
   const variantUrl = useVariantUrl(product.handle, variant.selectedOptions);
   const isMobile = useMedia('(max-width: 767px)', false);
-  
-  useEffect(() => {
-    forceUpdate();
-    console.log(product, "a;flk")
-  }, []);
 
   const percentageAmount = variant.compareAtPrice
     ? (
@@ -45,14 +41,11 @@ export function ProductCard({
       100
     ).toFixed()
     : null;
-  // const sizeOptions = product.options.filter(
-  //   (option) => option.name === 'Size',
-  // );
   const sizeOptions = product.options.filter((option) => {
     return option.name === 'Size' || option.name === 'Розмір';
   });
-  
-  console.log(sizeOptions, product.options)
+
+
 
   return (
     <div className="group/card">
@@ -89,20 +82,20 @@ export function ProductCard({
 
           </Link>
         )}
-          <div
-            ref={optionsRef}
-            className="w-full top-full bg-white  transition-all ease-in-out  duration-100 group-hover/card:bottom-0 group-hover/card:top-[unset] "
+        <div
+          ref={optionsRef}
+          className="w-full top-full bg-white  transition-all ease-in-out  duration-100 group-hover/card:bottom-0 group-hover/card:top-[unset] "
+        >
+          <VariantSelector
+            handle={product.handle}
+            options={sizeOptions}
+            variants={product.variants.nodes}
           >
-            <VariantSelector
-              handle={product.handle}
-              options={sizeOptions}
-              variants={product.variants.nodes}
-            >
-              {({ option }) => (
-                <ProductOptions key={option.name} option={option} />
-              )}
-            </VariantSelector>
-          </div>
+            {({ option }) => (
+              <ProductOptions product={product} key={option.name} option={option} />
+            )}
+          </VariantSelector>
+        </div>
         {/* {!isMobile && (
 
         )} */}
@@ -150,18 +143,40 @@ export function ProductCard({
     </div>
   );
 }
-function ProductOptions({ option }: { option: VariantOption }) {
+
+function updateUrlParam(url: string, param: string, newValue: string): string {
+  // Додаємо базовий URL для коректної роботи URL API
+  const baseUrl = 'http://example.com';
+  const urlObj = new URL(url, baseUrl);
+  const params = new URLSearchParams(urlObj.search);
+
+  // Заміна значення параметра
+  params.set(param, newValue);
+
+  // Побудова нового URL з оновленими параметрами
+  urlObj.search = params.toString();
+  return urlObj.pathname + urlObj.search;
+}
+
+function ProductOptions({ product, option }: {
+  product: ProductItemFragment;
+  option: VariantOption
+}) {
+  const variant = product.variants.nodes[0];
+  // console.log(product, "handle")
+  const variantUrl = useVariantUrl(product.handle, variant.selectedOptions);
+
   return (
     <div className="product-options" key={option.name}>
       <div className="grid grid-cols-6 gap-x-[5px] gap-y-[10px] items-center place-content-center  py-[10px]">
         {option.values.map(({ value, isAvailable, isActive, to }) => {
+          const updatedUrl = updateUrlParam(variantUrl, 'Розмір', value);
           return (
             <div key={option.name + value}>
               <Link
-                prefetch="intent"
-                preventScrollReset
-                replace
-                to={to}
+                style={{ zIndex: 20 }}
+
+                to={updatedUrl}
                 className={cn(
                   'border-r border-r-[#AD9F9F] flex text-sm font-medium leading-none items-center justify-center text-black/50',
                   isAvailable && 'text-black',

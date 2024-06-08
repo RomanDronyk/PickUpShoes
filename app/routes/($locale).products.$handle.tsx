@@ -84,7 +84,7 @@ export async function loader({params, request, context}: LoaderFunctionArgs) {
     RECOMMENDED_PRODUCTS,
     {
       variables: {
-        id: product.id,
+        id: product?.id||"0"
       },
     },
   );
@@ -174,7 +174,6 @@ export default function Product() {
   const {product, variants, viewedProducts, recommendations} =
     useLoaderData<typeof loader>();
   const {selectedVariant, descriptionHtml} = product;
-  console.log(product,variants,viewedProducts,recommendations, "isss")
   return (
     <div className="product lg:px-24 md:px-10 px-[10px] w-full ">
       <div className="sm:grid sm:grid-cols-2 flex flex-col gap-y-5 gap-x-10">
@@ -599,7 +598,6 @@ function ProductMain({
   variants: Promise<ProductVariantsQuery>;
 }) {
   const {title, descriptionHtml, vendor,collections} = product;
-  console.log(product, "new product")
   return (
     <div className="product-main">
       <div className="flex flex-col border-b pb-6 border-b-black/10">

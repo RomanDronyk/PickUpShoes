@@ -43,7 +43,6 @@ export const SizeGrid = ({vendor}: {vendor: string}) => {
     };
     fetchData();
   }, [vendor]);
-  console.log('Size object', sizeChart);
   if (sizeChart) {
     return (
       <Dialog>

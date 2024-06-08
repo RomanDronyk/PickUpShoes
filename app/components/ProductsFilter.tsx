@@ -11,10 +11,10 @@ import type {
   FilterValue,
   ProductFilter,
 } from '@shopify/hydrogen/storefront-api-types';
-import {ChevronDown} from 'lucide-react';
-import {useEffect, useMemo, useState} from 'react';
-import {useDebounce} from 'react-use';
-import type {SortParam} from '~/routes/($locale).collections.$handle';
+import { ChevronDown } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
+import { useDebounce } from 'react-use';
+import type { SortParam } from '~/routes/($locale).collections.$handle';
 import {
   Accordion,
   AccordionContent,
@@ -28,13 +28,13 @@ import {
   SheetTrigger,
   SheetContent,
 } from './ui/sheet';
-import {Button} from './ui/button';
-import {Command, CommandGroup, CommandItem} from './ui/command';
-import {Input} from './ui/input';
-import {Popover, PopoverContent, PopoverTrigger} from './ui/popover';
-import {Slider} from './ui/slider';
-import {ToggleGroup, ToggleGroupItem} from './ui/toggle-group';
-import {cn} from '~/lib/utils';
+import { Button } from './ui/button';
+import { Command, CommandGroup, CommandItem } from './ui/command';
+import { Input } from './ui/input';
+import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
+import { Slider } from './ui/slider';
+import { ToggleGroup, ToggleGroupItem } from './ui/toggle-group';
+import { cn } from '~/lib/utils';
 
 export const FILTER_URL_PREFIX = 'filter.';
 
@@ -95,17 +95,17 @@ function FilterDraw({
   );
   const initialRangePrice = JSON.parse(
     initialFilterPrice?.values[0].input as string,
-  ) as {price: {min: number; max: number}};
+  ) as { price: { min: number; max: number } };
   const markup = (filter: Filter) => {
     switch (filter.type) {
       case 'PRICE_RANGE':
         const priceFilterValue = params.get(`${FILTER_URL_PREFIX}price`);
         const price = priceFilterValue
-          ? (JSON.parse(priceFilterValue) as {min: number; max: number})
+          ? (JSON.parse(priceFilterValue) as { min: number; max: number })
           : {
-              min: initialRangePrice.price.min,
-              max: initialRangePrice.price.max,
-            };
+            min: initialRangePrice.price.min,
+            max: initialRangePrice.price.max,
+          };
         return (
           <PriceFilter
             key={filter.id}
@@ -132,17 +132,23 @@ function PriceFilter({
 }: {
   min: number;
   max: number;
-  value: {min: number; max: number};
+  value: { min: number; max: number };
 }) {
   const initialRangeValue = value ? [value.min, value.max] : [min, max];
   const [priceRange, setPriceRange] = useState(initialRangeValue);
+
   const location = useLocation();
   const params = useMemo(
     () => new URLSearchParams(location.search),
     [location.search],
   );
   const navigate = useNavigate();
-
+  useEffect(() => {
+    const searchParams = new URLSearchParams(location.search);
+    if (!searchParams.has('filter.price')) {
+      setPriceRange(initialRangeValue);
+    }
+  }, [location.search, setPriceRange]);
   useDebounce(
     () => {
       if (priceRange[0] === min && priceRange[1] === max) {
@@ -151,10 +157,10 @@ function PriceFilter({
         return;
       }
       const price = {
-        ...(priceRange[0] === undefined ? {} : {min: priceRange[0]}),
-        ...(priceRange[1] === undefined ? {} : {max: priceRange[1]}),
+        ...(priceRange[0] === undefined ? {} : { min: priceRange[0] }),
+        ...(priceRange[1] === undefined ? {} : { max: priceRange[1] }),
       };
-      const newParams = filterInputToParams({price}, params);
+      const newParams = filterInputToParams({ price }, params);
       navigate(`${location.pathname}?${newParams.toString()}`);
     },
     500,
@@ -194,8 +200,9 @@ function PriceFilter({
   );
 }
 
-function ListFilter({filter}: {filter: Filter}) {
+function ListFilter({ filter }: { filter: Filter }) {
   const [value, setValue] = useState<string[]>([]);
+
 
   const location = useLocation();
   const params = useMemo(
@@ -213,20 +220,23 @@ function ListFilter({filter}: {filter: Filter}) {
 
   const matches = useMatches();
 
+  interface CatalogMatchData {
+    appliedFilters: { filter: any }[];
+  }
+
   const catalogMatch = matches.find(
     (match) => match.id === 'routes/($locale).collections.$handle',
   );
+  const filtersValue =
+    catalogMatch?.data &&
+    (catalogMatch.data as { appliedFilters: { filter: any }[] }).appliedFilters.map(
+      (filter: any) => {
+        return JSON.stringify(filter.filter);
+      },
+    );
 
-  const filtersValue = catalogMatch?.data?.appliedFilters.map((filter) => {
-    return JSON.stringify(filter.filter);
-  });
+  const filterKey: string = Object.keys(exampleValueObj)[0];
 
-  const filterKey = Object.keys(exampleValueObj)[0];
-
-  // console.log('Filter:', filter);
-  // console.log('Value:', value);
-  // console.log('Object from params:', catalogMatch);
-  // console.log(filtersValue);
 
   const calculatedValues = filter.values.filter((value) =>
     filtersValue.includes(value.input),
@@ -273,42 +283,41 @@ function ListFilter({filter}: {filter: Filter}) {
             <div>
               <ToggleGroup
                 type="multiple"
-                className={` ${
-                  filter.id === 'fitler.v.option.color'
+                className={` ${filter.id === 'fitler.v.option.color'
                     ? 'grid grid-cols-5 gap-[15px]'
                     : 'flex flex-wrap justify-start'
-                }`}
+                  }`}
                 onValueChange={handleChange}
                 value={value}
               >
                 {filter.id !== 'filter.v.option.color'
                   ? filter.values.map((filterItem) => (
+                    <ToggleGroupItem
+                      key={filterItem.id}
+                      value={filterItem.id}
+                      className={cn(
+                        'data-[state=on]:bg-black data-[state=on]:text-white rounded-[62px] text-black/60  bg-[#F0F0F0] px-5 py-1',
+                      )}
+                    >
+                      <span>{filterItem.label}</span>
+                    </ToggleGroupItem>
+                  ))
+                  : filter.values.map((filterItem) => {
+                    // const colorClass = `background-color:var(--filter-${filterItem.label.toLowerCase()})`;
+                    const colorClass = {
+                      backgroundColor: `var(--filter-${filterItem.label.toLowerCase()})`,
+                    };
+                    return (
                       <ToggleGroupItem
                         key={filterItem.id}
                         value={filterItem.id}
                         className={cn(
-                          'data-[state=on]:bg-black data-[state=on]:text-white rounded-[62px] text-black/60  bg-[#F0F0F0] px-5 py-1',
+                          `data-[state=on]:before:content-colorFilterActive data-[state=on]:before:absolute data-[state=on]:before:top-2/4 data-[state=on]:before:left-2/4 data-[state=on]:before:-translate-x-2/4 data-[state=on]:before:-translate-y-2/4 relative  rounded-full border box-border w-[37px] h-[37px]`,
                         )}
-                      >
-                        <span>{filterItem.label}</span>
-                      </ToggleGroupItem>
-                    ))
-                  : filter.values.map((filterItem) => {
-                      // const colorClass = `background-color:var(--filter-${filterItem.label.toLowerCase()})`;
-                      const colorClass = {
-                        backgroundColor: `var(--filter-${filterItem.label.toLowerCase()})`,
-                      };
-                      return (
-                        <ToggleGroupItem
-                          key={filterItem.id}
-                          value={filterItem.id}
-                          className={cn(
-                            `data-[state=on]:before:content-colorFilterActive data-[state=on]:before:absolute data-[state=on]:before:top-2/4 data-[state=on]:before:left-2/4 data-[state=on]:before:-translate-x-2/4 data-[state=on]:before:-translate-y-2/4 relative  rounded-full border box-border w-[37px] h-[37px]`,
-                          )}
-                          style={colorClass}
-                        ></ToggleGroupItem>
-                      );
-                    })}
+                        style={colorClass}
+                      ></ToggleGroupItem>
+                    );
+                  })}
               </ToggleGroup>
             </div>
           </AccordionContent>
@@ -317,7 +326,7 @@ function ListFilter({filter}: {filter: Filter}) {
     </div>
   );
 }
-export function AppliedFilters({filters = []}: {filters: AppliedFilter[]}) {
+export function AppliedFilters({ filters = [] }: { filters: AppliedFilter[] }) {
   const [params] = useSearchParams();
   const location = useLocation();
   return (
@@ -328,6 +337,7 @@ export function AppliedFilters({filters = []}: {filters: AppliedFilter[]}) {
             <Button
               key={`${filter.label}-${JSON.stringify(filter.filter)}`}
               variant="ghost"
+
               className="bg-[#535353] rounded-2xl px-[10px] py-[5px] text-white hover:bg-[#535353]/60"
             >
               <Link
@@ -417,7 +427,6 @@ function getFilterFromLink(
   const arrayDecodeSearchParams = decodeSearchParams
     ? decodeSearchParams.split('&')
     : [];
-  // console.log(filter);
 }
 //create URL for sort products
 function getSortLink(
@@ -429,7 +438,7 @@ function getSortLink(
   return `${location.pathname}?${params.toString()}`;
 }
 // Sort menu component
-const sortMenu: {value: string; label: string}[] = [
+const sortMenu: { value: string; label: string }[] = [
   {
     label: 'Популярністю',
     value: 'best-selling',

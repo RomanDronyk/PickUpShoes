@@ -111,7 +111,6 @@ function EmptyOrders() {
   );
 }
 function OrderItem({order}: {order: OrderItemFragment}) {
-  console.log(order);
   return (
     <>
       <div className="grid grid-cols-5 items-center mt-5 pb-5 border-b border-b-black/10">

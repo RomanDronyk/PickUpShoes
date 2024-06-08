@@ -72,7 +72,6 @@ function CartLineItem({
   const {id, merchandise} = line;
   const {product, title, image, selectedOptions} = merchandise;
   const lineItemUrl = useVariantUrl(product.handle, selectedOptions);
-  console.log(image, "s;lkjf")
   return (
     <li key={id} className="cart-line">
       {image && (

@@ -14,6 +14,7 @@ export default function ViewedProducts({
 }: {
   products: ViewedProductsQuery;
 }) {
+
   const {nodes: viewed} = products;
 
   return (

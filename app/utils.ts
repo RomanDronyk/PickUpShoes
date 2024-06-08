@@ -47,6 +47,14 @@ export function getVariantUrl({
   searchParams: URLSearchParams;
   selectedOptions: SelectedOption[];
 }) {
+  type TranslationDict = {
+    [key: string]: string;
+  };
+  
+  const translationDict: TranslationDict = {
+    Size: 'Розмір',
+    Color: 'Колір',
+  };
   const match = /(\/[a-zA-Z]{2}-[a-zA-Z]{2}\/)/g.exec(pathname);
   const isLocalePathname = match && match.length > 0;
 
@@ -54,13 +62,17 @@ export function getVariantUrl({
     ? `${match![0]}products/${handle}`
     : `/products/${handle}`;
 
-  selectedOptions.forEach((option) => {
-    searchParams.set(option.name, option.value);
-  });
+    const translatedSearchParams = new URLSearchParams();
 
-  const searchString = searchParams.toString();
+    selectedOptions.forEach((option) => {
+      const translatedKey = translationDict[option.name] || option.name;
+      translatedSearchParams.set(translatedKey, option.value);
+    });
 
-  return path + (searchString ? '?' + searchParams.toString() : '');
+    const searchString = translatedSearchParams.toString();
+
+    console.log(path + (searchString ? '?' + searchString.toString() : ''))
+  return path + (searchString ? '?' + searchString.toString() : '');
 }
 export function parseAsCurrency(value: number, locale: I18nLocale) {
   return new Intl.NumberFormat(
@@ -68,3 +80,4 @@ export function parseAsCurrency(value: number, locale: I18nLocale) {
     {},
   ).format(value);
 }
+
