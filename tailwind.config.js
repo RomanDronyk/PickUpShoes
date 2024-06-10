@@ -101,7 +101,7 @@ module.exports = {
       },
       backgroundImage: {
         heroBg: "url('../assets/images/hero-left.png')",
-        menCollection: 'url("../assets/images/men-collection.png")',
+        menCollection: 'url("../assets/images/men-collection.jpg")',
         womenCollection: 'url("../assets/images/women-collection.png")',
         wearCollection: 'url("../assets/images/wear-collection.png")',
         notFoundBg: 'url("../assets/images/404.jpg")',
