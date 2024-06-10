@@ -737,21 +737,22 @@ function ProductOptions({option}: {option: VariantOption}) {
       <h5 className="text-[16px] text-black/60 mb-4">{option.name}</h5>
       <div className="product-options-grid grid grid-cols-5 gap-y-[10px] gap-x-[10px] items-start">
         {option.values.map(({value, isAvailable, isActive, to}) => {
-          return (
-            <Link
-              key={option.name + value}
-              prefetch="intent"
-              preventScrollReset
-              replace
-              to={to}
-              className={cn(
-                'text-black text-[16px] px-[18px] py-[15px] rounded-[22px] flex max-w-[76px] justify-center self-start bg-[#F0F0F0]',
-                isActive && 'text-white bg-black',
-              )}
-            >
-              {value}
-            </Link>
-          );
+          if(isAvailable){
+            return <Link
+            key={option.name + value}
+            prefetch="intent"
+            preventScrollReset
+            replace
+            to={to}
+            className={cn(
+              'text-black text-[16px] px-[18px] py-[15px] rounded-[22px] flex max-w-[76px] justify-center self-start bg-[#F0F0F0]',
+              isActive && 'text-white bg-black',
+            )}
+          >
+            {value}
+          </Link>
+          }
+          
         })}
       </div>
     </div>

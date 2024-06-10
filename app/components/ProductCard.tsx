@@ -29,7 +29,6 @@ export function ProductCard({
   const imageRef = useRef<HTMLDivElement>(null);
   const linkRef = useRef<HTMLAnchorElement>(null);
   const variant = product.variants.nodes[0];
-  console.log(product, "handle")
   const variantUrl = useVariantUrl(product.handle, variant.selectedOptions);
   const isMobile = useMedia('(max-width: 767px)', false);
 
@@ -197,7 +196,7 @@ function ProductLabel({ label }: { label?: Label }) {
     case Label.bestseller:
       return (
         <div className="absolute top-3 left-3 bg-red font-semibold text-sm text-white leading-[18px] px-3 py-1 rounded-[10px]">
-          <span>{label}</span>
+          <span>{label}s</span>
         </div>
       );
     case Label.new:
