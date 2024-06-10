@@ -38,6 +38,8 @@ export const SizeGrid = ({vendor}: {vendor: string}) => {
         const data = await loadJSON(vendor);
         setSizeChart(data);
       } catch (error) {
+        const data = await loadJSON("Adidas");
+
         console.error('Eror load size grid', error);
       }
     };
