@@ -40,7 +40,7 @@ export function Header({header, isLoggedIn, cart}: HeaderProps) {
   return (
     <header className="lg:px-24 px-5">
       <div className=" flex justify-between pt-[18px] pb-[25px] border-b border-black/20 relative">
-        <div className="flex items-center gap-x-[35px]" style={{maxWidth:156}}>
+      <div className="flex items-center gap-x-[35px] md:max-w-[156px]">
           {isMobile && (
             <MobileMenu
               menu={menu}

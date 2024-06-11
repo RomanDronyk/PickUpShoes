@@ -1,5 +1,7 @@
 import {type ActionFunctionArgs, json, redirect} from '@shopify/remix-oxygen';
-import {Form, useActionData, type MetaFunction} from '@remix-run/react';
+import {Form, Link, useActionData, type MetaFunction} from '@remix-run/react';
+import {Input} from '~/components/ui/input';
+import { Button } from '~/components/ui/button';
 
 type ActionResponse = {
   error: string | null;
@@ -64,13 +66,15 @@ export default function Reset() {
   const action = useActionData<ActionResponse>();
 
   return (
-    <div className="account-reset">
-      <h1>Reset Password.</h1>
-      <p>Enter a new password for your account.</p>
+    <div className="my-[20px] account-recover flex items-center justify-center self-stretch flex-col w-full">
+      <div className="w-2/4 rounded-[20px] border border-black/10 p-6">
+
+<h1 className="font-medium text-[32px]">Скинути пароль.</h1>
+      <p className='text-lg'>Введіть новий пароль для свого облікового запису.</p>
+
       <Form method="POST">
         <fieldset>
-          <label htmlFor="password">Password</label>
-          <input
+          <Input
             aria-label="Password"
             autoComplete="current-password"
             // eslint-disable-next-line jsx-a11y/no-autofocus
@@ -78,20 +82,25 @@ export default function Reset() {
             id="password"
             minLength={8}
             name="password"
-            placeholder="Password"
+            placeholder="Пароль"
             required
             type="password"
+            className="bg-input px-6 py-3 text-xl placeholder:text-xl h-[52px]"
+
           />
-          <label htmlFor="passwordConfirm">Re-enter password</label>
-          <input
+          <br />
+          <p className='text-lg'>Повторно введіть пароль</p>
+          <Input
             aria-label="Re-enter password"
             autoComplete="current-password"
             id="passwordConfirm"
             minLength={8}
             name="passwordConfirm"
-            placeholder="Re-enter password"
+            placeholder="Повторно введіть пароль"
             required
             type="password"
+            className="bg-input px-6 py-3 text-xl placeholder:text-xl h-[52px]"
+
           />
         </fieldset>
         {action?.error ? (
@@ -103,12 +112,15 @@ export default function Reset() {
         ) : (
           <br />
         )}
-        <button type="submit">Reset</button>
+         <Button type="submit" className="flex items-center justify-center gap-5 py-[14px] font-medium text-xl w-full rounded-[36px]">
+         Змінити
+              </Button>
       </Form>
       <br />
       <p>
-        <a href="/account/login">Back to login →</a>
+        <Link to="/account/login">Повернутися до входу →</Link>
       </p>
+      </div>
     </div>
   );
 }

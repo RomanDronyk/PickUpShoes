@@ -59,9 +59,11 @@ export function MobileMenu({
       >
         <SheetHeader className="flex items-center justify-between flex-row mb-10">
           {logo && (
+            
             <Link to="/">
-              <img src={logo} alt="Pick Up Shoes" />
+              <img src={logo} className='max-w-[200px]' alt="Pick Up Shoes" />
             </Link>
+
           )}
         </SheetHeader>
         <Accordion type="single" collapsible className="w-full">
@@ -98,7 +100,7 @@ export function MobileMenu({
                           <li key={subMenuItem.id}>
                             <Link
                               className="sm:text-lg text-base hover:underline"
-                              to={url}
+                              to={url ||""}
                             >
                               {subMenuItem.title}
                             </Link>
