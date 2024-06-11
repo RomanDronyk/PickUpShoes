@@ -98,7 +98,7 @@ function DropDownCartDetail({cart}: {cart: CartApiQueryFragment | null}) {
         </div>
         <div className="dropdown-checkout flex items-center justify-end">
           <Button className="rounded-[60px] px-[55px]">
-            <Link to={cart?.checkoutUrl} className="flex gap-5">
+            <Link to={cart?.checkoutUrl ||""} className="flex gap-5">
               <span className="font-medium text-2xl">Оформити замовлення</span>
               <svg
                 width="23"

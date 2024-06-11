@@ -47,8 +47,9 @@ export const SizeGrid = ({vendor}: {vendor: string}) => {
   }, [vendor]);
   if (sizeChart) {
     return (
-      <Dialog>
-        <DialogTrigger asChild>
+      <Dialog >
+<div style={{overflow:"hidden"}}>
+<DialogTrigger className='overflow-hidden' asChild>
           <Button variant="ghost" className="flex gap-2">
             Розмірна сітка
             <svg
@@ -75,8 +76,10 @@ export const SizeGrid = ({vendor}: {vendor: string}) => {
           </Button>
         </DialogTrigger>
         <DialogContent className="overflow-y-scroll overflow-x-scroll xl:overflow-visible max-h-[90vh]">
-          <ScrollArea>
-            <DialogHeader className="flex items-center justify-center font-bold text-2xl">
+          <ScrollArea style={{display: "block !important "}} >
+<div style={{display: "block"}}>
+
+<DialogHeader  className="block overflow-hidden flex items-center justify-center font-bold text-2xl">
               <DialogTitle>Розмірна сітка: {vendor}</DialogTitle>
             </DialogHeader>
             <div className="size-grid">
@@ -92,8 +95,10 @@ export const SizeGrid = ({vendor}: {vendor: string}) => {
               </div>
             </div>
             <ScrollBar orientation="vertical" className="scrollbar-none" />
+</div>
           </ScrollArea>
         </DialogContent>
+</div>
       </Dialog>
     );
   }
@@ -123,7 +128,7 @@ function GridRow({
     setSizesArray(mainArr);
   };
   return (
-    <div className="flex md:flex-row flex-col">
+    <div className="overflow-x-scroll flex md:flex-row flex-col">
       <div className="flex md:flex-col flex-row md:gap-[10px] justify-between">
         <div className="bg-black text-white font-semibold rounded-l-none rounded-t-[62px] py-[20px] md:py-0 justify-center items-center flex-col flex md:rounded-none  md:rounded-l-[62px] h-[64px] md:h-[44px] md:pl-[21px]  md:pr-[14px]  px-[14px] pb-[21px] md:pb-0 max-w-[55px] w-full">
           <span>UK</span>

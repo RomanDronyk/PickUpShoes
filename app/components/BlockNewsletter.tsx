@@ -1,13 +1,15 @@
 import { useState } from 'react';
 import { Input } from './ui/input';
+import { Form } from '@remix-run/react';
 
-
-export default function BlockNewsletter({ }) {
-    const [email, setEmail]= useState('')
-    const sendEmail = (e: React.FormEvent<HTMLFormElement>)=>{
-        e.preventDefault();
-        setEmail("")
-    }
+export default function BlockNewsletter() {
+  const [email, setEmail] = useState('');
+  
+  const sendEmail = async (e:any) => {
+    e.preventDefault();
+    
+    setEmail("")
+  };
     return (
 <div className="max-w-[1260px] px-[20px] w-full pb-[57px]">
   <div className="BlockNewsletter bg-PhotoSinsay bg-cover bg-center bg-no-repeat rounded-[20px] px-[60px] py-[40px] w-full flex">
@@ -17,7 +19,7 @@ export default function BlockNewsletter({ }) {
         будь в курсі. отримуй <br /> знижки — першим
       </h3>
     </div>
-    <form onSubmit={sendEmail} className="BlockNewsletter__collum">
+    <Form method="POST" onSubmit={sendEmail} className="BlockNewsletter__collum">
       <div className="flex items-center justify-center rounded-[27px] border border-placeholderText w-full px-[20px] py-[3px] BlockNewsletter_input_block">
         <svg width="22" height="16" viewBox="0 0 22 16" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path
@@ -41,9 +43,25 @@ export default function BlockNewsletter({ }) {
       >
         Підписатись на розсилку
       </button>
-    </form>
+    </Form>
   </div>
 </div>
     );
 }
 
+
+
+
+
+const CUSTOMER_EMAIL_SUBSCRIPTION_MUTATION = `#graphql
+mutation customerEmailMarketingSubscribe {
+  customerEmailMarketingSubscribe {
+    emailAddress {
+      
+    }
+    userErrors {
+      field
+      message
+    }
+  }
+}` as const;

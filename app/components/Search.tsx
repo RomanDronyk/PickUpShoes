@@ -544,7 +544,7 @@ function SearchResultItem({goToSearchResult, item}: SearchResultItemProps) {
             className="rounded-[15px]"
           />
         )}
-        <div className="flex md:flex-row flex-col md:justify-between gap-y-2 ml-[14px] w-full md:items-center items-start">
+        <div className=" flex md:flex-row flex-col md:justify-between gap-y-2 ml-[14px] w-full md:items-center items-start">
           {item.styledTitle ? (
             <div
               dangerouslySetInnerHTML={{
