@@ -175,6 +175,7 @@ function redirectToFirstVariant({
 export default function Product() {
   const {product, variants, viewedProducts, recommendations} =
     useLoaderData<typeof loader>();
+    console.log(product,"sfasadf")
   const {selectedVariant, descriptionHtml} = product;
   return (
     <div className="product lg:px-24 md:px-10 px-[10px] w-full ">
@@ -364,7 +365,7 @@ function ProductTabs({description}: {description: string}) {
                   <p>
                     <span className="font-medium">Самовивіз -</span>
                     <br />
-                    Ви залюбки моежет оплатити і забрати своє замовлення в
+                    Ви залюбки можете оплатити і забрати своє замовлення в
                     нашому магазині в м.Коломия
                   </p>
                   <div className="bg-smallLogoIcon bg-no-repeat bg-center bg-cover min-w-[63px] h-[63px] md:min-w-[83px] md:h-[83px]"></div>
@@ -687,6 +688,24 @@ function ProductForm({
   selectedVariant: ProductFragment['selectedVariant'];
   variants: Array<ProductVariantFragment>;
 }) {
+
+  const checkAllVarians = ()=>{
+    const allUnavailable = variants.every(variant => variant.availableForSale === false);
+  
+    if (allUnavailable) {
+      return "Немає в наявності";
+    }else{
+      return null
+    }
+  }
+
+  const checkSelectedVariant = ()=>{
+    return selectedVariant?.availableForSale? 'Додати в корзину': 'Оберіть розмір'
+  }
+  const valueCheckedAllVarians = checkAllVarians()
+  const valueCheckedVarian = checkSelectedVariant()
+
+  console.log(variants,"varians")
   return (
     <div className=" product-form pt-6">
       <div className="flex justify-between flex-wrap-reverse">
@@ -724,9 +743,10 @@ function ProductForm({
               : []
           }
         >
-          {selectedVariant?.availableForSale
-            ? 'Додати в корзину'
-            : 'Немає в наявності'}
+         {(valueCheckedAllVarians!==null)
+         ?valueCheckedAllVarians:
+          valueCheckedVarian}
+          
         </AddToCartButton>
       </div>
     </div>

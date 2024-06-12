@@ -36,7 +36,7 @@ export function Footer({menu: footerMenu, shop}: Footer) {
               <a href="mailto:picupshoes@gmail.com">picupshoes@gmail.com</a>
             </li>
             <li>
-              <a href="tel:+38 (098) 209 99-91">+38 (098) 209 99-91</a>
+              <a href="tel:+38 (073) 74-17-510">+38 (073) 74-17-510</a>
             </li>
           </ul>
         </div>
