@@ -6,6 +6,8 @@ import {
   type FetcherWithComponents,
   type MetaFunction,
 } from '@remix-run/react';
+import type {RecommendedProductFragment} from 'storefrontapi.generated';
+
 import {
   CartForm,
   Image,
@@ -188,7 +190,7 @@ export default function Product() {
       <ProductTabs description={descriptionHtml} />
       <div className="flex flex-col my-4 pt-[50px] border-t border-r-black/10 mt-[50px]">
         <ViewedProducts products={viewedProducts} />
-        <RecommendationProducts recommended={recommendations} />
+        <RecommendationProducts recommended={recommendations as unknown as RecommendedProductFragment[]} />
       </div>
     </div>
   );
@@ -749,7 +751,7 @@ function ProductOptions({option}: {option: VariantOption}) {
               isActive && 'text-white bg-black',
             )}
           >
-            {value}s
+            {value}
           </Link>
           }
         })}

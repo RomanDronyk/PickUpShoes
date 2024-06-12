@@ -6,7 +6,7 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from './ui/carousel';
-import type {RecommendedProductFragment} from 'storefrontapi.generated';
+import type {ProductItemFragment, RecommendedProductFragment} from 'storefrontapi.generated';
 
 export default function RecommendationProducts({
   recommended,
@@ -30,7 +30,7 @@ export default function RecommendationProducts({
                     key={item.id}
                     className="md:basis-1/4 basis-3/4 ml-1 px-3"
                   >
-                    <ProductCard product={item} />
+                    <ProductCard product={item as unknown as ProductItemFragment} />
                   </CarouselItem>
                 ))}
             </CarouselContent>
