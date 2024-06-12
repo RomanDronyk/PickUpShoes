@@ -749,10 +749,9 @@ function ProductOptions({option}: {option: VariantOption}) {
               isActive && 'text-white bg-black',
             )}
           >
-            {value}
+            {value}s
           </Link>
           }
-          
         })}
       </div>
     </div>

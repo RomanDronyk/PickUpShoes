@@ -34,7 +34,6 @@ export function ProductCard({
   
   useEffect(() => {
     forceUpdate();
-    console.log(product, "a;flk")
   }, []);
 
   const percentageAmount = variant.compareAtPrice
@@ -45,14 +44,11 @@ export function ProductCard({
       100
     ).toFixed()
     : null;
-  // const sizeOptions = product.options.filter(
-  //   (option) => option.name === 'Size',
-  // );
+
   const sizeOptions = product.options.filter((option) => {
     return option.name === 'Size' || option.name === 'Розмір';
   });
-  
-  console.log(sizeOptions, product.options)
+
 
   return (
     <div className="group/card">
@@ -98,9 +94,8 @@ export function ProductCard({
               options={sizeOptions}
               variants={product.variants.nodes}
             >
-              {({ option }) => (
-                <ProductOptions key={option.name} option={option} />
-              )}
+              {({ option }) =>  <ProductOptions key={option.name} option={option} />}
+
             </VariantSelector>
           </div>
         {/* {!isMobile && (
@@ -155,22 +150,25 @@ function ProductOptions({ option }: { option: VariantOption }) {
     <div className="product-options" key={option.name}>
       <div className="grid grid-cols-6 gap-x-[5px] gap-y-[10px] items-center place-content-center  py-[10px]">
         {option.values.map(({ value, isAvailable, isActive, to }) => {
-          return (
-            <div key={option.name + value}>
-              <Link
-                // prefetch="intent"
-                // preventScrollReset
-                // replace
-                to={to}
-                className={cn(
-                  'border-r border-r-[#AD9F9F] flex text-sm font-medium leading-none items-center justify-center text-black/50',
-                  isAvailable && 'text-black',
-                )}
-              >
-                {value}
-              </Link>
-            </div>
-          );
+          if(isAvailable){
+            return (
+              <div key={option.name + value}>
+                <Link
+                  // prefetch="intent"
+                  // preventScrollReset
+                  // replace
+                  to={to}
+                  className={cn(
+                    'border-r border-r-[#AD9F9F] flex text-sm font-medium leading-none items-center justify-center text-black/50',
+                    isAvailable && 'text-black',
+                  )}
+                >
+                  {value}
+                </Link>
+              </div>
+            );
+          }
+          
         })}
       </div>
     </div>
