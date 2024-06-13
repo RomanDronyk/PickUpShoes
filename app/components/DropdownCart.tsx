@@ -7,9 +7,11 @@ import { ArrowRight, X, Plus, Minus } from 'lucide-react';
 import type { CartApiQueryFragment } from 'storefrontapi.generated';
 import type { Variants } from 'framer-motion';
 import type { CartLineUpdateInput } from '@shopify/hydrogen/storefront-api-types';
+import EmptyCart from './ui/EmptyCart';
 
 type DropDownCartLine = CartApiQueryFragment['lines']['nodes'][0];
 type DropdownCartProps = {
+  closeCart:()=> void;
   cart: CartApiQueryFragment | null;
   active: boolean;
   handleShow: (arg0: boolean) => void;
@@ -19,56 +21,49 @@ type CartLine = CartApiQueryFragment['lines']['nodes'][0];
 
 const cartVariants = {
   closed: {
-    top: '0%',
+    top: '-300%',
     opacity: 0,
-    zIndex: -12,
-    // transition: {
-    //   type: 'spring',
-    //   zIndex: 1,
-    //   opacity: 1,
-    //   scale: 1,
-    //   delay: 0.1,
-    //   duration: 0.6,
-    // },
+    transition: {
+      type: 'spring',
+      opacity: 1,
+      scale: 1,
+      duration: 0.01,
+    },
   },
   open: {
     top: '100.9%',
-    zIndex: 1,
     opacity: 1,
-    // transition: {
-    //   type: 'spring',
-    //   duration: 1,
-    //   zIndex: 0.2,
-
-    //   scale: 1,
-    //   delayChildren: 0.2,
-    //   staggerChildren: 0.05,
-    // },
+    transition: {
+      type: 'spring',
+      duration: 0.01,
+      scale: 1,
+    },
   },
 } satisfies Variants;
 
-export function DropDownCart({ cart, active, handleShow }: DropdownCartProps) {
+export function DropDownCart({closeCart, cart, active, handleShow }: DropdownCartProps) {
+  console.log(closeCart, "sf;aldjk",handleShow)
   const lines = Boolean(cart?.lines?.nodes?.length || 0);
   /* const ref = useClickAway(() => {
     handleShow(false);
   }) as React.RefObject<HTMLDivElement>; */
   return (
-    <div
-      // initial={false}
-      // variants={cartVariants}
-      // animate={active ? 'open' : 'closed'}
-      // exit="closed"
+    <motion.div
+      initial={true}
+      variants={cartVariants}
+      animate={active ? 'open' : 'closed'}
+      exit="closed"
       className= {active?
-        "top-[101%] opacity-[1]  duration-500 transition-all ease-linear absolute z-20 w-full flex-col d-flex  bg-white/95 backdrop-blur-lg drop-shadow-cart rounded-b-[30px]  p-[30px] text-black"
-        :"top-[-400%] opacity-0  duration-500 transition-all ease-linear absolute z-20 w-full flex-col d-flex  bg-white/95 backdrop-blur-lg drop-shadow-cart rounded-b-[30px]  p-[30px] text-black"
+        "top-[101%] opacity-[1]  duration-300 transition-all ease-linear absolute z-20 w-full flex-col d-flex  bg-white/95 backdrop-blur-lg drop-shadow-cart rounded-b-[30px]  p-[30px] text-black"
+        :"top-[-500%] opacity-0  duration-300 transition-all ease-linear absolute z-20 w-full flex-col d-flex  bg-white/95 backdrop-blur-lg drop-shadow-cart rounded-b-[30px]  p-[30px] text-black"
       } 
     >
-      {!lines && <EmptyCart />}
-      {lines && <DropDownCartDetail cart={cart} />}
-    </div>
+      {!lines && <EmptyCart closeCart = {closeCart} />}
+      {lines && <DropDownCartDetail closeCart = {closeCart} cart={cart} />}
+    </motion.div>
   );
 }
-function DropDownCartDetail({ cart }: { cart: CartApiQueryFragment | null }) {
+function DropDownCartDetail({ cart,closeCart }: {closeCart:()=>void; cart: CartApiQueryFragment | null }) {
   const cost = cart?.cost;
   return (
     <div className="dropdown-detail">
@@ -88,7 +83,7 @@ function DropDownCartDetail({ cart }: { cart: CartApiQueryFragment | null }) {
         </div>
         <ul className="flex flex-col gap-4">
           {cart?.lines?.nodes.map((line) => (
-            <CartLineItem key={line.id} line={line} />
+            <CartLineItem  closeCart = {closeCart} key={line.id} line={line} />
           ))}
         </ul>
       </div>
@@ -127,7 +122,7 @@ function DropDownCartDetail({ cart }: { cart: CartApiQueryFragment | null }) {
   );
 }
 
-function CartLineItem({ line }: { line: DropDownCartLine }) {
+function CartLineItem({ line,closeCart }: { closeCart: ()=>void; line: DropDownCartLine }) {
   const { id, merchandise } = line;
   const { product, title, image, selectedOptions } = merchandise;
   const lineItemUrl = useVariantUrl(product.handle, selectedOptions);
@@ -145,7 +140,7 @@ function CartLineItem({ line }: { line: DropDownCartLine }) {
             className="rounded-[15px] mr-[14px]"
           />
         )}
-        <Link prefetch="intent" to={lineItemUrl}>
+        <Link onClick={closeCart} prefetch="intent" to={lineItemUrl}>
           <span className="font-semibold lg:text-[22px] text-lg">
             {product.title}
           </span>
@@ -172,18 +167,7 @@ function CartLineItem({ line }: { line: DropDownCartLine }) {
   );
 }
 
-function EmptyCart() {
-  return (
-    <div className="flex flex-col gap-5 min-h-52 h-full items-center justify-center">
-      <h3 className="font-semibold text-[26px]">Схоже твоя корзина порожня</h3>
-      <Button asChild className="bg-red font-medium hover:bg-darkRed text-xl">
-        <Link to="/collections/catalog">
-          До каталогу <ArrowRight size={20} className="ml-2" />
-        </Link>
-      </Button>
-    </div>
-  );
-}
+
 function CartLineQuantity({ line }: { line: CartLine }) {
   if (!line || typeof line?.quantity === 'undefined') return null;
   const { id: lineId, quantity } = line;

@@ -1,13 +1,15 @@
-import {Await, Link, NavLink, useLocation} from '@remix-run/react';
-import {Suspense, useEffect, useState} from 'react';
-import type {HeaderQuery} from 'storefrontapi.generated';
-import {useRootLoaderData} from '~/root';
-import {DropDownCart} from './DropdownCart';
-import type {LayoutProps} from './Layout';
-import {MobileCart} from './MobileCart';
-import {MobileMenu} from './MobileMenu';
-import {PredictiveSearchForm} from './Search';
-import {Button} from './ui/button';
+import { Await, Link, NavLink, useLocation } from '@remix-run/react';
+import { Suspense, useContext, useEffect, useState } from 'react';
+import type { HeaderQuery } from 'storefrontapi.generated';
+import { useRootLoaderData } from '~/root';
+import { DropDownCart } from './DropdownCart';
+import type { LayoutProps } from './Layout';
+import { MobileCart } from './MobileCart';
+import { MobileMenu } from './MobileMenu';
+import { PredictiveSearchForm } from './Search';
+import { Button } from './ui/button';
+import HeaderContext, { HeaderContextInterface } from '~/context/HeaderCarts';
+import { HeaderBasketContext } from '~/context/HeaderCarts';
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -16,17 +18,17 @@ import {
   NavigationMenuList,
   NavigationMenuTrigger,
 } from './ui/navigation-menu';
-import {useMedia} from 'react-use';
+import { useMedia } from 'react-use';
 
 export type HeaderProps = Pick<
   LayoutProps,
   'header' | 'cart' | 'isLoggedIn' | 'favorites'
 >;
 
-export function Header({header, isLoggedIn, cart}: HeaderProps) {
-  const {shop, menu} = header;
-  const [cartShow, setCartShow] = useState(false);
-  const {key} = useLocation();
+export function Header({ header, isLoggedIn, cart }: HeaderProps) {
+  const { shop, menu } = header;
+  const {cartShow, setCartShow}  = useContext(HeaderBasketContext) as HeaderContextInterface
+  const { key } = useLocation();
   const isMobile = useMedia('(max-width: 767px)', false);
 
   const handleShowCart = (value?: boolean) => {
@@ -38,109 +40,117 @@ export function Header({header, isLoggedIn, cart}: HeaderProps) {
   }, [key]);
 
   return (
-    <header className="lg:px-24 px-5">
-      <div className=" flex justify-between pt-[18px] pb-[25px] border-b border-black/20 relative">
-      <div className="flex items-center gap-x-[35px] md:max-w-[156px]">
-          {isMobile && (
-            <MobileMenu
+    <HeaderContext>
+
+      <header className="lg:px-24 px-5">
+        <div className=" flex justify-between pt-[18px] pb-[25px] border-b border-black/20 relative">
+          <div className="flex items-center gap-x-[35px] md:max-w-[156px]">
+            {isMobile && (
+              <MobileMenu
+                menu={menu}
+                logo={shop.brand.logo.image.url}
+                primaryDomainUrl={header.shop.primaryDomain.url}
+              />
+            )}
+            <NavLink
+              prefetch="intent"
+              to="/"
+              className="flex items-center md:w-auto w-[130px]"
+            >
+              <img src={shop.brand?.logo?.image?.url} alt="PickUpShoes" />
+            </NavLink>
+          </div>
+          {!isMobile && (
+            <HeaderMenu
               menu={menu}
-              logo={shop.brand.logo.image.url}
               primaryDomainUrl={header.shop.primaryDomain.url}
             />
           )}
-          <NavLink
-            prefetch="intent"
-            to="/"
-            className="flex items-center md:w-auto w-[130px]"
-          >
-            <img src={shop.brand?.logo?.image?.url} alt="PickUpShoes" />
-          </NavLink>
-        </div>
-        {!isMobile && (
-          <HeaderMenu
-            menu={menu}
-            primaryDomainUrl={header.shop.primaryDomain.url}
-          />
-        )}
 
-        <nav className="header-ctas  flex md:gap-x-[15px] gap-x-2">
-          <PredictiveSearchForm
-            isMobile={isMobile}
-            brandLogo={shop?.brand?.logo?.image}
-          />
-          {!isMobile && (
-            <>
+          <nav className="header-ctas  flex md:gap-x-[15px] gap-x-2">
+            <PredictiveSearchForm
+              isMobile={isMobile}
+              brandLogo={shop?.brand?.logo?.image}
+            />
+            {!isMobile && (
+              <>
+                <Suspense>
+                  <Await resolve={cart}>
+                    {(cart) => {
+                      if (!cart)
+                        return (
+                          <CartBadge count={0} handleShow={handleShowCart} />
+                        );
+                      return (
+                        <CartBadge
+                          count={cart.totalQuantity}
+                          handleShow={handleShowCart}
+                        />
+                      );
+                    }}
+                  </Await>
+                </Suspense>
+              </>
+            )}
+            {isMobile && (
               <Suspense>
                 <Await resolve={cart}>
                   {(cart) => {
-                    if (!cart)
-                      return (
-                        <CartBadge count={0} handleShow={handleShowCart} />
-                      );
-                    return (
-                      <CartBadge
-                        count={cart.totalQuantity}
-                        handleShow={handleShowCart}
-                      />
-                    );
+                    if (!cart) return <MobileCart closeCart={() => setCartShow(false)} cart={cart} empty={true} />;
+                    return <MobileCart closeCart={() => setCartShow(false)} cart={cart} />;
                   }}
                 </Await>
               </Suspense>
-            </>
-          )}
-          {isMobile && (
+            )}
+            <Button variant="ghost" asChild className="p-2">
+              <NavLink prefetch="intent" to="/account" style={activeLinkStyle}>
+                <svg
+                  className="max-sm:w-5 max-sm:h-5"
+                  width="32"
+                  height="32"
+                  viewBox="0 0 32 32"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M24 27V24.3333C24 22.9188 23.5224 21.5623 22.6722 20.5621C21.8221 19.5619 20.669 19 19.4667 19H11.5333C10.331 19 9.17795 19.5619 8.32778 20.5621C7.47762 21.5623 7 22.9188 7 24.3333V27"
+                    stroke="black"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <path
+                    d="M15.5 14C17.9853 14 20 11.9853 20 9.5C20 7.01472 17.9853 5 15.5 5C13.0147 5 11 7.01472 11 9.5C11 11.9853 13.0147 14 15.5 14Z"
+                    stroke="black"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </NavLink>
+            </Button>
+          </nav>
+          {!isMobile && (
             <Suspense>
               <Await resolve={cart}>
-                {(cart) => {
-                  if (!cart) return <MobileCart cart={cart} empty={true} />;
-                  return <MobileCart cart={cart} />;
-                }}
+                {(cart) => (
+                  <DropDownCart
+                    closeCart={() => {
+                      console.log("slfja")
+                      setCartShow(false)
+                    }}
+                    cart={cart}
+                    active={cartShow}
+                    handleShow={() => handleShowCart()}
+                  />
+                )}
               </Await>
             </Suspense>
           )}
-          <Button variant="ghost" asChild className="p-2">
-            <NavLink prefetch="intent" to="/account" style={activeLinkStyle}>
-              <svg
-                className="max-sm:w-5 max-sm:h-5"
-                width="32"
-                height="32"
-                viewBox="0 0 32 32"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M24 27V24.3333C24 22.9188 23.5224 21.5623 22.6722 20.5621C21.8221 19.5619 20.669 19 19.4667 19H11.5333C10.331 19 9.17795 19.5619 8.32778 20.5621C7.47762 21.5623 7 22.9188 7 24.3333V27"
-                  stroke="black"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-                <path
-                  d="M15.5 14C17.9853 14 20 11.9853 20 9.5C20 7.01472 17.9853 5 15.5 5C13.0147 5 11 7.01472 11 9.5C11 11.9853 13.0147 14 15.5 14Z"
-                  stroke="black"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            </NavLink>
-          </Button>
-        </nav>
-        {!isMobile && (
-          <Suspense>
-            <Await resolve={cart}>
-              {(cart) => (
-                <DropDownCart
-                  cart={cart}
-                  active={cartShow}
-                  handleShow={() => handleShowCart()}
-                />
-              )}
-            </Await>
-          </Suspense>
-        )}
-      </div>
-    </header>
+        </div>
+      </header>
+    </HeaderContext>
+
   );
 }
 
@@ -152,6 +162,7 @@ function CartBadge({
   handleShow: () => void;
 }) {
   return (
+
     <Button
       variant="ghost"
       className="relative px-2 py-2 max-sm:w-[23px] max-sm:h-[18px]"
@@ -206,8 +217,9 @@ export function HeaderMenu({
   menu: HeaderProps['header']['menu'];
   primaryDomainUrl: HeaderQuery['shop']['primaryDomain']['url'];
 }) {
-  const {publicStoreDomain} = useRootLoaderData();
+  const { publicStoreDomain } = useRootLoaderData();
   return (
+
     <NavigationMenu className="md:flex hidden">
       <NavigationMenuList>
         {menu?.items.map((item) => {
@@ -215,8 +227,8 @@ export function HeaderMenu({
           // if the url is internal, we strip the domain
           const url =
             item.url.includes('myshopify.com') ||
-            item.url.includes(publicStoreDomain) ||
-            item.url.includes(primaryDomainUrl)
+              item.url.includes(publicStoreDomain) ||
+              item.url.includes(primaryDomainUrl)
               ? new URL(item.url).pathname
               : item.url;
           return (
@@ -230,8 +242,8 @@ export function HeaderMenu({
                     {item.items.map((menuItem) => {
                       const url =
                         menuItem.url?.includes('myshopify.com') ||
-                        menuItem.url?.includes(publicStoreDomain) ||
-                        menuItem.url?.includes(primaryDomainUrl)
+                          menuItem.url?.includes(publicStoreDomain) ||
+                          menuItem.url?.includes(primaryDomainUrl)
                           ? new URL(menuItem.url).pathname
                           : menuItem.url;
 
@@ -254,6 +266,7 @@ export function HeaderMenu({
         })}
       </NavigationMenuList>
     </NavigationMenu>
+
   );
 }
 function activeLinkStyle({
@@ -269,4 +282,4 @@ function activeLinkStyle({
   };
 }
 
-function SubMenu() {}
+function SubMenu() { }
