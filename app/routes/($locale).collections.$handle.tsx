@@ -158,11 +158,12 @@ export default function Collection() {
           appliedFilters={appliedFilters}
         />
       </div>
-      <div className="items">
+      <div className="items relative">
         <div className="title flex items-center justify-between mb-[10px]">
           <h1 className="font-medium lg:text-[32px] text-[22px]">
             {collection.title}
           </h1>
+          
           {!isMobile ? (
             <SortProducts />
           ) : (
@@ -200,9 +201,12 @@ export default function Collection() {
 function ProductsGrid({products}: {products: ProductItemFragment[]}) {
   return (
     <div className="product-grid grid md:grid-cols-3 xl:grid-cols-3 grid-cols-2  gap-x-[20px] gap-y-10 mt-5">
-      {products.map((product, index) => {
+      {(products.length>0)?
+      products.map((product, index) => {
         return<div key={product.id}><ProductCard product={product}  /></div> 
-      })}
+      }):<h2 className="text-gray-500 text-2xl font-semibold left-1/2 opacity-70 absolute text-center top-1/2 transform -translate-x-1/2 -translate-y-1/2">
+      Нічого не знайдено
+    </h2>}
     </div>
   );
 }
