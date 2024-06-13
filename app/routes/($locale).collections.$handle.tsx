@@ -68,7 +68,7 @@ export async function loader({request, params, context}: LoaderFunctionArgs) {
   );
 
   if (!handle) {
-    return redirect('/collections');
+    return redirect('/collections/catalog');
   }
   const {collection: filtersCollection} =
     await storefront.query<CollectionFiltersQuery>(FILTER_QUERY, {

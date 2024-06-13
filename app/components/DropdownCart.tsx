@@ -1,12 +1,12 @@
-import {CartForm, Image, Money} from '@shopify/hydrogen';
-import {Link} from '@remix-run/react';
-import {motion} from 'framer-motion';
-import {Button} from './ui/button';
-import {useVariantUrl} from '~/utils';
-import {ArrowRight, X, Plus, Minus} from 'lucide-react';
-import type {CartApiQueryFragment} from 'storefrontapi.generated';
-import type {Variants} from 'framer-motion';
-import type {CartLineUpdateInput} from '@shopify/hydrogen/storefront-api-types';
+import { CartForm, Image, Money } from '@shopify/hydrogen';
+import { Link } from '@remix-run/react';
+import { motion } from 'framer-motion';
+import { Button } from './ui/button';
+import { useVariantUrl } from '~/utils';
+import { ArrowRight, X, Plus, Minus } from 'lucide-react';
+import type { CartApiQueryFragment } from 'storefrontapi.generated';
+import type { Variants } from 'framer-motion';
+import type { CartLineUpdateInput } from '@shopify/hydrogen/storefront-api-types';
 
 type DropDownCartLine = CartApiQueryFragment['lines']['nodes'][0];
 type DropdownCartProps = {
@@ -21,47 +21,54 @@ const cartVariants = {
   closed: {
     top: '0%',
     opacity: 0,
-    display: 'none',
-    transition: {
-      opacity: 0,
-      scale: 0,
-      delay: 0.1,
-      duration: 0.6,
-    },
+    zIndex: -12,
+    // transition: {
+    //   type: 'spring',
+    //   zIndex: 1,
+    //   opacity: 1,
+    //   scale: 1,
+    //   delay: 0.1,
+    //   duration: 0.6,
+    // },
   },
   open: {
     top: '100.9%',
-    display: 'flex',
+    zIndex: 1,
     opacity: 1,
-    transition: {
-      type: 'spring',
-      duration: 1,
-      scale: 1,
-      delayChildren: 0.2,
-      staggerChildren: 0.05,
-    },
+    // transition: {
+    //   type: 'spring',
+    //   duration: 1,
+    //   zIndex: 0.2,
+
+    //   scale: 1,
+    //   delayChildren: 0.2,
+    //   staggerChildren: 0.05,
+    // },
   },
 } satisfies Variants;
 
-export function DropDownCart({cart, active, handleShow}: DropdownCartProps) {
+export function DropDownCart({ cart, active, handleShow }: DropdownCartProps) {
   const lines = Boolean(cart?.lines?.nodes?.length || 0);
   /* const ref = useClickAway(() => {
     handleShow(false);
   }) as React.RefObject<HTMLDivElement>; */
   return (
-    <motion.div
-      initial={false}
-      variants={cartVariants}
-      animate={active ? 'open' : 'closed'}
-      exit="closed"
-      className="absolute z-20 w-full flex-col  bg-white/95 backdrop-blur-lg drop-shadow-cart rounded-b-[30px]  p-[30px] text-black"
+    <div
+      // initial={false}
+      // variants={cartVariants}
+      // animate={active ? 'open' : 'closed'}
+      // exit="closed"
+      className= {active?
+        "top-[101%] opacity-[1] z-[2] duration-700 transition-all ease-linear absolute z-20 w-full flex-col d-flex  bg-white/95 backdrop-blur-lg drop-shadow-cart rounded-b-[30px]  p-[30px] text-black"
+        :"top-[0%] opacity-0 z-[-10] duration-700 transition-all ease-linear absolute z-20 w-full flex-col d-flex  bg-white/95 backdrop-blur-lg drop-shadow-cart rounded-b-[30px]  p-[30px] text-black"
+      } 
     >
       {!lines && <EmptyCart />}
       {lines && <DropDownCartDetail cart={cart} />}
-    </motion.div>
+    </div>
   );
 }
-function DropDownCartDetail({cart}: {cart: CartApiQueryFragment | null}) {
+function DropDownCartDetail({ cart }: { cart: CartApiQueryFragment | null }) {
   const cost = cart?.cost;
   return (
     <div className="dropdown-detail">
@@ -98,7 +105,7 @@ function DropDownCartDetail({cart}: {cart: CartApiQueryFragment | null}) {
         </div>
         <div className="dropdown-checkout flex items-center justify-end">
           <Button className="rounded-[60px] px-[55px]">
-            <Link to={cart?.checkoutUrl ||""} className="flex gap-5">
+            <Link to={cart?.checkoutUrl || ""} className="flex gap-5">
               <span className="font-medium text-2xl">Оформити замовлення</span>
               <svg
                 width="23"
@@ -120,9 +127,9 @@ function DropDownCartDetail({cart}: {cart: CartApiQueryFragment | null}) {
   );
 }
 
-function CartLineItem({line}: {line: DropDownCartLine}) {
-  const {id, merchandise} = line;
-  const {product, title, image, selectedOptions} = merchandise;
+function CartLineItem({ line }: { line: DropDownCartLine }) {
+  const { id, merchandise } = line;
+  const { product, title, image, selectedOptions } = merchandise;
   const lineItemUrl = useVariantUrl(product.handle, selectedOptions);
   return (
     <li key={id} className="xl:grid xl:grid-cols-12 flex justify-between">
@@ -177,15 +184,15 @@ function EmptyCart() {
     </div>
   );
 }
-function CartLineQuantity({line}: {line: CartLine}) {
+function CartLineQuantity({ line }: { line: CartLine }) {
   if (!line || typeof line?.quantity === 'undefined') return null;
-  const {id: lineId, quantity} = line;
+  const { id: lineId, quantity } = line;
   const prevQuantity = Number(Math.max(0, quantity - 1).toFixed(0));
   const nextQuantity = Number((quantity + 1).toFixed(0));
 
   return (
     <div className="flex self-center items-center justify-center lg:gap-5 gap-3 text-lg text-black bg-input rounded-[62px] lg:px-5 px-2 py-1">
-      <CartLineUpdateButton lines={[{id: lineId, quantity: prevQuantity}]}>
+      <CartLineUpdateButton lines={[{ id: lineId, quantity: prevQuantity }]}>
         <button
           aria-label="Зменшити кількість"
           disabled={quantity <= 1}
@@ -197,7 +204,7 @@ function CartLineQuantity({line}: {line: CartLine}) {
         </button>
       </CartLineUpdateButton>
       <span>{quantity}</span>
-      <CartLineUpdateButton lines={[{id: lineId, quantity: nextQuantity}]}>
+      <CartLineUpdateButton lines={[{ id: lineId, quantity: nextQuantity }]}>
         <button
           className="flex flex-col items-center cursor-pointer"
           aria-label="Збільшити кількість"
@@ -253,18 +260,18 @@ function CartLineUpdateButton({
     <CartForm
       route="/cart"
       action={CartForm.ACTIONS.LinesUpdate}
-      inputs={{lines}}
+      inputs={{ lines }}
     >
       {children}
     </CartForm>
   );
 }
-function CartLineRemoveButton({lineIds}: {lineIds: string[]}) {
+function CartLineRemoveButton({ lineIds }: { lineIds: string[] }) {
   return (
     <CartForm
       route="/cart"
       action={CartForm.ACTIONS.LinesRemove}
-      inputs={{lineIds}}
+      inputs={{ lineIds }}
     >
       <Button
         type="submit"
