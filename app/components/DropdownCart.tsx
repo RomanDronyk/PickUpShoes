@@ -59,8 +59,8 @@ export function DropDownCart({ cart, active, handleShow }: DropdownCartProps) {
       // animate={active ? 'open' : 'closed'}
       // exit="closed"
       className= {active?
-        "top-[101%] opacity-[1] z-[2] duration-700 transition-all ease-linear absolute z-20 w-full flex-col d-flex  bg-white/95 backdrop-blur-lg drop-shadow-cart rounded-b-[30px]  p-[30px] text-black"
-        :"top-[0%] opacity-0 z-[-10] duration-700 transition-all ease-linear absolute z-20 w-full flex-col d-flex  bg-white/95 backdrop-blur-lg drop-shadow-cart rounded-b-[30px]  p-[30px] text-black"
+        "top-[101%] opacity-[1]  duration-500 transition-all ease-linear absolute z-20 w-full flex-col d-flex  bg-white/95 backdrop-blur-lg drop-shadow-cart rounded-b-[30px]  p-[30px] text-black"
+        :"top-[-400%] opacity-0  duration-500 transition-all ease-linear absolute z-20 w-full flex-col d-flex  bg-white/95 backdrop-blur-lg drop-shadow-cart rounded-b-[30px]  p-[30px] text-black"
       } 
     >
       {!lines && <EmptyCart />}
