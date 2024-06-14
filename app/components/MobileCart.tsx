@@ -79,14 +79,14 @@ export function MobileCart({
       </DrawerTrigger>
       <DrawerContent className="h-[90%] px-5">
         <div className="overflow-y-auto overflow-x-hidden">
-          {cart.lines.nodes.length > 0 ? <MobileCartDetail cart={cart} /> :<EmptyCart closeCart = {closeCart} /> }
+          {cart?.lines?.nodes?.length > 0 ? <MobileCartDetail setOpen = {setOpen} cart={cart} /> :<EmptyCart  setOpen = {setOpen} /> }
         </div>
       </DrawerContent>
     </Drawer>
   );
 }
 
-function MobileCartDetail({cart}: {cart: CartApiQueryFragment | null}) {
+function MobileCartDetail({cart,setOpen}: {setOpen?:any; cart: CartApiQueryFragment | null}) {
   const cost = cart?.cost;
   return (
     <>
@@ -100,7 +100,7 @@ function MobileCartDetail({cart}: {cart: CartApiQueryFragment | null}) {
       </DrawerHeader>
       <div className="flex flex-col gap-y-5">
         {cart?.lines?.nodes?.map((line: CartLine) => (
-          <MobileCartLine key={line.id} line={line} />
+          <MobileCartLine  setOpen= {setOpen} key={line.id} line={line} />
         ))}
       </div>
       <DrawerFooter className="px-0">
@@ -115,7 +115,7 @@ function MobileCartDetail({cart}: {cart: CartApiQueryFragment | null}) {
           &nbsp;грн
         </div>
         <Button asChild className="rounded-[60px] px-[55px]">
-          <Link to={cart?.checkoutUrl} className="flex gap-5">
+          <Link onClick={()=>setOpen(false)} to={cart?.checkoutUrl} className="flex gap-5">
             <span className="font-medium text-2xl">Оформити замовлення</span>
             <svg
               width="23"
@@ -136,7 +136,7 @@ function MobileCartDetail({cart}: {cart: CartApiQueryFragment | null}) {
   );
 }
 
-function MobileCartLine({line}: {line: DropDownCartLine}) {
+function MobileCartLine({line ,setOpen}: {setOpen: any; line: DropDownCartLine}) {
   const {id, merchandise} = line;
   const {product, title, image, selectedOptions} = merchandise;
   const lineItemUrl = useVariantUrl(product.handle, selectedOptions);
@@ -158,7 +158,7 @@ function MobileCartLine({line}: {line: DropDownCartLine}) {
               className="rounded-[15px] mr-[14px]"
             />
           )}
-          <Link prefetch="intent" to={lineItemUrl}>
+          <Link onClick={()=>setOpen(false)} prefetch="intent" to={lineItemUrl}>
             <span className="font-semibold min-[385px]:text-[20px] text-base">
               {product.title}
             </span>

@@ -48,7 +48,7 @@ export function Header({ header, isLoggedIn, cart }: HeaderProps) {
             {isMobile && (
               <MobileMenu
                 menu={menu}
-                logo={shop.brand.logo.image.url}
+                logo={shop.brand.logo.image.url }
                 primaryDomainUrl={header.shop.primaryDomain.url}
               />
             )}
@@ -135,13 +135,7 @@ export function Header({ header, isLoggedIn, cart }: HeaderProps) {
               <Await resolve={cart}>
                 {(cart) => (
                   <DropDownCart
-                    closeCart={() => {
-                      console.log("slfja")
-                      setCartShow(false)
-                    }}
                     cart={cart}
-                    active={cartShow}
-                    handleShow={() => handleShowCart()}
                   />
                 )}
               </Await>
@@ -156,17 +150,20 @@ export function Header({ header, isLoggedIn, cart }: HeaderProps) {
 
 function CartBadge({
   count = 0,
-  handleShow,
+
 }: {
   count: number;
-  handleShow: () => void;
+
 }) {
+  const {cartShow, setCartShow}  = useContext(HeaderBasketContext) as HeaderContextInterface
+
+  
   return (
 
     <Button
       variant="ghost"
       className="relative px-2 py-2 max-sm:w-[23px] max-sm:h-[18px]"
-      onClick={() => handleShow()}
+      onClick={() => setCartShow((value)=>!value)}
     >
       <svg
         width="32"
@@ -253,7 +250,7 @@ export function HeaderMenu({
                             asChild
                             className="text-base font-normal hover:underline"
                           >
-                            <Link to={url}>{menuItem.title}</Link>
+                            <Link to={url||""}>{menuItem.title}</Link>
                           </NavigationMenuLink>
                         </li>
                       );

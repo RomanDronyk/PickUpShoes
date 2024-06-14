@@ -8,6 +8,8 @@ import type { CartApiQueryFragment } from 'storefrontapi.generated';
 import type { Variants } from 'framer-motion';
 import type { CartLineUpdateInput } from '@shopify/hydrogen/storefront-api-types';
 import EmptyCart from './ui/EmptyCart';
+import { useContext } from 'react';
+import { HeaderBasketContext, HeaderContextInterface } from '~/context/HeaderCarts';
 
 type DropDownCartLine = CartApiQueryFragment['lines']['nodes'][0];
 type DropdownCartProps = {
@@ -41,29 +43,31 @@ const cartVariants = {
   },
 } satisfies Variants;
 
-export function DropDownCart({closeCart, cart, active, handleShow }: DropdownCartProps) {
-  console.log(closeCart, "sf;aldjk",handleShow)
+export function DropDownCart({ cart }: DropdownCartProps) {
+  const {cartShow, setCartShow}  = useContext(HeaderBasketContext) as HeaderContextInterface
+
+  
   const lines = Boolean(cart?.lines?.nodes?.length || 0);
-  /* const ref = useClickAway(() => {
-    handleShow(false);
-  }) as React.RefObject<HTMLDivElement>; */
+
   return (
     <motion.div
       initial={true}
       variants={cartVariants}
-      animate={active ? 'open' : 'closed'}
+      animate={cartShow ? 'open' : 'closed'}
       exit="closed"
-      className= {active?
+      className= {cartShow?
         "top-[101%] opacity-[1]  duration-300 transition-all ease-linear absolute z-20 w-full flex-col d-flex  bg-white/95 backdrop-blur-lg drop-shadow-cart rounded-b-[30px]  p-[30px] text-black"
         :"top-[-500%] opacity-0  duration-300 transition-all ease-linear absolute z-20 w-full flex-col d-flex  bg-white/95 backdrop-blur-lg drop-shadow-cart rounded-b-[30px]  p-[30px] text-black"
       } 
     >
-      {!lines && <EmptyCart closeCart = {closeCart} />}
-      {lines && <DropDownCartDetail closeCart = {closeCart} cart={cart} />}
+      {!lines && <EmptyCart />}
+      {lines && <DropDownCartDetail  cart={cart} />}
     </motion.div>
   );
 }
-function DropDownCartDetail({ cart,closeCart }: {closeCart:()=>void; cart: CartApiQueryFragment | null }) {
+function DropDownCartDetail({ cart }: { cart: CartApiQueryFragment | null }) {
+  const {cartShow, setCartShow}  = useContext(HeaderBasketContext) as HeaderContextInterface
+
   const cost = cart?.cost;
   return (
     <div className="dropdown-detail">
@@ -83,7 +87,7 @@ function DropDownCartDetail({ cart,closeCart }: {closeCart:()=>void; cart: CartA
         </div>
         <ul className="flex flex-col gap-4">
           {cart?.lines?.nodes.map((line) => (
-            <CartLineItem  closeCart = {closeCart} key={line.id} line={line} />
+            <CartLineItem  key={line.id} line={line} />
           ))}
         </ul>
       </div>
@@ -122,7 +126,9 @@ function DropDownCartDetail({ cart,closeCart }: {closeCart:()=>void; cart: CartA
   );
 }
 
-function CartLineItem({ line,closeCart }: { closeCart: ()=>void; line: DropDownCartLine }) {
+function CartLineItem({ line}: { line: DropDownCartLine }) {
+  const {cartShow, setCartShow}  = useContext(HeaderBasketContext) as HeaderContextInterface
+
   const { id, merchandise } = line;
   const { product, title, image, selectedOptions } = merchandise;
   const lineItemUrl = useVariantUrl(product.handle, selectedOptions);
@@ -140,7 +146,7 @@ function CartLineItem({ line,closeCart }: { closeCart: ()=>void; line: DropDownC
             className="rounded-[15px] mr-[14px]"
           />
         )}
-        <Link onClick={closeCart} prefetch="intent" to={lineItemUrl}>
+        <Link onClick={()=>setCartShow(false)} prefetch="intent" to={lineItemUrl}>
           <span className="font-semibold lg:text-[22px] text-lg">
             {product.title}
           </span>

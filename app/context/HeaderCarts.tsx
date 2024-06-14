@@ -1,4 +1,5 @@
 import React, { useState, useEffect, createContext, ReactNode } from "react"
+import { useLocation } from "react-use";
 
 export const HeaderBasketContext = createContext({})
 interface HeaderContextProps {
@@ -11,6 +12,11 @@ export interface HeaderContextInterface {
 
 const HeaderContext = ({ children }:HeaderContextProps) => {
     const [cartShow, setCartShow] = useState(false);
+    const location = useLocation();
+
+    useEffect(() => {
+        setCartShow(false);
+    }, [location]);
 
     const headerBasketContext = {
         cartShow, 
