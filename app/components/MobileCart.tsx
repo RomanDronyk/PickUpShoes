@@ -14,7 +14,7 @@ import {ArrowRight, Minus, Plus, X} from 'lucide-react';
 import {CartForm, Image, Money} from '@shopify/hydrogen';
 import {useState} from 'react';
 import {useVariantUrl} from '~/utils';
-import EmptyCart from './ui/EmptyCart';
+import EmptyCart from './ui/emptyCart';
 
 type DropDownCartLine = CartApiQueryFragment['lines']['nodes'][0];
 
@@ -115,7 +115,7 @@ function MobileCartDetail({cart,setOpen}: {setOpen?:any; cart: CartApiQueryFragm
           &nbsp;грн
         </div>
         <Button asChild className="rounded-[60px] px-[55px]">
-          <Link onClick={()=>setOpen(false)} to={cart?.checkoutUrl} className="flex gap-5">
+          <Link onClick={()=>setOpen(false)} to={cart?.checkoutUrl ||""} className="flex gap-5">
             <span className="font-medium text-2xl">Оформити замовлення</span>
             <svg
               width="23"

@@ -7,16 +7,13 @@ import { ArrowRight, X, Plus, Minus } from 'lucide-react';
 import type { CartApiQueryFragment } from 'storefrontapi.generated';
 import type { Variants } from 'framer-motion';
 import type { CartLineUpdateInput } from '@shopify/hydrogen/storefront-api-types';
-import EmptyCart from './ui/EmptyCart';
+import EmptyCart from './ui/emptyCart';
 import { useContext } from 'react';
 import { HeaderBasketContext, HeaderContextInterface } from '~/context/HeaderCarts';
 
 type DropDownCartLine = CartApiQueryFragment['lines']['nodes'][0];
 type DropdownCartProps = {
-  closeCart:()=> void;
   cart: CartApiQueryFragment | null;
-  active: boolean;
-  handleShow: (arg0: boolean) => void;
 };
 
 type CartLine = CartApiQueryFragment['lines']['nodes'][0];

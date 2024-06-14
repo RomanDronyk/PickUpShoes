@@ -48,7 +48,7 @@ export function Header({ header, isLoggedIn, cart }: HeaderProps) {
             {isMobile && (
               <MobileMenu
                 menu={menu}
-                logo={shop.brand.logo.image.url }
+                logo={shop?.brand?.logo?.image?.url }
                 primaryDomainUrl={header.shop.primaryDomain.url}
               />
             )}
@@ -79,12 +79,11 @@ export function Header({ header, isLoggedIn, cart }: HeaderProps) {
                     {(cart) => {
                       if (!cart)
                         return (
-                          <CartBadge count={0} handleShow={handleShowCart} />
+                          <CartBadge count={0}  />
                         );
                       return (
                         <CartBadge
                           count={cart.totalQuantity}
-                          handleShow={handleShowCart}
                         />
                       );
                     }}

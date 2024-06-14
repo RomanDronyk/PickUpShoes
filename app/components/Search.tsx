@@ -212,7 +212,7 @@ type SearchFromProps = {
   action?: FormProps['action'];
   method?: FormProps['method'];
   isMobile: boolean;
-  brandLogo?: Maybe<Pick<Image, 'url'>> | undefined;
+  brandLogo?: any;
   [key: string]: unknown;
 };
 
