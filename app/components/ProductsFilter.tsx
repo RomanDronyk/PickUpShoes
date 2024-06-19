@@ -241,34 +241,37 @@ const ListFilter: React.FC<ListFilterProps> = ({ filter , appliedFilters}) => {
   const location = useLocation();
   const navigate = useNavigate();
   const matches = useMatches();
+  
 
-  useEffect(()=>{
-    console.log(value, "value")
-    console.log(appliedFilters, "aplied fli")
-  },[appliedFilters])
-
-  useEffect(() => {
-    const appliedLabels = appliedFilters.map((filter) => {
-      const label = filter.label.toLowerCase();
-      if(label.includes(' ')){
-        return label.split(' ').join('-')
-      }else if(label.includes('.')){
-        return label.split('.').join('-')
-      }else{
-        return label
+  if(appliedFilters){
+    useEffect(()=>{
+      console.log(value, "value")
+      console.log(appliedFilters, "aplied fli")
+    },[appliedFilters])
+  
+    useEffect(() => {
+      const appliedLabels = appliedFilters.map((filter) => {
+        const label = filter.label.toLowerCase();
+        if(label.includes(' ')){
+          return label.split(' ').join('-')
+        }else if(label.includes('.')){
+          return label.split('.').join('-')
+        }else{
+          return label
+        }
+      });
+  
+      const updatedValue = value.filter((val) => {
+        const lastSegment = val.split('.').pop().toLowerCase();
+        const normalizedLastSegment = lastSegment.includes('-') ? lastSegment : lastSegment.split('.').join('-');
+        return appliedLabels.includes(normalizedLastSegment);
+      });
+  
+      if (updatedValue.length !== value.length) {
+        setValue(updatedValue);
       }
-    });
-
-    const updatedValue = value.filter((val) => {
-      const lastSegment = val.split('.').pop().toLowerCase();
-      const normalizedLastSegment = lastSegment.includes('-') ? lastSegment : lastSegment.split('.').join('-');
-      return appliedLabels.includes(normalizedLastSegment);
-    });
-
-    if (updatedValue.length !== value.length) {
-      setValue(updatedValue);
-    }
-  }, [appliedFilters]);
+    }, [appliedFilters]);
+  }
 
 
   const params = useMemo(
@@ -580,8 +583,10 @@ function getAppliedFilterLink(
 
 export function MobileFilters({
   filters,
+  appliedFilters,
   initialFilters,
 }: {
+  appliedFilters:any
   filters: Filter[]|any;
   initialFilters: Filter[]|any;
 }) {
@@ -628,7 +633,7 @@ export function MobileFilters({
             </svg>
           </div>
         </SheetHeader>
-        <FilterDraw filters={filters} initial={initialFilters} />
+        <FilterDraw appliedFilters={appliedFilters} filters={filters} initial={initialFilters} />
         <SheetClose asChild>
           <Button className="font-medium text-base text-white rounded-[30px] bg-black w-full mt-9 py-3">
             <span>Застосувати фільтри</span>

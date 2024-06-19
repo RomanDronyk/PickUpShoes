@@ -169,6 +169,7 @@ export default function Collection() {
             <SortProducts />
           ) : (
             <MobileFilters
+               appliedFilters= {appliedFilters}
               filters={collection.products.filters as Filter[]}
               initialFilters={filtersCollection?.products.filters as Filter[]}
             />
