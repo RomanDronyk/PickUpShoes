@@ -13,6 +13,7 @@
   },
   "prettier": "@shopify/prettier-config",
   "dependencies": {
+    "@apollo/client": "^3.10.5",
     "@radix-ui/react-accordion": "^1.1.2",
     "@radix-ui/react-dialog": "^1.0.5",
     "@radix-ui/react-navigation-menu": "^1.1.4",
@@ -37,7 +38,7 @@
     "embla-carousel-react": "^8.0.0",
     "framer-motion": "^11.0.3",
     "google-auth-library": "^9.6.3",
-    "graphql": "^16.6.0",
+    "graphql": "^16.8.2",
     "graphql-tag": "^2.12.6",
     "isbot": "^3.6.6",
     "lottie-react": "^2.4.0",

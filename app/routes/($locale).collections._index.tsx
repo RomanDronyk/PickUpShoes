@@ -1,28 +1,28 @@
-import {useLoaderData, type MetaFunction} from '@remix-run/react';
-import {Pagination, getPaginationVariables} from '@shopify/hydrogen';
+import { useLoaderData, type MetaFunction } from '@remix-run/react';
+import { Pagination, getPaginationVariables } from '@shopify/hydrogen';
 import type {
   ProductFilter,
   Collection,
   ProductCollectionSortKeys,
   Filter,
 } from '@shopify/hydrogen/storefront-api-types';
-import {json, redirect, type LoaderFunctionArgs} from '@shopify/remix-oxygen';
+import { json, redirect, type LoaderFunctionArgs } from '@shopify/remix-oxygen';
 import type {
   CollectionQuery,
   ProductItemFragment,
   CollectionFiltersQuery,
 } from 'storefrontapi.generated';
-import {ProductCard} from '~/components/ProductCard';
+import { ProductCard } from '~/components/ProductCard';
 import {
   ProductsFilter,
   SortProducts,
   AppliedFilters,
   MobileFilters,
 } from '~/components/ProductsFilter';
-import {parseAsCurrency} from '~/utils';
-import {useMedia} from 'react-use';
-import {Button} from '~/components/ui/button';
-import {MoveDown, MoveUp} from 'lucide-react';
+import { parseAsCurrency } from '~/utils';
+import { useMedia } from 'react-use';
+import { Button } from '~/components/ui/button';
+import { MoveDown, MoveUp } from 'lucide-react';
 import Loader from '~/components/Loader';
 
 export type SortParam =
@@ -34,23 +34,23 @@ export type SortParam =
 
 export const FILTER_URL_PREFIX = 'filter.';
 
-export const handle: {breadcrumb: string} = {
+export const handle: { breadcrumb: string } = {
   breadcrumb: 'collection',
 };
 
-export const meta: MetaFunction<typeof loader> = ({data}) => {
-  return [{title: `PickUpShoes | ${data?.collection.title ?? ''} Collection`}];
+export const meta: MetaFunction<typeof loader> = ({ data }) => {
+  return [{ title: `PickUpShoes | ${data?.collection.title ?? ''} Collection` }];
 };
 
-export async function loader({request, params, context}: LoaderFunctionArgs) {
-  const {handle} = params;
-  const {storefront} = context;
+export async function loader({ request, params, context }: LoaderFunctionArgs) {
+  const { handle } = params;
+  const { storefront } = context;
   const paginationVariables = getPaginationVariables(request, {
     pageBy: 8,
   });
   const locale = context.storefront.i18n;
   const searchParams = new URL(request.url).searchParams;
-  const {sortKey, reverse} = getSortValuesFromParam(
+  const { sortKey, reverse } = getSortValuesFromParam(
     searchParams.get('sort') as SortParam,
   );
 
@@ -70,14 +70,14 @@ export async function loader({request, params, context}: LoaderFunctionArgs) {
   if (!handle) {
     return redirect('/collections/catalog');
   }
-  const {collection: filtersCollection} =
+  const { collection: filtersCollection } =
     await storefront.query<CollectionFiltersQuery>(FILTER_QUERY, {
       variables: {
         handle,
         first: 1,
       },
     });
-  const {collection} = await storefront.query<CollectionQuery>(
+  const { collection } = await storefront.query<CollectionQuery>(
     COLLECTION_QUERY,
     {
       variables: {
@@ -141,21 +141,21 @@ export async function loader({request, params, context}: LoaderFunctionArgs) {
     })
     .filter((filter): filter is NonNullable<typeof filter> => filter !== null);
 
-  return json({collection, filtersCollection, appliedFilters});
+  return json({ collection, filtersCollection, appliedFilters });
 }
 
 export default function Collection() {
-  const {collection, filtersCollection, appliedFilters} =
+  const { collection, filtersCollection, appliedFilters } =
     useLoaderData<typeof loader>();
   const isMobile = useMedia('(max-width: 767px)', false);
-  
+
 
   return (
     <div className="grid lg:grid-cols-[minmax(auto,_300px)_minmax(auto,_1fr)] grid-cols-1 gap-x-5 w-full lg:px-24 md:px-12 px-[10px]  mb-8">
       <div className="sidebar xl:w-[300px] h-full lg:block hidden">
         <ProductsFilter
-          initialFilters={filtersCollection?.products.filters as Filter[]}
           filters={collection.products.filters as Filter[]}
+          initialFilters={filtersCollection?.products.filters as Filter[]}
           appliedFilters={appliedFilters}
         />
       </div>
@@ -164,7 +164,7 @@ export default function Collection() {
           <h1 className="font-medium lg:text-[32px] text-[22px]">
             {collection.title}
           </h1>
-          
+
           {!isMobile ? (
             <SortProducts />
           ) : (
@@ -176,7 +176,7 @@ export default function Collection() {
         </div>
         {isMobile && <AppliedFilters filters={appliedFilters} />}
         <Pagination connection={collection.products}>
-          {({nodes, isLoading, PreviousLink, NextLink}) => (
+          {({ nodes, isLoading, PreviousLink, NextLink }) => (
             <>
               <PreviousLink className="flex w-full justify-center mb-10">
                 <Button className="flex gap-3 items-center rounded-[8px] border border-black/10 bg-white text-black hover:bg-black/10">
@@ -199,15 +199,15 @@ export default function Collection() {
   );
 }
 
-function ProductsGrid({products}: {products: ProductItemFragment[]}) {
+function ProductsGrid({ products }: { products: ProductItemFragment[] }) {
   return (
     <div className="product-grid grid md:grid-cols-3 xl:grid-cols-3 grid-cols-2  gap-x-[20px] gap-y-10 mt-5">
-      {(products.length>0)?
-      products.map((product, index) => {
-        return<div key={product.id}><ProductCard product={product}  /></div> 
-      }):<h2 className="text-gray-500 text-2xl font-semibold left-1/2 opacity-70 absolute text-center top-1/2 transform -translate-x-1/2 -translate-y-1/2">
-      Нічого не знайдено
-    </h2>}
+      {(products.length > 0) ?
+        products.map((product, index) => {
+          return <div key={product.id}><ProductCard product={product} /></div>
+        }) : <h2 className="text-gray-500 text-2xl font-semibold left-1/2 opacity-70 absolute text-center top-1/2 transform -translate-x-1/2 -translate-y-1/2">
+          Нічого не знайдено
+        </h2>}
     </div>
   );
 }

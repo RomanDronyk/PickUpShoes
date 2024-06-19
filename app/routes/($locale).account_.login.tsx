@@ -219,7 +219,7 @@ export default function Login() {
           {error ? (
             <p>
               <mark>
-                <small>{error}</small>
+                <small>{(error ==="We have sent an email to ivan.kalunuch12@gmail.com, please click the link included to verify your email address"? "Ми надіслали вам повідомлення на пошту": error)}</small>
               </mark>
             </p>
           ) : (

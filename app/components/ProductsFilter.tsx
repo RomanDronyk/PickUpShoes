@@ -48,12 +48,13 @@ export type AppliedFilter = {
 export function ProductsFilter({
   filters,
   initialFilters,
-  appliedFilters = [],
+  appliedFilters,
 }: {
-  filters: Filter[];
-  initialFilters: Filter[];
-  appliedFilters?: AppliedFilter[];
+  filters: Filter[]|any;
+  initialFilters: Filter[]|any;
+  appliedFilters?: AppliedFilter[]|any;
 }) {
+
 
   return (
     <div className="flex flex-col gap-6 border border-black/10 rounded-[20px] py-5 px-6 ">
@@ -79,26 +80,36 @@ export function ProductsFilter({
           <AppliedFilters filters={appliedFilters} />
         </div>
       )}
-      <FilterDraw initial={initialFilters} filters={filters} />
+      <FilterDraw appliedFilters={appliedFilters} initial={initialFilters} filters={filters} />
     </div>
   );
 }
 
 function FilterDraw({
   filters,
+  appliedFilters,
   initial,
 }: {
+  appliedFilters: AppliedFilter;
   filters: Filter[];
   initial: Filter[];
 }) {
+  useEffect(()=>{
+    console.log(filters)
+  }, filters)
   const [params] = useSearchParams();
-  const initialFilterPrice = initial.find(
-    (item) => item.type === 'PRICE_RANGE',
-  );
-  const initialRangePrice = JSON.parse(
-    initialFilterPrice?.values[0].input as string,
-  ) as { price: { min: number; max: number } };
-  const markup = (filter: Filter) => {
+
+  const [initialFilterPrice, setInitialFilterPrice]= useState<any>(initial.find((item:any) => item.type === 'PRICE_RANGE'))
+  const [initialRangePrice, setInitialRangePrice]= useState<any>(JSON.parse(initialFilterPrice?.values[0].input))
+
+  useEffect(()=>{
+    setInitialFilterPrice(initial.find((item:any) => item.type === 'PRICE_RANGE'))
+    setInitialRangePrice(JSON.parse(initialFilterPrice?.values[0].input));
+  },[params])
+
+
+
+  const markup = (filter: Filter|any) => {
     switch (filter.type) {
       case 'PRICE_RANGE':
         const priceFilterValue = params.get(`${FILTER_URL_PREFIX}price`);
@@ -117,7 +128,7 @@ function FilterDraw({
           />
         );
       case 'LIST':
-        return <ListFilter key={filter.id} filter={filter} />;
+        return <ListFilter appliedFilters = {appliedFilters} key={filter.id} filter={filter} />;
     }
   };
   return (
@@ -136,8 +147,13 @@ function PriceFilter({
   max: number;
   value: { min: number; max: number };
 }) {
-  const initialRangeValue = value ? [value.min, value.max] : [min, max];
+  
+  const initialRangeValue:any = value ? [value.min, value.max] : [min, max];
   const [priceRange, setPriceRange] = useState(initialRangeValue);
+
+  useEffect(()=>{
+    console.log(priceRange)
+  },[priceRange])
 
   const location = useLocation();
   const params = useMemo(
@@ -159,7 +175,7 @@ function PriceFilter({
         return;
       }
       const price = {
-        ...(priceRange[0] === undefined ? {} : { min: priceRange[0] }),
+        ...(priceRange[0] === undefined ? { min: 0} : { min: priceRange[0] }),
         ...(priceRange[1] === undefined ? {} : { max: priceRange[1] }),
       };
       const newParams = filterInputToParams({ price }, params);
@@ -194,7 +210,8 @@ function PriceFilter({
       <Slider
         onValueChange={setPriceRange}
         minStepsBetweenThumbs={10}
-        defaultValue={initialRangeValue}
+        defaultValue={priceRange}
+        value = {priceRange}
         max={max}
         step={1}
       />
@@ -203,25 +220,56 @@ function PriceFilter({
 }
 
 
-interface Filter {
+interface IFilter {
   label: string;
   values: { id: string; input: string; label: string }[];
   id: string;
 }
 
-interface ProductFilter {
+interface IProductFilter {
   [key: string]: any;
 }
 
 interface ListFilterProps {
-  filter: Filter;
+  filter: IFilter;
+  appliedFilters: any
 }
 
-const ListFilter: React.FC<ListFilterProps> = ({ filter }) => {
+const ListFilter: React.FC<ListFilterProps> = ({ filter , appliedFilters}) => {
   const [value, setValue] = useState<string[]>([]);
+  const [filterValues, setFilterValues]=useState<any>([]);
   const location = useLocation();
   const navigate = useNavigate();
   const matches = useMatches();
+
+  useEffect(()=>{
+    console.log(value, "value")
+    console.log(appliedFilters, "aplied fli")
+  },[appliedFilters])
+
+  useEffect(() => {
+    const appliedLabels = appliedFilters.map((filter) => {
+      const label = filter.label.toLowerCase();
+      if(label.includes(' ')){
+        return label.split(' ').join('-')
+      }else if(label.includes('.')){
+        return label.split('.').join('-')
+      }else{
+        return label
+      }
+    });
+
+    const updatedValue = value.filter((val) => {
+      const lastSegment = val.split('.').pop().toLowerCase();
+      const normalizedLastSegment = lastSegment.includes('-') ? lastSegment : lastSegment.split('.').join('-');
+      return appliedLabels.includes(normalizedLastSegment);
+    });
+
+    if (updatedValue.length !== value.length) {
+      setValue(updatedValue);
+    }
+  }, [appliedFilters]);
+
 
   const params = useMemo(
     () => new URLSearchParams(location.search),
@@ -229,28 +277,29 @@ const ListFilter: React.FC<ListFilterProps> = ({ filter }) => {
   );
 
   const exampleValue = filter.values[0];
-  const exampleValueObj = JSON.parse(exampleValue.input) as ProductFilter;
+  const exampleValueObj = JSON.parse(exampleValue.input) as IProductFilter;
   const filterKey: string = Object.keys(exampleValueObj)[0];
 
   const catalogMatch = matches.find(
     (match) => match.id === 'routes/($locale).collections.$handle',
   );
 
-  const filtersValue =
-    catalogMatch?.data &&
-    (catalogMatch.data as { appliedFilters: { filter: any }[] }).appliedFilters.map(
+
+  const filtersValue:any =catalogMatch?.data &&(catalogMatch.data as { appliedFilters: { filter: any }[] }).appliedFilters.map(
       (filter: any) => {
         return JSON.stringify(filter.filter);
       },
     );
 
+
   const calculatedValues = filter.values.filter((value) =>
-    filtersValue.includes(value.input),
+    filtersValue.includes(value.input)
   );
 
   const handleChange = (value: string[]) => {
     setValue(value);
   };
+
 
   useDebounce(
     () => {
@@ -259,7 +308,7 @@ const ListFilter: React.FC<ListFilterProps> = ({ filter }) => {
         navigate(`${location.pathname}?${params.toString()}`);
         return;
       }else{
-        const selectedItems = filter.values.filter((item) =>
+        const selectedItems:any = filter.values.filter((item) =>
           value.includes(item.id),
         );
   
@@ -271,12 +320,14 @@ const ListFilter: React.FC<ListFilterProps> = ({ filter }) => {
     0,
     [value],
   );
-
   useEffect(() => {
     const appliedValues = calculatedValues.map((item) => item.id);
     const newValue = new Set(value.concat(appliedValues));
     setValue([...newValue]);
+    setFilterValues(filter.values)
+
   }, []);
+
 
   return (
     <div className="md:pb-6">
@@ -297,9 +348,11 @@ const ListFilter: React.FC<ListFilterProps> = ({ filter }) => {
                   }`}
                 onValueChange={handleChange}
                 value={value}
+                
               >
+                {console.log(value)}
                 {filter.id !== 'filter.v.option.color'
-                  ? filter.values.map((filterItem) => (
+                  ? filterValues.map((filterItem:any) => (
                     <ToggleGroupItem
                       key={filterItem.id}
                       value={filterItem.id}
@@ -310,7 +363,7 @@ const ListFilter: React.FC<ListFilterProps> = ({ filter }) => {
                       <span>{filterItem.label}</span>
                     </ToggleGroupItem>
                   ))
-                  : filter.values.map((filterItem) => {
+                  : filterValues.map((filterItem:any) => {
                     const colorClass = {
                       backgroundColor: `var(--filter-${filterItem.label.toLowerCase()})`,
                     };
@@ -529,8 +582,8 @@ export function MobileFilters({
   filters,
   initialFilters,
 }: {
-  filters: Filter[];
-  initialFilters: Filter[];
+  filters: Filter[]|any;
+  initialFilters: Filter[]|any;
 }) {
   return (
     <Sheet>
