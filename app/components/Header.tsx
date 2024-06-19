@@ -76,17 +76,7 @@ export function Header({ header, isLoggedIn, cart }: HeaderProps) {
               <>
                 <Suspense>
                   <Await resolve={cart}>
-                    {(cart) => {
-                      if (!cart)
-                        return (
-                          <CartBadge count={0}  />
-                        );
-                      return (
-                        <CartBadge
-                          count={cart.totalQuantity}
-                        />
-                      );
-                    }}
+                    {(cart) => (!cart)?<CartBadge count={0}  />:<CartBadge count={cart.totalQuantity} />}
                   </Await>
                 </Suspense>
               </>
@@ -95,8 +85,8 @@ export function Header({ header, isLoggedIn, cart }: HeaderProps) {
               <Suspense>
                 <Await resolve={cart}>
                   {(cart) => {
-                    if (!cart) return <MobileCart closeCart={() => setCartShow(false)} cart={cart} empty={true} />;
-                    return <MobileCart closeCart={() => setCartShow(false)} cart={cart} />;
+                    if (!cart) return <MobileCart cart={cart} />;
+                    return <MobileCart cart={cart} />;
                   }}
                 </Await>
               </Suspense>

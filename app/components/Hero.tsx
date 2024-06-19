@@ -1,11 +1,11 @@
-import {Link} from '@remix-run/react';
-import {Image} from '@shopify/hydrogen';
-import type {HomeHeroQuery} from 'storefrontapi.generated';
-import {Button} from './ui/button';
+import { Link } from '@remix-run/react';
+import { Image } from '@shopify/hydrogen';
+import type { HomeHeroQuery } from 'storefrontapi.generated';
+import { Button } from './ui/button';
 
-export function Hero({heroData}: {heroData: HomeHeroQuery}) {
+export function Hero({ heroData }: { heroData: HomeHeroQuery }) {
   const {
-    collection: {banner, motto, heading},
+    collection: { banner, motto, heading },
   } = heroData;
   const mottoArr = JSON.parse(motto.value);
   return (
@@ -16,9 +16,9 @@ export function Hero({heroData}: {heroData: HomeHeroQuery}) {
             {heading.value}
           </h1>
           <div className="mt-7">
-          <span className="inline-flex bg-white rounded-[30px] px-5 py-0 md:py-2.5 font-semibold text-black text-[26px] md:text-3xl lg:text-4xl xl:text-[42px] mr-3">
-  Виділяйся
-</span>
+            <span className="inline-flex bg-white rounded-[30px] px-5 py-0 md:py-2.5 font-semibold text-black text-[26px] md:text-3xl lg:text-4xl xl:text-[42px] mr-3">
+              Виділяйся
+            </span>
             <span className="text-[#D70000] font-semibold text-[26px]  md:text-3xl lg:text-4xl xl:text-[42px]">
               з комфортом
             </span>
@@ -78,7 +78,7 @@ export function Hero({heroData}: {heroData: HomeHeroQuery}) {
       <div>
         <Image
           alt="hero"
-          style={{aspectRatio: "1420 / 1158"}}
+          style={{ aspectRatio: "1420 / 1158" }}
           key={banner.reference.id}
           data={banner.reference.image}
         />

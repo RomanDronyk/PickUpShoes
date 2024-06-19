@@ -1,4 +1,4 @@
-import {Drawer, DrawerClose, DrawerContent, DrawerTrigger} from './ui/drawer';
+import { Drawer, DrawerClose, DrawerContent, DrawerTrigger } from './ui/drawer';
 import {
   Accordion,
   AccordionItem,
@@ -12,11 +12,12 @@ import {
   SheetContent,
   SheetTrigger,
 } from './ui/sheet';
-import {useState} from 'react';
-import type {HeaderProps} from './Header';
-import {Button} from './ui/button';
-import {Link} from '@remix-run/react';
-import {useRootLoaderData} from '~/root';
+import { useState } from 'react';
+import type { HeaderProps } from './Header';
+import * as SheetPrimitive from '@radix-ui/react-dialog';
+import { Button } from './ui/button';
+import { Link } from '@remix-run/react';
+import { useRootLoaderData } from '~/root';
 
 export function MobileMenu({
   menu,
@@ -29,7 +30,7 @@ export function MobileMenu({
 }) {
   const [open, setOpen] = useState(false);
 
-  const {publicStoreDomain} = useRootLoaderData();
+  const { publicStoreDomain } = useRootLoaderData();
   return (
     <Sheet>
       <SheetTrigger asChild className="md:hidden">
@@ -59,10 +60,11 @@ export function MobileMenu({
       >
         <SheetHeader className="flex items-center justify-between flex-row mb-10">
           {logo && (
-            
-            <Link to="/">
-              <img src={logo} className='max-w-[200px]' alt="Pick Up Shoes" />
-            </Link>
+            <SheetPrimitive.Close asChild>
+              <Link to="/">
+                <img src={logo} className='max-w-[200px]' alt="Pick Up Shoes" />
+              </Link>
+            </SheetPrimitive.Close>
 
           )}
         </SheetHeader>
@@ -72,8 +74,8 @@ export function MobileMenu({
             // if the url is internal, we strip the domain
             const url =
               menuItem.url.includes('myshopify.com') ||
-              menuItem.url.includes(publicStoreDomain) ||
-              menuItem.url.includes(primaryDomainUrl)
+                menuItem.url.includes(publicStoreDomain) ||
+                menuItem.url.includes(primaryDomainUrl)
                 ? new URL(menuItem.url).pathname
                 : menuItem.url;
 
@@ -92,18 +94,20 @@ export function MobileMenu({
                       {menuItem.items.map((subMenuItem) => {
                         const url =
                           subMenuItem.url?.includes('myshopify.com') ||
-                          subMenuItem.url?.includes(publicStoreDomain) ||
-                          subMenuItem.url?.includes(primaryDomainUrl)
+                            subMenuItem.url?.includes(publicStoreDomain) ||
+                            subMenuItem.url?.includes(primaryDomainUrl)
                             ? new URL(subMenuItem.url).pathname
                             : subMenuItem.url;
                         return (
                           <li key={subMenuItem.id}>
-                            <Link
-                              className="sm:text-lg text-base hover:underline"
-                              to={url ||""}
-                            >
-                              {subMenuItem.title}
-                            </Link>
+                            <SheetPrimitive.Close asChild>
+                              <Link
+                                className="sm:text-lg text-base hover:underline"
+                                to={url || ""}
+                              >
+                                {subMenuItem.title}
+                              </Link>
+                            </SheetPrimitive.Close>
                           </li>
                         );
                       })}

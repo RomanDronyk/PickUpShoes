@@ -148,6 +148,7 @@ export default function Collection() {
   const {collection, filtersCollection, appliedFilters} =
     useLoaderData<typeof loader>();
   const isMobile = useMedia('(max-width: 767px)', false);
+  
 
   return (
     <div className="grid lg:grid-cols-[minmax(auto,_300px)_minmax(auto,_1fr)] grid-cols-1 gap-x-5 w-full lg:px-24 md:px-12 px-[10px]  mb-8">

@@ -175,7 +175,6 @@ function redirectToFirstVariant({
 export default function Product() {
   const {product, variants, viewedProducts, recommendations} =
     useLoaderData<typeof loader>();
-    console.log(product,"sfasadf")
   const {selectedVariant, descriptionHtml} = product;
   return (
     <div className="product lg:px-24 md:px-10 px-[10px] w-full ">

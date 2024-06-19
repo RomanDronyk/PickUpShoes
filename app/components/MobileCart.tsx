@@ -12,7 +12,7 @@ import {Link} from '@remix-run/react';
 import {Button} from './ui/button';
 import {ArrowRight, Minus, Plus, X} from 'lucide-react';
 import {CartForm, Image, Money} from '@shopify/hydrogen';
-import {useState} from 'react';
+import {useEffect, useState} from 'react';
 import {useVariantUrl} from '~/utils';
 import EmptyCart from './ui/emptyCart';
 
@@ -22,15 +22,13 @@ type CartLine = CartApiQueryFragment['lines']['nodes'][0];
 
 export function MobileCart({
   cart,
-  empty,
-  closeCart
+
 }: {
   cart: CartApiQueryFragment | null |any;
-  empty?: boolean;
-  closeCart: ()=>void
+
 }) {
-  console.log(cart,"asdl;kfj")
   const [open, setOpen] = useState(false);
+  
   return (
     <Drawer open={open} onOpenChange={setOpen} direction="right">
       <DrawerTrigger asChild>
@@ -185,20 +183,7 @@ function MobileCartLine({line ,setOpen}: {setOpen: any; line: DropDownCartLine})
     </div>
   );
 }
-// function EmptyCart() {
-//   return (
-//     <div className="flex flex-col gap-5 min-h-52 h-full items-center justify-center">
-//       <h3 className="font-semibold text-center text-[26px]">
-//         Схоже твоя корзина порожня
-//       </h3>
-//       <Button asChild className="bg-red font-medium hover:bg-darkRed text-xl">
-//         <Link to="/collections/catalog">
-//           До каталогу <ArrowRight size={20} className="ml-2" />
-//         </Link>
-//       </Button>
-//     </div>
-//   );
-// }
+
 function CartLineQuantity({line}: {line: CartLine}) {
   if (!line || typeof line?.quantity === 'undefined') return null;
   const {id: lineId, quantity} = line;
@@ -232,6 +217,8 @@ function CartLineQuantity({line}: {line: CartLine}) {
     </div>
   );
 }
+
+
 function CartLinePrice({
   line,
   priceType = 'regular',

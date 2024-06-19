@@ -53,8 +53,8 @@ export function DropDownCart({ cart }: DropdownCartProps) {
       animate={cartShow ? 'open' : 'closed'}
       exit="closed"
       className= {cartShow?
-        "top-[101%] opacity-[1]  duration-300 transition-all ease-linear absolute z-20 w-full flex-col d-flex  bg-white/95 backdrop-blur-lg drop-shadow-cart rounded-b-[30px]  p-[30px] text-black"
-        :"top-[-500%] opacity-0  duration-300 transition-all ease-linear absolute z-20 w-full flex-col d-flex  bg-white/95 backdrop-blur-lg drop-shadow-cart rounded-b-[30px]  p-[30px] text-black"
+        "top-[101%] opacity-[1]  duration-300 transition-all ease-in-out absolute z-20 w-full flex-col d-flex  bg-white/95 backdrop-blur-lg drop-shadow-cart rounded-b-[30px]  p-[30px] text-black"
+        :"top-[-500%] opacity-0  duration-300 transition-all ease-in-out absolute z-20 w-full flex-col d-flex  bg-white/95 backdrop-blur-lg drop-shadow-cart rounded-b-[30px]  p-[30px] text-black"
       } 
     >
       {!lines && <EmptyCart />}

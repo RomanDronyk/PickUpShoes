@@ -71,7 +71,6 @@ export function getVariantUrl({
 
     const searchString = translatedSearchParams.toString();
 
-    console.log(path + (searchString ? '?' + searchString.toString() : ''))
   return path + (searchString ? '?' + searchString.toString() : '');
 }
 export function parseAsCurrency(value: number, locale: I18nLocale) {

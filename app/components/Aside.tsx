@@ -1,13 +1,3 @@
-/**
- * A side bar component with Overlay that works without JavaScript.
- * @example
- * ```jsx
- * <Aside id="search-aside" heading="SEARCH">
- *  <input type="search" />
- *  ...
- * </Aside>
- * ```
- */
 export function Aside({
   children,
   heading,

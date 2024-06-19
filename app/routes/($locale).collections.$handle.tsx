@@ -147,15 +147,16 @@ export async function loader({request, params, context}: LoaderFunctionArgs) {
 export default function Collection() {
   const {collection, filtersCollection, appliedFilters} =
     useLoaderData<typeof loader>();
-  const isMobile = useMedia('(max-width: 767px)', false);
+  const isMobile = useMedia('(max-width: 1024px)', false);
 
   return (
     <div className="grid lg:grid-cols-[minmax(auto,_300px)_minmax(auto,_1fr)] grid-cols-1 gap-x-5 w-full lg:px-24 md:px-12 px-[10px]  mb-8">
       <div className="sidebar xl:w-[300px] h-full lg:block hidden">
         <ProductsFilter
-          initialFilters={filtersCollection?.products.filters as Filter[]}
-          filters={collection.products.filters as Filter[]}
-          appliedFilters={appliedFilters}
+        appliedFilters={appliedFilters}
+        filters={collection.products.filters as Filter[]}
+        initialFilters={filtersCollection?.products.filters as Filter[]}
+
         />
       </div>
       <div className="items relative">

@@ -30,7 +30,6 @@ export function ProductCard({
   const linkRef = useRef<HTMLAnchorElement>(null);
   const variant = product.variants.nodes[0];
   const variantUrl = useVariantUrl(product.handle, variant.selectedOptions);
-  console.log(product, "product in cart")
   const isMobile = useMedia('(max-width: 767px)', false);
   
   useEffect(() => {

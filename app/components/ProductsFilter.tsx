@@ -1,3 +1,4 @@
+import {useLoaderData, type MetaFunction} from '@remix-run/react';
 import {
   Link,
   useLocation,
@@ -14,7 +15,7 @@ import type {
 import { ChevronDown } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { useDebounce } from 'react-use';
-import type { SortParam } from '~/routes/($locale).collections.$handle';
+import type { SortParam, loader } from '~/routes/($locale).collections.$handle';
 import {
   Accordion,
   AccordionContent,
@@ -53,6 +54,7 @@ export function ProductsFilter({
   initialFilters: Filter[];
   appliedFilters?: AppliedFilter[];
 }) {
+
   return (
     <div className="flex flex-col gap-6 border border-black/10 rounded-[20px] py-5 px-6 ">
       <div className="pb-6 border-b border-b-black/10 flex justify-between items-center">
@@ -200,33 +202,40 @@ function PriceFilter({
   );
 }
 
-function ListFilter({ filter }: { filter: Filter }) {
+
+interface Filter {
+  label: string;
+  values: { id: string; input: string; label: string }[];
+  id: string;
+}
+
+interface ProductFilter {
+  [key: string]: any;
+}
+
+interface ListFilterProps {
+  filter: Filter;
+}
+
+const ListFilter: React.FC<ListFilterProps> = ({ filter }) => {
   const [value, setValue] = useState<string[]>([]);
-
-
   const location = useLocation();
+  const navigate = useNavigate();
+  const matches = useMatches();
+
   const params = useMemo(
     () => new URLSearchParams(location.search),
     [location.search],
   );
 
-  const navigate = useNavigate();
-  //get prefix fitler
   const exampleValue = filter.values[0];
-
-  const exampleValueObj = JSON.parse(
-    exampleValue.input as string,
-  ) as ProductFilter;
-
-  const matches = useMatches();
-
-  interface CatalogMatchData {
-    appliedFilters: { filter: any }[];
-  }
+  const exampleValueObj = JSON.parse(exampleValue.input) as ProductFilter;
+  const filterKey: string = Object.keys(exampleValueObj)[0];
 
   const catalogMatch = matches.find(
     (match) => match.id === 'routes/($locale).collections.$handle',
   );
+
   const filtersValue =
     catalogMatch?.data &&
     (catalogMatch.data as { appliedFilters: { filter: any }[] }).appliedFilters.map(
@@ -234,9 +243,6 @@ function ListFilter({ filter }: { filter: Filter }) {
         return JSON.stringify(filter.filter);
       },
     );
-
-  const filterKey: string = Object.keys(exampleValueObj)[0];
-
 
   const calculatedValues = filter.values.filter((value) =>
     filtersValue.includes(value.input),
@@ -252,13 +258,15 @@ function ListFilter({ filter }: { filter: Filter }) {
         params.delete(`${FILTER_URL_PREFIX}${filterKey}`);
         navigate(`${location.pathname}?${params.toString()}`);
         return;
+      }else{
+        const selectedItems = filter.values.filter((item) =>
+          value.includes(item.id),
+        );
+  
+        const link = getFilterLink(selectedItems, params, location);
+        navigate(`${link}`);
       }
-      const selectedItems = filter.values.filter((item) =>
-        value.includes(item.id),
-      );
 
-      const link = getFilterLink(selectedItems, params, location);
-      navigate(`${link}`);
     },
     0,
     [value],
@@ -303,7 +311,6 @@ function ListFilter({ filter }: { filter: Filter }) {
                     </ToggleGroupItem>
                   ))
                   : filter.values.map((filterItem) => {
-                    // const colorClass = `background-color:var(--filter-${filterItem.label.toLowerCase()})`;
                     const colorClass = {
                       backgroundColor: `var(--filter-${filterItem.label.toLowerCase()})`,
                     };
@@ -326,6 +333,8 @@ function ListFilter({ filter }: { filter: Filter }) {
     </div>
   );
 }
+
+export default ListFilter;
 export function AppliedFilters({ filters = [] }: { filters: AppliedFilter[] }) {
   const [params] = useSearchParams();
   const location = useLocation();
