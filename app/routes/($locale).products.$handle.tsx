@@ -6,7 +6,7 @@ import {
   type FetcherWithComponents,
   type MetaFunction,
 } from '@remix-run/react';
-import type {RecommendedProductFragment} from 'storefrontapi.generated';
+import type { RecommendedProductFragment } from 'storefrontapi.generated';
 
 import {
   CartForm,
@@ -20,16 +20,16 @@ import type {
   CartLineInput,
   SelectedOption,
 } from '@shopify/hydrogen/storefront-api-types';
-import {defer, redirect, type LoaderFunctionArgs} from '@shopify/remix-oxygen';
-import {Suspense, useCallback, useEffect, useState} from 'react';
-import {useMedia} from 'react-use';
+import { defer, redirect, type LoaderFunctionArgs } from '@shopify/remix-oxygen';
+import { Suspense, useCallback, useEffect, useState } from 'react';
+import { useMedia } from 'react-use';
 import type {
   ProductFragment,
   ProductVariantFragment,
   ProductVariantsQuery,
 } from 'storefrontapi.generated';
 import RecommendationProducts from '~/components/RecommendationProducts';
-import {SizeGrid} from '~/components/SizeGrid';
+import { SizeGrid } from '~/components/SizeGrid';
 import ViewedProducts from '~/components/ViewedProducts';
 import {
   Carousel,
@@ -37,24 +37,24 @@ import {
   CarouselItem,
   type CarouselApi,
 } from '~/components/ui/carousel';
-import {ScrollArea, ScrollBar} from '~/components/ui/scroll-area';
-import {Tabs, TabsContent, TabsList, TabsTrigger} from '~/components/ui/tabs';
-import {viewedProductsCookie} from '~/cookies.server';
-import {cn} from '~/lib/utils';
-import {getVariantUrl} from '~/utils';
+import { ScrollArea, ScrollBar } from '~/components/ui/scroll-area';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/ui/tabs';
+import { viewedProductsCookie } from '~/cookies.server';
+import { cn } from '~/lib/utils';
+import { getVariantUrl } from '~/utils';
 import monoLogo from '../assets/images/mono.svg';
 
-export const meta: MetaFunction<typeof loader> = ({data}) => {
-  return [{title: `Hydrogen | ${data?.product.title ?? ''}`}];
+export const meta: MetaFunction<typeof loader> = ({ data }) => {
+  return [{ title: `Hydrogen | ${data?.product.title ?? ''}` }];
 };
 
 export const handle = {
   breadcrumb: 'product',
 };
 
-export async function loader({params, request, context}: LoaderFunctionArgs) {
-  const {handle} = params;
-  const {storefront} = context;
+export async function loader({ params, request, context }: LoaderFunctionArgs) {
+  const { handle } = params;
+  const { storefront } = context;
   const url = new URL(request.url);
   // Get the accept-language header
   const selectedOptions = getSelectedProductOptions(request).filter(
@@ -74,7 +74,7 @@ export async function loader({params, request, context}: LoaderFunctionArgs) {
   }
   const locale = context.storefront.i18n;
   // await the query for the critical product data
-  const {product} = await storefront.query(PRODUCT_QUERY, {
+  const { product } = await storefront.query(PRODUCT_QUERY, {
     variables: {
       language: locale.language,
       handle,
@@ -82,17 +82,17 @@ export async function loader({params, request, context}: LoaderFunctionArgs) {
     },
   });
 
-  const {productRecommendations} = await storefront.query(
+  const { productRecommendations } = await storefront.query(
     RECOMMENDED_PRODUCTS,
     {
       variables: {
-        id: product?.id||"0"
+        id: product?.id || "0"
       },
     },
   );
 
   if (!product?.id) {
-    throw new Response(null, {status: 404});
+    throw new Response(null, { status: 404 });
   }
 
   const firstVariant = product.variants.nodes[0];
@@ -109,7 +109,7 @@ export async function loader({params, request, context}: LoaderFunctionArgs) {
     // if no selected variant was returned from the selected options,
     // we redirect to the first variant's url with it's selected options applied
     if (!product.selectedVariant) {
-      throw redirectToFirstVariant({product, request});
+      throw redirectToFirstVariant({ product, request });
     }
   }
 
@@ -119,7 +119,7 @@ export async function loader({params, request, context}: LoaderFunctionArgs) {
   // where variant options might show as available when they're not, but after
   // this deffered query resolves, the UI will update.
   const variants = storefront.query(VARIANTS_QUERY, {
-    variables: {handle},
+    variables: { handle },
   });
 
   const cookieHeader = request.headers.get('Cookie');
@@ -173,15 +173,53 @@ function redirectToFirstVariant({
 }
 
 export default function Product() {
-  const {product, variants, viewedProducts, recommendations} =
+  const { product, variants, viewedProducts, recommendations } =
     useLoaderData<typeof loader>();
-  const {selectedVariant, descriptionHtml} = product;
+  const { selectedVariant, descriptionHtml } = product;
+
+
+  const [selectedIndex, setSelectedIndex] = useState<number | undefined>(0);
+  const [api, setApi] = useState<CarouselApi>();
+  const [thumbApi, setThumbApi] = useState<CarouselApi>();
+
+  const isWide = useMedia('(min-width:1280px)', false);
+
+  const handleThumbClick = useCallback(
+    (index: number) => {
+      if (!api) return;
+      api?.scrollTo(index);
+    },
+    [api],
+  );
+
+  const onSelect = useCallback(() => {
+    if (!api) return;
+    setSelectedIndex(api.selectedScrollSnap());
+    thumbApi?.scrollTo(api.selectedScrollSnap());
+  }, [api, thumbApi, setSelectedIndex]);
+
+  const objGalery = {
+    selectedIndex,
+    setSelectedIndex,
+    api,
+    setApi,
+    thumbApi,
+    setThumbApi,
+    isWide,
+    handleThumbClick,
+    onSelect,
+  }
+
+
+
+
   return (
     <div className="product lg:px-24 md:px-10 px-[10px] w-full ">
       <div className="sm:grid sm:grid-cols-2 flex flex-col gap-y-5 gap-x-10">
-        <ProductGalery media={product.media} />
+        <ProductGalery objGalery={objGalery} media={product.media} />
         {/* <ProductImage image={selectedVariant?.image} /> */}
         <ProductMain
+          objGalery={objGalery}
           selectedVariant={selectedVariant}
           product={product}
           variants={variants}
@@ -196,7 +234,7 @@ export default function Product() {
   );
 }
 
-function ProductTabs({description}: {description: string}) {
+function ProductTabs({ description }: { description: string }) {
   return (
     <div className="product-info my-6">
       <Tabs defaultValue="product-info">
@@ -233,7 +271,7 @@ function ProductTabs({description}: {description: string}) {
             </h3>
             <div
               className="grid grid-cols-2 border border-black/10 rounded-[20px] px-[25px] py-[30px] [&>div]:flex [&>div]:flex-col [&>*:nth-child(even)]:font-medium lg:text-2xl text-base"
-              dangerouslySetInnerHTML={{__html: description}}
+              dangerouslySetInnerHTML={{ __html: description }}
             />
           </div>
         </TabsContent>
@@ -480,7 +518,7 @@ function ProductTabs({description}: {description: string}) {
     </div>
   );
 }
-function ProductImage({image}: {image: ProductVariantFragment['image']}) {
+function ProductImage({ image }: { image: ProductVariantFragment['image'] }) {
   if (!image) {
     return <div className="product-image" />;
   }
@@ -497,27 +535,18 @@ function ProductImage({image}: {image: ProductVariantFragment['image']}) {
   );
 }
 
-function ProductGalery({media}: {media: ProductFragment['media']}) {
-  const [selectedIndex, setSelectedIndex] = useState<number | undefined>(0);
-  const [api, setApi] = useState<CarouselApi>();
-  const [thumbApi, setThumbApi] = useState<CarouselApi>();
-
-  const isWide = useMedia('(min-width:1280px)', false);
-
-  const handleThumbClick = useCallback(
-    (index: number) => {
-      if (!api) return;
-      api?.scrollTo(index);
-    },
-    [api],
-  );
-
-  const onSelect = useCallback(() => {
-    if (!api) return;
-    setSelectedIndex(api.selectedScrollSnap());
-    thumbApi?.scrollTo(api.selectedScrollSnap());
-  }, [api, thumbApi, setSelectedIndex]);
-
+function ProductGalery({ objGalery, media }: { objGalery: any, media: ProductFragment['media'] }) {
+  const {
+    selectedIndex,
+    setSelectedIndex,
+    api,
+    setApi,
+    thumbApi,
+    setThumbApi,
+    isWide,
+    handleThumbClick,
+    onSelect,
+  } = objGalery;
   useEffect(() => {
     onSelect();
     if (!api) return;
@@ -591,15 +620,17 @@ function ProductGalery({media}: {media: ProductFragment['media']}) {
 }
 
 function ProductMain({
+  objGalery,
   selectedVariant,
   product,
   variants,
 }: {
+  objGalery: any
   product: ProductFragment;
-  selectedVariant: ProductFragment['selectedVariant'];
+  selectedVariant: any;
   variants: Promise<ProductVariantsQuery>;
 }) {
-  const {title, descriptionHtml, vendor,collections} = product;
+  const { title, descriptionHtml, vendor, collections } = product;
   return (
     <div className="product-main">
       <div className="flex flex-col border-b pb-6 border-b-black/10">
@@ -611,8 +642,8 @@ function ProductMain({
             {product.selectedVariant?.sku}
           </span>
           <Link
-          to={`/collections/${collections.nodes[0].handle}?filter.productVendor="${vendor}"`}
-           className="text-white text-[16px] flex items-center jusity-center px-[14px] py-[5px] bg-black rounded-3xl self-start">
+            to={`/collections/${collections.nodes[0].handle}?filter.productVendor="${vendor}"`}
+            className="text-white text-[16px] flex items-center jusity-center px-[14px] py-[5px] bg-black rounded-3xl self-start">
             {product.vendor}
           </Link>
         </div>
@@ -624,6 +655,7 @@ function ProductMain({
             product={product}
             selectedVariant={selectedVariant}
             variants={[]}
+            objGalery={objGalery}
           />
         }
       >
@@ -633,6 +665,7 @@ function ProductMain({
         >
           {(data) => (
             <ProductForm
+              objGalery={objGalery}
               product={product}
               selectedVariant={selectedVariant}
               variants={data.product?.variants.nodes || []}
@@ -651,11 +684,11 @@ function ProductPrice({
 }) {
   const percentageAmount = selectedVariant?.compareAtPrice
     ? (
-        (1 -
-          parseInt(selectedVariant.price.amount) /
-            parseInt(selectedVariant.compareAtPrice.amount)) *
-        100
-      ).toFixed()
+      (1 -
+        parseInt(selectedVariant.price.amount) /
+        parseInt(selectedVariant.compareAtPrice.amount)) *
+      100
+    ).toFixed()
     : null;
   return (
     <div className="product-price price flex gap-x-[10px] md:font-medium md:text-2xl text-lg">
@@ -682,24 +715,26 @@ function ProductForm({
   product,
   selectedVariant,
   variants,
+  objGalery
 }: {
+  objGalery: any;
   product: ProductFragment;
   selectedVariant: ProductFragment['selectedVariant'];
   variants: Array<ProductVariantFragment>;
 }) {
 
-  const checkAllVarians = ()=>{
+  const checkAllVarians = () => {
     const allUnavailable = variants.every(variant => variant.availableForSale === false);
-  
+
     if (allUnavailable) {
       return "Немає в наявності";
-    }else{
+    } else {
       return null
     }
   }
 
-  const checkSelectedVariant = ()=>{
-    return selectedVariant?.availableForSale? 'Додати в корзину': 'Оберіть розмір'
+  const checkSelectedVariant = () => {
+    return selectedVariant?.availableForSale ? 'Додати в корзину' : 'Оберіть розмір'
   }
   const valueCheckedAllVarians = checkAllVarians()
   const valueCheckedVarian = checkSelectedVariant()
@@ -712,7 +747,7 @@ function ProductForm({
           options={product.options}
           variants={variants}
         >
-          {({option}) => <ProductOptions key={option.name} option={option} />}
+          {({ option }) => <ProductOptions objGalery={objGalery} product={product} key={option.name} option={option} />}
         </VariantSelector>
         <div className="w-[300x] text-2xl my-4">
           <SizeGrid vendor={product.vendor} />
@@ -737,44 +772,96 @@ function ProductForm({
           lines={
             selectedVariant
               ? [
-                  {
-                    merchandiseId: selectedVariant.id,
-                    quantity: 1,
-                  },
-                ]
+                {
+                  merchandiseId: selectedVariant.id,
+                  quantity: 1,
+                },
+              ]
               : []
           }
         >
-         {(valueCheckedAllVarians!==null)
-         ?valueCheckedAllVarians:
-          valueCheckedVarian}
-          
+          {(valueCheckedAllVarians !== null)
+            ? valueCheckedAllVarians :
+            valueCheckedVarian}
+
         </AddToCartButton>
       </div>
     </div>
   );
 }
 
-function ProductOptions({option}: {option: VariantOption}) {
+function ProductOptions({ objGalery, product, option }: { objGalery: any, product: any, option: VariantOption }) {
+  const {
+    selectedIndex,
+    setSelectedIndex,
+    api,
+    setApi,
+    thumbApi,
+    setThumbApi,
+    isWide,
+    handleThumbClick,
+    onSelect,
+  } = objGalery;
+  if (option.name === "Колір") {
+    console.log(product, "sadf")
+    return (
+      <div className="product-options max-w-[370px]" key={option.name}>
+        <h5 className="text-[16px] text-black/60 mb-4">{option.name}</h5>
+        <div className="product-options-grid grid grid-cols-5 gap-y-[10px] gap-x-[10px] items-start">
+          {option.values.map(({ value, isAvailable, isActive, to }, index) => {
+            if (isAvailable) {
+              return <Link
+                key={option.name + value}
+                prefetch="intent"
+              onClick={() => handleThumbClick(index)}
+
+                preventScrollReset
+                replace
+                to={to}
+                className={cn(
+                  'text-black text-[16px] px-[2px] py-[2px] rounded-[22px] flex max-w-[76px] justify-center self-start bg-[#F0F0F0]',
+                  isActive && 'text-white bg-black',
+                )}
+              >
+                <MediaFile
+
+                  mediaOptions={{
+                    image: {
+                      aspectRatio: '1/1',
+                      crop: 'center',
+                    },
+                  }}
+                  data={product.media.nodes[index]}
+                  className="w-full rounded-[20px]"
+                />
+                {/* {value} */}
+              </Link>
+            }
+          })}
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="product-options max-w-[370px]" key={option.name}>
       <h5 className="text-[16px] text-black/60 mb-4">{option.name}</h5>
       <div className="product-options-grid grid grid-cols-5 gap-y-[10px] gap-x-[10px] items-start">
-        {option.values.map(({value, isAvailable, isActive, to}) => {
-          if(isAvailable){
+        {option.values.map(({ value, isAvailable, isActive, to }) => {
+          if (isAvailable) {
             return <Link
-            key={option.name + value}
-            prefetch="intent"
-            preventScrollReset
-            replace
-            to={to}
-            className={cn(
-              'text-black text-[16px] px-[18px] py-[15px] rounded-[22px] flex max-w-[76px] justify-center self-start bg-[#F0F0F0]',
-              isActive && 'text-white bg-black',
-            )}
-          >
-            {value}
-          </Link>
+              key={option.name + value}
+              prefetch="intent"
+              preventScrollReset
+              replace
+              to={to}
+              className={cn(
+                'text-black text-[16px] px-[18px] py-[15px] rounded-[22px] flex max-w-[76px] justify-center self-start bg-[#F0F0F0]',
+                isActive && 'text-white bg-black',
+              )}
+            >
+              {value}
+            </Link>
           }
         })}
       </div>
@@ -799,7 +886,7 @@ function AddToCartButton({
     <div>
       <CartForm
         route="/cart"
-        inputs={{lines}}
+        inputs={{ lines }}
         action={CartForm.ACTIONS.LinesAdd}
       >
         {(fetcher: FetcherWithComponents<any>) => (

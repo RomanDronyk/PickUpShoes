@@ -31,9 +31,6 @@ type SizeGrid = {
 export const SizeGrid = ({vendor}: {vendor: string}) => {
   const [sizeChart, setSizeChart] = useState<SizeGrid>();
   const [gridView, setGridView] = useState(false);
-  useEffect(()=>{
-    console.log(sizeChart, "sizeChart")
-  },[sizeChart])
 
   useEffect(() => {
     const fetchData = async () => {

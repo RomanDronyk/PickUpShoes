@@ -4,7 +4,10 @@ import {
   type ActionFunctionArgs,
   type LoaderFunctionArgs,
 } from '@shopify/remix-oxygen';
-import {Form, useActionData, type MetaFunction} from '@remix-run/react';
+import {Form, Link, useActionData, type MetaFunction} from '@remix-run/react';
+
+import { Button } from '~/components/ui/button';
+import { Input } from '~/components/ui/input';
 
 type ActionResponse = {
   error: string | null;
@@ -88,52 +91,58 @@ export default function Activate() {
   const error = action?.error ?? null;
 
   return (
-    <div className="account-activate">
-      <h1>Activate Account.</h1>
-      <p>Create your password to activate your account.</p>
-      <Form method="POST">
-        <fieldset>
-          <label htmlFor="password">Password</label>
-          <input
-            id="password"
-            name="password"
-            type="password"
-            autoComplete="current-password"
-            placeholder="Password"
-            aria-label="Password"
-            minLength={8}
-            required
-            // eslint-disable-next-line jsx-a11y/no-autofocus
-            autoFocus
-          />
-          <label htmlFor="passwordConfirm">Re-enter password</label>
-          <input
-            id="passwordConfirm"
-            name="passwordConfirm"
-            type="password"
-            autoComplete="current-password"
-            placeholder="Re-enter password"
-            aria-label="Re-enter password"
-            minLength={8}
-            required
-          />
-        </fieldset>
-        {error ? (
-          <p>
-            <mark>
-              <small>{error}</small>
-            </mark>
-          </p>
-        ) : (
+    <div className="account-activate flex items-center justify-center self-stretch flex-col w-full">
+      <div className="w-2/4 rounded-[20px] border border-black/10 p-6">
+        <h1 className="font-medium text-[32px]">Активація облікового запису</h1>
+        <p className="text-lg">
+          Створіть свій пароль, щоб активувати обліковий запис.
+        </p>
+        <br />
+        <Form method="POST">
+          <fieldset>
+            <Input
+              aria-label="Password"
+              autoComplete="current-password"
+              id="password"
+              name="password"
+              placeholder="Пароль"
+              required
+              type="password"
+              minLength={8}
+              className="bg-input px-6 py-3 text-xl placeholder:text-xl h-[52px]"
+            />
+            <Input
+              aria-label="Re-enter password"
+              autoComplete="current-password"
+              id="passwordConfirm"
+              name="passwordConfirm"
+              placeholder="Повторно введіть пароль"
+              required
+              type="password"
+              minLength={8}
+              className="bg-input px-6 py-3 text-xl placeholder:text-xl h-[52px] mt-4"
+            />
+          </fieldset>
+          {error ? (
+            <p>
+              <mark>
+                <small>{error}</small>
+              </mark>
+            </p>
+          ) : (
+            <br />
+          )}
+          <Button className="flex items-center justify-center gap-5 py-[14px] font-medium text-xl w-full rounded-[36px]">
+            Зберегти
+          </Button>
+        </Form>
+        <div>
           <br />
-        )}
-        <button
-          className="bg-primary text-contrast rounded py-2 px-4 focus:shadow-outline block w-full"
-          type="submit"
-        >
-          Save
-        </button>
-      </Form>
+          <p>
+            <Link to="/account/login">На сторінку входу →</Link>
+          </p>
+        </div>
+      </div>
     </div>
   );
 }

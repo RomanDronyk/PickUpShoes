@@ -13,6 +13,8 @@ import {
   useOutletContext,
   type MetaFunction,
 } from '@remix-run/react';
+import { Button } from '~/components/ui/button';
+import { Input } from '~/components/ui/input';
 
 export type ActionResponse = {
   addressId?: string | null;
@@ -215,30 +217,26 @@ export async function action({request, context}: ActionFunctionArgs) {
 }
 
 export default function Addresses() {
-  const {customer} = useOutletContext<{customer: CustomerFragment}>();
-  const {defaultAddress, addresses} = customer;
+  const { customer } = useOutletContext<{ customer: CustomerFragment }>();
+  const { defaultAddress, addresses } = customer;
 
   return (
-    <div className="account-addresses">
-      <h2>Addresses</h2>
-      <br />
-      {!addresses.nodes.length ? (
-        <p>You have no addresses saved.</p>
-      ) : (
-        <div>
+    <div className="container grid lg:grid-cols-2 grid-cols-1 gap-y-10 gap-x-10 sm:px-24 px-[10px] my-10 w-full">
+      <div className="addresses rounded-[20px] border border-black/10 p-6">
+        <h2 className="xl:text-[32px] text-[24px] md:text-left text-center font-medium mb-[25px]">Адреси</h2>
+        <br />
+        {!addresses.nodes.length ? (
+          <p>У вас немає збережених адрес.</p>
+        ) : (
           <div>
-            <legend>Create address</legend>
             <NewAddressForm />
+            <br />
+            <hr />
+            <br />
+            <ExistingAddresses addresses={addresses} defaultAddress={defaultAddress} />
           </div>
-          <br />
-          <hr />
-          <br />
-          <ExistingAddresses
-            addresses={addresses}
-            defaultAddress={defaultAddress}
-          />
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }
@@ -260,15 +258,15 @@ function NewAddressForm() {
 
   return (
     <AddressForm address={newAddress} defaultAddress={null}>
-      {({stateForMethod}) => (
+      {({ stateForMethod }) => (
         <div>
-          <button
+          <Button
             disabled={stateForMethod('POST') !== 'idle'}
             formMethod="POST"
             type="submit"
           >
-            {stateForMethod('POST') !== 'idle' ? 'Creating' : 'Create'}
-          </button>
+            {stateForMethod('POST') !== 'idle' ? 'Створення' : 'Створити'}
+          </Button>
         </div>
       )}
     </AddressForm>
@@ -281,29 +279,25 @@ function ExistingAddresses({
 }: Pick<CustomerFragment, 'addresses' | 'defaultAddress'>) {
   return (
     <div>
-      <legend>Existing addresses</legend>
+      <h3>Існуючі адреси</h3>
       {addresses.nodes.map((address) => (
-        <AddressForm
-          key={address.id}
-          address={address}
-          defaultAddress={defaultAddress}
-        >
-          {({stateForMethod}) => (
-            <div>
-              <button
+        <AddressForm key={address.id} address={address} defaultAddress={defaultAddress}>
+          {({ stateForMethod }) => (
+            <div className="flex gap-4">
+              <Button
                 disabled={stateForMethod('PUT') !== 'idle'}
                 formMethod="PUT"
                 type="submit"
               >
-                {stateForMethod('PUT') !== 'idle' ? 'Saving' : 'Save'}
-              </button>
-              <button
+                {stateForMethod('PUT') !== 'idle' ? 'Збереження' : 'Зберегти'}
+              </Button>
+              <Button
                 disabled={stateForMethod('DELETE') !== 'idle'}
                 formMethod="DELETE"
                 type="submit"
               >
-                {stateForMethod('DELETE') !== 'idle' ? 'Deleting' : 'Delete'}
-              </button>
+                {stateForMethod('DELETE') !== 'idle' ? 'Видалення' : 'Видалити'}
+              </Button>
             </div>
           )}
         </AddressForm>
@@ -312,143 +306,141 @@ function ExistingAddresses({
   );
 }
 
-export function AddressForm({
+function AddressForm({
   address,
   defaultAddress,
   children,
 }: {
-  children: (props: {
-    stateForMethod: (
-      method: 'PUT' | 'POST' | 'DELETE',
-    ) => ReturnType<typeof useNavigation>['state'];
-  }) => React.ReactNode;
+  children: (props: { stateForMethod: (method: 'PUT' | 'POST' | 'DELETE') => ReturnType<typeof useNavigation>['state'] }) => React.ReactNode;
   defaultAddress: CustomerFragment['defaultAddress'];
   address: AddressFragment;
 }) {
-  const {state, formMethod} = useNavigation();
+  const { state, formMethod } = useNavigation();
   const action = useActionData<ActionResponse>();
   const error = action?.error?.[address.id];
   const isDefaultAddress = defaultAddress?.id === address.id;
+
   return (
     <Form id={address.id}>
       <fieldset>
         <input type="hidden" name="addressId" defaultValue={address.id} />
-        <label htmlFor="firstName">First name*</label>
-        <input
-          aria-label="First name"
-          autoComplete="given-name"
-          defaultValue={address?.firstName ?? ''}
+        <Input
           id="firstName"
           name="firstName"
-          placeholder="First name"
-          required
           type="text"
+          autoComplete="given-name"
+          defaultValue={address?.firstName ?? ''}
+          placeholder="Ім'я"
+          aria-label="First name"
+          required
+          className="bg-input px-6 py-3 text-xl placeholder:text-xl h-[52px]"
         />
-        <label htmlFor="lastName">Last name*</label>
-        <input
-          aria-label="Last name"
-          autoComplete="family-name"
-          defaultValue={address?.lastName ?? ''}
+        <Input
           id="lastName"
           name="lastName"
-          placeholder="Last name"
-          required
           type="text"
+          autoComplete="family-name"
+          defaultValue={address?.lastName ?? ''}
+          placeholder="Прізвище"
+          aria-label="Last name"
+          required
+          className="bg-input px-6 py-3 text-xl placeholder:text-xl h-[52px] mt-4"
         />
-        <label htmlFor="company">Company</label>
-        <input
-          aria-label="Company"
-          autoComplete="organization"
-          defaultValue={address?.company ?? ''}
+        <Input
           id="company"
           name="company"
-          placeholder="Company"
           type="text"
+          autoComplete="organization"
+          defaultValue={address?.company ?? ''}
+          placeholder="Компанія"
+          aria-label="Company"
+          className="bg-input px-6 py-3 text-xl placeholder:text-xl h-[52px] mt-4"
         />
-        <label htmlFor="address1">Address line*</label>
-        <input
-          aria-label="Address line 1"
-          autoComplete="address-line1"
-          defaultValue={address?.address1 ?? ''}
+        <Input
           id="address1"
           name="address1"
-          placeholder="Address line 1*"
-          required
           type="text"
+          autoComplete="address-line1"
+          defaultValue={address?.address1 ?? ''}
+          placeholder="Адреса"
+          aria-label="Address line 1"
+          required
+          className="bg-input px-6 py-3 text-xl placeholder:text-xl h-[52px] mt-4"
         />
-        <label htmlFor="address2">Address line 2</label>
-        <input
-          aria-label="Address line 2"
-          autoComplete="address-line2"
-          defaultValue={address?.address2 ?? ''}
+        <Input
           id="address2"
           name="address2"
-          placeholder="Address line 2"
           type="text"
+          autoComplete="address-line2"
+          defaultValue={address?.address2 ?? ''}
+          placeholder="Адреса (продовження)"
+          aria-label="Address line 2"
+          className="bg-input px-6 py-3 text-xl placeholder:text-xl h-[52px] mt-4"
         />
-        <label htmlFor="city">City*</label>
-        <input
-          aria-label="City"
-          autoComplete="address-level2"
-          defaultValue={address?.city ?? ''}
+        <Input
           id="city"
           name="city"
-          placeholder="City"
-          required
           type="text"
+          autoComplete="address-level2"
+          defaultValue={address?.city ?? ''}
+          placeholder="Місто"
+          aria-label="City"
+          required
+          className="bg-input px-6 py-3 text-xl placeholder:text-xl h-[52px] mt-4"
         />
-        <label htmlFor="province">State / Province*</label>
-        <input
-          aria-label="State"
-          autoComplete="address-level1"
-          defaultValue={address?.province ?? ''}
+        <Input
           id="province"
           name="province"
-          placeholder="State / Province"
-          required
           type="text"
+          autoComplete="address-level1"
+          defaultValue={address?.province ?? ''}
+          placeholder="Штат / Провінція"
+          aria-label="State / Province"
+          required
+          className="bg-input px-6 py-3 text-xl placeholder:text-xl h-[52px] mt-4"
         />
-        <label htmlFor="zip">Zip / Postal Code*</label>
-        <input
-          aria-label="Zip"
-          autoComplete="postal-code"
-          defaultValue={address?.zip ?? ''}
+        <Input
           id="zip"
           name="zip"
-          placeholder="Zip / Postal Code"
-          required
           type="text"
+          autoComplete="postal-code"
+          defaultValue={address?.zip ?? ''}
+          placeholder="Поштовий індекс"
+          aria-label="Zip / Postal Code"
+          required
+          className="bg-input px-6 py-3 text-xl placeholder:text-xl h-[52px] mt-4"
         />
-        <label htmlFor="country">Country*</label>
-        <input
-          aria-label="Country"
-          autoComplete="country-name"
-          defaultValue={address?.country ?? ''}
+        <Input
           id="country"
           name="country"
-          placeholder="Country"
-          required
           type="text"
+          autoComplete="country-name"
+          defaultValue={address?.country ?? ''}
+          placeholder="Країна"
+          aria-label="Country"
+          required
+          className="bg-input px-6 py-3 text-xl placeholder:text-xl h-[52px] mt-4"
         />
-        <label htmlFor="phone">Phone</label>
-        <input
-          aria-label="Phone"
-          autoComplete="tel"
-          defaultValue={address?.phone ?? ''}
+        <Input
           id="phone"
           name="phone"
-          placeholder="+16135551111"
-          pattern="^\+?[1-9]\d{3,14}$"
           type="tel"
+          autoComplete="tel"
+          defaultValue={address?.phone ?? ''}
+          placeholder="+380123456789"
+          aria-label="Phone"
+          pattern="^\+?[1-9]\d{3,14}$"
+          className="bg-input px-6 py-3 text-xl placeholder:text-xl h-[52px] mt-4"
         />
-        <div>
+        <div className="flex items-center mt-4">
           <input
             defaultChecked={isDefaultAddress}
             id="defaultAddress"
             name="defaultAddress"
             type="checkbox"
+            className="mr-2"
           />
-          <label htmlFor="defaultAddress">Set as default address</label>
+          <label htmlFor="defaultAddress">Зробити адресою за замовчуванням</label>
         </div>
         {error ? (
           <p>

@@ -182,7 +182,6 @@ const CartLineQuantity = React.memo(({ setNewQuantity, line }: { setNewQuantity:
   const { id: lineId, quantity } = line;
   const prevQuantity = Number(Math.max(0, quantity - 1).toFixed(0));
   const nextQuantity = Number((quantity + 1).toFixed(0));
-  console.log(prevQuantity,nextQuantity,quantity,line,"que")
 
   return (
     <div className="flex self-center items-center justify-center lg:gap-5 gap-3 text-lg text-black bg-input rounded-[62px] lg:px-5 px-2 py-1">

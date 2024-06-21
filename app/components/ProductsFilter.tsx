@@ -94,9 +94,7 @@ function FilterDraw({
   filters: Filter[];
   initial: Filter[];
 }) {
-  useEffect(()=>{
-    console.log(filters)
-  }, filters)
+
   const [params] = useSearchParams();
 
   const [initialFilterPrice, setInitialFilterPrice]= useState<any>(initial.find((item:any) => item.type === 'PRICE_RANGE'))
@@ -151,9 +149,6 @@ function PriceFilter({
   const initialRangeValue:any = value ? [value.min, value.max] : [min, max];
   const [priceRange, setPriceRange] = useState(initialRangeValue);
 
-  useEffect(()=>{
-    console.log(priceRange)
-  },[priceRange])
 
   const location = useLocation();
   const params = useMemo(
@@ -244,10 +239,6 @@ const ListFilter: React.FC<ListFilterProps> = ({ filter , appliedFilters}) => {
   
 
   if(appliedFilters){
-    useEffect(()=>{
-      console.log(value, "value")
-      console.log(appliedFilters, "aplied fli")
-    },[appliedFilters])
   
     useEffect(() => {
       const appliedLabels = appliedFilters.map((filter:any) => {
@@ -353,7 +344,6 @@ const ListFilter: React.FC<ListFilterProps> = ({ filter , appliedFilters}) => {
                 value={value}
                 
               >
-                {console.log(value)}
                 {filter.id !== 'filter.v.option.color'
                   ? filterValues.map((filterItem:any) => (
                     <ToggleGroupItem

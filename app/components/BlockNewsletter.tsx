@@ -4,32 +4,12 @@ import { Form, json, useFetcher } from '@remix-run/react';
 import { ActionFunctionArgs } from '@remix-run/server-runtime';
 
 
-export async function action({request, context}: ActionFunctionArgs) {
-  const {session, storefront} = context;
-
-  if (request.method !== 'POST') {
-    return json({error: 'Method not allowed'}, {status: 405});
-  }
-  const form = await request.formData();
-  const email = form.get('email');
-  const {customerCreate} = await storefront.mutate(
-    SUBSCRIBE_EMAIL,
-    {
-      variables: {
-        input: {email},
-        acceptsMarketing:true
-      },
-    },
-  );
-}
 
 export default function BlockNewsletter() {
   const [email, setEmail] = useState('');
-  const fetcher = useFetcher();
 
   const sendEmail = async (e:any) => {
     e.preventDefault();
-    fetcher.submit({ email }, { method: 'post', action: '/api/subscribe' });
     setEmail('');
   };
 
@@ -81,8 +61,8 @@ export default function BlockNewsletter() {
 
 
 const SUBSCRIBE_EMAIL = `#graphql
-mutation customerCreate($input: CustomerCreateInput!) {
-  customerCreate(input: $input) {
+mutation customerUpdate($input: CustomerCreateInput!) {
+  customerUpdate(input: $input) {
     customer {
       email
       acceptsMarketing
