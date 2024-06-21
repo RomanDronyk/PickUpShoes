@@ -704,7 +704,6 @@ function ProductForm({
   const valueCheckedAllVarians = checkAllVarians()
   const valueCheckedVarian = checkSelectedVariant()
 
-  console.log(variants,"varians")
   return (
     <div className=" product-form pt-6">
       <div className="flex justify-between flex-wrap-reverse">
@@ -729,7 +728,11 @@ function ProductForm({
         <AddToCartButton
           disabled={!selectedVariant || !selectedVariant.availableForSale}
           onClick={() => {
-            window.location.href = window.location.href + '#cart-aside';
+            window.scrollTo({
+              top: 0,
+              left: 0,
+              behavior: "smooth"
+            })
           }}
           lines={
             selectedVariant

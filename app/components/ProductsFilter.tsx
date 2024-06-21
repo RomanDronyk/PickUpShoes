@@ -250,7 +250,7 @@ const ListFilter: React.FC<ListFilterProps> = ({ filter , appliedFilters}) => {
     },[appliedFilters])
   
     useEffect(() => {
-      const appliedLabels = appliedFilters.map((filter) => {
+      const appliedLabels = appliedFilters.map((filter:any) => {
         const label = filter.label.toLowerCase();
         if(label.includes(' ')){
           return label.split(' ').join('-')
@@ -261,7 +261,7 @@ const ListFilter: React.FC<ListFilterProps> = ({ filter , appliedFilters}) => {
         }
       });
   
-      const updatedValue = value.filter((val) => {
+      const updatedValue = value.filter((val:any) => {
         const lastSegment = val.split('.').pop().toLowerCase();
         const normalizedLastSegment = lastSegment.includes('-') ? lastSegment : lastSegment.split('.').join('-');
         return appliedLabels.includes(normalizedLastSegment);

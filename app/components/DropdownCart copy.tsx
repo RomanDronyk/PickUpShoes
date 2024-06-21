@@ -20,13 +20,13 @@ type CartLine = CartApiQueryFragment['lines']['nodes'][0];
 
 const cartVariants = {
   closed: {
-    top: '-550%',
+    top: '-300%',
     opacity: 0,
     transition: {
       type: 'spring',
       opacity: 1,
       scale: 1,
-      duration: 0.7,
+      duration: 0.01,
     },
   },
   open: {
@@ -34,7 +34,7 @@ const cartVariants = {
     opacity: 1,
     transition: {
       type: 'spring',
-      duration: 0.7,
+      duration: 0.01,
       scale: 1,
     },
   },
@@ -51,8 +51,8 @@ export const DropDownCart = React.memo(({ cart }: DropdownCartProps) => {
       animate={cartShow ? 'open' : 'closed'}
       exit="closed"
       className={cartShow
-        ? "top-[101%] opacity-[1]  duration-[400] transition-all ease-out absolute z-20 w-full flex-col d-flex  bg-white/95 backdrop-blur-lg drop-shadow-cart rounded-b-[30px]  p-[30px] text-black"
-        : "top-[-600%] opacity-0  duration-[400] transition-all ease-out absolute z-20 w-full flex-col d-flex  bg-white/95 backdrop-blur-lg drop-shadow-cart rounded-b-[30px]  p-[30px] text-black"
+        ? "top-[101%] opacity-[1]  duration-300 transition-all ease-in-out absolute z-20 w-full flex-col d-flex  bg-white/95 backdrop-blur-lg drop-shadow-cart rounded-b-[30px]  p-[30px] text-black"
+        : "top-[-500%] opacity-0  duration-300 transition-all ease-in-out absolute z-20 w-full flex-col d-flex  bg-white/95 backdrop-blur-lg drop-shadow-cart rounded-b-[30px]  p-[30px] text-black"
       }
     >
       {!lines && <EmptyCart />}
@@ -126,15 +126,6 @@ const CartLineItem = React.memo(({ line }: { line: DropDownCartLine }) => {
   const { product, title, image, selectedOptions } = merchandise;
   const lineItemUrl = useVariantUrl(product.handle, selectedOptions);
 
-  const [isLoading, setIsLoading]=useState(false)
-  const [newQuantity, setNewQuantity]=useState(line.quantity)
-  const updateQuantity =(value:any)=>{
-    setIsLoading(true)
-  }
-  useEffect((()=>{
-    setIsLoading(false)
-  }),[line])
-
   return (
     <li key={id} className="xl:grid xl:grid-cols-12 flex justify-between">
       <div className="grid grid-cols-[70px_250px_110px] items-center gap-[14px] 2xl:col-span-9 xl:col-span-8 col-span-7">
@@ -166,29 +157,26 @@ const CartLineItem = React.memo(({ line }: { line: DropDownCartLine }) => {
         </div>
       </div>
       <div className="xl:grid xl:grid-cols-[130px_130px_130px] xl:col-span-3 flex  gap-x-3">
-        <CartLineQuantity
-setNewQuantity={updateQuantity}  line={line} />
-        <CartLinePrice isLoading = {isLoading} line={line} as="span" />
+        <CartLineQuantity line={line} />
+        <CartLinePrice line={line} as="span" />
         <div className="flex items-center justify-center">
-          <CartLineRemoveButton setNewQuantity={updateQuantity} lineIds={[line.id]} />
+          <CartLineRemoveButton lineIds={[line.id]} />
         </div>
       </div>
     </li>
   );
 });
 
-const CartLineQuantity = React.memo(({ setNewQuantity, line }: { setNewQuantity:any, line: CartLine }) => {
+const CartLineQuantity = React.memo(({ line }: { line: CartLine }) => {
   if (!line || typeof line?.quantity === 'undefined') return null;
   const { id: lineId, quantity } = line;
   const prevQuantity = Number(Math.max(0, quantity - 1).toFixed(0));
   const nextQuantity = Number((quantity + 1).toFixed(0));
-  console.log(prevQuantity,nextQuantity,quantity,line,"que")
 
   return (
     <div className="flex self-center items-center justify-center lg:gap-5 gap-3 text-lg text-black bg-input rounded-[62px] lg:px-5 px-2 py-1">
       <CartLineUpdateButton lines={[{ id: lineId, quantity: prevQuantity }]}>
         <button
-          onClick={()=>setNewQuantity()}
           aria-label="Зменшити кількість"
           disabled={quantity <= 1}
           name="decrease-quantity"
@@ -201,8 +189,6 @@ const CartLineQuantity = React.memo(({ setNewQuantity, line }: { setNewQuantity:
       <span>{quantity}</span>
       <CartLineUpdateButton lines={[{ id: lineId, quantity: nextQuantity }]}>
         <button
-          onClick={()=>setNewQuantity()}
-
           className="flex flex-col items-center cursor-pointer"
           aria-label="Збільшити кількість"
           name="increase-quantity"
@@ -216,22 +202,20 @@ const CartLineQuantity = React.memo(({ setNewQuantity, line }: { setNewQuantity:
 });
 
 const CartLinePrice = React.memo(({
-  isLoading,
   line,
   priceType = 'regular',
   ...passthroughProps
 }: {
-  isLoading:boolean;
   line: CartLine;
   priceType?: 'regular' | 'compareAt';
   [key: string]: any;
 }) => {
-  
   if (!line?.cost?.amountPerQuantity || !line?.cost?.totalAmount) return null;
 
-  const moneyV2 =priceType === 'regular'
-    ? line.cost.totalAmount
-    : line.cost.compareAtAmountPerQuantity;
+  const moneyV2 =
+    priceType === 'regular'
+      ? line.cost.totalAmount
+      : line.cost.compareAtAmountPerQuantity;
 
   if (moneyV2 == null) {
     return null;
@@ -239,13 +223,13 @@ const CartLinePrice = React.memo(({
 
   return (
     <div className="self-center text-center font-semibold lg:text-[22px] text-lg">
-      {isLoading? "Загрузка": <><Money
+      <Money
         withoutTrailingZeros
         withoutCurrency
         {...passthroughProps}
         data={moneyV2}
       />
-      грн</>}
+      грн
     </div>
   );
 });
@@ -268,7 +252,7 @@ const CartLineUpdateButton = React.memo(({
   );
 });
 
-const CartLineRemoveButton = React.memo(({setNewQuantity, lineIds }: {setNewQuantity:any; lineIds: string[] }) => {
+const CartLineRemoveButton = React.memo(({ lineIds }: { lineIds: string[] }) => {
   return (
     <CartForm
       route="/cart"
@@ -276,7 +260,6 @@ const CartLineRemoveButton = React.memo(({setNewQuantity, lineIds }: {setNewQuan
       inputs={{ lineIds }}
     >
       <Button
-      onClick={setNewQuantity}
         type="submit"
         className="self-center w-[25px] h-[25px] p-[6px] rounded-full"
       >
