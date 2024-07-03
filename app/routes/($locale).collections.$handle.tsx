@@ -148,6 +148,7 @@ export default function Collection() {
   const {collection, filtersCollection, appliedFilters} =
     useLoaderData<typeof loader>();
   const isMobile = useMedia('(max-width: 1024px)', false);
+  console.log(collection)
 
   return (
     <div className="grid lg:grid-cols-[minmax(auto,_300px)_minmax(auto,_1fr)] grid-cols-1 gap-x-5 w-full lg:px-24 md:px-12 px-[10px]  mb-8">
@@ -199,7 +200,8 @@ export default function Collection() {
   );
 }
 
-function ProductsGrid({products}: {products: ProductItemFragment[]}) {
+export function ProductsGrid({products}: {products: ProductItemFragment[]}) {
+  console.log(products,"dsf")
   return (
     <div className="product-grid grid md:grid-cols-3 xl:grid-cols-3 grid-cols-2  gap-x-[20px] gap-y-10 mt-5">
       {(products.length>0)?

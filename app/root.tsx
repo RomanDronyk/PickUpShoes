@@ -1,3 +1,4 @@
+
 import {useNonce} from '@shopify/hydrogen';
 import {
   defer,
@@ -24,6 +25,8 @@ import styles from 'app/styles/tailwind.css';
 import vaulStyles from 'vaul/dist/index.css';
 import NotFound from './components/NotFound';
 import {google} from 'worker-auth-providers';
+import HeaderContext, { HeaderContextInterface } from '~/context/HeaderCarts';
+
 /**
  * This is important to avoid re-fetching root queries on sub-navigations
  */
@@ -120,7 +123,10 @@ export default function App() {
         <Meta />
         <Links />
       </head>
+      <HeaderContext>
+
       <body className="font-sans">
+
         <Layout {...data}>
           <Outlet />
         </Layout>
@@ -128,6 +134,8 @@ export default function App() {
         <Scripts nonce={nonce} />
         <LiveReload nonce={nonce} />
       </body>
+    </HeaderContext>
+      
     </html>
   );
 }

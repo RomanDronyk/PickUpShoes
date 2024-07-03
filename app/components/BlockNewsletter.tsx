@@ -1,16 +1,18 @@
 import { useState } from 'react';
 import { Input } from './ui/input';
-import { Form, json, useFetcher } from '@remix-run/react';
+import { Form, json, useActionData, useFetcher } from '@remix-run/react';
 import { ActionFunctionArgs } from '@remix-run/server-runtime';
 
 
 
-export default function BlockNewsletter() {
+export default function BlockNewsletter({storefront}:any) {
   const [email, setEmail] = useState('');
+  const data = useActionData();
+  console.log(data);
 
-  const sendEmail = async (e:any) => {
+  const sendEmail = async (e: any) => {
     e.preventDefault();
-    setEmail('');
+    console.log("sdf")
   };
 
   return (
@@ -22,7 +24,7 @@ export default function BlockNewsletter() {
             будь в курсі. отримуй <br /> знижки — першим
           </h3>
         </div>
-        <Form method="post" onSubmit={sendEmail} className="BlockNewsletter__collum">
+        <Form method="post"  className="BlockNewsletter__collum">
           <div className="flex items-center justify-center rounded-[27px] border border-placeholderText w-full px-[20px] py-[3px] BlockNewsletter_input_block">
             <svg
               width="22"
@@ -41,6 +43,7 @@ export default function BlockNewsletter() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               type="email"
+              name='email'
               placeholder="Введіть свій e-mail"
               className="border-none BlockNewsletter_input"
             />
@@ -57,20 +60,3 @@ export default function BlockNewsletter() {
   );
 }
 
-
-
-
-const SUBSCRIBE_EMAIL = `#graphql
-mutation customerUpdate($input: CustomerCreateInput!) {
-  customerUpdate(input: $input) {
-    customer {
-      email
-      acceptsMarketing
-    }
-    customerUserErrors {
-      field
-      message
-      code
-    }
-  }
-}`

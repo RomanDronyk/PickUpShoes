@@ -1,10 +1,10 @@
-import {ScrollArea, ScrollBar} from '~/components/ui/scroll-area';
-import {Form, Link, NavLink, Outlet, useLoaderData} from '@remix-run/react';
-import {json, redirect, type LoaderFunctionArgs} from '@shopify/remix-oxygen';
-import {Scroll} from 'lucide-react';
-import type {CustomerFragment} from 'storefrontapi.generated';
-import {Button} from '~/components/ui/button';
-import {cn} from '~/lib/utils';
+import { ScrollArea, ScrollBar } from '~/components/ui/scroll-area';
+import { Form, Link, NavLink, Outlet, useLoaderData } from '@remix-run/react';
+import { json, redirect, type LoaderFunctionArgs } from '@shopify/remix-oxygen';
+import { Scroll } from 'lucide-react';
+import type { CustomerFragment } from 'storefrontapi.generated';
+import { Button } from '~/components/ui/button';
+import { cn } from '~/lib/utils';
 
 export function shouldRevalidate() {
   return true;
@@ -13,14 +13,14 @@ export const handle = {
   breadcrumb: () => <Link to="/account">Особистий кабінет</Link>,
 };
 
-export async function loader({request, context}: LoaderFunctionArgs) {
-  const {session, storefront} = context;
-  const {pathname} = new URL(request.url);
+export async function loader({ request, context }: LoaderFunctionArgs) {
+  const { session, storefront } = context;
+  const { pathname } = new URL(request.url);
   const customerAccessToken = await session.get('customerAccessToken');
   const isLoggedIn = !!customerAccessToken?.accessToken;
   const isAccountHome = pathname === '/account' || pathname === '/account/';
   const isPrivateRoute =
-    /^\/account\/(orders|orders\/.*|profile|addresses|addresses\/.*)$/.test(
+    /^\/account\/(orders|orders\/.*|profile|addresses|addresses|liked|liked\/.*)$/.test(
       pathname,
     );
 
@@ -49,7 +49,7 @@ export async function loader({request, context}: LoaderFunctionArgs) {
   }
 
   try {
-    const {customer} = await storefront.query(CUSTOMER_QUERY, {
+    const { customer } = await storefront.query(CUSTOMER_QUERY, {
       variables: {
         customerAccessToken: customerAccessToken.accessToken,
         country: storefront.i18n.country,
@@ -63,7 +63,7 @@ export async function loader({request, context}: LoaderFunctionArgs) {
     }
 
     return json(
-      {isLoggedIn, isPrivateRoute, isAccountHome, customer},
+      { isLoggedIn, isPrivateRoute, isAccountHome, customer },
       {
         headers: {
           'Cache-Control': 'no-cache, no-store, must-revalidate',
@@ -83,18 +83,18 @@ export async function loader({request, context}: LoaderFunctionArgs) {
 }
 
 export default function Acccount() {
-  const {customer, isPrivateRoute, isAccountHome} =
+  const { customer, isPrivateRoute, isAccountHome } =
     useLoaderData<typeof loader>();
 
   if (!isPrivateRoute && !isAccountHome) {
-    return <Outlet context={{customer}} />;
+    return <Outlet context={{ customer }} />;
   }
 
   return (
     <AccountLayout customer={customer as CustomerFragment}>
       <br />
       <br />
-      <Outlet context={{customer}} />
+      <Outlet context={{ customer }} />
     </AccountLayout>
   );
 }
@@ -160,12 +160,16 @@ function AccountMenu() {
         <NavLink to="/account/profile" className={isActiveStyle}>
           Особиста інформація
         </NavLink>
+        {/* <NavLink to="/account/userLike" className={isActiveStyle}>
+          Вподобане
+        </NavLink> */}
         <NavLink to="/account/orders" className={isActiveStyle}>
           Історія замовлень
         </NavLink>
-        {/* <NavLink to="/account/addresses" style={isActiveStyle}>
-        Addresses
-      </NavLink> */}
+        <NavLink to="/account/liked" className={isActiveStyle}>
+        Вподобане
+
+      </NavLink>
       </nav>
       <ScrollBar orientation="horizontal" className="scrollbar-none" />
     </ScrollArea>

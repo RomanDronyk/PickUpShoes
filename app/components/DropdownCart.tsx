@@ -51,7 +51,7 @@ export const DropDownCart = React.memo(({ cart }: DropdownCartProps) => {
       animate={cartShow ? 'open' : 'closed'}
       exit="closed"
       className={cartShow
-        ? "top-[101%] opacity-[1]  duration-[400] transition-all ease-out absolute z-20 w-full flex-col d-flex  bg-white/95 backdrop-blur-lg drop-shadow-cart rounded-b-[30px]  p-[30px] text-black"
+        ? "top-[101%] opacity-[1]  transition-all ease-out absolute z-20 w-full flex-col d-flex  bg-white/95 backdrop-blur-lg drop-shadow-cart rounded-b-[30px]  p-[30px] text-black"
         : "top-[-600%] opacity-0  duration-[400] transition-all ease-out absolute z-20 w-full flex-col d-flex  bg-white/95 backdrop-blur-lg drop-shadow-cart rounded-b-[30px]  p-[30px] text-black"
       }
     >

@@ -1,31 +1,46 @@
-import {defer, type LoaderFunctionArgs} from '@shopify/remix-oxygen';
-import {Await, useLoaderData, Link, type MetaFunction} from '@remix-run/react';
-import {Suspense} from 'react';
+import { ActionFunctionArgs, defer, type LoaderFunctionArgs } from '@shopify/remix-oxygen';
+import { Await, useLoaderData, Link, type MetaFunction, Form, useActionData } from '@remix-run/react';
+import { Suspense } from 'react';
 import BlockNewsletter from '~/components/BlockNewsletter';
-import {Image, Money} from '@shopify/hydrogen';
+import { Image, Money, createStorefrontClient } from '@shopify/hydrogen';
+import {
+  json,
+  redirect
+} from '@shopify/remix-oxygen';
+
 import type {
   FeaturedCollectionFragment,
   RecommendedProductsQuery,
   BestSellersQuery,
 } from 'storefrontapi.generated';
 
-import {Hero} from '~/components/Hero';
-import {MainCollections} from '~/components/MainCollections';
+
+import { Hero } from '~/components/Hero';
+import { MainCollections } from '~/components/MainCollections';
 import BestSellers from '~/components/BestSellers';
 import NewProducts from '~/components/NewProducts';
-
-export const handle: {breadcrumb: string} = {
+import { Input } from '~/components/ui/input';
+import { Button } from '~/components/ui/button';
+import { uuidv7 } from "uuidv7";
+import shopify from '~/shopify.server';
+export const handle: { breadcrumb: string } = {
   breadcrumb: 'home',
 };
 
+enum FormNames {
+  LOGIN_FORM = 'loginForm',
+  REGISTER_FORM = 'registerForm',
+}
+
+
 export const meta: MetaFunction = () => {
-  return [{title: 'PickupShoes | Головна'}];
+  return [{ title: 'PickupShoes | Головна' }];
 };
 
-export async function loader({context}: LoaderFunctionArgs) {
-  const {storefront} = context;
+export async function loader({ context }: LoaderFunctionArgs) {
+  const { storefront } = context;
 
-  const {collections} = await storefront.query(FEATURED_COLLECTION_QUERY);
+  const { collections } = await storefront.query(FEATURED_COLLECTION_QUERY);
   const featuredCollection = collections.nodes[0];
   const recommendedProducts = storefront.query(RECOMMENDED_PRODUCTS_QUERY);
 
@@ -50,6 +65,9 @@ export async function loader({context}: LoaderFunctionArgs) {
     },
   });
 
+
+
+
   return defer({
     featuredCollection,
     recommendedProducts,
@@ -57,12 +75,68 @@ export async function loader({context}: LoaderFunctionArgs) {
     mainCollections,
     bestSellers,
     newProducts,
+    storefront
   });
 }
+export async function action({ context, request }: ActionFunctionArgs) {
+  const formData = await request.formData();
+  const { session, storefront } = context;
+
+  const {admin} = await shopify.authenticate.admin(request);
+
+  const updates = Object.fromEntries(formData);
+  const { email }: any = updates;
+  const password = await uuidv7();
+
+  try {
+    const response = await admin.graphql(
+      `#graphql
+      mutation customerCreate($input: CustomerInput!) {
+        customerCreate(input: $input) {
+          userErrors {
+            field
+            message
+          }
+          customer {
+            id
+            email
+            acceptsMarketing
+          }
+        }
+      }`,
+      {
+        variables: {
+          "input": {
+            "email": email,
+            "acceptsMarketing": true
+          }
+        },
+      },
+    );
+    
+    const data = await response.json();
+  
+    if (response?.userErrors?.length) {
+      console.error('Customer creation errors:', response.userErrors);
+      throw new Error(response.userErrors.map(e => e.message).join(", "));
+    }
+  
+    return json({ error: null }, { status: 302, headers: { Location: '/' } });
+  
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      return json({ error: error.message }, { status: 400 });
+    }
+    return json({ error: 'An unknown error occurred' }, { status: 400 });
+  }
+
+}
+
 
 export default function Homepage() {
-  const {heroCollection, mainCollections, bestSellers, newProducts} =
+  const { heroCollection, mainCollections, bestSellers, newProducts, storefront } =
     useLoaderData<typeof loader>();
+  const actionData = useActionData();
   return (
     <div className="home w-full flex flex-col items-center justify-center gap-y-[45px]">
       <Hero heroData={heroCollection} />
@@ -70,7 +144,7 @@ export default function Homepage() {
       <BestSellers items={bestSellers} />
       <NewProducts items={newProducts} />
       {/* <RecommendedProducts products={data.recommendedProducts} /> */}
-      <BlockNewsletter/>
+      <BlockNewsletter />
     </div>
   );
 }
@@ -107,9 +181,9 @@ function RecommendedProducts({
       <h2>Recommended Products</h2>
       <Suspense fallback={<div>Loading...</div>}>
         <Await resolve={products}>
-          {({products}) => (
+          {({ products }) => (
             <div className="recommended-products-grid">
-              {products.nodes.map((product) => (
+              {products.nodes.map((product: any) => (
                 <Link
                   key={product.id}
                   className="recommended-product"
@@ -308,3 +382,21 @@ const MAIN_COOLLECTIONS = `#graphql
   }
 }
 ` as const;
+
+
+
+export const CUSOMTER_CREATE_WITHOUT_PASS = `#graphql
+mutation customerCreate($input: CustomerCreateInput!) {
+  customerCreate(input: $input) {
+    customer {
+      email
+      acceptsMarketing
+    }
+    customerUserErrors {
+      field
+      message
+      code
+    }
+  }
+}
+`;

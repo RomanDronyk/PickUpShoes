@@ -331,7 +331,7 @@ export default function Login() {
 }
 
 // NOTE: https://shopify.dev/docs/api/storefront/latest/mutations/customeraccesstokencreate
-const LOGIN_MUTATION = `#graphql
+export const LOGIN_MUTATION = `#graphql
   mutation login($input: CustomerAccessTokenCreateInput!) {
     customerAccessTokenCreate(input: $input) {
       customerUserErrors {
@@ -348,7 +348,7 @@ const LOGIN_MUTATION = `#graphql
 ` as const;
 
 // NOTE: https://shopify.dev/docs/api/storefront/latest/mutations/customerCreate
-const CUSTOMER_CREATE_MUTATION = `#graphql
+export const CUSTOMER_CREATE_MUTATION = `#graphql
   mutation customerCreate(
     $input: CustomerCreateInput!,
     $country: CountryCode,
@@ -369,7 +369,7 @@ const CUSTOMER_CREATE_MUTATION = `#graphql
 
 // NOTE: https://shopify.dev/docs/api/storefront/latest/mutations/customeraccesstokencreate
 
-const REGISTER_LOGIN_MUTATION = `#graphql
+export const REGISTER_LOGIN_MUTATION = `#graphql
   mutation registerLogin(
     $input: CustomerAccessTokenCreateInput!,
     $country: CountryCode,

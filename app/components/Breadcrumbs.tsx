@@ -17,6 +17,8 @@ export const breadcrumbsSchema = z.enum([
   'login',
   'orders',
   'profile',
+  "liked",
+  "likedsd"
 ]);
 export type TBreadcrumbsType = z.infer<typeof breadcrumbsSchema>;
 
@@ -29,8 +31,7 @@ export function Breadcrumbs() {
     deepsRoute?.handle?.breadcrumb,
   );
   const isValidBreadcrumb = parsedBreadcrumbType.success;
-
-  if (isValidBreadcrumb && deepsRoute.data) {
+  if (isValidBreadcrumb ) {
     switch (parsedBreadcrumbType.data) {
       case 'collection':
         pages.push({
@@ -78,6 +79,11 @@ export function Breadcrumbs() {
           name: 'Особистиа інформація',
         });
         break;
+        case 'likedsd':
+          pages.push({
+            href: `/account/likedsd`,
+            name: 'Liked',
+          });
       case 'orders':
         pages.push({
           href: `/account/ptofile`,
@@ -89,9 +95,17 @@ export function Breadcrumbs() {
           name: 'Історія замовлень',
         });
         break;
+        case 'liked':
+          pages.push({
+            href: `/liked`,
+            name: 'Вподобані',
+          });
+
+          break;
       default:
         break;
     }
+
   } else {
     return null;
   }

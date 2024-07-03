@@ -9,6 +9,7 @@ import {AnimatePresence, motion} from 'framer-motion';
 import {Aside} from '~/components/Aside';
 import {Footer} from '~/components/Footer';
 import {Header, HeaderMenu} from '~/components/Header';
+import HeaderContext, { HeaderContextInterface } from '~/context/HeaderCarts';
 import {CartMain} from '~/components/Cart';
 import {
   PredictiveSearchForm,
@@ -34,7 +35,9 @@ export function Layout({
 }: LayoutProps) {
   return (
     <div className="min-h-full flex flex-col">
+
       {header && <Header header={header} cart={cart} isLoggedIn={isLoggedIn} />}
+
       <Breadcrumbs />
       <AnimatePresence mode="popLayout" initial={false}>
         <motion.main

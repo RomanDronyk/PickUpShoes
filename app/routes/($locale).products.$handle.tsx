@@ -56,16 +56,14 @@ export async function loader({ params, request, context }: LoaderFunctionArgs) {
   const { handle } = params;
   const { storefront } = context;
   const url = new URL(request.url);
-  // Get the accept-language header
+
   const selectedOptions = getSelectedProductOptions(request).filter(
     (option) =>
-      // Filter out Shopify predictive search query params
       !option.name.startsWith('_sid') &&
       !option.name.startsWith('_pos') &&
       !option.name.startsWith('_psq') &&
       !option.name.startsWith('_ss') &&
       !option.name.startsWith('_v') &&
-      // Filter out third party tracking params
       !option.name.startsWith('fbclid'),
   );
 
@@ -73,7 +71,7 @@ export async function loader({ params, request, context }: LoaderFunctionArgs) {
     throw new Error('Expected product handle to be defined');
   }
   const locale = context.storefront.i18n;
-  // await the query for the critical product data
+
   const { product } = await storefront.query(PRODUCT_QUERY, {
     variables: {
       language: locale.language,
@@ -95,32 +93,17 @@ export async function loader({ params, request, context }: LoaderFunctionArgs) {
     throw new Response(null, { status: 404 });
   }
 
-  const firstVariant = product.variants.nodes[0];
-  const firstVariantIsDefault = Boolean(
-    firstVariant.selectedOptions.find(
-      (option: SelectedOption) =>
-        option.name === 'Title' && option.value === 'Default Title',
-    ),
-  );
-
-  if (firstVariantIsDefault) {
-    product.selectedVariant = firstVariant;
-  } else {
-    // if no selected variant was returned from the selected options,
-    // we redirect to the first variant's url with it's selected options applied
-    if (!product.selectedVariant) {
-      throw redirectToFirstVariant({ product, request });
-    }
-  }
-
-  // In order to show which variants are available in the UI, we need to query
-  // all of them. But there might be a *lot*, so instead separate the variants
-  // into it's own separate query that is deferred. So there's a brief moment
-  // where variant options might show as available when they're not, but after
-  // this deffered query resolves, the UI will update.
-  const variants = storefront.query(VARIANTS_QUERY, {
+  const variants = await storefront.query(VARIANTS_QUERY, {
     variables: { handle },
   });
+
+  const firstAvailableVariant = variants.product.variants.nodes.find(variant => variant.availableForSale) || product.variants.nodes[0];
+
+  const isRequestedVariantAvailable = product.selectedVariant?.availableForSale;
+
+  if (!isRequestedVariantAvailable) {
+    throw redirectToFirstVariant({ product, variants, request });
+  }
 
   const cookieHeader = request.headers.get('Cookie');
   const cookie = (await viewedProductsCookie.parse(cookieHeader)) || [];
@@ -134,6 +117,7 @@ export async function loader({ params, request, context }: LoaderFunctionArgs) {
       ids: cookie,
     },
   });
+
   return defer(
     {
       product,
@@ -149,15 +133,19 @@ export async function loader({ params, request, context }: LoaderFunctionArgs) {
   );
 }
 
+
+
 function redirectToFirstVariant({
   product,
+  variants,
   request,
 }: {
   product: ProductFragment;
+  variants: any;
   request: Request;
 }) {
   const url = new URL(request.url);
-  const firstVariant = product.variants.nodes[0];
+  const firstVariant = variants.product.variants.nodes.find(variant => variant.availableForSale) || product.variants.nodes[0];
 
   return redirect(
     getVariantUrl({
@@ -176,6 +164,8 @@ export default function Product() {
   const { product, variants, viewedProducts, recommendations } =
     useLoaderData<typeof loader>();
   const { selectedVariant, descriptionHtml } = product;
+  console.log(variants)
+
 
 
   const [selectedIndex, setSelectedIndex] = useState<number | undefined>(0);
@@ -191,6 +181,7 @@ export default function Product() {
     },
     [api],
   );
+  
 
   const onSelect = useCallback(() => {
     if (!api) return;
@@ -209,7 +200,6 @@ export default function Product() {
     handleThumbClick,
     onSelect,
   }
-
 
 
 
@@ -723,7 +713,7 @@ function ProductForm({
   variants: Array<ProductVariantFragment>;
 }) {
 
-  const checkAllVarians = () => {
+ const checkAllVarians = () => {
     const allUnavailable = variants.every(variant => variant.availableForSale === false);
 
     if (allUnavailable) {
@@ -741,7 +731,7 @@ function ProductForm({
 
   return (
     <div className=" product-form pt-6">
-      <div className="flex justify-between flex-wrap-reverse">
+      <div className="grid gap-[20px] justify-between flex-wrap-reverse">
         <VariantSelector
           handle={product.handle}
           options={product.options}
@@ -749,7 +739,7 @@ function ProductForm({
         >
           {({ option }) => <ProductOptions objGalery={objGalery} product={product} key={option.name} option={option} />}
         </VariantSelector>
-        <div className="w-[300x] text-2xl my-4">
+        <div className="w-[300x] text-2xl">
           <SizeGrid vendor={product.vendor} />
         </div>
       </div>
@@ -802,8 +792,10 @@ function ProductOptions({ objGalery, product, option }: { objGalery: any, produc
     handleThumbClick,
     onSelect,
   } = objGalery;
+
+
+
   if (option.name === "Колір") {
-    console.log(product, "sadf")
     return (
       <div className="product-options max-w-[370px]" key={option.name}>
         <h5 className="text-[16px] text-black/60 mb-4">{option.name}</h5>
@@ -869,7 +861,7 @@ function ProductOptions({ objGalery, product, option }: { objGalery: any, produc
   );
 }
 
-function AddToCartButton({
+export function AddToCartButton({
   analytics,
   children,
   disabled,

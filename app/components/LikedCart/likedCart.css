@@ -1,0 +1,7 @@
+.blockLikedCart{
+    display: flex !important;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    max-height: 70px;
+}

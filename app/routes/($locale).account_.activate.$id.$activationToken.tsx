@@ -92,7 +92,7 @@ export default function Activate() {
 
   return (
     <div className="account-activate flex items-center justify-center self-stretch flex-col w-full">
-      <div className="w-2/4 rounded-[20px] border border-black/10 p-6">
+      <div className="w-2/4 rounded-[20px] border border-black/10 p-6 my-[30px]">
         <h1 className="font-medium text-[32px]">Активація облікового запису</h1>
         <p className="text-lg">
           Створіть свій пароль, щоб активувати обліковий запис.

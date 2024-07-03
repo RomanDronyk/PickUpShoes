@@ -6,11 +6,12 @@ import {
 } from '@shopify/hydrogen';
 import { cn } from '~/lib/utils';
 
-import { Link } from '@remix-run/react';
+import { Link, redirect } from '@remix-run/react';
 import type { ProductItemFragment } from 'storefrontapi.generated';
 import { useVariantUrl } from '~/utils';
 import { useMedia } from 'react-use';
-import { useRef, useReducer, useEffect } from 'react';
+import { useRef, useReducer, useEffect, useState, useContext } from 'react';
+import HeaderContext, { HeaderBasketContext, HeaderContextInterface } from '~/context/HeaderCarts';
 
 export enum Label {
   bestseller = 'Хіт продажу',
@@ -31,10 +32,40 @@ export function ProductCard({
   const variant = product.variants.nodes[0];
   const variantUrl = useVariantUrl(product.handle, variant.selectedOptions);
   const isMobile = useMedia('(max-width: 767px)', false);
-  
+  const [productWithLike, setProductWithLike] = useState({ ...product, isLiked: false })
   useEffect(() => {
     forceUpdate();
   }, []);
+
+  const {
+    likedCart,
+    removeLikeCart,
+    addLikedCart
+  } = useContext(HeaderBasketContext) as HeaderContextInterface;
+
+
+  useEffect(()=>{
+    const productIndex = likedCart.findIndex((item:any) => item.id === productWithLike.id);
+    if (productIndex === -1) {
+       setProductWithLike({...product, isLiked:false});
+      }
+    likedCart.map((element:any,index:number)=>{
+      if(element.id == productWithLike.id){
+        setProductWithLike({...element,isLiked:true})
+      }
+    })
+  },[likedCart])
+
+  const toggleLike = ()=>{
+    if(productWithLike.isLiked){
+      setProductWithLike({...productWithLike,isLiked:false})
+      removeLikeCart(productWithLike)
+    }else{
+      addLikedCart(productWithLike)
+      setProductWithLike({...productWithLike,isLiked:true})
+    }
+  }
+
 
   const percentageAmount = variant.compareAtPrice
     ? (
@@ -49,7 +80,6 @@ export function ProductCard({
     return option.name === 'Size' || option.name === 'Розмір';
   });
 
-
   return (
     <div className="group/card">
       <div
@@ -61,6 +91,14 @@ export function ProductCard({
           } as React.CSSProperties
         }
       >
+        <button
+          onClick={() => toggleLike()} // Функція для додавання/видалення зі списку бажань
+          className=" absolute p-2 rounded-full bg-white shadow-lg  top-3 right-3 p-2"
+          style={{ zIndex: 32 }}
+          aria-label="Add to wishlist"
+        >
+          <HeartIcon isFavorited={productWithLike.isLiked} />
+        </button>
         {product.featuredImage && (
           <Link
             ref={linkRef}
@@ -85,19 +123,19 @@ export function ProductCard({
 
           </Link>
         )}
-          <div
-            ref={optionsRef}
-            className="w-full top-full bg-white  transition-all ease-in-out  duration-100 group-hover/card:bottom-0 group-hover/card:top-[unset] "
+        <div
+          ref={optionsRef}
+          className="w-full top-full bg-white  transition-all ease-in-out  duration-100 group-hover/card:bottom-0 group-hover/card:top-[unset] "
+        >
+          <VariantSelector
+            handle={product.handle}
+            options={sizeOptions}
+            variants={product.variants.nodes}
           >
-            <VariantSelector
-              handle={product.handle}
-              options={sizeOptions}
-              variants={product.variants.nodes}
-            >
-              {({ option }) =>  <ProductOptions key={option.name} option={option} />}
+            {({ option }) => <ProductOptions key={option.name} option={option} />}
 
-            </VariantSelector>
-          </div>
+          </VariantSelector>
+        </div>
         {/* {!isMobile && (
 
         )} */}
@@ -150,7 +188,7 @@ function ProductOptions({ option }: { option: VariantOption }) {
     <div className="product-options" key={option.name}>
       <div className="grid grid-cols-6 gap-x-[5px] gap-y-[10px] items-center place-content-center  py-[10px]">
         {option.values.map(({ value, isAvailable, isActive, to }) => {
-          if(isAvailable){
+          if (isAvailable) {
             return (
               <div key={option.name + value}>
                 <Link
@@ -168,14 +206,14 @@ function ProductOptions({ option }: { option: VariantOption }) {
               </div>
             );
           }
-          
+
         })}
       </div>
     </div>
   );
 }
 
-function ProductLabel({ label }: { label?: Label }) {
+export function ProductLabel({ label }: { label?: Label }) {
   switch (label) {
     case Label.bestseller:
       return (
@@ -193,3 +231,20 @@ function ProductLabel({ label }: { label?: Label }) {
       return '';
   }
 }
+
+const HeartIcon = ({ isFavorited }: { isFavorited: boolean }) => {
+
+  if (isFavorited) {
+    return (
+      <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlnsXlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+        width="15px" height="15px" viewBox="0 0 15 15" xmlSpace="preserve">
+        <path d="M13.91,6.75c-1.17,2.25-4.3,5.31-6.07,6.94c-0.1903,0.1718-0.4797,0.1718-0.67,0C5.39,12.06,2.26,9,1.09,6.75
+       C-1.48,1.8,5-1.5,7.5,3.45C10-1.5,16.48,1.8,13.91,6.75z"/>
+      </svg>
+    )
+  } else {
+    return <svg width="18" height="16" viewBox="0 0 18 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M5 1C2.7912 1 1 2.73964 1 4.88594C1 6.61852 1.7 10.7305 8.5904 14.8873C8.71383 14.961 8.85552 15 9 15C9.14448 15 9.28617 14.961 9.4096 14.8873C16.3 10.7305 17 6.61852 17 4.88594C17 2.73964 15.2088 1 13 1C10.7912 1 9 3.35511 9 3.35511C9 3.35511 7.2088 1 5 1Z" stroke="black" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  }
+};

@@ -214,3 +214,15 @@
     margin-bottom: 30px;
   }
 }
+
+
+.swym-delete-button{
+  background-color: #efefef;
+  width: 298px;
+  color: black;
+}
+
+.swym-add-to-bag-btn{
+  background-color: cadetblue;
+  width: 298px;
+}
