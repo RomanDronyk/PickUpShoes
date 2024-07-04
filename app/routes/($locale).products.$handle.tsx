@@ -164,7 +164,7 @@ export default function Product() {
   const { product, variants, viewedProducts, recommendations } =
     useLoaderData<typeof loader>();
   const { selectedVariant, descriptionHtml } = product;
-  console.log(variants)
+  console.log(product, "sfd")
 
 
 

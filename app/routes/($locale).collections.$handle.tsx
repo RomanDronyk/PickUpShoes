@@ -201,15 +201,21 @@ export default function Collection() {
 }
 
 export function ProductsGrid({products}: {products: ProductItemFragment[]}) {
-  console.log(products,"dsf")
+  const availableProducts = products.filter(product =>
+    product.variants.nodes.some(variant => variant.availableForSale)
+  );
+
   return (
     <div className="product-grid grid md:grid-cols-3 xl:grid-cols-3 grid-cols-2  gap-x-[20px] gap-y-10 mt-5">
-      {(products.length>0)?
-      products.map((product, index) => {
-        return<div key={product.id}><ProductCard product={product}  /></div> 
-      }):<h2 className="text-gray-500 text-2xl font-semibold left-1/2 opacity-70 absolute text-center top-1/2 transform -translate-x-1/2 -translate-y-1/2">
-      Нічого не знайдено
-    </h2>}
+      {availableProducts.length > 0 ? (
+        availableProducts.map((product, index) => (
+          <div key={product.id}><ProductCard product={product} /></div>
+        ))
+      ) : (
+        <h2 className="text-gray-500 text-2xl font-semibold left-1/2 opacity-70 absolute text-center top-1/2 transform -translate-x-1/2 -translate-y-1/2">
+          Нічого не знайдено
+        </h2>
+      )}
     </div>
   );
 }
@@ -239,8 +245,9 @@ const PRODUCT_ITEM_FRAGMENT = `#graphql
         ...MoneyProductItem
       }
     }
-    variants(first: 1) {
+    variants(first: 10) {
       nodes {
+        availableForSale
         selectedOptions {
           name
           value
@@ -253,7 +260,6 @@ const PRODUCT_ITEM_FRAGMENT = `#graphql
           amount
           currencyCode
         }
-
       }
     }
   }
@@ -284,7 +290,6 @@ const FILTER_QUERY = `#graphql
 }
 ` as const;
 
-// NOTE: https://shopify.dev/docs/api/storefront/2022-04/objects/collection
 const COLLECTION_QUERY = `#graphql
   ${PRODUCT_ITEM_FRAGMENT}
   query Collection(
@@ -336,8 +341,10 @@ const COLLECTION_QUERY = `#graphql
       }
     }
   }
-
 ` as const;
+
+
+
 function getSortValuesFromParam(sortParam: SortParam | null): {
   sortKey: ProductCollectionSortKeys;
   reverse: boolean;

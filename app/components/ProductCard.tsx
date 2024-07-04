@@ -6,7 +6,7 @@ import {
 } from '@shopify/hydrogen';
 import { cn } from '~/lib/utils';
 
-import { Link, redirect } from '@remix-run/react';
+import { Link, NavLink, redirect } from '@remix-run/react';
 import type { ProductItemFragment } from 'storefrontapi.generated';
 import { useVariantUrl } from '~/utils';
 import { useMedia } from 'react-use';
@@ -79,6 +79,8 @@ export function ProductCard({
   const sizeOptions = product.options.filter((option) => {
     return option.name === 'Size' || option.name === 'Розмір';
   });
+  console.log(product)
+
 
   return (
     <div className="group/card">
@@ -132,7 +134,7 @@ export function ProductCard({
             options={sizeOptions}
             variants={product.variants.nodes}
           >
-            {({ option }) => <ProductOptions key={option.name} option={option} />}
+            {({ option }) => <ProductOptions key={option.name} option={option} options = {product.options} />}
 
           </VariantSelector>
         </div>
@@ -183,30 +185,37 @@ export function ProductCard({
     </div>
   );
 }
-function ProductOptions({ option }: { option: VariantOption }) {
+function ProductOptions({ options, option }: { options?: any, option: VariantOption }) {
+  const colorOption = options?.find((opt: any) => opt.name === "Колір");
+
   return (
     <div className="product-options" key={option.name}>
-      <div className="grid grid-cols-6 gap-x-[5px] gap-y-[10px] items-center place-content-center  py-[10px]">
+      <div className="grid grid-cols-6 gap-x-[5px] gap-y-[10px] items-center place-content-center py-[10px]">
         {option.values.map(({ value, isAvailable, isActive, to }) => {
+          let newLink = to;
           if (isAvailable) {
+            if (colorOption) {
+              // Parse the URL and append the color parameter
+              const [baseUrl, queryParams] = to.split('?');
+              const searchParams = new URLSearchParams(queryParams);
+              searchParams.set("Колір", colorOption.values[0]);
+              newLink = `${baseUrl}?${searchParams.toString()}`;
+            }
+
             return (
               <div key={option.name + value}>
-                <Link
-                  // prefetch="intent"
-                  // preventScrollReset
-                  // replace
-                  to={to}
+                <NavLink
+                  to={newLink}
                   className={cn(
                     'border-r border-r-[#AD9F9F] flex text-sm font-medium leading-none items-center justify-center text-black/50',
                     isAvailable && 'text-black',
                   )}
                 >
                   {value}
-                </Link>
+                </NavLink>
               </div>
             );
           }
-
         })}
       </div>
     </div>
