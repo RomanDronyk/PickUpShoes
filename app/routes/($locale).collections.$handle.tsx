@@ -102,15 +102,10 @@ export async function loader({request, params, context}: LoaderFunctionArgs) {
     .map((filter) => {
       const foundValue = allFilterValues.find((value) => {
         const valueInput = JSON.parse(value.input as string) as ProductFilter;
-        // special case for price, the user can enter something freeform (still a number, though)
-        // that may not make sense for the locale/currency.
-        // Basically just check if the price filter is applied at all.
         if (valueInput.price && filter.price) {
           return true;
         }
         return (
-          // This comparison should be okay as long as we're not manipulating the input we
-          // get from the API before using it as a URL param.
           JSON.stringify(valueInput) === JSON.stringify(filter)
         );
       });
@@ -148,7 +143,7 @@ export default function Collection() {
   const {collection, filtersCollection, appliedFilters} =
     useLoaderData<typeof loader>();
   const isMobile = useMedia('(max-width: 1024px)', false);
-  console.log(collection)
+  console.log(collection, "колекції")
 
   return (
     <div className="grid lg:grid-cols-[minmax(auto,_300px)_minmax(auto,_1fr)] grid-cols-1 gap-x-5 w-full lg:px-24 md:px-12 px-[10px]  mb-8">

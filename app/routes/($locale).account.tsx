@@ -146,7 +146,7 @@ function AccountMenu() {
       ? 'bg-black text-white hover:bg-black hover:cursor-default'
       : '';
     return cn(
-      'text-xl shrink-0 text-black  px-[30px] text-center  w-3/4 sm:w-auto  rounded-t-[30px] py-4 transition-all ease hover:bg-input',
+      'text-xl shrink-0 text-black   px-[30px] text-center  w-[32%]   rounded-t-[30px] py-4 transition-all ease hover:bg-input',
       active,
     );
   }
