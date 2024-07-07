@@ -15,6 +15,13 @@ export const handle = {
   breadcrumb: 'orders',
 };
 
+const financialStatusTranslations = {
+  PAID: 'Оплачено',
+  PENDING: 'Очікується',
+  REFUNDED: 'Повернено',
+  // Додайте інші статуси тут
+};
+
 export const meta: MetaFunction = () => {
   return [{title: 'Історія замовлень'}];
 };
@@ -144,7 +151,7 @@ function OrderItem({order}: {order: OrderItemFragment}) {
             грн
           </span>
         </div>
-        <p>{order.financialStatus}</p>
+        <p>{financialStatusTranslations[order.financialStatus] || order.financialStatus}</p>
         <p>
           {new Date(order.processedAt).toLocaleString('uk', {
             day: 'numeric',

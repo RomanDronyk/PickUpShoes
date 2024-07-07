@@ -52,7 +52,7 @@ export default function Liked() {
   } = useContext(HeaderBasketContext) as HeaderContextInterface
 
   return (
-    <div className={!isMobile ? "mb-[60px] addresses rounded-[20px] border border-black/10 p-6" : "mb-[60px] addresses rounded "}>
+    <div style={{minHeight:90}} className={ "mb-[60px] relative addresses rounded-[20px] border border-black/10 p-6" }>
       {likedCart.length > 0 ?
         <div style={{ display: "grid", gap: 10 }}>
           {likedCart.map((product: ProductItemFragment) => <LikedCart key={product.id} product={product} />)}
