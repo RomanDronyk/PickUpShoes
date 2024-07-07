@@ -53,6 +53,13 @@ export async function loader({params, context}: LoaderFunctionArgs) {
   });
 }
 
+const fulfillmentStatusTranslations = {
+  FULFILLED: 'Виконано',
+  UNFULFILLED: 'Не виконано',
+  PARTIALLY_FULFILLED: 'Частково виконано',
+  // Додайте інші статуси тут
+};
+
 export default function OrderRoute() {
   const {order, lineItems, discountValue, discountPercentage} =
     useLoaderData<typeof loader>();
@@ -85,24 +92,6 @@ export default function OrderRoute() {
             ))}
           </div>
           <div>
-            {/* {((discountValue && discountValue.amount) || */}
-            {/*   discountPercentage) && ( */}
-            {/*   <tr> */}
-            {/*     <th scope="row" colSpan={3}> */}
-            {/*       <p>Знижки</p> */}
-            {/*     </th> */}
-            {/*     <th scope="row"> */}
-            {/*       <p>Знижки</p> */}
-            {/*     </th> */}
-            {/*     <td> */}
-            {/*       {discountPercentage ? ( */}
-            {/*         <span>-{discountPercentage}% OFF</span> */}
-            {/*       ) : ( */}
-            {/*         discountValue && <Money data={discountValue!} /> */}
-            {/*       )} */}
-            {/*     </td> */}
-            {/*   </tr> */}
-            {/* )} */}
             <div className="flex font-semibold gap-[10px] text-xl">
               <div>
                 <p>Всього: </p>
@@ -140,7 +129,7 @@ export default function OrderRoute() {
             )}
             <h3>Статус</h3>
             <div>
-              <p>{order.fulfillmentStatus}</p>
+              <p>{fulfillmentStatusTranslations[order.fulfillmentStatus] || order.fulfillmentStatus}</p>
             </div>
           </div>
         </div>
