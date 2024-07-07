@@ -226,3 +226,13 @@
   background-color: cadetblue;
   width: 298px;
 }
+.animation-foter-link{
+  background-color: #000;
+  transition: all 0.3s;
+}
+.animation-foter-link:hover{
+  background-color: #fff;
+}
+.animation-foter-link:hover svg path{
+  stroke: #000;
+}
