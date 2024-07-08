@@ -60,7 +60,7 @@ export default function Liked() {
           </div>
           :
           <h2 className="text-gray-500 text-2xl  font-semibold left-1/2 opacity-70 absolute text-center top-[50%] transform -translate-x-1/2 -translate-y-1/2">
-            На жаль ви нічого не вподобали
+            На жаль, ви нічого не вподобали
           </h2>
         }
       </div>
