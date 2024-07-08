@@ -59,7 +59,7 @@ export async function loader({request, params, context}: LoaderFunctionArgs) {
       if (key.startsWith(FILTER_URL_PREFIX)) {
         const filterKey = key.substring(FILTER_URL_PREFIX.length);
         filters.push({
-          [filterKey]: JSON.parse(value),
+          [filterKey]: JSON.parse(value ||`[]`),
         });
       }
       return filters;
@@ -98,6 +98,14 @@ export async function loader({request, params, context}: LoaderFunctionArgs) {
   const allFilterValues = collection.products.filters.flatMap(
     (filter) => filter.values,
   );
+
+  const headerPromise = await storefront.query(HEADER_QUERY, {
+    cache: storefront.CacheLong(),
+    variables: {
+      headerMenuHandle: 'main-menu', // Adjust to your header menu handle
+    },
+  });
+
   const appliedFilters = filters
     .map((filter) => {
       const foundValue = allFilterValues.find((value) => {
@@ -136,19 +144,19 @@ export async function loader({request, params, context}: LoaderFunctionArgs) {
     })
     .filter((filter): filter is NonNullable<typeof filter> => filter !== null);
 
-  return json({collection, filtersCollection, appliedFilters});
+  return json({collection,headerPromise, filtersCollection, appliedFilters});
 }
 
 export default function Collection() {
-  const {collection, filtersCollection, appliedFilters} =
+  const {headerPromise, collection, filtersCollection, appliedFilters} =
     useLoaderData<typeof loader>();
   const isMobile = useMedia('(max-width: 1024px)', false);
-  console.log(collection, "колекції")
 
   return (
     <div className="grid lg:grid-cols-[minmax(auto,_300px)_minmax(auto,_1fr)] grid-cols-1 gap-x-5 w-full lg:px-24 md:px-12 px-[10px]  mb-8">
       <div className="sidebar xl:w-[300px] h-full lg:block hidden">
         <ProductsFilter
+        headerPromise = {headerPromise}
         appliedFilters={appliedFilters}
         filters={collection.products.filters as Filter[]}
         initialFilters={filtersCollection?.products.filters as Filter[]}
@@ -165,6 +173,7 @@ export default function Collection() {
             <SortProducts />
           ) : (
             <MobileFilters
+              headerPromise = {headerPromise}
               filters={collection.products.filters as Filter[]}
               initialFilters={filtersCollection?.products.filters as Filter[]}
             />
@@ -377,3 +386,61 @@ function getSortValuesFromParam(sortParam: SortParam | null): {
       };
   }
 }
+const MENU_FRAGMENT = `#graphql
+  fragment MenuItem on MenuItem {
+    id
+    resourceId
+    tags
+    title
+    type
+    url
+  }
+  fragment ChildMenuItem on MenuItem {
+    ...MenuItem
+  }
+  fragment ParentMenuItem on MenuItem {
+    ...MenuItem
+    items {
+      ...ChildMenuItem
+    }
+  }
+  fragment Menu on Menu {
+    id
+    items {
+      ...ParentMenuItem
+    }
+  }
+` as const;
+
+
+
+const HEADER_QUERY = `#graphql
+  fragment Shop on Shop {
+    id
+    name
+    description
+    primaryDomain {
+      url
+    }
+    brand {
+      logo {
+        image {
+          url
+        }
+      }
+    }
+  }
+  query Header(
+    $country: CountryCode
+    $headerMenuHandle: String!
+    $language: LanguageCode
+  ) @inContext(language: $language, country: $country) {
+    shop {
+      ...Shop
+    }
+    menu(handle: $headerMenuHandle) {
+      ...Menu
+    }
+  }
+  ${MENU_FRAGMENT}
+` as const;

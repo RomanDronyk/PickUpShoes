@@ -53,7 +53,7 @@ export function getVariantUrl({
   
   const translationDict: TranslationDict = {
     Size: 'Розмір',
-    Color: 'Колір',
+    Color: 'Color',
   };
   const match = /(\/[a-zA-Z]{2}-[a-zA-Z]{2}\/)/g.exec(pathname);
   const isLocalePathname = match && match.length > 0;

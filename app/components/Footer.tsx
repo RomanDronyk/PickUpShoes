@@ -40,7 +40,7 @@ export function Footer({ menu: footerMenu, shop }: Footer) {
             </a>
             <a href='#' className='animation-foter-link' style={{ borderRadius: "50%", border: "1px solid #fff", width: 28, height: 28, display: "flex", justifyContent: "center", alignItems: "center", }}>
               <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M13.125 3.125L1.25 7.8125L5.625 8.4375M13.125 3.125L11.5625 12.5L5.625 8.4375M13.125 3.125L5.625 8.4375M5.625 8.4375V11.875L7.65562 9.82687" stroke="white" strokeLinecap="round" stroke-linejoin="round" />
+                <path d="M13.125 3.125L1.25 7.8125L5.625 8.4375M13.125 3.125L11.5625 12.5L5.625 8.4375M13.125 3.125L5.625 8.4375M5.625 8.4375V11.875L7.65562 9.82687" stroke="white" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
 
 

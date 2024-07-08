@@ -193,7 +193,6 @@ function ProductOptions({ options, option }: { options?: any, option: VariantOpt
       <div className="grid grid-cols-6 gap-x-[5px] gap-y-[10px] items-center place-content-center py-[10px]">
         {option.values.map(({ value, isAvailable, isActive, to }) => {
           let newLink = to;
-          if (isAvailable) {
             if (colorOption) {
               // Parse the URL and append the color parameter
               const [baseUrl, queryParams] = to.split('?');
@@ -215,7 +214,6 @@ function ProductOptions({ options, option }: { options?: any, option: VariantOpt
                 </NavLink>
               </div>
             );
-          }
         })}
       </div>
     </div>

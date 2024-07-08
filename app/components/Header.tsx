@@ -84,7 +84,7 @@ export function Header({ header, isLoggedIn, cart }: HeaderProps) {
               <div style={{display: "flex", alignItems: "center", justifyContent: "center"}}>
                 {isMobile?
                 <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M4.25 1C2.17925 1 0.5 2.73964 0.5 4.88594C0.5 6.61852 1.15625 10.7305 7.616 14.8873C7.73171 14.961 7.86455 15 8 15C8.13545 15 8.26829 14.961 8.384 14.8873C14.8438 10.7305 15.5 6.61852 15.5 4.88594C15.5 2.73964 13.8207 1 11.75 1C9.67925 1 8 3.35511 8 3.35511C8 3.35511 6.32075 1 4.25 1Z" stroke="black" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M4.25 1C2.17925 1 0.5 2.73964 0.5 4.88594C0.5 6.61852 1.15625 10.7305 7.616 14.8873C7.73171 14.961 7.86455 15 8 15C8.13545 15 8.26829 14.961 8.384 14.8873C14.8438 10.7305 15.5 6.61852 15.5 4.88594C15.5 2.73964 13.8207 1 11.75 1C9.67925 1 8 3.35511 8 3.35511C8 3.35511 6.32075 1 4.25 1Z" stroke="black" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>:
               <svg width="22" height="22" viewBox="0 0 18 16" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M5 1C2.7912 1 1 2.73964 1 4.88594C1 6.61852 1.7 10.7305 8.5904 14.8873C8.71383 14.961 8.85552 15 9 15C9.14448 15 9.28617 14.961 9.4096 14.8873C16.3 10.7305 17 6.61852 17 4.88594C17 2.73964 15.2088 1 13 1C10.7912 1 9 3.35511 9 3.35511C9 3.35511 7.2088 1 5 1Z" stroke="black" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />

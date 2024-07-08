@@ -1,4 +1,4 @@
-import {useLoaderData, type MetaFunction} from '@remix-run/react';
+import { useLoaderData, type MetaFunction } from '@remix-run/react';
 import {
   Link,
   useLocation,
@@ -36,6 +36,8 @@ import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
 import { Slider } from './ui/slider';
 import { ToggleGroup, ToggleGroupItem } from './ui/toggle-group';
 import { cn } from '~/lib/utils';
+import { NavigationMenu, NavigationMenuContent, NavigationMenuItem, NavigationMenuLink, NavigationMenuList, NavigationMenuTrigger } from '@radix-ui/react-navigation-menu';
+import { useRootLoaderData } from '~/root';
 
 export const FILTER_URL_PREFIX = 'filter.';
 
@@ -49,10 +51,12 @@ export function ProductsFilter({
   filters,
   initialFilters,
   appliedFilters,
+  headerPromise,
 }: {
-  filters: Filter[]|any;
-  initialFilters: Filter[]|any;
-  appliedFilters?: AppliedFilter[]|any;
+  filters: Filter[] | any;
+  initialFilters: Filter[] | any;
+  appliedFilters?: AppliedFilter[] | any;
+  headerPromise?: any
 }) {
 
 
@@ -80,7 +84,7 @@ export function ProductsFilter({
           <AppliedFilters filters={appliedFilters} />
         </div>
       )}
-      <FilterDraw appliedFilters={appliedFilters} initial={initialFilters} filters={filters} />
+      <FilterDraw headerPromise={headerPromise} appliedFilters={appliedFilters} initial={initialFilters} filters={filters} />
     </div>
   );
 }
@@ -89,30 +93,38 @@ function FilterDraw({
   filters,
   appliedFilters,
   initial,
+  headerPromise,
 }: {
   appliedFilters: AppliedFilter;
   filters: Filter[];
   initial: Filter[];
+  headerPromise: any;
 }) {
+  const { menu, shop } = headerPromise ;
 
   const [params] = useSearchParams();
 
-  const [initialFilterPrice, setInitialFilterPrice]= useState<any>(initial.find((item:any) => item.type === 'PRICE_RANGE'))
-  const [initialRangePrice, setInitialRangePrice]= useState<any>(JSON.parse(initialFilterPrice?.values[0].input))
+  const [initialFilterPrice, setInitialFilterPrice] = useState<any>(initial.find((item: any) => item.type === 'PRICE_RANGE'))
+  const [initialRangePrice, setInitialRangePrice] = useState<any>(JSON.parse(initialFilterPrice?.values[0].input || "[]"))
 
-  useEffect(()=>{
-    setInitialFilterPrice(initial.find((item:any) => item.type === 'PRICE_RANGE'))
-    setInitialRangePrice(JSON.parse(initialFilterPrice?.values[0].input));
-  },[params])
+  useEffect(() => {
+    setInitialFilterPrice(initial.find((item: any) => item.type === 'PRICE_RANGE'))
+    setInitialRangePrice(JSON.parse(initialFilterPrice?.values[0].input || "[]"));
+  }, [params])
+  const { publicStoreDomain } = useRootLoaderData();
 
 
 
-  const markup = (filter: Filter|any) => {
+
+
+
+
+  const markup = (filter: Filter | any) => {
     switch (filter.type) {
       case 'PRICE_RANGE':
         const priceFilterValue = params.get(`${FILTER_URL_PREFIX}price`);
         const price = priceFilterValue
-          ? (JSON.parse(priceFilterValue) as { min: number; max: number })
+          ? (JSON.parse(priceFilterValue || "[]") as { min: number; max: number })
           : {
             min: initialRangePrice.price.min,
             max: initialRangePrice.price.max,
@@ -126,11 +138,78 @@ function FilterDraw({
           />
         );
       case 'LIST':
-        return <ListFilter appliedFilters = {appliedFilters} key={filter.id} filter={filter} />;
+        return <ListFilter appliedFilters={appliedFilters} key={filter.id} filter={filter} />;
     }
   };
+  const [value, setValue] = useState<string[]>([]);
+  const navigate = useNavigate();
+
+  const handleChange = (value: string[]) => {
+    setValue(value);
+  };
+  const location = useLocation();
+  useEffect(() => {
+    setValue(location.pathname)
+  }, [location.pathname])
+  useEffect(() => {
+    console.log(value)
+    navigate(value)
+  }, [value,location.pathname])
+
   return (
     <div className="flex flex-col">
+      <div className="md:flex flex-col hidden">
+        {menu&& menu?.items.map((item) => {
+          return (
+            <Accordion key={item.id} type="single" collapsible className="w-full">
+              <AccordionItem value="sizes" >
+                <AccordionTrigger className="font-normal">
+                  {item.title}
+                </AccordionTrigger>
+                <AccordionContent>
+                  <ToggleGroup
+                    type="single"
+                    className='flex flex-wrap justify-start'
+                    onValueChange={handleChange}
+                    value={value}
+                  >
+                    <ul className="grid gap-[10px] justify-start w-[390px]">
+                      {item.items.map((menuItem:any) => {
+                        const url =
+                          menuItem.url?.includes('myshopify.com') ||
+                            menuItem.url?.includes(publicStoreDomain) ||
+                            menuItem.url?.includes("primaryDomainUrl")
+                            ? new URL(menuItem.url).pathname
+                            : menuItem.url;
+
+                        return (
+                          <li key={menuItem.id}>
+                            <ToggleGroupItem
+                              value={url}
+                              asChild
+                              style={{background: "none !important", textTransform: "capitalize", height: "auto"}}
+                              className={cn(
+                                'data-[state=on]:bg-none hover:bg-[transparent]  grid justify-start  w-full data-[state=on]:bg-[transparent] data-[state=on]:text-black text-black/60',
+                              )}
+                            >
+                              <div
+                              >
+                                {menuItem.title}
+                              </div>
+                            </ToggleGroupItem>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </ToggleGroup>
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
+
+          )
+        }
+        )}
+      </div>
       {filters.map((item, index) => markup(item))}
     </div>
   );
@@ -145,8 +224,8 @@ function PriceFilter({
   max: number;
   value: { min: number; max: number };
 }) {
-  
-  const initialRangeValue:any = value ? [value.min, value.max] : [min, max];
+
+  const initialRangeValue: any = value ? [value.min, value.max] : [min, max];
   const [priceRange, setPriceRange] = useState(initialRangeValue);
 
 
@@ -170,7 +249,7 @@ function PriceFilter({
         return;
       }
       const price = {
-        ...(priceRange[0] === undefined ? { min: 0} : { min: priceRange[0] }),
+        ...(priceRange[0] === undefined ? { min: 0 } : { min: priceRange[0] }),
         ...(priceRange[1] === undefined ? {} : { max: priceRange[1] }),
       };
       const newParams = filterInputToParams({ price }, params);
@@ -181,7 +260,7 @@ function PriceFilter({
   );
   return (
     <div className="flex flex-col gap-[10px] pb-12 md:pb-6 border-b border-b-black/10">
-      <div className="font-semibold text-xl mb-[10px]">
+      <div className="font-semibold text-xl mb-[10px] mt-[25px]">
         <span>Ціновий діапазон</span>
       </div>
       <div className="bg-input flex flex-row rounded-[40px] py-[5px]">
@@ -206,7 +285,7 @@ function PriceFilter({
         onValueChange={setPriceRange}
         minStepsBetweenThumbs={10}
         defaultValue={priceRange}
-        value = {priceRange}
+        value={priceRange}
         max={max}
         step={1}
       />
@@ -230,34 +309,34 @@ interface ListFilterProps {
   appliedFilters: any
 }
 
-const ListFilter: React.FC<ListFilterProps> = ({ filter , appliedFilters}) => {
+const ListFilter: React.FC<ListFilterProps> = ({ filter, appliedFilters }) => {
   const [value, setValue] = useState<string[]>([]);
-  const [filterValues, setFilterValues]=useState<any>([]);
+  const [filterValues, setFilterValues] = useState<any>([]);
   const location = useLocation();
   const navigate = useNavigate();
   const matches = useMatches();
-  
 
-  if(appliedFilters){
-  
+
+  if (appliedFilters) {
+
     useEffect(() => {
-      const appliedLabels = appliedFilters.map((filter:any) => {
+      const appliedLabels = appliedFilters.map((filter: any) => {
         const label = filter.label.toLowerCase();
-        if(label.includes(' ')){
+        if (label.includes(' ')) {
           return label.split(' ').join('-')
-        }else if(label.includes('.')){
+        } else if (label.includes('.')) {
           return label.split('.').join('-')
-        }else{
+        } else {
           return label
         }
       });
-  
-      const updatedValue = value.filter((val:any) => {
+
+      const updatedValue = value.filter((val: any) => {
         const lastSegment = val.split('.').pop().toLowerCase();
         const normalizedLastSegment = lastSegment.includes('-') ? lastSegment : lastSegment.split('.').join('-');
         return appliedLabels.includes(normalizedLastSegment);
       });
-  
+
       if (updatedValue.length !== value.length) {
         setValue(updatedValue);
       }
@@ -271,7 +350,7 @@ const ListFilter: React.FC<ListFilterProps> = ({ filter , appliedFilters}) => {
   );
 
   const exampleValue = filter.values[0];
-  const exampleValueObj = JSON.parse(exampleValue.input) as IProductFilter;
+  const exampleValueObj = JSON.parse(exampleValue.input || "[]") as IProductFilter;
   const filterKey: string = Object.keys(exampleValueObj)[0];
 
   const catalogMatch = matches.find(
@@ -279,11 +358,11 @@ const ListFilter: React.FC<ListFilterProps> = ({ filter , appliedFilters}) => {
   );
 
 
-  const filtersValue:any =catalogMatch?.data &&(catalogMatch.data as { appliedFilters: { filter: any }[] }).appliedFilters.map(
-      (filter: any) => {
-        return JSON.stringify(filter.filter);
-      },
-    );
+  const filtersValue: any = catalogMatch?.data && (catalogMatch.data as { appliedFilters: { filter: any }[] }).appliedFilters.map(
+    (filter: any) => {
+      return JSON.stringify(filter.filter ||"[]");
+    },
+  );
 
 
   const calculatedValues = filter.values.filter((value) =>
@@ -301,11 +380,11 @@ const ListFilter: React.FC<ListFilterProps> = ({ filter , appliedFilters}) => {
         params.delete(`${FILTER_URL_PREFIX}${filterKey}`);
         navigate(`${location.pathname}?${params.toString()}`);
         return;
-      }else{
-        const selectedItems:any = filter.values.filter((item) =>
+      } else {
+        const selectedItems: any = filter.values.filter((item) =>
           value.includes(item.id),
         );
-  
+
         const link = getFilterLink(selectedItems, params, location);
         navigate(`${link}`);
       }
@@ -322,7 +401,7 @@ const ListFilter: React.FC<ListFilterProps> = ({ filter , appliedFilters}) => {
 
   }, []);
 
-
+  console.log(filter.id, "filter id")
   return (
     <div className="md:pb-6">
       <Accordion type="single" collapsible className="w-full">
@@ -337,15 +416,15 @@ const ListFilter: React.FC<ListFilterProps> = ({ filter , appliedFilters}) => {
               <ToggleGroup
                 type="multiple"
                 className={` ${filter.id === 'fitler.v.option.color'
-                    ? 'grid grid-cols-5 gap-[15px]'
-                    : 'flex flex-wrap justify-start'
+                  ? 'grid grid-cols-5 gap-[15px]'
+                  : 'flex flex-wrap justify-start'
                   }`}
                 onValueChange={handleChange}
                 value={value}
-                
+
               >
                 {filter.id !== 'filter.v.option.color'
-                  ? filterValues.map((filterItem:any) => (
+                  ? filterValues.map((filterItem: any) => (
                     <ToggleGroupItem
                       key={filterItem.id}
                       value={filterItem.id}
@@ -356,7 +435,7 @@ const ListFilter: React.FC<ListFilterProps> = ({ filter , appliedFilters}) => {
                       <span>{filterItem.label}</span>
                     </ToggleGroupItem>
                   ))
-                  : filterValues.map((filterItem:any) => {
+                  : filterValues.map((filterItem: any) => {
                     const colorClass = {
                       backgroundColor: `var(--filter-${filterItem.label.toLowerCase()})`,
                     };
@@ -381,6 +460,7 @@ const ListFilter: React.FC<ListFilterProps> = ({ filter , appliedFilters}) => {
 }
 
 export default ListFilter;
+
 export function AppliedFilters({ filters = [] }: { filters: AppliedFilter[] }) {
   const [params] = useSearchParams();
   const location = useLocation();
@@ -390,7 +470,7 @@ export function AppliedFilters({ filters = [] }: { filters: AppliedFilter[] }) {
         {filters.map((filter: AppliedFilter) => {
           return (
             <Button
-              key={`${filter.label}-${JSON.stringify(filter.filter)}`}
+              key={`${filter.label}-${JSON.stringify(filter.filter || [])}`}
               variant="ghost"
 
               className="bg-[#535353] rounded-2xl px-[10px] py-[5px] text-white hover:bg-[#535353]/60"
@@ -428,18 +508,18 @@ function filterInputToParams(
 ) {
   const input =
     typeof rawInput === 'string'
-      ? (JSON.parse(rawInput) as ProductFilter)
+      ? (JSON.parse(rawInput || "[]") as ProductFilter)
       : rawInput;
 
   Object.entries(input).forEach(([key, value]) => {
-    if (params.has(`${FILTER_URL_PREFIX}${key}`, JSON.stringify(value))) {
+    if (params.has(`${FILTER_URL_PREFIX}${key}`, JSON.stringify(value ||"[]"))) {
       return;
     }
     if (key === 'price') {
       // For price, we want to overwrite
-      params.set(`${FILTER_URL_PREFIX}${key}`, JSON.stringify(value));
+      params.set(`${FILTER_URL_PREFIX}${key}`, JSON.stringify(value ||"[]"));
     } else {
-      params.append(`${FILTER_URL_PREFIX}${key}`, JSON.stringify(value));
+      params.append(`${FILTER_URL_PREFIX}${key}`, JSON.stringify(value ||"[]") );
     }
   });
 
@@ -454,19 +534,19 @@ function getFilterLink(
   rawInput.forEach((item) => {
     const input =
       typeof item.input === 'string'
-        ? (JSON.parse(item.input) as ProductFilter)
+        ? (JSON.parse(item.input ||"[]") as ProductFilter)
         : rawInput;
     Object.entries(input).forEach(([key, value]) => {
       if (
-        paramsClone.has(`${FILTER_URL_PREFIX}${key}`, JSON.stringify(value))
+        paramsClone.has(`${FILTER_URL_PREFIX}${key}`, JSON.stringify(value ||"[]"))
       ) {
         return;
       }
       if (key === 'price') {
         // For price, we want to overwrite
-        paramsClone.set(`${FILTER_URL_PREFIX}${key}`, JSON.stringify(value));
+        paramsClone.set(`${FILTER_URL_PREFIX}${key}`, JSON.stringify(value ||"[]"));
       } else {
-        paramsClone.append(`${FILTER_URL_PREFIX}${key}`, JSON.stringify(value));
+        paramsClone.append(`${FILTER_URL_PREFIX}${key}`, JSON.stringify(value ||"[]"));
       }
     });
   });
@@ -566,7 +646,7 @@ function getAppliedFilterLink(
 
   Object.entries(filter.filter).forEach(([key, value]) => {
     const fullKey = FILTER_URL_PREFIX + key;
-    paramsClone.delete(fullKey, JSON.stringify(value));
+    paramsClone.delete(fullKey, JSON.stringify(value ||"[]"));
   });
   return `${location.pathname}?${paramsClone.toString()}`;
 }
@@ -575,11 +655,14 @@ export function MobileFilters({
   filters,
   appliedFilters,
   initialFilters,
+  headerPromise,
 }: {
-  appliedFilters:any
-  filters: Filter[]|any;
-  initialFilters: Filter[]|any;
+  appliedFilters: any
+  headerPromise:any;
+  filters: Filter[] | any;
+  initialFilters: Filter[] | any;
 }) {
+  console.log(headerPromise, "header mobile promise")
   return (
     <Sheet>
       <SheetTrigger asChild>
@@ -623,7 +706,7 @@ export function MobileFilters({
             </svg>
           </div>
         </SheetHeader>
-        <FilterDraw appliedFilters={appliedFilters} filters={filters} initial={initialFilters} />
+        <FilterDraw headerPromise = {headerPromise} appliedFilters={appliedFilters} filters={filters} initial={initialFilters} />
         <SheetClose asChild>
           <Button className="font-medium text-base text-white rounded-[30px] bg-black w-full mt-9 py-3">
             <span>Застосувати фільтри</span>

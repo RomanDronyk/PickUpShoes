@@ -181,7 +181,7 @@ export default function Product() {
     },
     [api],
   );
-  
+
 
   const onSelect = useCallback(() => {
     if (!api) return;
@@ -713,7 +713,7 @@ function ProductForm({
   variants: Array<ProductVariantFragment>;
 }) {
 
- const checkAllVarians = () => {
+  const checkAllVarians = () => {
     const allUnavailable = variants.every(variant => variant.availableForSale === false);
 
     if (allUnavailable) {
@@ -793,42 +793,41 @@ function ProductOptions({ objGalery, product, option }: { objGalery: any, produc
     onSelect,
   } = objGalery;
 
+  console.log(option, "optionsss")
 
-
-  if (option.name === "Колір") {
+  if (option.name === "Колір" || option.name === "Color") {
     return (
       <div className="product-options max-w-[370px]" key={option.name}>
         <h5 className="text-[16px] text-black/60 mb-4">{option.name}</h5>
         <div className="product-options-grid grid grid-cols-5 gap-y-[10px] gap-x-[10px] items-start">
           {option.values.map(({ value, isAvailable, isActive, to }, index) => {
-            if (isAvailable) {
-              return <Link
-                key={option.name + value}
-                prefetch="intent"
+            console.log(to, "link to to")
+            return <Link
+              key={option.name + value}
+              prefetch="intent"
               onClick={() => handleThumbClick(index)}
 
-                preventScrollReset
-                replace
-                to={to}
-                className={cn(
-                  'text-black text-[16px] px-[2px] py-[2px] rounded-[22px] flex max-w-[76px] justify-center self-start bg-[#F0F0F0]',
-                  isActive && 'text-white bg-black',
-                )}
-              >
-                <MediaFile
+              preventScrollReset
+              replace
+              to={to}
+              className={cn(
+                'text-black text-[16px] px-[2px] py-[2px] rounded-[22px] flex max-w-[76px] justify-center self-start bg-[#F0F0F0]',
+                isActive && 'text-white bg-black',
+              )}
+            >
+              <MediaFile
 
-                  mediaOptions={{
-                    image: {
-                      aspectRatio: '1/1',
-                      crop: 'center',
-                    },
-                  }}
-                  data={product.media.nodes[index]}
-                  className="w-full rounded-[20px]"
-                />
-                {/* {value} */}
-              </Link>
-            }
+                mediaOptions={{
+                  image: {
+                    aspectRatio: '1/1',
+                    crop: 'center',
+                  },
+                }}
+                data={product.media.nodes[index]}
+                className="w-full rounded-[20px]"
+              />
+              {/* {value} */}
+            </Link>
           })}
         </div>
       </div>
