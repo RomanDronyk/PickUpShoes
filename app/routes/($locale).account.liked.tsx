@@ -33,6 +33,10 @@ export const meta: MetaFunction = () => {
   return [{ title: 'Вподобане' }];
 };
 
+export const handle = {
+  breadcrumb: 'likes',
+};
+
 export async function loader({ context }: LoaderFunctionArgs) {
   const { session } = context;
   const customerAccessToken = await session.get('customerAccessToken');

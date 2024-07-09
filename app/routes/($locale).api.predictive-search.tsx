@@ -173,7 +173,7 @@ const PREDICTIVE_SEARCH_QUERY = `#graphql
     title
     handle
     trackingParameters
-    variants(first: 1) {
+    variants(first: 10) {
       nodes {
         id
         image {

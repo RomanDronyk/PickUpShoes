@@ -69,7 +69,7 @@ const SEARCH_QUERY = `#graphql
     title
     trackingParameters
     vendor
-    variants(first: 1) {
+    variants(first: 10) {
       nodes {
         id
         image {

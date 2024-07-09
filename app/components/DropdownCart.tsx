@@ -20,21 +20,23 @@ type CartLine = CartApiQueryFragment['lines']['nodes'][0];
 
 const cartVariants = {
   closed: {
-    top: '-550%',
     opacity: 0,
+    zIndex: 123,
+    top: "-750%",
     transition: {
       type: 'spring',
       opacity: 1,
       scale: 1,
-      duration: 0.7,
+      duration: 0.5,
     },
   },
   open: {
     top: '100.9%',
-    opacity: 1,
+      zIndex: 123,
+      opacity: 1,
     transition: {
       type: 'spring',
-      duration: 0.7,
+      duration: 1,
       scale: 1,
     },
   },
@@ -46,13 +48,14 @@ export const DropDownCart = React.memo(({ cart }: DropdownCartProps) => {
 
   return (
     <motion.div
+      style={{top:"-200px"}}
       initial={true}
       variants={cartVariants}
       animate={cartShow ? 'open' : 'closed'}
       exit="closed"
       className={cartShow
-        ? "top-[101%] opacity-[1]  transition-all ease-out absolute z-20 w-full flex-col d-flex  bg-white/95 backdrop-blur-lg drop-shadow-cart rounded-b-[30px]  p-[30px] text-black"
-        : "top-[-600%] opacity-0  duration-[400] transition-all ease-out absolute z-20 w-full flex-col d-flex  bg-white/95 backdrop-blur-lg drop-shadow-cart rounded-b-[30px]  p-[30px] text-black"
+        ? " opacity-[1]  transition-all ease-out absolute z-20 w-full flex-col d-flex  bg-white/95 backdrop-blur-lg drop-shadow-cart rounded-b-[30px]  p-[30px] text-black"
+        : " opacity-0   transition-all ease-out absolute z-20 w-full flex-col d-flex  bg-white/95 backdrop-blur-lg drop-shadow-cart rounded-b-[30px]  p-[30px] text-black"
       }
     >
       {!lines && <EmptyCart />}

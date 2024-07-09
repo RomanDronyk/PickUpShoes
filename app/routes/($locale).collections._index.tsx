@@ -238,7 +238,7 @@ const PRODUCT_ITEM_FRAGMENT = `#graphql
         ...MoneyProductItem
       }
     }
-    variants(first: 1) {
+    variants(first: 10) {
       nodes {
         selectedOptions {
           name

@@ -56,7 +56,7 @@ export default function Liked() {
       <div className={isMobile? "flex flex-col min-h-[100px] relative  ":'flex flex-col min-h-[100px] relative  justify-center  register rounded-[20px] border border-black/10 p-6 my-[30px]'}>
         {likedCart.length > 0 ?
           <div style={{ display: "grid", gap: 10 }}>
-            {likedCart.map((product: ProductItemFragment) => <LikedCart key={product.id} product={product} />)}
+            {likedCart.map((product: ProductItemFragment) => <LikedCart key={product.handle} product={product} />)}
           </div>
           :
           <h2 className="text-gray-500 text-2xl  font-semibold left-1/2 opacity-70 absolute text-center top-[50%] transform -translate-x-1/2 -translate-y-1/2">
@@ -129,12 +129,14 @@ const PRODUCT_ITEM_FRAGMENT = `#graphql
         ...MoneyProductItem
       }
     }
-    variants(first: 1) {
+    variants(first: 10) {
       nodes {
         selectedOptions {
           name
           value
         }
+        availableForSale
+        id
         price {
           amount
           currencyCode

@@ -1,8 +1,8 @@
-import {useMatches, Link} from '@remix-run/react';
-import {ChevronRight} from 'lucide-react';
-import {z} from 'zod';
+import { useMatches, Link } from '@remix-run/react';
+import { ChevronRight } from 'lucide-react';
+import { z } from 'zod';
 
-const PoliciesTitle: {[key: string]: string} = {
+const PoliciesTitle: { [key: string]: string } = {
   'refund-policy': 'Обмін та повернення',
   'privacy-policy': 'Політика конфіденційності',
   'terms-of-service': 'Угода користувача',
@@ -18,6 +18,7 @@ export const breadcrumbsSchema = z.enum([
   'orders',
   'profile',
   "liked",
+  "likes",
   "likedsd"
 ]);
 export type TBreadcrumbsType = z.infer<typeof breadcrumbsSchema>;
@@ -25,13 +26,13 @@ export type TBreadcrumbsType = z.infer<typeof breadcrumbsSchema>;
 export function Breadcrumbs() {
   const matches = useMatches();
   const deepsRoute = matches.at(-1);
-  const pages: {href: string; name: string}[] = [{href: '/', name: 'Головна'}];
+  const pages: { href: string; name: string }[] = [{ href: '/', name: 'Головна' }];
 
   const parsedBreadcrumbType = breadcrumbsSchema.safeParse(
     deepsRoute?.handle?.breadcrumb,
   );
   const isValidBreadcrumb = parsedBreadcrumbType.success;
-  if (isValidBreadcrumb ) {
+  if (isValidBreadcrumb) {
     switch (parsedBreadcrumbType.data) {
       case 'collection':
         pages.push({
@@ -79,29 +80,35 @@ export function Breadcrumbs() {
           name: 'Особистиа інформація',
         });
         break;
-        case 'likedsd':
-          pages.push({
-            href: `/account/likedsd`,
-            name: 'Liked',
-          });
       case 'orders':
         pages.push({
-          href: `/account/ptofile`,
+          href: `/account/orders`,
           name: 'Особистий кабінет',
         });
-
         pages.push({
           href: `${deepsRoute?.pathname}`,
           name: 'Історія замовлень',
         });
         break;
-        case 'liked':
-          pages.push({
-            href: `/liked`,
-            name: 'Вподобані',
-          });
+      case 'liked':
+        
+        pages.push({
+          href: `${deepsRoute?.pathname}`,
+          name: 'Вподобані',
+        });
 
-          break;
+        break;
+      case 'likes':
+        pages.push({
+          href: `/account/liked`,
+          name: 'Особистий кабінет',
+        });
+        pages.push({
+          href: `/account/liked`,
+          name: 'Вподобані',
+        });
+
+        break;
       default:
         break;
     }

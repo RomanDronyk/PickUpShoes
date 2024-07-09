@@ -150,6 +150,7 @@ export async function loader({request, params, context}: LoaderFunctionArgs) {
 export default function Collection() {
   const {headerPromise, collection, filtersCollection, appliedFilters} =
     useLoaderData<typeof loader>();
+    console.log(collection)
   const isMobile = useMedia('(max-width: 1024px)', false);
 
   return (
@@ -206,7 +207,11 @@ export default function Collection() {
 
 export function ProductsGrid({products}: {products: ProductItemFragment[]}) {
   const availableProducts = products.filter(product =>
-    product.variants.nodes.some(variant => variant.availableForSale)
+    product.variants.nodes.some(variant => {
+      if(variant.availableForSale){
+        return {...variant, product}
+      }
+    })
   );
 
   return (
@@ -252,6 +257,7 @@ const PRODUCT_ITEM_FRAGMENT = `#graphql
     variants(first: 10) {
       nodes {
         availableForSale
+        id
         selectedOptions {
           name
           value

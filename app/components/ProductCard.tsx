@@ -6,7 +6,7 @@ import {
 } from '@shopify/hydrogen';
 import { cn } from '~/lib/utils';
 
-import { Link, NavLink, redirect } from '@remix-run/react';
+import { Link, NavLink, redirect, useNavigate } from '@remix-run/react';
 import type { ProductItemFragment } from 'storefrontapi.generated';
 import { useVariantUrl } from '~/utils';
 import { useMedia } from 'react-use';
@@ -32,10 +32,11 @@ export function ProductCard({
   const variant = product.variants.nodes[0];
   const variantUrl = useVariantUrl(product.handle, variant.selectedOptions);
   const isMobile = useMedia('(max-width: 767px)', false);
-  const [productWithLike, setProductWithLike] = useState({ ...product, isLiked: false })
+  const navigate = useNavigate()
   useEffect(() => {
     forceUpdate();
   }, []);
+
 
   const {
     likedCart,
@@ -44,27 +45,8 @@ export function ProductCard({
   } = useContext(HeaderBasketContext) as HeaderContextInterface;
 
 
-  useEffect(()=>{
-    const productIndex = likedCart.findIndex((item:any) => item.id === productWithLike.id);
-    if (productIndex === -1) {
-       setProductWithLike({...product, isLiked:false});
-      }
-    likedCart.map((element:any,index:number)=>{
-      if(element.id == productWithLike.id){
-        setProductWithLike({...element,isLiked:true})
-      }
-    })
-  },[likedCart])
+  const firstVariant = product.variants.nodes.find(variant => variant.availableForSale) || product.variants.nodes[0];
 
-  const toggleLike = ()=>{
-    if(productWithLike.isLiked){
-      setProductWithLike({...productWithLike,isLiked:false})
-      removeLikeCart(productWithLike)
-    }else{
-      addLikedCart(productWithLike)
-      setProductWithLike({...productWithLike,isLiked:true})
-    }
-  }
 
 
   const percentageAmount = variant.compareAtPrice
@@ -79,9 +61,41 @@ export function ProductCard({
   const sizeOptions = product.options.filter((option) => {
     return option.name === 'Size' || option.name === 'Розмір';
   });
-  console.log(product)
+
+  const [dataForLike, setDataForLike] = useState({
+    variants: {
+      nodes:[...product.variants.nodes]
+    },
+    handle: product.handle,
+    id: product.id,
+    selectedVariant: {selectedOptions: [...firstVariant.selectedOptions],id: firstVariant.id, image:{...product.featuredImage}},
+    title: product.title,
+    isLiked: false
+  });
+  
 
 
+  useEffect(() => {
+    const productIndex = likedCart.findIndex((item: any) => item.id === dataForLike.id);
+    if (productIndex === -1) {
+      setDataForLike({ ...dataForLike, isLiked: false });
+    }
+    likedCart.map((element: any, index: number) => {
+      if (element.id == dataForLike.id) {
+        setDataForLike({ ...element, isLiked: true })
+      }
+    })
+  }, [likedCart])
+  const toggleLike = () => {
+    if (dataForLike.isLiked) {
+      setDataForLike({ ...dataForLike, isLiked: false })
+      removeLikeCart(dataForLike)
+    } else {
+      addLikedCart(dataForLike)
+      setDataForLike({ ...dataForLike, isLiked: true })
+      navigate("/liked")
+    }
+  }
   return (
     <div className="group/card">
       <div
@@ -99,7 +113,7 @@ export function ProductCard({
           style={{ zIndex: 32 }}
           aria-label="Add to wishlist"
         >
-          <HeartIcon isFavorited={productWithLike.isLiked} />
+          <HeartIcon isFavorited={dataForLike.isLiked} />
         </button>
         {product.featuredImage && (
           <Link
@@ -134,14 +148,10 @@ export function ProductCard({
             options={sizeOptions}
             variants={product.variants.nodes}
           >
-            {({ option }) => <ProductOptions key={option.name} option={option} options = {product.options} />}
+            {({ option }) => <ProductOptions key={option.name} option={option} options={product.options} />}
 
           </VariantSelector>
         </div>
-        {/* {!isMobile && (
-
-        )} */}
-
       </div>
       <div className="flex flex-col mt-3">
         <Link to={variantUrl}>
@@ -193,27 +203,27 @@ function ProductOptions({ options, option }: { options?: any, option: VariantOpt
       <div className="grid grid-cols-6 gap-x-[5px] gap-y-[10px] items-center place-content-center py-[10px]">
         {option.values.map(({ value, isAvailable, isActive, to }) => {
           let newLink = to;
-            if (colorOption) {
-              // Parse the URL and append the color parameter
-              const [baseUrl, queryParams] = to.split('?');
-              const searchParams = new URLSearchParams(queryParams);
-              searchParams.set("Колір", colorOption.values[0]);
-              newLink = `${baseUrl}?${searchParams.toString()}`;
-            }
+          if (colorOption) {
+            // Parse the URL and append the color parameter
+            const [baseUrl, queryParams] = to.split('?');
+            const searchParams = new URLSearchParams(queryParams);
+            searchParams.set("Колір", colorOption.values[0]);
+            newLink = `${baseUrl}?${searchParams.toString()}`;
+          }
 
-            return (
-              <div key={option.name + value}>
-                <NavLink
-                  to={newLink}
-                  className={cn(
-                    'border-r border-r-[#AD9F9F] flex text-sm font-medium leading-none items-center justify-center text-black/50',
-                    isAvailable && 'text-black',
-                  )}
-                >
-                  {value}
-                </NavLink>
-              </div>
-            );
+          return (
+            <div key={option.name + value}>
+              <NavLink
+                to={newLink}
+                className={cn(
+                  'border-r border-r-[#AD9F9F] flex text-sm font-medium leading-none items-center justify-center text-black/50',
+                  isAvailable && 'text-black',
+                )}
+              >
+                {value}
+              </NavLink>
+            </div>
+          );
         })}
       </div>
     </div>

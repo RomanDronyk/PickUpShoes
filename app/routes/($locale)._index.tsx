@@ -234,8 +234,10 @@ const PRODUCT_ITEM_FRAGMENT = `#graphql
         ...MoneyProductItem
       }
     }
-    variants(first: 1) {
+    variants(first: 10) {
       nodes {
+        availableForSale
+        id
         selectedOptions {
           name
           value
@@ -284,6 +286,7 @@ query NewProducts($country: CountryCode, $language: LanguageCode)
 `;
 
 const FEATURED_COLLECTION_QUERY = `#graphql
+
   fragment FeaturedCollection on Collection {
     id
     title

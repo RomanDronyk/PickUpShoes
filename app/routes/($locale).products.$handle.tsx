@@ -3,6 +3,7 @@ import {
   Link,
   useLoaderData,
   useLocation,
+  useNavigate,
   type FetcherWithComponents,
   type MetaFunction,
 } from '@remix-run/react';
@@ -21,7 +22,7 @@ import type {
   SelectedOption,
 } from '@shopify/hydrogen/storefront-api-types';
 import { defer, redirect, type LoaderFunctionArgs } from '@shopify/remix-oxygen';
-import { Suspense, useCallback, useEffect, useState } from 'react';
+import { Suspense, useCallback, useContext, useEffect, useState } from 'react';
 import { useMedia } from 'react-use';
 import type {
   ProductFragment,
@@ -43,6 +44,7 @@ import { viewedProductsCookie } from '~/cookies.server';
 import { cn } from '~/lib/utils';
 import { getVariantUrl } from '~/utils';
 import monoLogo from '../assets/images/mono.svg';
+import { HeaderBasketContext, HeaderContextInterface } from '~/context/HeaderCarts';
 
 export const meta: MetaFunction<typeof loader> = ({ data }) => {
   return [{ title: `Hydrogen | ${data?.product.title ?? ''}` }];
@@ -164,7 +166,7 @@ export default function Product() {
   const { product, variants, viewedProducts, recommendations } =
     useLoaderData<typeof loader>();
   const { selectedVariant, descriptionHtml } = product;
-  console.log(product, "sfd")
+
 
 
 
@@ -206,7 +208,7 @@ export default function Product() {
   return (
     <div className="product lg:px-24 md:px-10 px-[10px] w-full ">
       <div className="sm:grid sm:grid-cols-2 flex flex-col gap-y-5 gap-x-10">
-        <ProductGalery objGalery={objGalery} media={product.media} />
+        <ProductGalery product={product} objGalery={objGalery} media={product.media} />
         {/* <ProductImage image={selectedVariant?.image} /> */}
         <ProductMain
           objGalery={objGalery}
@@ -525,7 +527,7 @@ function ProductImage({ image }: { image: ProductVariantFragment['image'] }) {
   );
 }
 
-function ProductGalery({ objGalery, media }: { objGalery: any, media: ProductFragment['media'] }) {
+function ProductGalery({ product, objGalery, media }: { product: any, objGalery: any, media: ProductFragment['media'] }) {
   const {
     selectedIndex,
     setSelectedIndex,
@@ -542,6 +544,42 @@ function ProductGalery({ objGalery, media }: { objGalery: any, media: ProductFra
     if (!api) return;
     api.on('select', onSelect);
   }, [api, onSelect]);
+  const navigate = useNavigate()
+
+  const [productWithLike, setProductWithLike] = useState({ ...product, isLiked: false })
+  const {
+    likedCart,
+    removeLikeCart,
+    addLikedCart
+  } = useContext(HeaderBasketContext) as HeaderContextInterface;
+
+
+
+  useEffect(() => {
+    setProductWithLike({ ...product, isLiked: false })
+  }, [product.selectedVariant.id])
+  useEffect(() => {
+    const productIndex = likedCart.findIndex((item: any) => item.selectedVariant.id === productWithLike.selectedVariant.id);
+    if (productIndex === -1) {
+      setProductWithLike({ ...product, sizeVariants: product.variants.nodes, isLiked: false });
+    }
+    likedCart.map((element: any, index: number) => {
+      if (element.selectedVariant.id == productWithLike.selectedVariant.id) {
+        setProductWithLike({ ...element, isLiked: true })
+      }
+    })
+  }, [likedCart, productWithLike.selectedVariant.id])
+  
+  const toggleLike = () => {
+    if (productWithLike.isLiked) {
+      setProductWithLike({ ...productWithLike, isLiked: false })
+      removeLikeCart(productWithLike)
+    } else {
+      addLikedCart(productWithLike)
+      setProductWithLike({ ...productWithLike, isLiked: true })
+      navigate("/liked")
+    }
+  }
 
   return (
     <div className="xl:grid xl:grid-cols-[minmax(70px,_152px)_minmax(80%,_1fr)] flex flex-col-reverse gap-y-5 gap-x-[14px]">
@@ -601,6 +639,14 @@ function ProductGalery({ objGalery, media }: { objGalery: any, media: ProductFra
                 data={item}
                 className="rounded-[20px]"
               />
+              <button
+                onClick={() => toggleLike()} // Функція для додавання/видалення зі списку бажань
+                className=" absolute p-2 rounded-full bg-white shadow-lg  top-3 right-3 p-2"
+                style={{ zIndex: 32 }}
+                aria-label="Add to wishlist"
+              >
+                <HeartIcon isFavorited={productWithLike.isLiked} />
+              </button>
             </CarouselItem>
           ))}
         </CarouselContent>
@@ -608,6 +654,23 @@ function ProductGalery({ objGalery, media }: { objGalery: any, media: ProductFra
     </div>
   );
 }
+const HeartIcon = ({ isFavorited }: { isFavorited: boolean }) => {
+
+  if (isFavorited) {
+    return (
+      <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlnsXlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+        width="15px" height="15px" viewBox="0 0 15 15" xmlSpace="preserve">
+        <path d="M13.91,6.75c-1.17,2.25-4.3,5.31-6.07,6.94c-0.1903,0.1718-0.4797,0.1718-0.67,0C5.39,12.06,2.26,9,1.09,6.75
+       C-1.48,1.8,5-1.5,7.5,3.45C10-1.5,16.48,1.8,13.91,6.75z"/>
+      </svg>
+    )
+  } else {
+    return <svg width="18" height="16" viewBox="0 0 18 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M5 1C2.7912 1 1 2.73964 1 4.88594C1 6.61852 1.7 10.7305 8.5904 14.8873C8.71383 14.961 8.85552 15 9 15C9.14448 15 9.28617 14.961 9.4096 14.8873C16.3 10.7305 17 6.61852 17 4.88594C17 2.73964 15.2088 1 13 1C10.7912 1 9 3.35511 9 3.35511C9 3.35511 7.2088 1 5 1Z" stroke="black" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  }
+};
+
 
 function ProductMain({
   objGalery,
@@ -793,7 +856,6 @@ function ProductOptions({ objGalery, product, option }: { objGalery: any, produc
     onSelect,
   } = objGalery;
 
-  console.log(option, "optionsss")
 
   if (option.name === "Колір" || option.name === "Color") {
     return (
@@ -801,7 +863,6 @@ function ProductOptions({ objGalery, product, option }: { objGalery: any, produc
         <h5 className="text-[16px] text-black/60 mb-4">{option.name}</h5>
         <div className="product-options-grid grid grid-cols-5 gap-y-[10px] gap-x-[10px] items-start">
           {option.values.map(({ value, isAvailable, isActive, to }, index) => {
-            console.log(to, "link to to")
             return <Link
               key={option.name + value}
               prefetch="intent"
@@ -896,7 +957,9 @@ export function AddToCartButton({
                 disabled && 'bg-white text-black border border-black',
               )}
             >
-              {children}
+              {fetcher.state == 'idle' ? 
+                children
+              : "Загрузка"}
             </button>
           </>
         )}
@@ -960,7 +1023,7 @@ const PRODUCT_FRAGMENT = `#graphql
     selectedVariant: variantBySelectedOptions(selectedOptions: $selectedOptions) {
       ...ProductVariant
     }
-    variants(first: 1) {
+    variants(first: 10) {
       nodes {
         ...ProductVariant
       }
@@ -1060,27 +1123,17 @@ const PRODUCT_ITEM_FRAGMENT = `#graphql
         ...MoneyProductItem
       }
     }
-    variants(first: 1) {
+    variants(first: 10) {
       nodes {
-        selectedOptions {
-          name
-          value
-        }
-        price {
-          amount
-          currencyCode
-        }
-        compareAtPrice {
-          amount
-          currencyCode
-        }
-
+        ...ProductVariant
       }
     }
   }
+  ${PRODUCT_VARIANT_FRAGMENT}
 ` as const;
 
 const VIEWED_PRODUCT = `#graphql
+
   query ViewedProducts(
     $ids: [ID!]!
   ) {
@@ -1106,25 +1159,15 @@ const VIEWED_PRODUCT = `#graphql
           currencyCode
         }
       }
-      variants(first:1){
-        nodes{
-          selectedOptions{
-            name
-            value
-          }
-          price{
-            amount
-            currencyCode
-          }
-          compareAtPrice{
-            amount
-            currencyCode
-          }
+      variants(first: 10) {
+        nodes {
+          ...ProductVariant
         }
       }
     }
-    }
   }
+}
+${PRODUCT_VARIANT_FRAGMENT}
 ` as const;
 
 const RECOMMENDED_PRODUCTS = `#graphql
@@ -1151,24 +1194,13 @@ const RECOMMENDED_PRODUCTS = `#graphql
           currencyCode
         }
       }
-      variants(first:1){
-        nodes{
-          selectedOptions{
-            name
-            value
-          }
-          price{
-            amount
-            currencyCode
-          }
-          compareAtPrice{
-            amount
-            currencyCode
-          }
+      variants(first: 10) {
+        nodes {
+          ...ProductVariant
         }
       }
-    } 
-
     }
   }
+}
+${PRODUCT_VARIANT_FRAGMENT}
 ` as const;

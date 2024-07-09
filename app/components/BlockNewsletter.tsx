@@ -8,11 +8,9 @@ import { ActionFunctionArgs } from '@remix-run/server-runtime';
 export default function BlockNewsletter({storefront}:any) {
   const [email, setEmail] = useState('');
   const data = useActionData();
-  console.log(data);
 
   const sendEmail = async (e: any) => {
     e.preventDefault();
-    console.log("sdf")
   };
 
   return (

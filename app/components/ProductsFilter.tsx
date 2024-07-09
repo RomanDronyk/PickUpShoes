@@ -100,7 +100,7 @@ function FilterDraw({
   initial: Filter[];
   headerPromise: any;
 }) {
-  const { menu, shop } = headerPromise ;
+  const { menu, shop } = headerPromise;
 
   const [params] = useSearchParams();
 
@@ -152,14 +152,13 @@ function FilterDraw({
     setValue(location.pathname)
   }, [location.pathname])
   useEffect(() => {
-    console.log(value)
     navigate(value)
-  }, [value,location.pathname])
+  }, [value, location.pathname])
 
   return (
     <div className="flex flex-col">
       <div className="md:flex flex-col hidden">
-        {menu&& menu?.items.map((item) => {
+        {menu && menu?.items.map((item) => {
           return (
             <Accordion key={item.id} type="single" collapsible className="w-full">
               <AccordionItem value="sizes" >
@@ -174,7 +173,7 @@ function FilterDraw({
                     value={value}
                   >
                     <ul className="grid gap-[10px] justify-start w-[390px]">
-                      {item.items.map((menuItem:any) => {
+                      {item.items.map((menuItem: any) => {
                         const url =
                           menuItem.url?.includes('myshopify.com') ||
                             menuItem.url?.includes(publicStoreDomain) ||
@@ -183,13 +182,13 @@ function FilterDraw({
                             : menuItem.url;
 
                         return (
-                          <li key={menuItem.id}>
+                          <li key={menuItem.id} className='hover:cursor-pointer'>
                             <ToggleGroupItem
                               value={url}
                               asChild
-                              style={{background: "none !important", textTransform: "capitalize", height: "auto"}}
+                              style={{ background: "none !important", textTransform: "capitalize", height: "auto" }}
                               className={cn(
-                                'data-[state=on]:bg-none hover:bg-[transparent]  grid justify-start  w-full data-[state=on]:bg-[transparent] data-[state=on]:text-black text-black/60',
+                                'data-[state=on]:bg-none hover:bg-[transparent] hover:text-black/80  grid justify-start  w-full data-[state=on]:bg-[transparent] data-[state=on]:text-black text-black/60',
                               )}
                             >
                               <div
@@ -360,7 +359,7 @@ const ListFilter: React.FC<ListFilterProps> = ({ filter, appliedFilters }) => {
 
   const filtersValue: any = catalogMatch?.data && (catalogMatch.data as { appliedFilters: { filter: any }[] }).appliedFilters.map(
     (filter: any) => {
-      return JSON.stringify(filter.filter ||"[]");
+      return JSON.stringify(filter.filter || "[]");
     },
   );
 
@@ -401,7 +400,6 @@ const ListFilter: React.FC<ListFilterProps> = ({ filter, appliedFilters }) => {
 
   }, []);
 
-  console.log(filter.id, "filter id")
   return (
     <div className="md:pb-6">
       <Accordion type="single" collapsible className="w-full">
@@ -512,14 +510,14 @@ function filterInputToParams(
       : rawInput;
 
   Object.entries(input).forEach(([key, value]) => {
-    if (params.has(`${FILTER_URL_PREFIX}${key}`, JSON.stringify(value ||"[]"))) {
+    if (params.has(`${FILTER_URL_PREFIX}${key}`, JSON.stringify(value || "[]"))) {
       return;
     }
     if (key === 'price') {
       // For price, we want to overwrite
-      params.set(`${FILTER_URL_PREFIX}${key}`, JSON.stringify(value ||"[]"));
+      params.set(`${FILTER_URL_PREFIX}${key}`, JSON.stringify(value || "[]"));
     } else {
-      params.append(`${FILTER_URL_PREFIX}${key}`, JSON.stringify(value ||"[]") );
+      params.append(`${FILTER_URL_PREFIX}${key}`, JSON.stringify(value || "[]"));
     }
   });
 
@@ -534,19 +532,19 @@ function getFilterLink(
   rawInput.forEach((item) => {
     const input =
       typeof item.input === 'string'
-        ? (JSON.parse(item.input ||"[]") as ProductFilter)
+        ? (JSON.parse(item.input || "[]") as ProductFilter)
         : rawInput;
     Object.entries(input).forEach(([key, value]) => {
       if (
-        paramsClone.has(`${FILTER_URL_PREFIX}${key}`, JSON.stringify(value ||"[]"))
+        paramsClone.has(`${FILTER_URL_PREFIX}${key}`, JSON.stringify(value || "[]"))
       ) {
         return;
       }
       if (key === 'price') {
         // For price, we want to overwrite
-        paramsClone.set(`${FILTER_URL_PREFIX}${key}`, JSON.stringify(value ||"[]"));
+        paramsClone.set(`${FILTER_URL_PREFIX}${key}`, JSON.stringify(value || "[]"));
       } else {
-        paramsClone.append(`${FILTER_URL_PREFIX}${key}`, JSON.stringify(value ||"[]"));
+        paramsClone.append(`${FILTER_URL_PREFIX}${key}`, JSON.stringify(value || "[]"));
       }
     });
   });
@@ -646,7 +644,7 @@ function getAppliedFilterLink(
 
   Object.entries(filter.filter).forEach(([key, value]) => {
     const fullKey = FILTER_URL_PREFIX + key;
-    paramsClone.delete(fullKey, JSON.stringify(value ||"[]"));
+    paramsClone.delete(fullKey, JSON.stringify(value || "[]"));
   });
   return `${location.pathname}?${paramsClone.toString()}`;
 }
@@ -658,11 +656,10 @@ export function MobileFilters({
   headerPromise,
 }: {
   appliedFilters: any
-  headerPromise:any;
+  headerPromise: any;
   filters: Filter[] | any;
   initialFilters: Filter[] | any;
 }) {
-  console.log(headerPromise, "header mobile promise")
   return (
     <Sheet>
       <SheetTrigger asChild>
@@ -706,7 +703,7 @@ export function MobileFilters({
             </svg>
           </div>
         </SheetHeader>
-        <FilterDraw headerPromise = {headerPromise} appliedFilters={appliedFilters} filters={filters} initial={initialFilters} />
+        <FilterDraw headerPromise={headerPromise} appliedFilters={appliedFilters} filters={filters} initial={initialFilters} />
         <SheetClose asChild>
           <Button className="font-medium text-base text-white rounded-[30px] bg-black w-full mt-9 py-3">
             <span>Застосувати фільтри</span>
