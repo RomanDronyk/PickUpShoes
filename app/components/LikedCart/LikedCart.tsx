@@ -73,18 +73,15 @@ export function LikedCart({ product }: ILikedCart) {
     const {
         removeLikeCart
     } = useContext(HeaderBasketContext) as HeaderContextInterface
-    const variant = product.variants.nodes[0];
     const imageRef = useRef<HTMLDivElement>(null);
 
-    const variantUrl = useVariantUrl(product.handle, variant.selectedOptions);
+    const firstVariant = product.variants.nodes?.find(variant => variant.availableForSale) || product.variants.nodes[0];
+    const variantUrl = useVariantUrl(product.handle, firstVariant.selectedOptions);
 
     const [disabled, setDisable] = useState(false)
 
     const isMobile = useMedia('(max-width: 1024px)', false);
-    const firstVariant = product.variants.nodes?.find(variant => variant.availableForSale) || product.variants.nodes[0];
-    const handleAddToCart = () => {
-        setDisable(false);
-    }
+
     useEffect(()=>{
         console.log(product, "liked cart")
     },[])
@@ -129,7 +126,7 @@ export function LikedCart({ product }: ILikedCart) {
                         </div>
                     </div>
                     <div>
-                        {firstVariant.selectedOptions.map((option:ISelectedOptions) => {
+                    {product.selectedVariant.selectedOptions.map((option:ISelectedOptions) => {
                             return <>
                                 <h4 >
                                     {option.name}: {option.value}
@@ -167,7 +164,7 @@ export function LikedCart({ product }: ILikedCart) {
                                     />
                                     <button
                                         type="submit"
-                                        disabled={disabled ?? fetcher.state !== 'idle'}
+                                        disabled={ fetcher.state !== 'idle'}
                                         className={cn(
                                             'bg-black text-white font-medium text-[18px] w-full rounded-[62px] py-[10px] px-[37px] cursor-pointer',
                                             false && 'bg-white text-black border border-black',
