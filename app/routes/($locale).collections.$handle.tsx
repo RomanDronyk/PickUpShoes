@@ -24,6 +24,7 @@ import {useMedia} from 'react-use';
 import {Button} from '~/components/ui/button';
 import {MoveDown, MoveUp} from 'lucide-react';
 import Loader from '~/components/Loader';
+import { useEffect } from 'react';
 
 export type SortParam =
   | 'price-low-high'
@@ -144,13 +145,17 @@ export async function loader({request, params, context}: LoaderFunctionArgs) {
     })
     .filter((filter): filter is NonNullable<typeof filter> => filter !== null);
 
-  return json({collection,headerPromise, filtersCollection, appliedFilters});
+  return json({collection,headerPromise, filtersCollection, appliedFilters,handle,params});
 }
 
 export default function Collection() {
-  const {headerPromise, collection, filtersCollection, appliedFilters} =
+  const {headerPromise, collection, filtersCollection, appliedFilters,handle,params} =
     useLoaderData<typeof loader>();
-    console.log(collection)
+  useEffect(()=>{
+    console.log( appliedFilters, "apied")
+    console.log(filtersCollection, "filter")
+    console.log(handle,params)
+  },[handle])
   const isMobile = useMedia('(max-width: 1024px)', false);
 
   return (
@@ -299,6 +304,9 @@ const FILTER_QUERY = `#graphql
     }
 }
 ` as const;
+
+
+
 
 const COLLECTION_QUERY = `#graphql
   ${PRODUCT_ITEM_FRAGMENT}

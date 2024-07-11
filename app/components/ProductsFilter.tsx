@@ -308,12 +308,22 @@ interface ListFilterProps {
   appliedFilters: any
 }
 
-const ListFilter: React.FC<ListFilterProps> = ({ filter, appliedFilters }) => {
+const ListFilter: React.FC<ListFilterProps> = ({ filter:newFilter, appliedFilters }) => {
   const [value, setValue] = useState<string[]>([]);
   const [filterValues, setFilterValues] = useState<any>([]);
   const location = useLocation();
   const navigate = useNavigate();
   const matches = useMatches();
+  const [filter,setFilters] =useState(()=>{
+    const newValues = newFilter.values.map(value=>{
+      if(value.id.slice(-1) ==="."){
+        return {...value, id: value.id + value.label}
+      }else{
+        return value
+      }
+    })
+    return {...newFilter, values: newValues}
+  })
 
 
   if (appliedFilters) {
@@ -335,6 +345,7 @@ const ListFilter: React.FC<ListFilterProps> = ({ filter, appliedFilters }) => {
         const normalizedLastSegment = lastSegment.includes('-') ? lastSegment : lastSegment.split('.').join('-');
         return appliedLabels.includes(normalizedLastSegment);
       });
+
 
       if (updatedValue.length !== value.length) {
         setValue(updatedValue);
@@ -383,7 +394,6 @@ const ListFilter: React.FC<ListFilterProps> = ({ filter, appliedFilters }) => {
         const selectedItems: any = filter.values.filter((item) =>
           value.includes(item.id),
         );
-
         const link = getFilterLink(selectedItems, params, location);
         navigate(`${link}`);
       }
@@ -392,6 +402,7 @@ const ListFilter: React.FC<ListFilterProps> = ({ filter, appliedFilters }) => {
     0,
     [value],
   );
+
   useEffect(() => {
     const appliedValues = calculatedValues.map((item) => item.id);
     const newValue = new Set(value.concat(appliedValues));

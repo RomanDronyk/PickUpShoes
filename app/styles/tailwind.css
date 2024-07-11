@@ -226,13 +226,24 @@
   background-color: cadetblue;
   width: 298px;
 }
+
+.animation_show,
+.animation_hide{
+  position: absolute;
+  transition: all 0.3s;
+  
+
+}
+.animation_hide{
+  opacity: 0;
+}
 .animation-foter-link{
   background-color: #000;
-  transition: all 0.3s;
+  position: relative;
 }
-.animation-foter-link:hover{
-  background-color: #fff;
+.animation-foter-link:hover .animation_show{
+  opacity: 0;
 }
-.animation-foter-link:hover svg path{
-  stroke: #000;
+.animation-foter-link:hover .animation_hide{
+  opacity: 1;
 }
