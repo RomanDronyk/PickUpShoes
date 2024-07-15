@@ -138,7 +138,7 @@ export default function Homepage() {
     useLoaderData<typeof loader>();
   const actionData = useActionData();
   return (
-    <div className="home w-full flex flex-col items-center justify-center gap-y-[45px]">
+    <div className="home w-full flex flex-col items-center justify-center gap-y-[58px]">
       <Hero heroData={heroCollection} />
       <MainCollections collection={mainCollections} />
       <BestSellers items={bestSellers} />

@@ -206,7 +206,7 @@ export default function Product() {
 
 
   return (
-    <div className="product lg:px-24 md:px-10 px-[10px] w-full ">
+    <div className="pt-[16px] product lg:px-24 md:px-10 px-[10px] w-full ">
       <div className="sm:grid sm:grid-cols-2 flex flex-col gap-y-5 gap-x-10">
         <ProductGalery product={product} objGalery={objGalery} media={product.media} />
         {/* <ProductImage image={selectedVariant?.image} /> */}
@@ -231,7 +231,7 @@ function ProductTabs({ description }: { description: string }) {
     <div className="product-info my-6">
       <Tabs defaultValue="product-info">
         <ScrollArea className="scrollbar-none " aria-orientation="horizontal">
-          <TabsList className="w-full bg-none justify-between gap-3 py-0 sm:gap-0 bg-[#fff]  rounded-none h-[69px]">
+          <TabsList className="w-full bg-none justify-between gap-3 py-0 sm:gap-0 bg-[#fff] overflow-x-scroll  rounded-none h-[79px]">
             <TabsTrigger
               value="product-info"
               className="w-full text-[20px] text-black py-[19px] data-[state=active]:rounded-none data-[state=active]:border-b-[2px] data-[state=active]:border-b-black"
@@ -255,10 +255,11 @@ function ProductTabs({ description }: { description: string }) {
         </ScrollArea>
         <TabsContent
           value="product-info"
-          className="flex items-center mt-[34px]"
+          className="flex items-center mt-[25px]"
         >
           <div>
-            <h3 className="lg:text-2xl sm:text-xl text-lg font-bold mb-6">
+          <h3 className='sm:text-[24px] text-[18px] font-semibold  mb-[20px]'
+>
               Опис товару
             </h3>
             <div
@@ -268,7 +269,9 @@ function ProductTabs({ description }: { description: string }) {
           </div>
         </TabsContent>
         <TabsContent value="product-payment">
-          <div className="p-6 border border-black/10 rounded-[20px] w-full">
+        <h2 className='sm:text-[24px] text-[18px] font-semibold  mb-[20px]'
+           >Оплата і доставка</h2>
+          <div className="p-3 sm:p-6 border border-black/10 rounded-[20px] w-full">
             <div className="grid md:grid-cols-[1fr,_minmax(40%,_585px)] gap-x-5">
               <div className="flex flex-col gap-5">
                 <div className="bg-[#FAFAFA] rounded-[15px] p-5 md:text-xl text-base">
@@ -404,11 +407,14 @@ function ProductTabs({ description }: { description: string }) {
           </div>
         </TabsContent>
         <TabsContent value="product-delivery">
-          <div className="p-6 border border-black/10 rounded-[20px] w-full">
-            <div className="grid md:grid-cols-2 grid-cols-1 gap-y-5 md:gap-y-0 md:gap-x-5">
+          <h2 className='sm:text-[24px] text-[18px] font-semibold  mb-[20px]'
+           >Обмін та повернення</h2>
+          <div className="p-3 sm:p-6 border border-black/10 rounded-[20px] w-full">
+
+            <div className="grid md:grid-cols-[4fr_5fr] grid-cols-1 gap-y-5 md:gap-y-0 md:gap-x-5">
               <div className="bg-[#FAFAFA] rounded-[15px] p-5 md:text-xl text-base">
-                <div className="flex items-center text-2xl font-semibold">
-                  <h4>Обмін та повернення</h4>
+                <div className="flex items-center text-[21px] sm:text-2xl font-semibold mb-[10px]">
+                  <h4>Повернення</h4>
                   <svg
                     width="30"
                     height="30"
@@ -422,8 +428,7 @@ function ProductTabs({ description }: { description: string }) {
                     />
                   </svg>
                 </div>
-                <br />
-                <div className="text-xl">
+                <div className="text-[14px] sm:text-[20px]">
                   <p>
                     Повернення товару доступно на протязі 14 дінв (з дня
                     отримання товару на Пошті або в Магазині)
@@ -436,7 +441,7 @@ function ProductTabs({ description }: { description: string }) {
                   </p>
 
                   <br />
-                  <p className="text-balance">
+                  <p className="text-[14px] sm:text-[20px] leading-[130%]">
                     Якщо до прикладу в кросівках ви ходили тільки вдома декілька
                     хвилин і зрозуміли що вам вони некомфортні тоді ми залюбки
                     оформимо для вас повекрнення, звичайно якщо вони
@@ -445,7 +450,7 @@ function ProductTabs({ description }: { description: string }) {
                 </div>
 
                 <br />
-                <div className="bg-white px-[15px] py-[10px] rounded-[15px] w-fit">
+                <div className="bg-white px-[15px] py-[10px] rounded-[15px] w-fit text-center sm:text-start text-[13px] sm:text-[20px]">
                   <span>Повернення відбувається за рахунок клієнта</span>
                   <br />
                   <span className="font-semibold">
@@ -454,7 +459,7 @@ function ProductTabs({ description }: { description: string }) {
                 </div>
               </div>
               <div className="bg-[#FAFAFA] rounded-[15px] p-5 md:text-xl text-base">
-                <div className="flex items-center text-2xl font-semibold">
+                <div className="flex items-center text-[21px] sm:text-2xl font-semibold mb-[10px]">
                   <h4>Обмін</h4>
                   <svg
                     width="31"
@@ -469,9 +474,8 @@ function ProductTabs({ description }: { description: string }) {
                     />
                   </svg>
                 </div>
-                <br />
-                <div className="text-xl">
-                  <p className="text-balance">
+                <div className="text-[14px] sm:text-[20px]">
+                  <p className="text-[14px] sm:text-[20px] leading-[130%]">
                     Обмін присутній в нас на протязі 14 днів (з дня отриманя
                     товарну на Пошті або в Магазині)
                     <span className="flex font-semibold">
@@ -479,19 +483,19 @@ function ProductTabs({ description }: { description: string }) {
                     </span>
                   </p>
                   <br />
-                  <p className="text-balance">
+                  <p className="text-[14px] sm:text-[20px] leading-[130%]">
                     Обміну підлягає лише новий та неушкоджений товар, такий який
                     ви отримали на пошті (якщо це кросівки тоді коробка
                     обовʼязково має бути присутня, і бірки якщо вони були)
                   </p>
                   <br />
-                  <p className="text-balance">
+                  <p className="text-[14px] sm:text-[20px] leading-[130%]">
                     Також ми дорожимо нашими клієнтами і стараємося щоб вам було
                     максимально комфортно.і
                   </p>
                 </div>
                 <br />
-                <div className="bg-white px-[15px] py-[10px] rounded-[15px] w-fit">
+                <div className="bg-white px-[15px] py-[10px] rounded-[15px] w-fit text-[14px] sm:text-[20px] ">
                   <p className="font-semibold">
                     При обміні товару доставка в одну сторону
                     <br /> буде за наш рахунок :)
@@ -499,8 +503,8 @@ function ProductTabs({ description }: { description: string }) {
                 </div>
               </div>
             </div>
-            <div className="bg-[#2D2D2D] rounded-[15px] py-5 flex items-center justify-center">
-              <span className="text-white font-semibold text-2xl">
+            <div className="mt-[20px] bg-[#2D2D2D] rounded-[15px] py-2 sm:py-5 flex items-center justify-center">
+              <span className="text-white font-semibold text-[14px] text-center px-[10px] sm:text-2xl">
                 Вживане взуття поверненню та обміну не підлягає!!!
               </span>
             </div>
@@ -518,7 +522,7 @@ function ProductImage({ image }: { image: ProductVariantFragment['image'] }) {
     <div className="product-image rounded-[20px]">
       <Image
         alt={image.altText || 'Product Image'}
-        aspectRatio="1/1"
+        aspectRatio="1/1.1"
         data={image}
         key={image.id}
         className="rounded-[20px] max-h-[830px]"
@@ -569,7 +573,7 @@ function ProductGalery({ product, objGalery, media }: { product: any, objGalery:
       }
     })
   }, [likedCart, productWithLike.selectedVariant.id])
-  
+
   const toggleLike = () => {
     if (productWithLike.isLiked) {
       setProductWithLike({ ...productWithLike, isLiked: false })
@@ -582,7 +586,7 @@ function ProductGalery({ product, objGalery, media }: { product: any, objGalery:
   }
 
   return (
-    <div className="xl:grid xl:grid-cols-[minmax(70px,_152px)_minmax(80%,_1fr)] flex flex-col-reverse gap-y-5 gap-x-[14px]">
+    <div className="xl:grid xl:grid-cols-[minmax(70px,_152px)_minmax(70%,_1fr)] flex flex-col-reverse gap-y-5 gap-x-[14px]">
       <Carousel
         setApi={setThumbApi}
         opts={{
@@ -607,7 +611,7 @@ function ProductGalery({ product, objGalery, media }: { product: any, objGalery:
               <MediaFile
                 mediaOptions={{
                   image: {
-                    aspectRatio: '1/1',
+                    aspectRatio: '1/1.1',
                     crop: 'center',
                   },
                 }}
@@ -637,11 +641,11 @@ function ProductGalery({ product, objGalery, media }: { product: any, objGalery:
                   },
                 }}
                 data={item}
-                className="rounded-[20px]"
+                className="rounded-[20px] aspect-1 image-product-aspect "
               />
               <button
                 onClick={() => toggleLike()} // Функція для додавання/видалення зі списку бажань
-                className=" absolute p-2 rounded-full bg-white shadow-lg  top-3 right-3 p-2"
+                className=" absolute p-2 rounded-full bg-white shadow-lg  top-[1.35rem] right-3 p-2"
                 style={{ zIndex: 32 }}
                 aria-label="Add to wishlist"
               >
@@ -794,7 +798,7 @@ function ProductForm({
 
   return (
     <div className=" product-form pt-6">
-      <div className="grid gap-[20px] justify-between flex-wrap-reverse">
+      <div className="grid gap-[20px] justify-between flex-wrap-reverse lg:grid-cols-[1fr_0.3fr]">
         <VariantSelector
           handle={product.handle}
           options={product.options}
@@ -957,9 +961,9 @@ export function AddToCartButton({
                 disabled && 'bg-white text-black border border-black',
               )}
             >
-              {fetcher.state == 'idle' ? 
+              {fetcher.state == 'idle' ?
                 children
-              : "Загрузка"}
+                : "Загрузка"}
             </button>
           </>
         )}

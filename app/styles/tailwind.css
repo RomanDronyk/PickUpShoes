@@ -4,30 +4,35 @@
   font-weight: 300;
   src: url('../../public/fonts/Gilroy-Light.woff2') format('woff2');
 }
+
 @font-face {
   font-family: 'Gilroy';
   font-style: normal;
   font-weight: 400;
   src: url('../../public/fonts/Gilroy-Regular.woff2') format('woff2');
 }
+
 @font-face {
   font-family: 'Gilroy';
   font-style: normal;
   font-weight: 500;
   src: url('../../public/fonts/Gilroy-Medium.woff2') format('woff2');
 }
+
 @font-face {
   font-family: 'Gilroy';
   font-style: normal;
   font-weight: 600;
   src: url('../../public/fonts/Gilroy-SemiBold.woff2') format('woff2');
 }
+
 @font-face {
   font-family: 'Gilroy';
   font-style: normal;
   font-weight: 700;
   src: url('../../public/fonts/Gilroy-Bold.woff2') format('woff2');
 }
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -92,9 +97,11 @@
   * {
     @apply border-border;
   }
+
   html {
     @apply h-full;
   }
+
   body {
     @apply h-full bg-background text-foreground;
   }
@@ -104,16 +111,21 @@
   .no-scrollbar::-webkit-scrollbar {
     display: none;
   }
+
   /* Hide scrollbar for IE, Edge and Firefox */
   .no-scrollbar {
-    -ms-overflow-style: none; /* IE and Edge */
-    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none;
+    /* IE and Edge */
+    scrollbar-width: none;
+    /* Firefox */
   }
 }
-.underLineHover{
+
+.underLineHover {
   position: relative;
 }
-.underLineHover::before{
+
+.underLineHover::before {
   position: absolute;
   content: "";
   left: 0;
@@ -124,16 +136,18 @@
   height: 2px;
   background-color: white;
 }
-.blockFirsSite:hover .underLineHover::before{
+
+.blockFirsSite:hover .underLineHover::before {
   opacity: 1;
 }
 
-.BlockNewsletter{
+.BlockNewsletter {
   justify-content: space-between;
   position: relative;
 
 }
-.BlockNewsletter::before{
+
+.BlockNewsletter::before {
   position: absolute;
   border-radius: 20px;
   content: "";
@@ -144,106 +158,133 @@
   background-color: #000000d1;
   z-index: 0;
 }
-.BlockNewsletter__image{
+
+.BlockNewsletter__image {
   width: 90px;
   height: 90px;
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center center;
 }
-.BlockNewsletter__row{
+
+.BlockNewsletter__row {
   display: flex;
   z-index: 2;
   align-items: center;
   color: #fff;
   gap: 29px;
 }
-.BlockNewsletter__text{
+
+.BlockNewsletter__text {
   font-weight: 600;
   z-index: 2;
   font-size: 36px;
   text-transform: uppercase;
 
 }
-.BlockNewsletter__collum{
+
+.BlockNewsletter__collum {
   z-index: 2;
   width: 349px;
 }
-.BlockNewsletter_input{
+
+.BlockNewsletter_input {
   width: 349px !important;
   z-index: 2;
   display: block;
 }
-.BlockNewsletter_input_block{
+
+.BlockNewsletter_input_block {
   z-index: 2;
-  width: 349px ;
+  width: 349px;
   margin-bottom: 14px;
 
   color: #000;
-  background-color: #fff ;
+  background-color: #fff;
 }
-@media(max-width: 1024px){
-  .BlockNewsletter{
+
+@media(max-width: 1024px) {
+  .BlockNewsletter {
     padding: 40px 20px !important;
   }
-  .BlockNewsletter__text{
+
+  .BlockNewsletter__text {
     font-size: 26px;
   }
-  .BlockNewsletter__image{
+
+  .BlockNewsletter__image {
     width: 60px;
     height: 60px;
   }
-  .BlockNewsletter__row{
+
+  .BlockNewsletter__row {
     gap: 15px;
   }
 }
-@media(max-width: 768px){
-.BlockNewsletter_input_block,.BlockNewsletter__collum,.BlockNewsletter_input{
-  width: 100%;
-}
-  .BlockNewsletter{
+
+@media(max-width: 768px) {
+
+  .BlockNewsletter_input_block,
+  .BlockNewsletter__collum,
+  .BlockNewsletter_input {
+    width: 100%;
+  }
+
+  .BlockNewsletter {
     padding: 36px 23px !important;
     flex-direction: column;
     align-items: center;
   }
-  .BlockNewsletter__text{
+
+  .BlockNewsletter__text {
     font-size: 20px;
   }
-  .BlockNewsletter__row{
+
+  .BlockNewsletter__row {
     gap: 15px;
     margin-bottom: 30px;
   }
 }
 
 
-.swym-delete-button{
+.swym-delete-button {
   background-color: #efefef;
   width: 298px;
   color: black;
 }
 
-.swym-add-to-bag-btn{
+.swym-add-to-bag-btn {
   background-color: cadetblue;
   width: 298px;
 }
 
 .animation_show,
-.animation_hide{
+.animation_hide {
   position: absolute;
   transition: all 0.3s;
-  
+
 
 }
-.animation_hide{
+
+.animation_hide {
   opacity: 0;
 }
-.animation-foter-link{
+
+.animation-foter-link {
   background-color: #000;
   position: relative;
 }
-.animation-foter-link:hover .animation_show{
+
+.animation-foter-link:hover .animation_show {
   opacity: 0;
 }
-.animation-foter-link:hover .animation_hide{
+
+.animation-foter-link:hover .animation_hide {
   opacity: 1;
+}
+
+@media (min-width: 1200px) {
+  .image-product-aspect {
+    aspect-ratio: 1/1.2 !important;
+  }
 }

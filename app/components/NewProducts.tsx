@@ -16,7 +16,7 @@ export default function NewProducts({items}: {items: NewProductsQuery}) {
     },
   } = items;
   return (
-    <div className="flex flex-col w-full gap-[30px] max-w-[1240px] pb-[35px] px-5 md:px-0">
+    <div className="flex flex-col w-full gap-[30px] max-w-[1240px] pb-[0px] px-5 md:px-0">
       <div className="flex md:justify-between justify-center">
         <div className="font-semibold text-black text-[36px]">
           <h3>Наші новинки</h3>
@@ -44,7 +44,7 @@ export default function NewProducts({items}: {items: NewProductsQuery}) {
           </CarouselContent>
         </Carousel>
       </div>
-      <div className="flex items-center justify-center mt-5">
+      <div className="flex items-center justify-center ">
         <Link
           to="/collections/new"
           prefetch="viewport"

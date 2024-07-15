@@ -118,8 +118,8 @@ export function Breadcrumbs() {
   }
 
   return (
-    <nav aria-label="Breadcrumbs" className="my-7 lg:px-24 md:px-10 px-[10px]">
-      <ol role="list" className="flex items-center sm:text-base text-[12px]">
+    <nav aria-label="Breadcrumbs" className="my-5 lg:px-24 md:px-10 px-[10px]">
+      <ol role="list" className="gap-[10px] flex items-center sm:text-base text-[12px]">
         {pages.map((page, index) => {
           const currentPage = index === pages.length - 1;
           const homePage = page.href === '/';

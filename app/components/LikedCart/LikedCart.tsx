@@ -87,7 +87,7 @@ export function LikedCart({ product }: ILikedCart) {
     },[])
     if (isMobile) {
         return (
-            <div className='flex flex-col min-h-[100px] relative  justify-center  register rounded-[20px] border border-black/10 p-6 my-[10px]'>
+            <div className='flex flex-col min-h-[100px] relative  justify-center  register rounded-[20px] border border-black/10 p-6 my-[10px] mb-[30px] lg:mb-0'>
                 <div className='grid' style={{ minWidth: "100%", gridTemplateColumns: "1fr", position: "relative", justifyContent: 'space-between', alignItems: "center", gap: 10, }}>
                     <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
                         <Link

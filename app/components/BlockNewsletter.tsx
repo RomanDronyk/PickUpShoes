@@ -15,7 +15,7 @@ export default function BlockNewsletter({storefront}:any) {
 
   return (
     <div className="max-w-[1260px] px-[20px] w-full pb-[57px]">
-      <div className="BlockNewsletter bg-PhotoSinsay bg-cover bg-center bg-no-repeat rounded-[20px] px-[60px] py-[40px] w-full flex">
+      <div className="BlockNewsletter bg-PhotoSinsay bg-cover bg-center bg-no-repeat rounded-[20px] px-[60px] pt-[40px] pb-[28px] w-full flex">
         <div className="BlockNewsletter__row">
           <div className="BlockNewsletter__image bg-smallLogoIcon"></div>
           <h3 className="BlockNewsletter__text">

@@ -1,11 +1,11 @@
-import {Link, useLoaderData, type MetaFunction} from '@remix-run/react';
+import { Link, useLoaderData, type MetaFunction } from '@remix-run/react';
 import {
   Money,
   Pagination,
   Image,
   getPaginationVariables,
 } from '@shopify/hydrogen';
-import {json, redirect, type LoaderFunctionArgs} from '@shopify/remix-oxygen';
+import { json, redirect, type LoaderFunctionArgs } from '@shopify/remix-oxygen';
 import type {
   CustomerOrdersFragment,
   OrderItemFragment,
@@ -23,11 +23,11 @@ const financialStatusTranslations = {
 };
 
 export const meta: MetaFunction = () => {
-  return [{title: 'Історія замовлень'}];
+  return [{ title: 'Історія замовлень' }];
 };
 
-export async function loader({request, context}: LoaderFunctionArgs) {
-  const {session, storefront} = context;
+export async function loader({ request, context }: LoaderFunctionArgs) {
+  const { session, storefront } = context;
 
   const customerAccessToken = await session.get('customerAccessToken');
   if (!customerAccessToken?.accessToken) {
@@ -39,7 +39,7 @@ export async function loader({request, context}: LoaderFunctionArgs) {
       pageBy: 20,
     });
 
-    const {customer} = await storefront.query(CUSTOMER_ORDERS_QUERY, {
+    const { customer } = await storefront.query(CUSTOMER_ORDERS_QUERY, {
       variables: {
         customerAccessToken: customerAccessToken.accessToken,
         country: storefront.i18n.country,
@@ -53,38 +53,40 @@ export async function loader({request, context}: LoaderFunctionArgs) {
       throw new Error('Customer not found');
     }
 
-    return json({customer});
+    return json({ customer });
   } catch (error: unknown) {
     if (error instanceof Error) {
-      return json({error: error.message}, {status: 400});
+      return json({ error: error.message }, { status: 400 });
     }
-    return json({error}, {status: 400});
+    return json({ error }, { status: 400 });
   }
 }
 
 export default function Orders() {
-  const {customer} = useLoaderData<{customer: CustomerOrdersFragment}>();
-  const {orders, numberOfOrders} = customer;
+  const { customer } = useLoaderData<{ customer: CustomerOrdersFragment }>();
+  const { orders, numberOfOrders } = customer;
   return (
-    <div className="rounded-[20px] border border-black/10 p-6 mb-10">
-      <div className="grid grid-cols-5 text-xl font-semibold border-b border-b-black/10 pb-[15px]">
-        <div>Товар(и)</div>
-        <div>Ціна</div>
-        <div>Статус замовлення</div>
-        <div>Дата купівлі</div>
-        <div>№ замовлення</div>
+    <div className='m-full overflow-scroll'>
+      <div className="rounded-[20px] border border-black/10 p-6 mb-10 min-w-[1100px]">
+        <div className="grid grid-cols-5 text-xl font-semibold border-b border-b-black/10 pb-[15px]">
+          <div className='text-start'>Товар(и)</div>
+          <div className='text-center'>Ціна</div>
+          <div className='text-center'>Статус замовлення</div>
+          <div className='text-center'>Дата купівлі</div>
+          <div className='text-end'>№ замовлення</div>
+        </div>
+        {orders.nodes.length ? <OrdersTable orders={orders} /> : <EmptyOrders />}
       </div>
-      {orders.nodes.length ? <OrdersTable orders={orders} /> : <EmptyOrders />}
     </div>
   );
 }
 
-function OrdersTable({orders}: Pick<CustomerOrdersFragment, 'orders'>) {
+function OrdersTable({ orders }: Pick<CustomerOrdersFragment, 'orders'>) {
   return (
     <div className="acccount-orders">
       {orders?.nodes.length ? (
         <Pagination connection={orders}>
-          {({nodes, isLoading, PreviousLink, NextLink}) => {
+          {({ nodes, isLoading, PreviousLink, NextLink }) => {
             return (
               <>
                 <PreviousLink>
@@ -117,11 +119,11 @@ function EmptyOrders() {
     </div>
   );
 }
-function OrderItem({order}: {order: OrderItemFragment}) {
+function OrderItem({ order }: { order: OrderItemFragment }) {
   return (
     <>
       <div className="grid grid-cols-5 items-center mt-5 pb-5 border-b border-b-black/10">
-        <div className="flex gap-[10px]">
+        <div className="flex gap-[10px] relative">
           <div>
             <Image
               data={order.lineItems.nodes[0].variant?.image}
@@ -132,16 +134,18 @@ function OrderItem({order}: {order: OrderItemFragment}) {
             />
           </div>
           <div className="flex flex-col">
-            <span className="font-semibold text-lg">
+            <h4 className="md:text-xl text-lg font-semibold line-clamp-1 pr-[10px] mb-[7px]">
               {order.lineItems.nodes[0].title}
-            </span>
+            </h4>
             <span className="text-black/60">
               Артикул: {order.lineItems.nodes[0].variant?.sku}
             </span>
           </div>
+          <div className="absolute top-[0px] bottom-[0px] right-[1px] w-[1px] bg-black/10"></div>
         </div>
-        <div>
-          <span className="font-semibold text-lg">
+        <div className="relative h-[100%] flex items-center justify-center">
+
+          <span className="font-semibold text-lg ">
             <Money
               as="span"
               withoutCurrency
@@ -150,25 +154,31 @@ function OrderItem({order}: {order: OrderItemFragment}) {
             />
             грн
           </span>
+          <div className="absolute top-[0px] bottom-[0px] right-[1px] w-[1px] bg-black/10"></div>
         </div>
-        <p>{financialStatusTranslations[order.financialStatus] || order.financialStatus}</p>
-        <p>
+        <p className="relative h-[100%] flex items-center justify-center ">
+          {financialStatusTranslations[order.financialStatus] || order.financialStatus}
+          <div className="absolute top-[0px] bottom-[0px] right-[1px] w-[1px] bg-black/10"></div>
+        </p>
+        <p className="relative h-[100%] flex items-center justify-center ">
           {new Date(order.processedAt).toLocaleString('uk', {
             day: 'numeric',
             month: 'numeric',
             year: 'numeric',
           })}
+          <div className="absolute top-[0px] bottom-[0px] right-[1px] w-[1px] bg-black/10"></div>
         </p>
         <Link
-          className="underline cursor-pointer"
+          className=" cursor-pointer font-normal flex justify-end"
           to={`/account/orders/${btoa(order.id)}`}
         >
-          <strong>#{order.orderNumber}</strong>
+          #{order.orderNumber}
         </Link>
       </div>
     </>
   );
 }
+
 
 const ORDER_ITEM_FRAGMENT = `#graphql
   fragment OrderItem on Order {

@@ -62,7 +62,7 @@ export function ProductsFilter({
 
   return (
     <div className="flex flex-col gap-6 border border-black/10 rounded-[20px] py-5 px-6 ">
-      <div className="pb-6 border-b border-b-black/10 flex justify-between items-center">
+      <div className=" border-b-black/10 flex justify-between items-center">
         <div className="font-semibold text-xl">Фільтрація товару</div>
 
         <svg
@@ -80,7 +80,7 @@ export function ProductsFilter({
         </svg>
       </div>
       {appliedFilters.length > 0 && (
-        <div className="pb-6">
+        <div className="">
           <AppliedFilters filters={appliedFilters} />
         </div>
       )}
@@ -259,7 +259,7 @@ function PriceFilter({
   );
   return (
     <div className="flex flex-col gap-[10px] pb-12 md:pb-6 border-b border-b-black/10">
-      <div className="font-semibold text-xl mb-[10px] mt-[25px]">
+      <div className="font-semibold text-xl mb-[10px] mt-[0px]">
         <span>Ціновий діапазон</span>
       </div>
       <div className="bg-input flex flex-row rounded-[40px] py-[5px]">
@@ -482,7 +482,7 @@ export function AppliedFilters({ filters = [] }: { filters: AppliedFilter[] }) {
               key={`${filter.label}-${JSON.stringify(filter.filter || [])}`}
               variant="ghost"
 
-              className="bg-[#535353] rounded-2xl px-[10px] py-[5px] text-white hover:bg-[#535353]/60"
+              className="bg-[#535353] rounded-2xl px-[10px] py-[3px] text-white hover:bg-[#535353]/60"
             >
               <Link
                 to={getAppliedFilterLink(filter, params, location)}

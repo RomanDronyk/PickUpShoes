@@ -13,7 +13,9 @@ export function Footer({ menu: footerMenu, shop }: Footer) {
   const { menu, secondMenu } = footerMenu;
   return (
     <footer className="bg-black pt-[81px] text-placeholderText">
-      <div className="flex md:flex justify-between lg:px-24  px-5 sm:px-12 md:flex-row flex-col sm:grid sm:grid-cols-2 sm:gap-x-[20px] sm:gap-y-[30px] gap-x-[20px] gap-y-[45px]">
+       <div 
+       style={{gridTemplateColumns: "1.7fr 1fr 1fr 1fr ", gap: "96px"}}
+       className="flex md:grid justify-between lg:px-24  px-5 sm:px-12 lg:flex-row flex-col sm:grid sm:grid-cols-2  sm:gap-y-[30px] gap-x-[20px] gap-y-[45px]">
         <div className="flex flex-col gap-4">
           <img
             src={footerLogo}
@@ -21,7 +23,7 @@ export function Footer({ menu: footerMenu, shop }: Footer) {
             className="lg:w-60 md:w-40 w-52"
           />
           <SubscribeFooter />
-          <div className='flex gap-[10px]'>
+          <div className='pl-[13px] pt-[9px] flex gap-[10px]'>
             <a href='https://www.instagram.com/pick.up.shoes' target='blank' className='animation-foter-link' style={{ borderRadius: "50%", border: "1px solid #fff", width: 28, height: 28, display: "flex", justifyContent: "center", alignItems: "center", }}>
               <span className='animation_show'>
                 <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">

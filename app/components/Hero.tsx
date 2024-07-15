@@ -10,7 +10,7 @@ export function Hero({ heroData }: { heroData: HomeHeroQuery }) {
   const mottoArr = JSON.parse(motto.value);
   return (
     <div className="grid md:grid-cols-2 grid-cols-1 w-full">
-      <div className="flex flex-col justify-center items-center md:items-start  bg-heroBg w-full h-full md:bg-contain bg-cover bg-center bg-no-repeat">
+      <div className="flex flex-col justify-center items-center md:items-start  bg-heroBg w-full h-full md:bg-contain bg-cover bg-center bg-no-repeat pb-[26px]">
         <div className="w-full sm:pl-5 lg:pl-24 sm:w-auto flex flex-col items-center justify-center md:items-start pt-10 md:pt-0 max-[390px]:px-5">
           <h1 className="font-semibold text-[27px] md:text-2xl xl:text-[27px] opacity-45">
             {heading.value}

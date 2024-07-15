@@ -67,7 +67,7 @@ export function Header({ header, isLoggedIn, cart }: HeaderProps) {
           />
         )}
 
-        <nav className="header-ctas  flex md:gap-x-[15px] gap-x-2">
+        <nav className="header-ctas  flex md:gap-x-[0px] gap-x-2">
           <PredictiveSearchForm
             isMobile={isMobile}
             brandLogo={shop?.brand?.logo?.image}

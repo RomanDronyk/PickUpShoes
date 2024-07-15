@@ -49,13 +49,13 @@ export default function Liked() {
   return (
     <div className=" w-full lg:px-24 md:px-12 px-[10px]  mb-8">
       <div className="items relative">
-        <h1 className="font-medium lg:text-[32px] text-[22px]">
+        <h1 className="pt-[13px] pl-[1.46rem] font-medium lg:text-[32px] text-[22px]">
           Вподобані товари
         </h1>
       </div>
-      <div className={isMobile? "flex flex-col min-h-[100px] relative  ":'flex flex-col min-h-[100px] relative  justify-center  register rounded-[20px] border border-black/10 p-6 my-[30px]'}>
+      <div className={isMobile? "flex flex-col min-h-[100px] relative  ":'flex flex-col min-h-[100px] relative  justify-center  register rounded-[20px] border border-black/10 p-6 my-[12px] mb-[34px]'}>
         {likedCart.length > 0 ?
-          <div style={{ display: "grid", gap: 10 }}>
+          <div style={{ display: "grid", gap: 18 }}>
             {likedCart.map((product: ProductItemFragment) => <LikedCart key={product.handle} product={product} />)}
           </div>
           :
@@ -69,7 +69,7 @@ export default function Liked() {
           type="submit"
           style={{ alignItems: "center" }}
           className={cn(
-            'bg-black flex  gap-[20px] text-white font-medium text-[18px] mb-[70px] rounded-[62px] py-[10px] px-[37px] cursor-pointer',
+            'bg-black flex w-full sm:w-auto justify-center  gap-[35px] text-white font-medium text-[16px] sm:text-[18px] mb-[70px] rounded-[62px] py-[11px] sm:py-[14px] px-[58px] cursor-pointer',
             false && 'bg-white text-black border border-black',
           )}
         >
@@ -82,6 +82,9 @@ export default function Liked() {
 
       {/* <RecommendationProducts recommended={recommendedProducts}/> */}
       <BestSellers items={bestSellers} />
+      <div className='h-[40px]'>
+
+      </div>
       <BlockNewsletter />
     </div>
   );

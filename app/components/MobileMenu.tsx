@@ -37,7 +37,7 @@ export function MobileMenu({
         <Button variant="ghost" className="p-0">
           {/* <Lottie style={style} animationData={burger} loop={true} /> */}
           <svg
-            width="35"
+            width="33"
             height="21"
             viewBox="0 0 35 21"
             fill="none"

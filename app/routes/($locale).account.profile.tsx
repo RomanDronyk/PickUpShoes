@@ -126,7 +126,7 @@ export default function AccountProfile() {
   const customer = action?.customer ?? account?.customer;
 
   return (
-    <div className="contaier grid md:grid-cols-2 grid-cols-1 gap-y-10 gap-x-10 my-10 w-full">
+    <div className="contaier grid md:grid-cols-2 grid-cols-1 gap-y-10 gap-x-10 my-10 w-full mt-0">
       <div className="account-profile rounded-[20px] border border-black/10 p-6">
         <h2 className="md:text-[32px] text-xl font-medium mb-[25px]">
           Особиста інформація
@@ -148,7 +148,7 @@ export default function AccountProfile() {
               aria-label="Ім`я"
               defaultValue={customer.firstName ?? ''}
               minLength={2}
-              className="bg-input px-6 py-3 text-xl placeholder:text-xl h-[52px] mb-[25px]"
+              className="bg-input px-6 py-3 text-xl placeholder:text-xl h-[52px] mb-[21px] lg:w-[94%] "
             />
             <label
               className="md:text-xl text-lg pl-5 md:mb-[10px] mb-1 inline-flex"
@@ -165,7 +165,7 @@ export default function AccountProfile() {
               aria-label="Прізвище"
               defaultValue={customer.lastName ?? ''}
               minLength={2}
-              className="bg-input px-6 py-3 text-xl placeholder:text-xl h-[52px] mb-[25px]"
+              className="bg-input px-6 py-3 text-xl placeholder:text-xl h-[52px] mb-[21px] lg:w-[94%] "
             />
             <label
               className="md:text-xl text-lg pl-5 md:mb-[10px] mb-1 inline-flex"
@@ -181,7 +181,7 @@ export default function AccountProfile() {
               placeholder="+38(000)00-00-000"
               aria-label="Mobile"
               defaultValue={customer.phone ?? ''}
-              className="bg-input px-6 py-3 text-xl placeholder:text-xl h-[52px] mb-[25px]"
+              className="bg-input px-6 py-3 text-xl placeholder:text-xl h-[52px] mb-[21px] lg:w-[94%] "
             />
             <label
               className="text-lg md:text-xl pl-5 md:mb-[10px] mb-1 inline-flex"
@@ -198,7 +198,7 @@ export default function AccountProfile() {
               placeholder="Email"
               aria-label="Email"
               defaultValue={customer.email ?? ''}
-              className="bg-input px-6 py-3 text-xl placeholder:text-xl h-[52px] mb-[25px]"
+              className="bg-input px-6 py-3 text-xl placeholder:text-xl h-[52px] mb-[21px] lg:w-[94%] "
             />
             <div className="account-profile-marketing flex justify-start items-center gap-3">
               <Input
@@ -271,7 +271,7 @@ export default function AccountProfile() {
               placeholder="********"
               aria-label="Current password"
               minLength={8}
-              className="bg-input px-6 py-3 text-xl placeholder:text-xl h-[52px] mb-[25px]"
+              className="bg-input px-6 py-3 text-xl placeholder:text-xl h-[52px] mb-[21px] lg:w-[94%] "
             />
 
             <label
@@ -287,7 +287,7 @@ export default function AccountProfile() {
               placeholder="Введіть новий пароль"
               aria-label="New password"
               minLength={8}
-              className="bg-input px-6 py-3 text-xl placeholder:text-xl h-[52px] mb-[25px]"
+              className="bg-input px-6 py-3 text-xl placeholder:text-xl h-[52px] mb-[21px] lg:w-[94%] "
             />
 
             <label
@@ -303,7 +303,7 @@ export default function AccountProfile() {
               placeholder="Введіть новий пароль"
               aria-label="New password confirm"
               minLength={8}
-              className="bg-input px-6 py-3 text-xl placeholder:text-xl h-[52px] mb-[25px]"
+              className="bg-input px-6 py-3 text-xl placeholder:text-xl h-[52px] mb-[21px] lg:w-[94%] "
             />
           </fieldset>
           <Button

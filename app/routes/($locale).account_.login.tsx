@@ -174,9 +174,9 @@ export default function Login() {
   const error = data?.error || null;
   const loginError = data?.loginError || null;
   return (
-    <div className="contaier grid lg:grid-cols-2 grid-cols-1 gap-y-10 gap-x-10 sm:px-24 px-[10px] my-10 w-full">
+    <div className="contaier grid lg:grid-cols-[7fr_8fr] grid-cols-1 gap-y-10 gap-x-10 sm:px-24 px-[10px] my-10 w-full mt-[1rem]">
       <div className="register rounded-[20px] border border-black/10 p-6 ">
-        <h2 className="xl:text-[32px] text-[24px] md:text-left text-center  font-medium mb-[25px]">
+        <h2 className="xl:text-[32px] text-[24px] md:text-left text-center  font-medium mb-[20px]">
           Реєстрація
         </h2>
         <Form method="POST">
@@ -248,7 +248,7 @@ export default function Login() {
           </Button>
         </Form>
       </div>
-      <div className="login rounded-[20px] border border-black/10 p-6 ">
+      <div className="login rounded-[20px] border border-black/10 p-[1.2rem_1.6rem] ">
         <h2 className="font-medium xl:text-[32px] text-[24px] mb-[25px] md:text-left text-center">
           Вхід для зареєстрованих користувачів
         </h2>

@@ -113,11 +113,11 @@ function AccountLayout({
     : 'Інформація про обліковий запис';
 
   return (
-    <div className="account lg:px-24 sm:px-10 px-[10px] pt-10 w-full overflow-x-hidden">
+    <div className="account lg:px-24 sm:px-10 px-[10px] pt-[1rem] w-full overflow-x-hidden">
       <h1 className="md:text-[32px] sm:text-[28px] text-[22px] font-medium px-[10px] sm:px-0">
         Особистий кабінет
       </h1>
-      <div className="flex justify-between items-center flex-wrap my-11 sm:px-0 px-[10px] gap-[10px]">
+      <div className="flex justify-between items-center flex-wrap my-11 sm:px-0 px-[10px] gap-[10px] mt-[1.75rem]">
         <div>
           <h2 className="md:text-[32px] sm:text-[28px] text-[20px] font-semibold">
             {heading}
@@ -146,16 +146,16 @@ function AccountMenu() {
       ? 'bg-black text-white hover:bg-black hover:cursor-default'
       : '';
     return cn(
-      'text-xl shrink-0 text-black   px-[30px] text-center  w-[32%]   rounded-t-[30px] py-4 transition-all ease hover:bg-input',
+      'text-base sm:text-xl shrink-0 text-black    sm:px-[30px] text-center  w-[32%]   rounded-t-[30px]  py-3 sm:py-4 transition-all ease hover:bg-input',
       active,
     );
   }
 
   return (
-    <ScrollArea className="scrollbar-none">
+    <ScrollArea className="scrollbar-none overflow-scroll w-full">
       <nav
         role="navigation"
-        className="flex flex-row justify-between min-w-0 shrink-0 gap-2 border-b border-b-[#666666]"
+        className="flex flex-row justify-between min-w-0 shrink-0 gap-2 border-b border-b-[#666666] min-w-[700px] "
       >
         <NavLink to="/account/profile" className={isActiveStyle}>
           Особиста інформація
