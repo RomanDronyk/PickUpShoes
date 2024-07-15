@@ -8,7 +8,7 @@ export function MainCollections({
 }) {
   const { men, women, clothes } = collection;
   return (
-    <div className="grid grid-cols-[minmax(150px,_610px)_minmax(150px,_575px)] gap-x-3 sm:gap-x-[16px] gap-y-[10px] pb-4 sm:pl-[6.5rem] sm:pr-[2.5rem] px-[10px] w-full ">
+    <div className="grid grid-cols-[minmax(150px,_610px)_minmax(150px,_575px)] gap-x-3 sm:gap-x-[16px] gap-y-[10px] pb-4 sm:pl-[6.5rem] sm:pr-[2.5rem] px-[10px] ">
       <div className="blockFirsSite relative col-span-1 sm:row-span-2 xl:h-[666px] lg:h-[450px] md:h-[350px]  sm:h-[300px] h-[160px]  rounded-[30px] bg-center bg-cover bg-menCollection overflow-hidden">
         <div className="absolute top-0 lef-0 w-full h-full flex items-center justify-center  text-white font-medium lg:text-[42px] text-[28px] max-[450px]:text-base">
           <Link

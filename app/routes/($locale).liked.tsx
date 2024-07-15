@@ -47,9 +47,10 @@ export default function Liked() {
   const isMobile = useMedia('(max-width: 767px)', false);
 
   return (
-    <div className=" w-full lg:px-24 md:px-12 px-[10px]  mb-8">
+    <div className="  flex flex-col  lg:px-24 md:px-12 px-[10px]  mb-8" 
+    style={{margin: "0 auto"}}>
       <div className="items relative">
-        <h1 className="pt-[13px] pl-[1.46rem] font-medium lg:text-[32px] text-[22px]">
+        <h1 className=" pt-[13px] pl-[1.46rem] font-medium lg:text-[32px] text-[22px]">
           Вподобані товари
         </h1>
       </div>
