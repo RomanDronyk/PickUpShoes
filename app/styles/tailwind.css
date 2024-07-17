@@ -288,3 +288,20 @@
     aspect-ratio: 1/1.2 !important;
   }
 }
+.success-message {
+  animation: example 1s ease-in-out ;
+}
+
+@keyframes example {
+  0% {
+    opacity: 0;
+    transform: translateX(0);
+  }
+  50% {
+    opacity: 1;
+    transform: translateX(50px);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}

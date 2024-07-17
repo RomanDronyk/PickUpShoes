@@ -5,7 +5,8 @@ import BlockNewsletter from '~/components/BlockNewsletter';
 import { Image, Money, createStorefrontClient } from '@shopify/hydrogen';
 import {
   json,
-  redirect
+  redirect,
+  type ActionArgs
 } from '@shopify/remix-oxygen';
 
 import type {
@@ -15,6 +16,8 @@ import type {
 } from 'storefrontapi.generated';
 
 
+
+
 import { Hero } from '~/components/Hero';
 import { MainCollections } from '~/components/MainCollections';
 import BestSellers from '~/components/BestSellers';
@@ -22,7 +25,7 @@ import NewProducts from '~/components/NewProducts';
 import { Input } from '~/components/ui/input';
 import { Button } from '~/components/ui/button';
 import { uuidv7 } from "uuidv7";
-import shopify from '~/shopify.server';
+// import shopify from '~/shopify.server';
 export const handle: { breadcrumb: string } = {
   breadcrumb: 'home',
 };
@@ -78,59 +81,61 @@ export async function loader({ context }: LoaderFunctionArgs) {
     storefront
   });
 }
-export async function action({ context, request }: ActionFunctionArgs) {
-  const formData = await request.formData();
-  const { session, storefront } = context;
 
-  const {admin} = await shopify.authenticate.admin(request);
 
-  const updates = Object.fromEntries(formData);
-  const { email }: any = updates;
-  const password = await uuidv7();
+// export async function action({ context, request }: ActionFunctionArgs) {
+//   const formData = await request.formData();
+//   const { session, storefront } = context;
 
-  try {
-    const response = await admin.graphql(
-      `#graphql
-      mutation customerCreate($input: CustomerInput!) {
-        customerCreate(input: $input) {
-          userErrors {
-            field
-            message
-          }
-          customer {
-            id
-            email
-            acceptsMarketing
-          }
-        }
-      }`,
-      {
-        variables: {
-          "input": {
-            "email": email,
-            "acceptsMarketing": true
-          }
-        },
-      },
-    );
+//   const {admin} = await shopify.authenticate.admin(request);
+
+//   const updates = Object.fromEntries(formData);
+//   const { email }: any = updates;
+//   const password = await uuidv7();
+
+//   try {
+//     const response = await admin.graphql(
+//       `#graphql
+//       mutation customerCreate($input: CustomerInput!) {
+//         customerCreate(input: $input) {
+//           userErrors {
+//             field
+//             message
+//           }
+//           customer {
+//             id
+//             email
+//             acceptsMarketing
+//           }
+//         }
+//       }`,
+//       {
+//         variables: {
+//           "input": {
+//             "email": email,
+//             "acceptsMarketing": true
+//           }
+//         },
+//       },
+//     );
     
-    const data = await response.json();
+//     const data = await response.json();
   
-    if (response?.userErrors?.length) {
-      console.error('Customer creation errors:', response.userErrors);
-      throw new Error(response.userErrors.map(e => e.message).join(", "));
-    }
+//     if (response?.userErrors?.length) {
+//       console.error('Customer creation errors:', response.userErrors);
+//       throw new Error(response.userErrors.map(e => e.message).join(", "));
+//     }
   
-    return json({ error: null }, { status: 302, headers: { Location: '/' } });
+//     return json({ error: null }, { status: 302, headers: { Location: '/' } });
   
-  } catch (error: unknown) {
-    if (error instanceof Error) {
-      return json({ error: error.message }, { status: 400 });
-    }
-    return json({ error: 'An unknown error occurred' }, { status: 400 });
-  }
+//   } catch (error: unknown) {
+//     if (error instanceof Error) {
+//       return json({ error: error.message }, { status: 400 });
+//     }
+//     return json({ error: 'An unknown error occurred' }, { status: 400 });
+//   }
 
-}
+// }
 
 
 export default function Homepage() {
@@ -403,3 +408,8 @@ mutation customerCreate($input: CustomerCreateInput!) {
   }
 }
 `;
+
+
+
+
+///////

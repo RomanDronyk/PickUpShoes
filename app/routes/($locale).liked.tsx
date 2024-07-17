@@ -47,14 +47,14 @@ export default function Liked() {
   const isMobile = useMedia('(max-width: 767px)', false);
 
   return (
-    <div className="  flex flex-col  lg:px-24 md:px-12 px-[10px]  mb-8" 
-    style={{margin: "0 auto"}}>
+    <div className="w-full  flex flex-col  lg:px-24 md:px-12 px-[10px]  mb-8"
+      style={{ margin: "0 auto" }}>
       <div className="items relative">
         <h1 className=" pt-[13px] pl-[1.46rem] font-medium lg:text-[32px] text-[22px]">
           Вподобані товари
         </h1>
       </div>
-      <div className={isMobile? "flex flex-col min-h-[100px] relative  ":'flex flex-col min-h-[100px] relative  justify-center  register rounded-[20px] border border-black/10 p-6 my-[12px] mb-[34px]'}>
+      <div className={isMobile ? "flex flex-col min-h-[100px] relative  " : 'flex flex-col min-h-[100px] relative  justify-center  register rounded-[20px] border border-black/10 p-6 my-[12px] mb-[34px]'}>
         {likedCart.length > 0 ?
           <div style={{ display: "grid", gap: 18 }}>
             {likedCart.map((product: ProductItemFragment) => <LikedCart key={product.handle} product={product} />)}
@@ -82,11 +82,13 @@ export default function Liked() {
 
 
       {/* <RecommendationProducts recommended={recommendedProducts}/> */}
-      <BestSellers items={bestSellers} />
-      <div className='h-[40px]'>
+      <div className='flex flex-col justify-center items-center' >
+        <BestSellers items={bestSellers} />
+        <div className='h-[40px]'>
 
+        </div>
+        <BlockNewsletter />
       </div>
-      <BlockNewsletter />
     </div>
   );
 }

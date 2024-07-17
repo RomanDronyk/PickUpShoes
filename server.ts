@@ -14,6 +14,7 @@ import {
   type SessionStorage,
   type Session,
 } from '@shopify/remix-oxygen';
+import { createAdminClient } from '~/utils/createAdminClient';
 
 /**
  * Export a fetch handler in module format.
@@ -41,15 +42,25 @@ export default {
       /**
        * Create Hydrogen's Storefront client.
        */
-      const {storefront} = createStorefrontClient({
+      const { storefront } = createStorefrontClient({
         cache,
         waitUntil,
-        i18n: {language: 'UK', country: 'UA'},
+        i18n: { language: 'UK', country: 'UA' },
         publicStorefrontToken: env.PUBLIC_STOREFRONT_API_TOKEN,
         privateStorefrontToken: env.PRIVATE_STOREFRONT_API_TOKEN,
         storeDomain: env.PUBLIC_STORE_DOMAIN,
         storefrontId: env.PUBLIC_STOREFRONT_ID,
         storefrontHeaders: getStorefrontHeaders(request),
+      });
+
+
+      /**
+ * Create Hydrogen's Admin API client.
+ */
+      const { admin } = createAdminClient({
+        privateAdminToken: env.PRIVATE_ADMIN_API_TOKEN,
+        storeDomain: `https://${env.PUBLIC_STORE_DOMAIN}`,
+        adminApiVersion: env.PRIVATE_ADMIN_API_VERSION || '2023-01',
       });
 
       /*
@@ -67,10 +78,11 @@ export default {
        * Create a Remix request handler and pass
        * Hydrogen's Storefront client to the loader context.
        */
+
       const handleRequest = createRequestHandler({
         build: remixBuild,
         mode: process.env.NODE_ENV,
-        getLoadContext: () => ({session, storefront, cart, env, waitUntil}),
+        getLoadContext: () => ({admin, session, storefront, cart, env, waitUntil }),
       });
 
       const response = await handleRequest(request);
@@ -81,14 +93,14 @@ export default {
          * If the redirect doesn't exist, then `storefrontRedirect`
          * will pass through the 404 response.
          */
-        return storefrontRedirect({request, response, storefront});
+        return storefrontRedirect({ request, response, storefront });
       }
 
       return response;
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error(error);
-      return new Response('An unexpected error occurred', {status: 500});
+      return new Response('An unexpected error occurred', { status: 500 });
     }
   },
 };
@@ -107,7 +119,7 @@ function getLocaleFromRequest(request: Request): I18nLocale {
     [language, country] = firstPathPart.split('-') as I18nFromUrl;
   }
 
-  return {language, country, pathPrefix};
+  return { language, country, pathPrefix };
 }
 
 /**

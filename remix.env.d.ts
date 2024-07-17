@@ -31,6 +31,8 @@ declare global {
     PUBLIC_CUSTOMER_ACCOUNT_API_CLIENT_ID: string;
     PUBLIC_CUSTOMER_ACCOUNT_API_URL: string;
     PUBLIC_CHECKOUT_DOMAIN: string;
+    PRIVATE_ADMIN_API_TOKEN: string;
+    PRIVATE_ADMIN_API_VERSION: string;
   }
 
   /**

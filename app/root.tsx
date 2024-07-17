@@ -22,7 +22,7 @@ import type {CustomerAccessToken} from '@shopify/hydrogen/storefront-api-types';
 import favicon from '../public/favicon.ico';
 import {Layout} from '~/components/Layout';
 import styles from 'app/styles/tailwind.css';
-import vaulStyles from 'vaul/dist/index.css';
+// import vaulStyles from 'vaul/dist/index.css';
 import NotFound from './components/NotFound';
 import {google} from 'worker-auth-providers';
 import HeaderContext, { HeaderContextInterface } from '~/context/HeaderCarts';
@@ -52,7 +52,7 @@ export const shouldRevalidate: ShouldRevalidateFunction = ({
 export function links() {
   return [
     {rel: 'stylesheet', href: styles},
-    {rel: 'stylesheet', href: vaulStyles},
+    // {rel: 'stylesheet', href: vaulStyles},
     {
       rel: 'preconnect',
       href: 'https://cdn.shopify.com',

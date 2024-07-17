@@ -413,7 +413,7 @@ function ProductTabs({ description }: { description: string }) {
 
             <div className="grid md:grid-cols-[4fr_5fr] grid-cols-1 gap-y-5 md:gap-y-0 md:gap-x-5">
               <div className="bg-[#FAFAFA] rounded-[15px] p-5 md:text-xl text-base">
-                <div className="flex items-center text-[21px] sm:text-2xl font-semibold mb-[10px]">
+                <div className="flex items-center text-[21px] sm:text-2xl font-semibold mb-[10px] md:gap-[13px] gap-[8px]">
                   <h4>Повернення</h4>
                   <svg
                     width="30"
@@ -453,13 +453,13 @@ function ProductTabs({ description }: { description: string }) {
                 <div className="bg-white px-[15px] py-[10px] rounded-[15px] w-fit text-center sm:text-start text-[13px] sm:text-[20px]">
                   <span>Повернення відбувається за рахунок клієнта</span>
                   <br />
-                  <span className="font-semibold">
+                  <span className="font-medium">
                     *крім випадків коли була наша помилка
                   </span>
                 </div>
               </div>
               <div className="bg-[#FAFAFA] rounded-[15px] p-5 md:text-xl text-base">
-                <div className="flex items-center text-[21px] sm:text-2xl font-semibold mb-[10px]">
+                <div className="flex items-center text-[21px] sm:text-2xl font-semibold mb-[10px] md:gap-[13px] gap-[8px]">
                   <h4>Обмін</h4>
                   <svg
                     width="31"
@@ -478,7 +478,7 @@ function ProductTabs({ description }: { description: string }) {
                   <p className="text-[14px] sm:text-[20px] leading-[130%]">
                     Обмін присутній в нас на протязі 14 днів (з дня отриманя
                     товарну на Пошті або в Магазині)
-                    <span className="flex font-semibold">
+                    <span className="flex font-medium">
                       *можливі вийнятки по домовленності
                     </span>
                   </p>
@@ -491,12 +491,12 @@ function ProductTabs({ description }: { description: string }) {
                   <br />
                   <p className="text-[14px] sm:text-[20px] leading-[130%]">
                     Також ми дорожимо нашими клієнтами і стараємося щоб вам було
-                    максимально комфортно.і
+                    максимально комфортно.
                   </p>
                 </div>
                 <br />
                 <div className="bg-white px-[15px] py-[10px] rounded-[15px] w-fit text-[14px] sm:text-[20px] ">
-                  <p className="font-semibold">
+                  <p className="font-medium">
                     При обміні товару доставка в одну сторону
                     <br /> буде за наш рахунок :)
                   </p>
@@ -799,6 +799,7 @@ function ProductForm({
   return (
     <div className=" product-form pt-6">
       <div className="grid gap-[20px] justify-between flex-wrap-reverse lg:grid-cols-[1fr_0.3fr]">
+        <div>
         <VariantSelector
           handle={product.handle}
           options={product.options}
@@ -806,6 +807,7 @@ function ProductForm({
         >
           {({ option }) => <ProductOptions objGalery={objGalery} product={product} key={option.name} option={option} />}
         </VariantSelector>
+        </div>
         <div className="w-[300x] text-2xl">
           <SizeGrid vendor={product.vendor} />
         </div>
