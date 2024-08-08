@@ -231,7 +231,7 @@ function ProductTabs({ description }: { description: string }) {
     <div className="product-info my-6">
       <Tabs defaultValue="product-info">
         <ScrollArea className="scrollbar-none " aria-orientation="horizontal">
-          <TabsList className="w-full bg-none justify-between gap-3 py-0 sm:gap-0 bg-[#fff] overflow-x-scroll  rounded-none h-[79px]">
+          <TabsList className="w-full bg-none justify-between gap-3 py-0 sm:gap-0 bg-[#fff] overflow-x-auto  rounded-none h-[89px]">
             <TabsTrigger
               value="product-info"
               className="w-full text-[20px] text-black py-[19px] data-[state=active]:rounded-none data-[state=active]:border-b-[2px] data-[state=active]:border-b-black"
@@ -611,7 +611,7 @@ function ProductGalery({ product, objGalery, media }: { product: any, objGalery:
               <MediaFile
                 mediaOptions={{
                   image: {
-                    aspectRatio: '1/1.1',
+                    aspectRatio: '1/1',
                     crop: 'center',
                   },
                 }}

@@ -44,6 +44,7 @@ export const DropDownCart = React.memo(({ cart }: DropdownCartProps) => {
   const { cartShow } = useContext(HeaderBasketContext) as HeaderContextInterface;
   const lines = Boolean(cart?.lines?.nodes?.length || 0);
 
+
   return (
     <motion.div
       initial={true}
@@ -62,6 +63,7 @@ export const DropDownCart = React.memo(({ cart }: DropdownCartProps) => {
 });
 
 const DropDownCartDetail = React.memo(({ cart }: { cart: CartApiQueryFragment | null }) => {
+
   const cost = cart?.cost;
   return (
     <div className="dropdown-detail">

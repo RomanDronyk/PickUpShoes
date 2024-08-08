@@ -149,7 +149,7 @@ export default function Homepage() {
       <BestSellers items={bestSellers} />
       <NewProducts items={newProducts} />
       {/* <RecommendedProducts products={data.recommendedProducts} /> */}
-      <BlockNewsletter />
+      {/* <BlockNewsletter /> */}
     </div>
   );
 }

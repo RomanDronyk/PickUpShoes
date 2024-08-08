@@ -55,7 +55,7 @@ export default function User() {
 
   return (
     <div className="cart">
-hello
-    </div>
+{/* hello */}
+    </div> 
   );
 }

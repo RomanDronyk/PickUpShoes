@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext, useCallback } from 'react';
 import { CartForm, Image, Money } from '@shopify/hydrogen';
-import { Link } from '@remix-run/react';
+import { Link, defer, useLoaderData } from '@remix-run/react';
 import { motion } from 'framer-motion';
 import { Button } from './ui/button';
 import { useVariantUrl } from '~/utils';
@@ -42,9 +42,39 @@ const cartVariants = {
   },
 } satisfies Variants;
 
+export const loader = async ({context, request }: { context :any,request: Request }) => {
+  const { storefront } = context;
+  const data  = await storefront.query(CREATE_CHECKOUT_URL, {
+    variables: {
+      "input": {
+        "lineItems": [
+          {
+            "variantId": "gid://shopify/ProductVariant/47843539878196",
+            "quantity": 1
+          }
+        ],
+        "email": "customer@example.com",
+        "shippingAddress": {
+          "address1": "123 Main Street",
+          "city": "Anytown",
+          "country": "US",
+          "firstName": "John",
+          "lastName": "Doe",
+          "zip": "12345"
+        }
+      }
+    }
+});
+return defer({
+  data
+});
+
+}
 export const DropDownCart = React.memo(({ cart }: DropdownCartProps) => {
   const { cartShow } = useContext(HeaderBasketContext) as HeaderContextInterface;
   const lines = Boolean(cart?.lines?.nodes?.length || 0);
+  console.log(cart, "cart show")
+
 
   return (
     <motion.div
@@ -65,6 +95,18 @@ export const DropDownCart = React.memo(({ cart }: DropdownCartProps) => {
 });
 
 const DropDownCartDetail = React.memo(({ cart }: { cart: CartApiQueryFragment | null }) => {
+  function extractCheckoutId(url:string) {
+    const regex = /https:\/\/[^/]+\/[^/]+\/cart\/c\/([^?]+\?key=[^&]+)/;
+    const match = url.match(regex);
+    return match ? match[1] : null;
+  }
+  
+  // Приклад використання
+  const  data =
+  useLoaderData<typeof loader>();
+  const url = cart?.checkoutUrl
+    const checkoutId = extractCheckoutId(url);
+  console.log(data, "some new "); // Z2NwLWV1cm9wZS13ZXN0MTowMUozRlZWMU1GNzM4S1dOWlFNMDdEOUUwWg
   const cost = cart?.cost;
   return (
     <div className="dropdown-detail">
@@ -101,7 +143,7 @@ const DropDownCartDetail = React.memo(({ cart }: { cart: CartApiQueryFragment | 
         </div>
         <div className="dropdown-checkout flex items-center justify-end">
           <Button className="rounded-[60px] px-[55px]">
-            <Link to={cart?.checkoutUrl || ""} className="flex gap-5">
+            <Link to={`/checkout?checkoutId=${checkoutId}`|| ""}  onClick={()=>console.log(cart?.checkoutUrl)} className="flex gap-5">
               <span className="font-medium text-2xl">Оформити замовлення</span>
               <svg
                 width="23"
@@ -287,3 +329,28 @@ const CartLineRemoveButton = React.memo(({setNewQuantity, lineIds }: {setNewQuan
     </CartForm>
   );
 });
+
+
+const CREATE_CHECKOUT_URL = `#graphql
+mutation CreateCheckout($input: CheckoutCreateInput!) {
+  checkoutCreate(input: $input) {
+    checkout {
+      id
+      webUrl
+      lineItems(first: 5) {
+        edges {
+          node {
+            title
+            quantity
+          }
+        }
+      }
+    }
+    checkoutUserErrors {
+      code
+      field
+      message
+    }
+  }
+}
+`

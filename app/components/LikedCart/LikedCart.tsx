@@ -15,20 +15,20 @@ import { cn } from '~/lib/utils';
 import { HeaderBasketContext, HeaderContextInterface } from '~/context/HeaderCarts';
 import { useMedia } from 'react-use';
 
-interface IProductVariantPrice {
+export interface IProductVariantPrice {
     amount: string,
     currencyCode: string
 }
-interface IProductVariantProduct {
+export interface IProductVariantProduct {
     handle: string,
     title: string
 }
-interface ISelectedOptions {
+export interface ISelectedOptions {
     name: string,
     value: string
 }
 
-interface IProductVariantImage {
+export interface IProductVariantImage {
     altText: null | any,
     height: number | null,
     id: string,
@@ -37,7 +37,7 @@ interface IProductVariantImage {
     __typename: string
 }
 
-interface IVariant {
+export interface IVariant {
     availableForSale: boolean,
     compareAtPrice: number | null,
     currentlyNotInStock: boolean,
@@ -51,20 +51,20 @@ interface IVariant {
     title: string,
     unitPrice: null | any
 }
-interface IVariants {
+export interface IVariants {
     nodes: IVariant[]
 }
 
 
 // product?.selectedVariant?.image
-interface ILikedNewCart {
+export interface ILikedNewCart {
     variants: IVariants;
     handle: string;
     selectedVariant: IVariant;
     title: string;
     id: string,
 }
-interface ILikedCart {
+export interface ILikedCart {
     product: ILikedNewCart
 }
 

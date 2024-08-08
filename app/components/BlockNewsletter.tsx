@@ -5,22 +5,21 @@ import { ActionFunctionArgs, LoaderFunctionArgs, json } from '@remix-run/server-
 import { Button } from './ui/button';
 
 export default function BlockNewsletter({ storefront }: any) {
-  const [email, setEmail] = useState('');
-  const { subscribedToNewsletter }: any = useLoaderData();
-  const fetcher: any = useFetcher();
-  const { state, data } = fetcher;
-  const subscribeSuccess = data?.subscriber;
-  const subscribeError = data?.error;
+  // const [email, setEmail] = useState('');
+  // const { subscribedToNewsletter }: any = useLoaderData();
+  // const fetcher: any = useFetcher();
+  // const { state, data } = fetcher;
+  // const subscribeSuccess = data?.subscriber;
+  // const subscribeError = data?.error;
 
-  useEffect(() => {
-    console.log(subscribeError, 'error')
-    console.log(subscribeSuccess, 'success')
-    console.log(subscribedToNewsletter, data)
-    if (state === "submitting") {
-      setEmail("")
-    }
-  }, [state])
-
+  // useEffect(() => {
+  //   console.log(subscribeError, 'error')
+  //   console.log(subscribeSuccess, 'success')
+  //   console.log(subscribedToNewsletter, data)
+  //   if (state === "submitting") {
+  //     setEmail("")
+  //   }
+  // }, [state])
 
   return (
     <div className="max-w-[1260px] px-[20px] w-full pb-[57px]">

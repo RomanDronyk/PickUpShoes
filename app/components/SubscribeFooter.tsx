@@ -6,16 +6,23 @@ import { LoaderFunctionArgs, json } from '@remix-run/server-runtime';
 
 
 export function SubscribeFooter() {
+  // const loaderData = useLoaderData();
   const [email, setEmail] = useState('');
-  const { subscribedToNewsletter }: any = useLoaderData();
-  const fetcher: any = useFetcher();
-  const { state, data } = fetcher;
+  // if (!loaderData) {
+    // Handle the scenario where loader data is not available
+  //   console.error("Loader data is not available.");
+  //   return <div>Error: No data available.</div>;
+  // }
+  // const { subscribedToNewsletter }:any = loaderData;
+  const fetcher = useFetcher();
+  const { state, data }:any = fetcher;
   const subscribeSuccess = data?.subscriber;
   const subscribeError = data?.error;
+
   useEffect(() => {
     console.log(subscribeError, 'error')
     console.log(subscribeSuccess, 'success')
-    console.log(subscribedToNewsletter, data)
+    // console.log(subscribedToNewsletter, data)
     if (state === "submitting") {
       setEmail("")
     }
@@ -100,17 +107,14 @@ export function SubscribeFooter() {
   );
 }
 
-
-export async function loader({ context }: LoaderFunctionArgs) {
-  try {
-    const { session } = context;
-    const emailMarketingConsent =
-      (await session.get('emailMarketingConsent')) || null;
-    const subscribedToNewsletter = emailMarketingConsent === 'SUBSCRIBED';
-    return json({
-      subscribedToNewsletter,
-    });
-  } catch (e) {
-    console.log(e)
-  }
-}
+// export async function loader({ context }: LoaderFunctionArgs) {
+//   try {
+//     const { session } = context;
+//     const emailMarketingConsent = await session.get('emailMarketingConsent') || null;
+//     const subscribedToNewsletter = emailMarketingConsent === 'SUBSCRIBED';
+//     return json({ subscribedToNewsletter });
+//   } catch (e) {
+//     console.error(e, "error subsribe"); // Log the error for debugging
+//     return json({ subscribedToNewsletter: false }); // Return a default or error state
+//   }
+// }
