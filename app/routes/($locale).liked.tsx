@@ -87,7 +87,7 @@ export default function Liked() {
         <div className='h-[40px]'>
 
         </div>
-        {/* <BlockNewsletter /> */}
+        <BlockNewsletter />
       </div>
     </div>
   );

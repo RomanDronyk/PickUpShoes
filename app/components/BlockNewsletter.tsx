@@ -5,21 +5,19 @@ import { ActionFunctionArgs, LoaderFunctionArgs, json } from '@remix-run/server-
 import { Button } from './ui/button';
 
 export default function BlockNewsletter({ storefront }: any) {
-  // const [email, setEmail] = useState('');
-  // const { subscribedToNewsletter }: any = useLoaderData();
-  // const fetcher: any = useFetcher();
-  // const { state, data } = fetcher;
-  // const subscribeSuccess = data?.subscriber;
-  // const subscribeError = data?.error;
+  const [email, setEmail] = useState('');
+  const fetcher: any = useFetcher();
+  const { state, data } = fetcher;
+  const subscribeSuccess = data?.subscriber;
+  const subscribeError = data?.error;
 
-  // useEffect(() => {
-  //   console.log(subscribeError, 'error')
-  //   console.log(subscribeSuccess, 'success')
-  //   console.log(subscribedToNewsletter, data)
-  //   if (state === "submitting") {
-  //     setEmail("")
-  //   }
-  // }, [state])
+  useEffect(() => {
+    console.log(subscribeError, 'error')
+    console.log(subscribeSuccess, 'success')
+    if (state === "submitting") {
+      setEmail("")
+    }
+  }, [state])
 
   return (
     <div className="max-w-[1260px] px-[20px] w-full pb-[57px]">
@@ -102,16 +100,10 @@ export default function BlockNewsletter({ storefront }: any) {
                   >
                     {subscribeSuccess ? "Ви успішно підписались" : subscribeError ? "Ви уже підписані" : " Підписатись на розсилку"}
                   </Button>
-                  {subscribeSuccess ? (
+                  {subscribeSuccess && (
                     <p className='text-green text-center' style={{ color: 'green' }}>
                       Ви успішно підписались на розсилку
                     </p>
-                  ) : subscribedToNewsletter ? (
-                    <p style={{ color: 'blue' }}>
-                      Ви уже підписані
-                    </p>
-                  ) : (
-                    <></>
                   )}
                   {subscribeError && <p className='text-red text-center'> {subscribeError.message}</p>}
                 </fetcher.Form>
@@ -119,17 +111,4 @@ export default function BlockNewsletter({ storefront }: any) {
       </div>
     </div>
   );
-}
-export async function loader({ context }: LoaderFunctionArgs) {
-  try {
-    const { session } = context;
-    const emailMarketingConsent =
-      (await session.get('emailMarketingConsent')) || null;
-    const subscribedToNewsletter = emailMarketingConsent === 'SUBSCRIBED';
-    return json({
-      subscribedToNewsletter,
-    });
-  } catch (e) {
-    console.log(e)
-  }
 }
