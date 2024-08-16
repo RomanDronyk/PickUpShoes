@@ -216,7 +216,7 @@ export default function Checkout() {
                 </Form>
             </div>
             <div>
-                <h1 class="xl:text-[32px] text-[24px] md:text-left text-center  font-medium mb-[20px]">Ви обрали:</h1>
+                <h1 className="xl:text-[32px] text-[24px] md:text-left text-center  font-medium mb-[20px]">Ви обрали:</h1>
                 <div className="register rounded-[20px] border border-black/10 p-[0px_24px] ">
                     {products.length > 0 && products.map((product: any, index: number) => {
                         return <>
@@ -468,8 +468,8 @@ const generageMonoUrl = async (products:any,id:any)=>{
         body: JSON.stringify({
           amount: +amount,
           ccy: 980,
-          redirectUrl: "https://737c-88-155-72-240.ngrok-free.app",
-          webHookUrl: `https://737c-88-155-72-240.ngrok-free.app/checkout-webhook`,
+          redirectUrl: "https://pick-up-shoes.com.ua",
+          webHookUrl: `https://pick-up-shoes.com.ua/checkout-webhook`,
           merchantPaymInfo: {
             reference: `${id}`,
             destination: "Подарунок від MISTER GIFTER",
