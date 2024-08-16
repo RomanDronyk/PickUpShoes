@@ -20,7 +20,7 @@ export default function Checkout() {
     const [products, setProducts] = useState(data?.data?.node?.lineItems?.edges || [])
     const response: any = useActionData();
     const amount = products.reduce((acc, element)=> +element.node.variant?.priceV2?.amount+ acc, 0)
-
+    console.log(response,"responce")
     if(response?.url){
         window.location.href = response?.url;
 
