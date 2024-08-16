@@ -401,9 +401,9 @@ async function generateOrderInKeycrm(formData: FormData) {
         method: "POST",
         headers: {
             'Content-Type': 'application/json',
-            'Accept': 'application/json',
-            'Cache-Control': 'no-cache',
-            'Pragma': 'no-cache',
+            // 'Accept': 'application/json',
+            // 'Cache-Control': 'no-cache',
+            // 'Pragma': 'no-cache',
             'Authorization': `Bearer ${KEYCRM_API_KEY}`,
         },
         body: JSON.stringify(orderData),
