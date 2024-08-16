@@ -81,10 +81,7 @@ export function LikedCart({ product }: ILikedCart) {
     const [disabled, setDisable] = useState(false)
 
     const isMobile = useMedia('(max-width: 1024px)', false);
-
-    useEffect(()=>{
-        console.log(product, "liked cart")
-    },[])
+    
     if (isMobile) {
         return (
             <div className='flex flex-col min-h-[100px] relative  justify-center  register rounded-[20px] border border-black/10 p-6 my-[10px] mb-[30px] lg:mb-0'>

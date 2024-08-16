@@ -13,7 +13,6 @@ export default function BlockNewsletter({ storefront }: any) {
 
   useEffect(() => {
     console.log(subscribeError, 'error')
-    console.log(subscribeSuccess, 'success')
     if (state === "submitting") {
       setEmail("")
     }

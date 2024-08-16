@@ -2,7 +2,7 @@ import { Await, Link, NavLink, useLocation } from '@remix-run/react';
 import { Suspense, useContext, useEffect, useState } from 'react';
 import type { HeaderQuery } from 'storefrontapi.generated';
 import { useRootLoaderData } from '~/root';
-import { DropDownCart } from './DropdownCart';
+import { DropDownCart } from './DropdownCart/DropdownCart';
 import type { LayoutProps } from './Layout';
 import { MobileCart } from './MobileCart';
 import { MobileMenu } from './MobileMenu';
