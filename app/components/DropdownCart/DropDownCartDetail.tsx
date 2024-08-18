@@ -11,7 +11,6 @@ import CartLineItem from './CartLineItem';
 const DropDownCartDetail = React.memo(({ cart }: { cart: CartApiQueryFragment | null }) => {
   const [shopifyCheckoutId, setShopifyCheckoutId] = useState("")
   useEffect(()=>{
-    console.log(cart, "changes cart")  
     const lineItems =  cart?.lines?.nodes?.map(element=>{
       return {
         quantity: element?.quantity,

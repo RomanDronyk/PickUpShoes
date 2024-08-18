@@ -1,11 +1,8 @@
-import {Link} from '@remix-run/react';
 import {ProductCard} from './ProductCard';
 import {
   Carousel,
   CarouselContent,
   CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
 } from './ui/carousel';
 import type {ViewedProductsQuery} from 'storefrontapi.generated';
 

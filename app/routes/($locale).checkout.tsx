@@ -3,15 +3,22 @@ import { Input } from '~/components/ui/input';
 import { ActionFunction } from '@remix-run/node';
 import GET_CHECKOUT_QUERY from '~/graphqlRequests/GET_CHECKOUT_QUERY';
 import CREATE_CHEKOUT_URL from '~/graphqlRequests/CREATE_CHEKOUT_URL';
-import {  useState } from 'react';
+import { useEffect, useState } from 'react';
 import CheckoutCart from '~/components/CheckoutCart';
 import { Button } from '~/components/ui/button';
+import NovaPoshtaCity from '~/components/Checkout/novaPoshtaCity';
+import NovaPoshtaDepartent from '~/components/Checkout/novaPoshtaDepartment';
 
 
 
 // Meta function for the page
 export const meta: MetaFunction = () => {
-    return [{ title: `Hydrogen | Checkout` }];
+
+    return [{
+        title: `Hydrogen | Checkout`, 'http-equiv': {
+            'Content-Security-Policy': "connect-src 'self' https://api.novaposhta.ua;"
+        }
+    }];
 };
 
 // Checkout component
@@ -19,18 +26,42 @@ export default function Checkout() {
     const data: any = useLoaderData();
     const [products, setProducts] = useState(data?.data?.node?.lineItems?.edges || [])
     const response: any = useActionData();
-    const amount = products.reduce((acc, element)=> +element.node.variant?.priceV2?.amount+ acc, 0)
-    console.log(response,"responce")
-    if(response?.url){
-        window.location.href = response?.url;
+    const [city, setCity] = useState("")
+    const [department, setDepartment] = useState({
+        CityDescription: "",
+        SettlementAreaDescription: "",
+        PostalCodeUA: "",
+        Description: "",
+        Ref: ""
+    })
+    const [userName, setUserName] = useState({ firstName: "", lastName: "" });
+    const [userPhone, setUserPhone] = useState("")
 
+
+    const amount = products.reduce((acc: any, element: any) => +element.node.variant?.priceV2?.amount + acc, 0)
+    if (response?.url) {
+        window.location.href = response?.url;
     }
-    console.log(products, "products se")
+    useEffect(() => {
+        console.log(city)
+    }, [city])
+    console.log(products)
     return (
         <div className="contaier gap-[40px] grid grid-cols-2 grid lg:grid-cols-[1fr_1fr] grid-cols-2 gap-y-10 gap-x-10 sm:px-24 px-[10px] my-10 w-full mt-[1rem]">
             <div className=''>
                 <Form method="POST" className='grid gap-[35px]'>
                     <input type="hidden" name="products" value={JSON.stringify(products)} />
+                    <input type="hidden" name="shipping_address_city" value={department?.CityDescription} />
+                    <input type="hidden" name="shipping_address_country" value={"Ukraine"} />
+                    <input type="hidden" name="shipping_address_region" value={department?.SettlementAreaDescription} />
+                    <input type="hidden" name="shipping_address_zip" value={department?.PostalCodeUA} />
+                    <input type="hidden" name="shipping_secondary_line" value={"string"} />
+                    <input type="hidden" name="shipping_receive_point" value={department?.Description} />
+                    <input type="hidden" name="recipient_full_name" value={`${userName.firstName} ${userName.lastName}`} />
+                    <input type="hidden" name="recipient_phone" value={userPhone} />
+                    <input type="hidden" name="warehouse_ref" value={department?.Ref} />
+
+
                     <input type="hidden" name="action" value="create order" />
                     <div className="register rounded-[20px] border border-black/10 p-[20px_24px] ">
                         <h2 className="xl:text-[32px] text-[24px] md:text-left text-center  font-medium mb-[20px]">
@@ -45,6 +76,9 @@ export default function Checkout() {
                                     autoComplete="firstName"
                                     placeholder="Ім’я отримувача"
                                     aria-label="First Name"
+                                    onChange={(event) => setUserName((prevData) => {
+                                        return { ...prevData, firstName: event.target.value }
+                                    })}
                                     // eslint-disable-next-line jsx-a11y/no-autofocus
                                     autoFocus
                                     // value={data?.node?.shippingAddress?.firstName}
@@ -66,6 +100,9 @@ export default function Checkout() {
                                     autoFocus
                                     // value={data?.node?.shippingAddress?.lastName}
                                     required
+                                    onChange={(event) => setUserName((prevData) => {
+                                        return { ...prevData, lastName: event.target.value }
+                                    })}
                                     className="bg-input px-6 py-3 text-xl placeholder:text-xl h-[52px] "
                                 />
                             </div>
@@ -81,6 +118,7 @@ export default function Checkout() {
                                     aria-label="Password"
                                     minLength={4}
                                     required
+                                    onChange={(event) => setUserPhone(event.target.value)}
                                     className="bg-input px-6 py-3 text-xl placeholder:text-xl h-[52px] "
                                 />
                             </div>
@@ -101,37 +139,14 @@ export default function Checkout() {
                             </div>
 
                             <div className='pb-[15px] border-b border-black/20'>
-
-                                <Input
-                                    id="city"
-                                    name="city"
-                                    type="city"
-                                    autoComplete="city"
-                                    placeholder="Місто"
-                                    aria-label="Re-enter password"
-                                    minLength={4}
-                                    required
-                                    className="bg-input px-6 py-3 text-xl placeholder:text-xl h-[52px] "
-                                />
+                                <NovaPoshtaCity setCity={setCity} />
                             </div>
-
                             <div className='pb-[15px] border-b border-black/20'>
+                                <NovaPoshtaDepartent setDepartment={setDepartment} city={city} />
 
-                                <Input
-                                    id="postalOfice"
-                                    name="postalOfice"
-                                    type="postalOfice"
-                                    autoComplete="postalOfice"
-                                    placeholder="Відділення"
-                                    aria-label="Re-enter password"
-                                    minLength={4}
-                                    required
-                                    className="bg-input px-6 py-3 text-xl placeholder:text-xl h-[52px] "
-                                />
                             </div>
 
                             <div className=''>
-
                                 <Input
                                     id="email"
                                     name="email"
@@ -144,6 +159,8 @@ export default function Checkout() {
                                     className="bg-input px-6 py-3 text-xl placeholder:text-xl h-[52px] "
                                 />
                             </div>
+                            <>
+                            </>
 
                         </fieldset>
 
@@ -202,12 +219,10 @@ export default function Checkout() {
                                 <Button className='rounded-[64px]'>Додати</Button>
                             </div>
                             <div>
-
                                 {response?.error && (
                                     <>
                                         {response?.error}
                                     </>
-
                                 )}
                             </div>
                             <Button className='rounded-[64px] w-[100%] text-semibold text-[18px] text-white py-[20px]'>Оформити замовлення</Button>
@@ -238,24 +253,97 @@ export const loader = async ({ context, request }: { context: any, request: Requ
     const { storefront } = context;
 
     const url = new URL(request.url);
-    const checkoutId = url.searchParams.get('checkoutId');
-
+    const inputCity = url.searchParams.get('city') || '';
+    const checkoutId = url.searchParams.get('checkoutId') || "";
+    const inputDepartment = url.searchParams.get("department") || ""
+    let cities = [];
+    let data: any = []
+    let department: any = []
     if (!checkoutId) {
-        throw new Error('Missing checkout ID');
+        data = []
     }
 
-    try {
-        const data: any = await storefront.query(GET_CHECKOUT_QUERY, {
-            variables: { checkoutId: `${checkoutId}` },
-        });
-        return json({ data });
+    if (inputDepartment) {
+        try {
+            department = await fetchDepartment(inputCity, inputDepartment); // fetchCity та API ключі мають бути імпортовані з novaPoshta.tsx
+        } catch (e) {
+            console.log(e)
+            department = []
+        }
+    }
+    if (checkoutId) {
+        try {
+            data = await storefront.query(GET_CHECKOUT_QUERY, {
+                variables: { checkoutId: `${checkoutId}` },
+            });
 
-    } catch (e) {
-        return json({ data: [] });
+        } catch (e) {
+            data = []
+        }
+    }
+
+    if (inputCity) {
+        try {
+            cities = await fetchCity(inputCity); // fetchCity та API ключі мають бути імпортовані з novaPoshta.tsx
+        } catch (e) {
+            console.log(e)
+            cities = []
+        }
 
     }
+    return json({ data, cities, department });
 
 };
+const fetchDepartment = async (inputCity: string, department: string) => {
+    const response: any = await fetch(API_POSHTA_URL, {
+        method: "POST",
+        body: JSON.stringify({
+            apiKey: API_POSHTA_KEY,
+            modelName: "Address",
+            calledMethod: "getWarehouses",
+            methodProperties: {
+                CityName: inputCity,
+                Page: "1",
+                Limit: "10",
+                Language: "UA",
+                WarehouseId: department,
+            },
+        }),
+    });
+    const { data, success } = await response.json();
+    if (success) {
+        return data;
+    } else {
+        return []
+    }
+};
+
+const fetchCity = async (cityName: string) => {
+    const response: any = await fetch(API_POSHTA_URL, {
+        method: "POST",
+        body: JSON.stringify({
+            apiKey: API_POSHTA_KEY,
+            modelName: "Address",
+            calledMethod: "searchSettlements",
+            methodProperties: {
+                CityName: cityName,
+                Limit: "10",
+                Page: "1",
+            },
+        }),
+    });
+    const { data, success } = await response.json();
+    let datsadf: any = []
+    if (success) {
+        datsadf = data[0].Addresses
+    } else {
+        datsadf = []
+    }
+    return datsadf
+};
+
+const API_POSHTA_URL = "https://api.novaposhta.ua/v2.0/json/"
+const API_POSHTA_KEY = "fac23a4d2d34c603535680b0e25fac94"
 
 
 export const action: ActionFunction = async ({ request, context }) => {
@@ -300,8 +388,6 @@ async function createOrder(data: FormData) {
     return await generateOrderInKeycrm(data)
 }
 async function createUrl(lineItems: any[], storefront: any) {
-    // Логіка створення URL на основі lineItems
-    console.log("creating urlr", lineItems)
     try {
         const data = await storefront.mutate(
             CREATE_CHEKOUT_URL,
@@ -329,7 +415,7 @@ async function generateOrder(lineItems: any[]) {
 
 async function generateOrderInKeycrm(formData: FormData) {
 
-    const productsString:any = formData.get('products') || '[]';
+    const productsString: any = formData.get('products') || '[]';
     const products = JSON.parse(productsString);
     const paymentMethod = formData.get("payment");
     const firstName = formData.get('firstName') || "null"
@@ -338,27 +424,15 @@ async function generateOrderInKeycrm(formData: FormData) {
 
     const orderData = {
         source_id: 1,
-        // source_uuid: formData.get('source_uuid') || '115',
-        // buyer_comment: formData.get('buyer_comment') || '',
         manager_id: 1,
-        // manager_comment: formData.get('manager_comment') || '',
-        promocode: formData.get('promo') || '',
-        // discount_percent: parseFloat(formData.get('discount_percent') || '0'),
-        // discount_amount: parseFloat(formData.get('discount_amount') || '0'),
-        // shipping_price: parseFloat(formData.get('shipping_price') || '0'),
-        // wrap_price: parseFloat(formData.get('wrap_price') || '0'),
-        // gift_message: formData.get('gift_message') || '',
-        // is_gift: formData.get('is_gift') === 'on',
-        // gift_wrap: formData.get('gift_wrap') === 'on',
-        // taxes: parseFloat(formData.get('taxes') || '0'),
-        // ordered_at: new Date().toISOString(),
+        buyer_comment: `Звязатись через ${formData.get('contactType')}  \n Оплата: ${paymentMethod}`,
         buyer: {
-            full_name: firstName +" " + lastName || '',
+            full_name: firstName + " " + lastName || '',
             email: formData.get('email') || '',
             phone: formData.get('phone') || ''
         },
         shipping: {
-            // delivery_service_id: 1,
+            delivery_service_id: formData.get('delivery') === "novaposhta" ? 1 : 2,
             tracking_code: formData.get('tracking_code') || '',
             shipping_service: formData.get('delivery') || '',
             shipping_address_city: formData.get('city') || '',
@@ -370,7 +444,6 @@ async function generateOrderInKeycrm(formData: FormData) {
             recipient_full_name: formData.get('recipient_full_name') || '',
             recipient_phone: formData.get('recipient_phone') || '',
             warehouse_ref: formData.get('warehouse_ref') || '',
-            shipping_date: formData.get('shipping_date') || ""
         },
         marketing: {
             utm_source: formData.get('utm_source') || '',
@@ -380,46 +453,27 @@ async function generateOrderInKeycrm(formData: FormData) {
             utm_content: formData.get('utm_content') || ''
         },
         products: generateProductForKeycrm(products),
-        // payments: [
-        //     {
-        //         payment_method_id: 2,
-        //         payment_method: formData.get('payment') || '',
-        //         amount: parseFloat(formData.get('amount') || '0'),
-        //         description: formData.get('description') || '',
-        //         payment_date: new Date().toISOString(),
-        //         status: 'not_paid'
-        //     }
-        // ],
-        // custom_fields: [
-        //     {
-        //         uuid: 'OR_1037',
-        //         value: 'Lord'
-        //     }
-        // ]
     };
     const response = await fetch(`${KEYCRM_URL}/order`, {
         method: "POST",
         headers: {
             'Content-Type': 'application/json',
-            // 'Accept': 'application/json',
-            // 'Cache-Control': 'no-cache',
-            // 'Pragma': 'no-cache',
             'Authorization': `Bearer ${KEYCRM_API_KEY}`,
         },
         body: JSON.stringify(orderData),
     })
 
-    const result:any = await response.json();
-    if (!response.ok) { 
-        return json({ error: "error" + result.message || 'Failed to create order' });
+    const result: any = await response.json();
+    if (!response.ok) {
+        return json({ result, error: "error" + result.message || 'Failed to create order' });
     }
     console.log(result)
-    
+
     if (paymentMethod === "card") {
-        paymentLink =await generageMonoUrl(products, result.id)
+        paymentLink = await generageMonoUrl(products, result.id)
 
     }
-    return json({ message: "order success created", url: paymentLink});
+    return json({ message: "order success created", url: paymentLink });
 
 }
 const generateProductForKeycrm = (products: any) => {
@@ -438,79 +492,74 @@ const generateProductForKeycrm = (products: any) => {
             "name": title,
             // "comment": "Наклеїти плівку",
             "picture": variant?.image?.url,
-            "properties": [
-                {
-                    "name": "Color",
-                    "value": "Gold"
-                }
-            ]
+            "properties": variant?.selectedOptions
         }
 
     })
 }
 
-const generageMonoUrl = async (products:any,id:any)=>{
+const generageMonoUrl = async (products: any, id: any) => {
     const productsForMono = getDataFromMonoUser(products);
     const amount = productsForMono.reduce(
-        (accumulator:number, currentValue:any) =>{
-            console.log( accumulator , currentValue.sum,'sdklfjlk')
-            return  accumulator + currentValue?.sum
+        (accumulator: number, currentValue: any) => {
+            console.log(accumulator, currentValue.sum, 'sdklfjlk')
+            return accumulator + currentValue?.sum
         },
         0,
-      )
+    )
 
     return await fetch("https://api.monobank.ua/api/merchant/invoice/create", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
-          "X-Token": MONO_TOKEN,
+            "Content-Type": "application/json",
+            "X-Token": MONO_TOKEN,
         },
         body: JSON.stringify({
-          amount: +amount,
-          ccy: 980,
-          redirectUrl: "https://pick-up-shoes.com.ua",
-          webHookUrl: `https://pick-up-shoes.com.ua/checkout-webhook`,
-          merchantPaymInfo: {
-            reference: `${id}`,
-            destination: "Подарунок від MISTER GIFTER",
-            comment: "Подарунок від MISTER GIFTER",
-            basketOrder: productsForMono,
-          },
-          paymentType: "debit",
-          validity: 3600,
+            amount: +amount,
+            ccy: 980,
+            redirectUrl: "https://pick-up-shoes.com.ua",
+            webHookUrl: `https://pick-up-shoes.com.ua/checkout-webhook`,
+            merchantPaymInfo: {
+                reference: `${id}`,
+                destination: "Подарунок від MISTER GIFTER",
+                comment: "Подарунок від MISTER GIFTER",
+                basketOrder: productsForMono,
+            },
+            paymentType: "debit",
+            validity: 3600,
         }),
-      })
+    })
         .then((response) => {
-          return response.json();
+            return response.json();
         })
-        .then((data:any) => {
-          return data.pageUrl;
+        .then((data: any) => {
+            return data.pageUrl;
         })
         .catch((response) => console.log(response));
 }
 
 const getDataFromMonoUser = (products: any) => {
     return products.map(
-      (product: any, index: number) => {
-        const { quantity, title, variant } = product.node
-        const splitVariant = variant.id.split('/')
-        const variantId = splitVariant[splitVariant.length - 1]
-        return {
-          name: title,
-          qty: quantity,
-          sum: variant?.priceV2?.amount * 100,
-          icon: variant?.image?.url,
-          unit: "шт.",
-          barcode: variantId,
-          header: "header",
-          code: variantId,
-          footer: "footer",
-          tax: [0],
-          uktzed: "uktzedcode",
-        };
-      }
+        (product: any, index: number) => {
+            const { quantity, title, variant } = product.node
+            const splitVariant = variant.id.split('/')
+            const variantId = splitVariant[splitVariant.length - 1]
+            return {
+                name: title,
+                qty: quantity,
+                sum: variant?.priceV2?.amount * 100,
+                icon: variant?.image?.url,
+                unit: "шт.",
+                barcode: variantId,
+                header: "header",
+                code: variantId,
+                footer: "footer",
+                tax: [0],
+                uktzed: "uktzedcode",
+            };
+        }
     );
-  };
+};
 const MONO_TOKEN = "utR_bnF6LUzdc4pr3yFNFF2kKEPk75xeIlItZx9QfaxY"
 const KEYCRM_URL = "https://openapi.keycrm.app/v1"
 const KEYCRM_API_KEY = "Mjg3ZTM0OGJlMWRiYjQxZmU2MmM1MWY4MTgxNmNjNjc4MWRjYWFlYg"

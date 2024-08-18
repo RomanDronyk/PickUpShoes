@@ -24,7 +24,6 @@ const CartLineItem = React.memo(({ line }: { line: CartLine }) => {
     setIsLoading(false)
   }), [line])
 
-  console.log(line, "product line")
 
   return (
     <li key={id} className="xl:grid xl:grid-cols-12 flex justify-between">

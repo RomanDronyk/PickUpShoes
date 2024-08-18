@@ -6,23 +6,13 @@ import { LoaderFunctionArgs, json } from '@remix-run/server-runtime';
 
 
 export function SubscribeFooter() {
-  // const loaderData = useLoaderData();
   const [email, setEmail] = useState('');
-  // if (!loaderData) {
-    // Handle the scenario where loader data is not available
-  //   console.error("Loader data is not available.");
-  //   return <div>Error: No data available.</div>;
-  // }
-  // const { subscribedToNewsletter }:any = loaderData;
   const fetcher = useFetcher();
   const { state, data }:any = fetcher;
   const subscribeSuccess = data?.subscriber;
   const subscribeError = data?.error;
 
   useEffect(() => {
-    console.log(subscribeError, 'error')
-    console.log(subscribeSuccess, 'success')
-    // console.log(subscribedToNewsletter, data)
     if (state === "submitting") {
       setEmail("")
     }
@@ -33,9 +23,7 @@ export function SubscribeFooter() {
         Залиш свій email та отримуй знижки першим
       </span>
       {subscribeSuccess && (
-
         <div className='success-message  rounded-[30px] items-center text-[14px] md:text-[16px] max-w-[321px] z-10 bg-white md:p-[12px_20px] h-auto  flex gap-[8px] leading-[140%] p-[10px_20px] md:gap-[12px]'>
-
           <p className='text-black font-medium '>
             Підписка на розсилку
             <span className='text-[#03963E] font-semibold'> - успішна</span>
@@ -106,15 +94,3 @@ export function SubscribeFooter() {
     </div>
   );
 }
-
-// export async function loader({ context }: LoaderFunctionArgs) {
-//   try {
-//     const { session } = context;
-//     const emailMarketingConsent = await session.get('emailMarketingConsent') || null;
-//     const subscribedToNewsletter = emailMarketingConsent === 'SUBSCRIBED';
-//     return json({ subscribedToNewsletter });
-//   } catch (e) {
-//     console.error(e, "error subsribe"); // Log the error for debugging
-//     return json({ subscribedToNewsletter: false }); // Return a default or error state
-//   }
-// }

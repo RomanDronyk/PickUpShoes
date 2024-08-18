@@ -1,5 +1,5 @@
 
-import {useNonce} from '@shopify/hydrogen';
+import { useNonce } from '@shopify/hydrogen';
 import {
   defer,
   type SerializeFrom,
@@ -18,14 +18,18 @@ import {
   isRouteErrorResponse,
   type ShouldRevalidateFunction,
 } from '@remix-run/react';
-import type {CustomerAccessToken} from '@shopify/hydrogen/storefront-api-types';
+import type { CustomerAccessToken } from '@shopify/hydrogen/storefront-api-types';
 import favicon from '../public/favicon.ico';
-import {Layout} from '~/components/Layout';
+import { Layout } from '~/components/Layout';
 import styles from 'app/styles/tailwind.css';
 // import vaulStyles from 'vaul/dist/index.css';
 import NotFound from './components/NotFound';
-import {google} from 'worker-auth-providers';
+import { google } from 'worker-auth-providers';
 import HeaderContext, { HeaderContextInterface } from '~/context/HeaderCarts';
+
+import { CacheProvider } from '@emotion/react';
+import createCache from '@emotion/cache';
+
 
 /**
  * This is important to avoid re-fetching root queries on sub-navigations
@@ -51,7 +55,7 @@ export const shouldRevalidate: ShouldRevalidateFunction = ({
 
 export function links() {
   return [
-    {rel: 'stylesheet', href: styles},
+    { rel: 'stylesheet', href: styles },
     // {rel: 'stylesheet', href: vaulStyles},
     {
       rel: 'preconnect',
@@ -61,7 +65,7 @@ export function links() {
       rel: 'preconnect',
       href: 'https://shop.app',
     },
-    {rel: 'icon', type: 'image/svg+xml', href: favicon},
+    { rel: 'icon', type: 'image/svg+xml', href: favicon },
   ];
 }
 
@@ -70,13 +74,13 @@ export const useRootLoaderData = () => {
   return root?.data as SerializeFrom<typeof loader>;
 };
 
-export async function loader({context}: LoaderFunctionArgs) {
-  const {storefront, session, cart} = context;
+export async function loader({ context }: LoaderFunctionArgs) {
+  const { storefront, session, cart } = context;
   const customerAccessToken = await session.get('customerAccessToken');
   const publicStoreDomain = context.env.PUBLIC_STORE_DOMAIN;
 
   // validate the customer access token is valid
-  const {isLoggedIn, headers} = await validateCustomerAccessToken(
+  const { isLoggedIn, headers } = await validateCustomerAccessToken(
     session,
     customerAccessToken,
   );
@@ -104,17 +108,19 @@ export async function loader({context}: LoaderFunctionArgs) {
     {
       cart: cartPromise,
       footer: footerPromise,
-      header:  headerPromise,
+      header: headerPromise,
       isLoggedIn,
       publicStoreDomain,
     },
-    {headers},
+    { headers },
   );
 }
 
 export default function App() {
   const nonce = useNonce();
   const data = useLoaderData<typeof loader>();
+  const cache = createCache({ key: 'css', prepend: true });
+
   return (
     <html lang="uk">
       <head>
@@ -123,19 +129,22 @@ export default function App() {
         <Meta />
         <Links />
       </head>
-      <HeaderContext>
+      <CacheProvider value={cache}>
 
-      <body className="font-sans">
+        <HeaderContext>
 
-        <Layout {...data}>
-          <Outlet />
-        </Layout>
-        <ScrollRestoration nonce={nonce} />
-        <Scripts nonce={nonce} />
-        <LiveReload nonce={nonce} />
-      </body>
-    </HeaderContext>
-      
+          <body className="font-sans">
+
+            <Layout {...data}>
+              <Outlet />
+            </Layout>
+            <ScrollRestoration nonce={nonce} />
+            <Scripts nonce={nonce} />
+            <LiveReload nonce={nonce} />
+          </body>
+        </HeaderContext>
+      </CacheProvider>
+
     </html>
   );
 }
@@ -193,7 +202,7 @@ async function validateCustomerAccessToken(
   let isLoggedIn = false;
   const headers = new Headers();
   if (!customerAccessToken?.accessToken || !customerAccessToken?.expiresAt) {
-    return {isLoggedIn, headers};
+    return { isLoggedIn, headers };
   }
 
   const expiresAt = new Date(customerAccessToken.expiresAt).getTime();
@@ -207,7 +216,7 @@ async function validateCustomerAccessToken(
     isLoggedIn = true;
   }
 
-  return {isLoggedIn, headers};
+  return { isLoggedIn, headers };
 }
 
 const MENU_FRAGMENT = `#graphql

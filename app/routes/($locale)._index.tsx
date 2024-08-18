@@ -22,9 +22,6 @@ import { Hero } from '~/components/Hero';
 import { MainCollections } from '~/components/MainCollections';
 import BestSellers from '~/components/BestSellers';
 import NewProducts from '~/components/NewProducts';
-import { Input } from '~/components/ui/input';
-import { Button } from '~/components/ui/button';
-import { uuidv7 } from "uuidv7";
 // import shopify from '~/shopify.server';
 export const handle: { breadcrumb: string } = {
   breadcrumb: 'home',

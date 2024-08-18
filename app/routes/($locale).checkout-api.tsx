@@ -55,8 +55,6 @@ export const action: ActionFunction = async ({ request, context }) => {
 };
 
 async function createUrl(lineItems: any[], storefront: any) {
-    // Логіка створення URL на основі lineItems
-    console.log("creating urlr", lineItems)
     try{
         const data = await storefront.mutate(
             CREATE_CHEKOUT_URL,

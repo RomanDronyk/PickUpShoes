@@ -47,7 +47,7 @@ import monoLogo from '../assets/images/mono.svg';
 import { HeaderBasketContext, HeaderContextInterface } from '~/context/HeaderCarts';
 
 export const meta: MetaFunction<typeof loader> = ({ data }) => {
-  return [{ title: `Hydrogen | ${data?.product.title ?? ''}` }];
+  return [{ title: `Hydrogen | ${data?.product?.title ?? ''}` }];
 };
 
 export const handle = {
@@ -99,9 +99,7 @@ export async function loader({ params, request, context }: LoaderFunctionArgs) {
     variables: { handle },
   });
 
-  const firstAvailableVariant = variants.product.variants.nodes.find(variant => variant.availableForSale) || product.variants.nodes[0];
-
-  const isRequestedVariantAvailable = product.selectedVariant?.availableForSale;
+  const isRequestedVariantAvailable = product?.selectedVariant?.availableForSale;
 
   if (!isRequestedVariantAvailable) {
     throw redirectToFirstVariant({ product, variants, request });
@@ -147,14 +145,14 @@ function redirectToFirstVariant({
   request: Request;
 }) {
   const url = new URL(request.url);
-  const firstVariant = variants.product.variants.nodes.find(variant => variant.availableForSale) || product.variants.nodes[0];
+  const firstVariant = variants?.product?.variants?.nodes.find(variant => variant?.availableForSale) || product?.variants?.nodes[0];
 
   return redirect(
     getVariantUrl({
-      pathname: url.pathname,
-      handle: product.handle,
-      selectedOptions: firstVariant.selectedOptions,
-      searchParams: new URLSearchParams(url.search),
+      pathname: url?.pathname,
+      handle: product?.handle,
+      selectedOptions: firstVariant?.selectedOptions,
+      searchParams: new URLSearchParams(url?.search),
     }),
     {
       status: 302,
@@ -208,7 +206,7 @@ export default function Product() {
   return (
     <div className="pt-[16px] product lg:px-24 md:px-10 px-[10px] w-full ">
       <div className="sm:grid sm:grid-cols-2 flex flex-col gap-y-5 gap-x-10">
-        <ProductGalery product={product} objGalery={objGalery} media={product.media} />
+        <ProductGalery product={product} objGalery={objGalery} media={product?.media} />
         {/* <ProductImage image={selectedVariant?.image} /> */}
         <ProductMain
           objGalery={objGalery}
@@ -563,19 +561,19 @@ function ProductGalery({ product, objGalery, media }: { product: any, objGalery:
     setProductWithLike({ ...product, isLiked: false })
   }, [product.selectedVariant.id])
   useEffect(() => {
-    const productIndex = likedCart.findIndex((item: any) => item.selectedVariant.id === productWithLike.selectedVariant.id);
+    const productIndex = likedCart.findIndex((item: any) => item?.selectedVariant?.id === productWithLike?.selectedVariant?.id);
     if (productIndex === -1) {
-      setProductWithLike({ ...product, sizeVariants: product.variants.nodes, isLiked: false });
+      setProductWithLike({ ...product, sizeVariants: product?.variants?.nodes, isLiked: false });
     }
     likedCart.map((element: any, index: number) => {
-      if (element.selectedVariant.id == productWithLike.selectedVariant.id) {
+      if (element?.selectedVariant.id == productWithLike?.selectedVariant.id) {
         setProductWithLike({ ...element, isLiked: true })
       }
     })
-  }, [likedCart, productWithLike.selectedVariant.id])
+  }, [likedCart, productWithLike?.selectedVariant?.id])
 
   const toggleLike = () => {
-    if (productWithLike.isLiked) {
+    if (productWithLike?.isLiked) {
       setProductWithLike({ ...productWithLike, isLiked: false })
       removeLikeCart(productWithLike)
     } else {
@@ -649,7 +647,7 @@ function ProductGalery({ product, objGalery, media }: { product: any, objGalery:
                 style={{ zIndex: 32 }}
                 aria-label="Add to wishlist"
               >
-                <HeartIcon isFavorited={productWithLike.isLiked} />
+                <HeartIcon isFavorited={productWithLike?.isLiked} />
               </button>
             </CarouselItem>
           ))}
@@ -687,7 +685,7 @@ function ProductMain({
   selectedVariant: any;
   variants: Promise<ProductVariantsQuery>;
 }) {
-  const { title, descriptionHtml, vendor, collections } = product;
+  const { title, descriptionHtml, vendor, collections } = product || {title:"", descriptionHtml:"", vendor:"", collections:[]};
   return (
     <div className="product-main">
       <div className="flex flex-col border-b pb-6 border-b-black/10">
@@ -699,7 +697,7 @@ function ProductMain({
             {product.selectedVariant?.sku}
           </span>
           <Link
-            to={`/collections/${collections.nodes[0].handle}?filter.productVendor="${vendor}"`}
+            to={`/collections/${collections?.nodes[0]?.handle}?filter.productVendor="${vendor}"`}
             className="text-white text-[16px] flex items-center jusity-center px-[14px] py-[5px] bg-black rounded-3xl self-start">
             {product.vendor}
           </Link>
@@ -725,7 +723,7 @@ function ProductMain({
               objGalery={objGalery}
               product={product}
               selectedVariant={selectedVariant}
-              variants={data.product?.variants.nodes || []}
+              variants={data?.product?.variants.nodes || []}
             />
           )}
         </Await>
@@ -742,8 +740,8 @@ function ProductPrice({
   const percentageAmount = selectedVariant?.compareAtPrice
     ? (
       (1 -
-        parseInt(selectedVariant.price.amount) /
-        parseInt(selectedVariant.compareAtPrice.amount)) *
+        parseInt(selectedVariant?.price?.amount) /
+        parseInt(selectedVariant?.compareAtPrice?.amount)) *
       100
     ).toFixed()
     : null;
@@ -751,12 +749,12 @@ function ProductPrice({
     <div className="product-price price flex gap-x-[10px] md:font-medium md:text-2xl text-lg">
       <div className="price flex gap-x-[10px] md:font-medium md:text-[32px] text-lg">
         <span className="font-extrabold text-[32px]">
-          {selectedVariant?.price.amount} грн
+          {selectedVariant?.price?.amount} грн
         </span>
         {selectedVariant?.compareAtPrice && (
           <>
             <span className="line-through text-[#B3B3B3]">
-              {selectedVariant?.compareAtPrice.amount}
+              {selectedVariant?.compareAtPrice?.amount}
             </span>
             <span className="flex self-center py-1 items-center justify-center rounded-xl px-3 bg-darkRed/10 font-medium text-[16px] text-destructive">
               {percentageAmount}%

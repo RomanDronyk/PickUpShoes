@@ -13,7 +13,6 @@ export const action: ActionFunction = async ({ request }) => {
     }
     try {
         const data = await request.json();
-        console.log(data)
         await updateStatus(data)
         return json({ error: "Invalid Content-Type" }, { status: 200 });
 
@@ -26,8 +25,6 @@ export const action: ActionFunction = async ({ request }) => {
 const updateStatus = async (bankData: any) => {
     const Amount = bankData?.amount / 100;
     const orderId = +bankData?.reference;
-    console.log(orderId)
-
     if (bankData?.status === "success") {
         try {
             const response = await fetch(`${KEYCRM_URL}/order/${orderId}/payment`, {
