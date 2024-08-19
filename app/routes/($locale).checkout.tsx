@@ -46,8 +46,12 @@ export default function Checkout() {
     const amount = data?.cartPromise?.cost?.subtotalAmount?.amount || 0
     const urlFromAction = response?.url;
     const navigate = useNavigate()
+
+    if(urlFromAction=="/thanks"){
     urlFromAction? navigate(urlFromAction): null;
-    console.log(urlFromAction, "url from actions ")
+    }else if(urlFromAction !==null && urlFromAction){
+        window.location.href = urlFromAction;
+    }
 
     return (
 
