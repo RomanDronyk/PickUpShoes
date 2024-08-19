@@ -375,7 +375,9 @@ export const action: ActionFunction = async ({ request, context }) => {
                 return generateOrder(lineItems);
 
             case 'create order':
-                return createOrder(formData);
+                const result = await createOrder(formData);
+                console.log("Action result:", result);
+                return result;
 
             default:
                 return json({ error: "Invalid action" }, { status: 400 });
