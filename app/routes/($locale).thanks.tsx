@@ -14,7 +14,8 @@ export default function Thanks() {
         bottom: 0,
         left: 0,
         right: 0,
-        position: "absolute"
+        position: "absolute",
+        WebkitBackdropFilter: "blur(9.6px)"
     }} >
                 </div>
                 <div className=' -scale-x-[1]  lg:items-start items-center' style={{display: "flex", flexDirection: "column",   padding: "10vh 0", zIndex: 23, color: "#fff", margin: "auto auto" }}>
