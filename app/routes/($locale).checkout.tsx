@@ -1,13 +1,16 @@
-import { useLoaderData, json, MetaFunction, Form, Link, FetcherWithComponents, useActionData } from '@remix-run/react';
+import { useLoaderData, json, MetaFunction, Form, Link, FetcherWithComponents, useActionData, redirect } from '@remix-run/react';
 import { Input } from '~/components/ui/input';
 import { ActionFunction } from '@remix-run/node';
 import GET_CHECKOUT_QUERY from '~/graphqlRequests/GET_CHECKOUT_QUERY';
 import CREATE_CHEKOUT_URL from '~/graphqlRequests/CREATE_CHEKOUT_URL';
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import CheckoutCart from '~/components/CheckoutCart';
 import { Button } from '~/components/ui/button';
 import NovaPoshtaCity from '~/components/Checkout/novaPoshtaCity';
 import NovaPoshtaDepartent from '~/components/Checkout/novaPoshtaDepartment';
+import ContactType from '~/components/Checkout/contactType';
+import { useMedia } from 'react-use';
+import CheckoutCartMobile from '~/components/CheckoutCartMobile';
 
 
 
@@ -24,9 +27,12 @@ export const meta: MetaFunction = () => {
 // Checkout component
 export default function Checkout() {
     const data: any = useLoaderData();
-    const [products, setProducts] = useState(data?.data?.node?.lineItems?.edges || [])
     const response: any = useActionData();
     const [city, setCity] = useState("")
+    const [userName, setUserName] = useState({ firstName: "", lastName: "" });
+    const [userPhone, setUserPhone] = useState("")
+    const isMobile = useMedia('(max-width: 767px)', false);
+
     const [department, setDepartment] = useState({
         CityDescription: "",
         SettlementAreaDescription: "",
@@ -34,37 +40,35 @@ export default function Checkout() {
         Description: "",
         Ref: ""
     })
-    const [userName, setUserName] = useState({ firstName: "", lastName: "" });
-    const [userPhone, setUserPhone] = useState("")
 
+    const cartsFromCart = data?.cartPromise?.lines?.nodes.map((element: any) => element);
+    console.log(cartsFromCart, "cartsFromCart")
+    const amount = data?.cartPromise?.cost?.subtotalAmount?.amount || 0
 
-    const amount = products.reduce((acc: any, element: any) => +element.node.variant?.priceV2?.amount + acc, 0)
-    if (response?.url) {
-        window.location.href = response?.url;
-    }
-    useEffect(() => {
-        console.log(city)
-    }, [city])
-    console.log(products)
     return (
-        <div className="contaier gap-[40px] grid grid-cols-2 grid lg:grid-cols-[1fr_1fr] grid-cols-2 gap-y-10 gap-x-10 sm:px-24 px-[10px] my-10 w-full mt-[1rem]">
+
+        <div className="flex flex-col-reverse contaier gap-[20px] md:gap-[40px] md:grid md:grid-cols-2 lg:grid-cols-[1fr_1fr] md:grid-cols-2 md:gap-y-10 md:gap-x-10 lg:px-24 px-[10px] my-10 w-full mt-[1rem]"
+            style={{ maxWidth: "100%", overflow: "hidden" }}>
+
             <div className=''>
-                <Form method="POST" className='grid gap-[35px]'>
-                    <input type="hidden" name="products" value={JSON.stringify(products)} />
-                    <input type="hidden" name="shipping_address_city" value={department?.CityDescription} />
-                    <input type="hidden" name="shipping_address_country" value={"Ukraine"} />
-                    <input type="hidden" name="shipping_address_region" value={department?.SettlementAreaDescription} />
-                    <input type="hidden" name="shipping_address_zip" value={department?.PostalCodeUA} />
-                    <input type="hidden" name="shipping_secondary_line" value={"string"} />
-                    <input type="hidden" name="shipping_receive_point" value={department?.Description} />
-                    <input type="hidden" name="recipient_full_name" value={`${userName.firstName} ${userName.lastName}`} />
-                    <input type="hidden" name="recipient_phone" value={userPhone} />
-                    <input type="hidden" name="warehouse_ref" value={department?.Ref} />
-
-
-                    <input type="hidden" name="action" value="create order" />
+                <Form method="POST" className='grid gap-[35px]'
+                    style={{ maxWidth: "100%", overflow: "hidden" }}>
+                    <div style={{ position: "absolute", zIndex: -10, opacity: 0 }}>
+                        <input style={{ width: "0% !important" }} type="hidden" name="products" value={JSON.stringify(cartsFromCart)} />
+                        <input style={{ width: "0% !important" }} type="hidden" name="shipping_address_city" value={department?.CityDescription} />
+                        <input style={{ width: "0% !important" }} type="hidden" name="shipping_address_country" value={"Ukraine"} />
+                        <input style={{ width: "0% !important" }} type="hidden" name="shipping_address_region" value={department?.SettlementAreaDescription} />
+                        <input style={{ width: "0% !important" }} type="hidden" name="shipping_address_zip" value={department?.PostalCodeUA} />
+                        <input style={{ width: "0% !important" }} type="hidden" name="shipping_secondary_line" value={"string"} />
+                        <input style={{ width: "0% !important" }} type="hidden" name="shipping_receive_point" value={department?.Description} />
+                        <input style={{ width: "0% !important" }} type="hidden" name="recipient_full_name" value={`${userName.firstName} ${userName.lastName}`} />
+                        <input style={{ width: "0% !important" }} type="hidden" name="recipient_phone" value={userPhone} />
+                        <input style={{ width: "0% !important" }} type="hidden" name="warehouse_ref" value={department?.Ref} />
+                        <input style={{ width: "0% !important" }} type="hidden" name="amount" value={amount.replace(".0", "")} />
+                        <input type="hidden" name="action" value="create order" />
+                    </div>
                     <div className="register rounded-[20px] border border-black/10 p-[20px_24px] ">
-                        <h2 className="xl:text-[32px] text-[24px] md:text-left text-center  font-medium mb-[20px]">
+                        <h2 className="xl:text-[32px] text-[24px] text-left  font-medium mb-[20px]">
                             Дані для доставки
                         </h2>
                         <fieldset className="flex flex-col gap-[15px]">
@@ -76,6 +80,7 @@ export default function Checkout() {
                                     autoComplete="firstName"
                                     placeholder="Ім’я отримувача"
                                     aria-label="First Name"
+
                                     onChange={(event) => setUserName((prevData) => {
                                         return { ...prevData, firstName: event.target.value }
                                     })}
@@ -96,6 +101,7 @@ export default function Checkout() {
                                     autoComplete="lastName"
                                     placeholder="Прізвище"
                                     aria-label="Last Name"
+
                                     // eslint-disable-next-line jsx-a11y/no-autofocus
                                     autoFocus
                                     // value={data?.node?.shippingAddress?.lastName}
@@ -116,6 +122,7 @@ export default function Checkout() {
                                     autoComplete="phone"
                                     placeholder="+ 38 (098) 999 99-99"
                                     aria-label="Password"
+
                                     minLength={4}
                                     required
                                     onChange={(event) => setUserPhone(event.target.value)}
@@ -124,20 +131,8 @@ export default function Checkout() {
                             </div>
 
                             <div className='pb-[15px] border-b border-black/20'>
-
-                                <Input
-                                    id="contactType"
-                                    name="contactType"
-                                    type="contactType"
-                                    autoComplete="contactType"
-                                    placeholder="Спосіб зв’язку"
-                                    aria-label="Re-enter password"
-                                    minLength={4}
-                                    required
-                                    className="bg-input px-6 py-3 text-xl placeholder:text-xl h-[52px] "
-                                />
+                                <ContactType />
                             </div>
-
                             <div className='pb-[15px] border-b border-black/20'>
                                 <NovaPoshtaCity setCity={setCity} />
                             </div>
@@ -154,6 +149,7 @@ export default function Checkout() {
                                     autoComplete="email"
                                     placeholder="E-mail"
                                     aria-label="Re-enter E-mail"
+
                                     minLength={4}
                                     required
                                     className="bg-input px-6 py-3 text-xl placeholder:text-xl h-[52px] "
@@ -168,42 +164,46 @@ export default function Checkout() {
                     </div>
                     <div className="register rounded-[20px] border border-black/10 p-[20px_24px] ">
                         <div>
-                            <h2 className="xl:text-[32px] text-[24px] md:text-left text-center  font-medium mb-[20px]">
+                            <h2 className="xl:text-[32px] text-[24px] text-left  font-medium mb-[20px]">
                                 Спосіб доставки
                             </h2>
                             <div className="delivery-options">
 
-                                <div className="flex items-center mb-4">
-                                    <input defaultChecked style={{ accentColor: "black", cursor: "pointer" }} type="radio" id="delivery1" name="delivery" value="novaposhta" className="mr-2" />
-                                    <label style={{ cursor: "pointer" }} htmlFor="delivery1" className="text-lg">Доставка Новою Поштою</label>
+                                <div className="flex mb-4 items-start">
+                                    <input defaultChecked style={{ accentColor: "black", cursor: "pointer", marginTop: 5 }} type="radio" id="delivery1" name="delivery" value="novaposhta" className="mr-2" />
+                                    <label style={{ cursor: "pointer" }} htmlFor="delivery1" className="font-normal text-[16px]">Доставка Новою Поштою</label>
                                 </div>
-                                <div className="flex items-center mb-4">
-                                    <input style={{ accentColor: "black", cursor: "pointer" }} type="radio" id="delivery2" name="delivery" value="ukrposhta" className="mr-2" />
-                                    <label style={{ cursor: "pointer" }} htmlFor="delivery2" className="text-lg">Доставка Укрпоштою</label>
+                                <div className="flex mb-4 items-start">
+                                    <input style={{ accentColor: "black", cursor: "pointer", marginTop: 5 }} type="radio" id="delivery2" name="delivery" value="ukrposhta" className="mr-2" />
+                                    <label style={{ cursor: "pointer" }} htmlFor="delivery2" className="font-normal text-[16px]">Самовивіз (м. Коломия вул. Чорновола 28 | ТЦ “Водолій”, 3 поверх)</label>
                                 </div>
                             </div>
                         </div>
                         <div>
-                            <h2 className="xl:text-[32px] text-[24px] md:text-left text-center  font-medium mb-[20px]">
+                            <h2 className="xl:text-[32px] text-[24px] text-left  font-medium mb-[20px]">
                                 Спосіб оплати
                             </h2>
                             <div className="payment-options">
-                                <div className="flex items-center mb-4">
-                                    <input defaultChecked style={{ accentColor: "black", cursor: "pointer" }} type="radio" id="payment1" name="payment" value="card" className="mr-2" />
-                                    <label htmlFor="payment1" className="text-lg">Оплата карткою онлайн</label>
+                                <div className="flex mb-4 items-start">
+                                    <input defaultChecked style={{ accentColor: "black", cursor: "pointer", marginTop: 5 }} type="radio" id="payment1" name="payment" value="card" className="mr-2" />
+                                    <label htmlFor="payment1" className="font-normal text-[16px]">Оплата карткою онлайн</label>
                                 </div>
-                                <div className="flex items-center mb-4">
-                                    <input style={{ accentColor: "black", cursor: "pointer" }} type="radio" id="payment2" name="payment" value="cash" className="mr-2" />
-                                    <label htmlFor="payment2" className="text-lg">Оплата готівкою при отриманні</label>
+                                <div className="flex mb-4 items-start">
+                                    <input style={{ height: "auto", accentColor: "black", cursor: "pointer", marginTop: 5 }} type="radio" id="payment2" name="payment" value="cash" className="mr-2" />
+                                    <label htmlFor="payment2" className="font-normal text-[16px]">При отриманні з предоплатою 200 грн
+                                        <span className='text-[14px] font-medium' >
+                                            *Менеджер зв’яжеться з вами протягом 15 хвилин та надасть реквізити для внесення предоплати
+                                        </span>
+                                    </label>
                                 </div>
                             </div>
                         </div>
                         <div >
                             <div className=' justify-between flex font-bold'>
-                                <h2 className="xl:text-[32px] text-[24px] md:text-left text-center   mb-[20px]">
+                                <h2 className="xl:text-[32px] text-nowrap sm:text-[24px] text-left  mb-[15px] text-[22px]  sm:mb-[20px]">
                                     До сплати:
                                 </h2>
-                                <input name="amount" disabled value={`${amount} грн.`} className='xl:text-[32px] text-right text-[24px] bg-transparent text-center   mb-[20px]' />
+                                <input style={{ width: 127 }} name="amount" disabled value={`${amount} грн.`} className='xl:text-[32px] text-nowrap sm:text-[24px] text-left  mb-[15px] text-[22px]  sm:mb-[20px]' />
                             </div>
                             <div className='hidden flex justify-between gap-[12px] pb-[24px]'>
                                 <Input
@@ -213,10 +213,14 @@ export default function Checkout() {
                                     autoComplete="promo"
                                     placeholder="Ваш промокод"
                                     aria-label="Не правильний промокод"
+
                                     minLength={4}
                                     className="bg-input px-6 py-3 text-xl placeholder:text-xl h-[52px] "
                                 />
-                                <Button className='rounded-[64px]'>Додати</Button>
+                                <Button className='rounded-[64px]'>
+                                    Додати
+
+                                </Button>
                             </div>
                             <div>
                                 {response?.error && (
@@ -225,19 +229,33 @@ export default function Checkout() {
                                     </>
                                 )}
                             </div>
-                            <Button className='rounded-[64px] w-[100%] text-semibold text-[18px] text-white py-[20px]'>Оформити замовлення</Button>
+                            <Button className='rounded-[64px] w-[100%] text-semibold text-[18px] text-white py-[16px]'>
+                                Оформити замовлення
+                                <span style={{marginLeft:15}}>
+                                    <svg width="16" height="16" viewBox="0 0 20 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M12.2959 0.454104L19.0459 7.2041C19.1508 7.30862 19.234 7.43281 19.2908 7.56956C19.3476 7.7063 19.3768 7.85291 19.3768 8.00098C19.3768 8.14904 19.3476 8.29565 19.2908 8.4324C19.234 8.56915 19.1508 8.69334 19.0459 8.79785L12.2959 15.5479C12.0846 15.7592 11.7979 15.8779 11.4991 15.8779C11.2002 15.8779 10.9135 15.7592 10.7022 15.5479C10.4908 15.3365 10.3721 15.0499 10.3721 14.751C10.3721 14.4521 10.4908 14.1654 10.7022 13.9541L15.5313 9.12504L1.75 9.12504C1.45163 9.12504 1.16548 9.00651 0.954505 8.79554C0.743527 8.58456 0.625 8.29841 0.625 8.00004C0.625 7.70167 0.743527 7.41552 0.954505 7.20455C1.16548 6.99357 1.45163 6.87504 1.75 6.87504L15.5313 6.87504L10.7013 2.04598C10.4899 1.83463 10.3712 1.54799 10.3712 1.2491C10.3712 0.950218 10.4899 0.663574 10.7013 0.45223C10.9126 0.240885 11.1992 0.122151 11.4981 0.122151C11.797 0.122151 12.0837 0.240885 12.295 0.45223L12.2959 0.454104Z" fill="white" />
+                                    </svg>
+
+                                </span>
+                            </Button>
                         </div>
                     </div>
                 </Form>
             </div>
             <div>
-                <h1 className="xl:text-[32px] text-[24px] md:text-left text-center  font-medium mb-[20px]">Ви обрали:</h1>
+                <h1 className="xl:text-[32px] text-[24px] text-left  font-medium mb-[20px]">Ви обрали:</h1>
                 <div className="register rounded-[20px] border border-black/10 p-[0px_24px] ">
-                    {products.length > 0 && products.map((product: any, index: number) => {
-                        return <>
-                            <CheckoutCart key={product.node.variant?.id} product={product.node} />
-                            {products.length - 1 !== index && <div key={products.length - 1 + index} className='border border-black/10'></div>}
-                        </>
+                    {cartsFromCart.length > 0 && cartsFromCart.map((product: any, index: number) => {
+                        return <React.Fragment key={product.id} >
+                            {
+                                isMobile ?
+                                    <CheckoutCartMobile cartsFromCart={product} /> :
+                                    <CheckoutCart cartsFromCart={product} />
+
+
+                            }
+                            {cartsFromCart.length - 1 !== index && <div key={cartsFromCart.length - 1 + index} className='border border-black/10'></div>}
+                        </React.Fragment>
                     }
                     )}
                 </div>
@@ -250,18 +268,13 @@ export default function Checkout() {
 
 // // Loader function to get checkout data
 export const loader = async ({ context, request }: { context: any, request: Request }) => {
-    const { storefront } = context;
-
+    const { storefront, cart } = context;
+    const cartPromise = await cart.get();
     const url = new URL(request.url);
     const inputCity = url.searchParams.get('city') || '';
-    const checkoutId = url.searchParams.get('checkoutId') || "";
     const inputDepartment = url.searchParams.get("department") || ""
     let cities = [];
-    let data: any = []
     let department: any = []
-    if (!checkoutId) {
-        data = []
-    }
 
     if (inputDepartment) {
         try {
@@ -271,17 +284,6 @@ export const loader = async ({ context, request }: { context: any, request: Requ
             department = []
         }
     }
-    if (checkoutId) {
-        try {
-            data = await storefront.query(GET_CHECKOUT_QUERY, {
-                variables: { checkoutId: `${checkoutId}` },
-            });
-
-        } catch (e) {
-            data = []
-        }
-    }
-
     if (inputCity) {
         try {
             cities = await fetchCity(inputCity); // fetchCity та API ключі мають бути імпортовані з novaPoshta.tsx
@@ -291,7 +293,7 @@ export const loader = async ({ context, request }: { context: any, request: Requ
         }
 
     }
-    return json({ data, cities, department });
+    return json({ cartPromise,  cities, department });
 
 };
 const fetchDepartment = async (inputCity: string, department: string) => {
@@ -420,6 +422,7 @@ async function generateOrderInKeycrm(formData: FormData) {
     const paymentMethod = formData.get("payment");
     const firstName = formData.get('firstName') || "null"
     const lastName = formData.get('lastName') || "null"
+    const amount = formData.get('amount') || 0
     let paymentLink = ''
 
     const orderData = {
@@ -470,43 +473,33 @@ async function generateOrderInKeycrm(formData: FormData) {
     console.log(result)
 
     if (paymentMethod === "card") {
-        paymentLink = await generageMonoUrl(products, result.id)
-
+        paymentLink = await generageMonoUrl(amount, products, result.id)
+        return redirect(paymentLink);
+    }else{
+        return redirect('/thanks');
     }
     return json({ message: "order success created", url: paymentLink });
 
 }
 const generateProductForKeycrm = (products: any) => {
     return products.map((product: any) => {
-        const { quantity, title, variant } = product.node
-        const splitVariant = variant.id.split('/')
+        const splitVariant = product.merchandise.id.split('/')
         const variantId = splitVariant[splitVariant.length - 1]
         return {
             "sku": variantId,
-            "price": variant?.priceV2?.amount,
-            // "purchased_price": 100,
-            // "discount_percent": 11.5,
-            // "discount_amount": 9.99,
-            "quantity": quantity,
+            "price": product?.merchandise?.price?.amount || 0,
+            "quantity": product?.quantity || 0,
             "unit_type": "шт",
-            "name": title,
-            // "comment": "Наклеїти плівку",
-            "picture": variant?.image?.url,
-            "properties": variant?.selectedOptions
+            "name": product?.merchandise?.product?.title || " ",
+            "picture": product?.merchandise?.image?.url,
+            "properties": product?.merchandise?.selectedOptions
         }
 
     })
 }
 
-const generageMonoUrl = async (products: any, id: any) => {
+const generageMonoUrl = async (amount: any, products: any, id: string) => {
     const productsForMono = getDataFromMonoUser(products);
-    const amount = productsForMono.reduce(
-        (accumulator: number, currentValue: any) => {
-            console.log(accumulator, currentValue.sum, 'sdklfjlk')
-            return accumulator + currentValue?.sum
-        },
-        0,
-    )
 
     return await fetch("https://api.monobank.ua/api/merchant/invoice/create", {
         method: "POST",
@@ -515,9 +508,9 @@ const generageMonoUrl = async (products: any, id: any) => {
             "X-Token": MONO_TOKEN,
         },
         body: JSON.stringify({
-            amount: +amount,
+            amount: amount * 100,
             ccy: 980,
-            redirectUrl: "https://pick-up-shoes.com.ua",
+            redirectUrl: "https://pick-up-shoes.com.ua/thanks",
             webHookUrl: `https://pick-up-shoes.com.ua/checkout-webhook`,
             merchantPaymInfo: {
                 reference: `${id}`,
@@ -541,14 +534,13 @@ const generageMonoUrl = async (products: any, id: any) => {
 const getDataFromMonoUser = (products: any) => {
     return products.map(
         (product: any, index: number) => {
-            const { quantity, title, variant } = product.node
-            const splitVariant = variant.id.split('/')
+            const splitVariant = product.merchandise.id.split('/')
             const variantId = splitVariant[splitVariant.length - 1]
             return {
-                name: title,
-                qty: quantity,
-                sum: variant?.priceV2?.amount * 100,
-                icon: variant?.image?.url,
+                name: product?.merchandise?.product?.title || " ",
+                qty: product?.quantity || 0,
+                sum: +product?.merchandise?.price?.amount * 100,
+                icon: product?.merchandise?.image?.url,
                 unit: "шт.",
                 barcode: variantId,
                 header: "header",

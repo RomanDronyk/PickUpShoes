@@ -113,7 +113,7 @@ function MobileCartDetail({cart,setOpen}: {setOpen?:any; cart: CartApiQueryFragm
           &nbsp;грн
         </div>
         <Button asChild className="rounded-[60px] px-[55px]">
-          <Link onClick={()=>setOpen(false)} to={cart?.checkoutUrl ||""} className="flex gap-5">
+          <Link onClick={()=>setOpen(false)} to={"/checkout" ||""} className="flex gap-5">
             <span className="font-medium text-2xl">Оформити замовлення</span>
             <svg
               width="23"

@@ -68,8 +68,8 @@ const DropDownCartDetail = React.memo(({ cart }: { cart: CartApiQueryFragment | 
           &nbsp;грн
         </div>
         <div className="dropdown-checkout flex items-center justify-end">
+            <Link to={`/checkout`|| ""}  onClick={()=>console.log(cart?.checkoutUrl)} className="flex gap-5">
           <Button className="rounded-[60px] px-[55px]">
-            <Link to={`/checkout?checkoutId=${shopifyCheckoutId}`|| ""}  onClick={()=>console.log(cart?.checkoutUrl)} className="flex gap-5">
               <span className="font-medium text-2xl">Оформити замовлення</span>
               <svg
                 width="23"
@@ -83,8 +83,8 @@ const DropDownCartDetail = React.memo(({ cart }: { cart: CartApiQueryFragment | 
                   fill="white"
                 />
               </svg>
-            </Link>
           </Button>
+            </Link>
         </div>
       </div>
     </div>

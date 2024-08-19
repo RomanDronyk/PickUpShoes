@@ -80,60 +80,6 @@ export async function loader({ context }: LoaderFunctionArgs) {
 }
 
 
-// export async function action({ context, request }: ActionFunctionArgs) {
-//   const formData = await request.formData();
-//   const { session, storefront } = context;
-
-//   const {admin} = await shopify.authenticate.admin(request);
-
-//   const updates = Object.fromEntries(formData);
-//   const { email }: any = updates;
-//   const password = await uuidv7();
-
-//   try {
-//     const response = await admin.graphql(
-//       `#graphql
-//       mutation customerCreate($input: CustomerInput!) {
-//         customerCreate(input: $input) {
-//           userErrors {
-//             field
-//             message
-//           }
-//           customer {
-//             id
-//             email
-//             acceptsMarketing
-//           }
-//         }
-//       }`,
-//       {
-//         variables: {
-//           "input": {
-//             "email": email,
-//             "acceptsMarketing": true
-//           }
-//         },
-//       },
-//     );
-    
-//     const data = await response.json();
-  
-//     if (response?.userErrors?.length) {
-//       console.error('Customer creation errors:', response.userErrors);
-//       throw new Error(response.userErrors.map(e => e.message).join(", "));
-//     }
-  
-//     return json({ error: null }, { status: 302, headers: { Location: '/' } });
-  
-//   } catch (error: unknown) {
-//     if (error instanceof Error) {
-//       return json({ error: error.message }, { status: 400 });
-//     }
-//     return json({ error: 'An unknown error occurred' }, { status: 400 });
-//   }
-
-// }
-
 
 export default function Homepage() {
   const { heroCollection, mainCollections, bestSellers, newProducts, storefront } =

@@ -105,6 +105,7 @@ module.exports = {
         womenCollection: 'url("../assets/images/women-collection.png")',
         wearCollection: 'url("../assets/images/wear-collection.png")',
         notFoundBg: 'url("../assets/images/404.jpg")',
+        thankBg: 'url("../assets/images/thank.jpg")',
         swtichMenWite: 'url("../assets/images/switch-user-white.svg")',
         swtichMenBlack: 'url("../assets/images/switch-user-black.svg")',
         switchWoomenBlack: 'url("../assets/images/switch-woomen-black.svg")',

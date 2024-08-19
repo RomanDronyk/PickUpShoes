@@ -1,9 +1,11 @@
 const style = {
   width: "100%",
+
   '.MuiInputBase-root': {
     height: '52px',
     display: 'flex',
     width: '100%',
+  
     backgroundColor: 'hsl(0 0% 89.8%)',
     borderRadius: '62px',
     padding: '0 6px',

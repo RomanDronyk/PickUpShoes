@@ -2,19 +2,19 @@ import { CartForm, Image } from "@shopify/hydrogen"
 import CartLineQuantity from "../DropdownCart/CartLineQuantity"
 import { useState } from "react"
 
-const CheckoutCart = ({ cartsFromCart }: any) => {
+const CheckoutCartMobile = ({ cartsFromCart }: any) => {
 
     const [loading, setLoading] = useState(false)
     const updateQuantity = (value: any) => {
         setLoading(true)
     }
     return (
-        <div className='flex flex-col min-h-[100px] relative  justify-center  register   py-[24px] mb-[30px] lg:mb-0'>
-            <div className='grid' style={{ minWidth: "100%", gridTemplateColumns: "1fr", position: "relative", justifyContent: 'space-between', alignItems: "center", gap: 10, }}>
-                <div className="flex gap-[16px] items-center min-h-[100%]">
+        <div className='flex flex-col min-h-[100px] relative  justify-center  register   pt-[24px] mb-[30px] lg:mb-0'>
+            <div className='grid' style={{ minWidth: "100%", gridTemplateColumns: "1fr", position: "relative", justifyContent: 'space-between', alignItems: "center", gap: 0, }}>
+                <div className="flex gap-[16px]  min-h-[100%] pb-[7px]">
                     <div
                         style={{
-                            maxWidth: 124
+                            maxWidth: 70
                         }}
                         className="relative block rounded-[20px] overflow-hidden group-hover/card:h-[calc(var(--image-height)-var(--options-height)+10px)] w-full h-full transition-all duration-100 ease-in-out"
                     >
@@ -22,7 +22,7 @@ const CheckoutCart = ({ cartsFromCart }: any) => {
                             className="relative overflow-hidden"
                             style={{
                                 height: 'var(--image-height)',
-                                maxWidth: 124
+                                maxWidth: 70
                             }}
                         >
                             <Image
@@ -41,22 +41,25 @@ const CheckoutCart = ({ cartsFromCart }: any) => {
                                 {cartsFromCart?.merchandise?.product?.title}
                             </h4>
                         </div>
-                        <div>
-                            {cartsFromCart?.merchandise?.selectedOptions.map((option: any) => {
-                                return <>
-                                    <h4 key={option.name}>
-                                        {option.name}: <span className="text-black/50">{option.value}</span>
-                                    </h4>
-                                </>
-                            })}
-                        </div>
-                        <div>
-                            <h4 className="md:text-xl text-lg font-semibold line-clamp-1 pr-[10px] mb-[7px]">
-                                {cartsFromCart?.merchandise?.price?.amount} грн
-                            </h4>
-                        </div>
+
                     </div>
                     <CartLineQuantity setNewQuantity={updateQuantity} isAbsolute={true} line={cartsFromCart} />
+                </div>
+                <div >
+                    <div className="pb-[12px]">
+                        {cartsFromCart?.merchandise?.selectedOptions.map((option: any) => {
+                            return <>
+                                <h4 key={option.name}>
+                                    {option.name}: <span className="text-black/50">{option.value}</span>
+                                </h4>
+                            </>
+                        })}
+                    </div>
+                    <div>
+                        <h4 className="md:text-xl text-lg font-semibold line-clamp-1 pr-[10px] mb-[7px]">
+                            {cartsFromCart?.merchandise?.price?.amount} грн
+                        </h4>
+                    </div>
                 </div>
                 <div style={{ display: "flex", alignItems: "center", gap: "20px", width: "100%" }}>
                     <CartLineRemoveButton lineIds={cartsFromCart.id} />
@@ -86,4 +89,4 @@ function CartLineRemoveButton({ lineIds }: { lineIds: string[] }) {
         </CartForm>
     );
 }
-export default CheckoutCart
+export default CheckoutCartMobile
