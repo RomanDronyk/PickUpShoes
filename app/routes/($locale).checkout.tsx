@@ -488,7 +488,7 @@ async function generateOrderInKeycrm(formData: FormData) {
     }else{
         paymentLink = '/thanks';
     }
-    return json({ message: "order success created", url: paymentLink });
+    return json({ message: "order success created", url: paymentLink|| "/thanks" });
 
 }
 const generateProductForKeycrm = (products: any) => {
