@@ -1,4 +1,4 @@
-import { useLoaderData, json, MetaFunction, Form, Link, FetcherWithComponents, useActionData, redirect } from '@remix-run/react';
+import { useLoaderData, json, MetaFunction, Form, Link, FetcherWithComponents, useActionData, redirect, useNavigate } from '@remix-run/react';
 import { Input } from '~/components/ui/input';
 import { ActionFunction } from '@remix-run/node';
 import GET_CHECKOUT_QUERY from '~/graphqlRequests/GET_CHECKOUT_QUERY';
@@ -44,6 +44,10 @@ export default function Checkout() {
     const cartsFromCart = data?.cartPromise?.lines?.nodes.map((element: any) => element);
     console.log(cartsFromCart, "cartsFromCart")
     const amount = data?.cartPromise?.cost?.subtotalAmount?.amount || 0
+    const urlFromAction = response?.url;
+    const navigate = useNavigate()
+    urlFromAction? navigate(urlFromAction): null;
+
 
     return (
 
@@ -251,8 +255,6 @@ export default function Checkout() {
                                 isMobile ?
                                     <CheckoutCartMobile cartsFromCart={product} /> :
                                     <CheckoutCart cartsFromCart={product} />
-
-
                             }
                             {cartsFromCart.length - 1 !== index && <div key={cartsFromCart.length - 1 + index} className='border border-black/10'></div>}
                         </React.Fragment>
@@ -474,9 +476,9 @@ async function generateOrderInKeycrm(formData: FormData) {
 
     if (paymentMethod === "card") {
         paymentLink = await generageMonoUrl(amount, products, result.id)
-        return redirect(paymentLink);
+
     }else{
-        return redirect('/thanks');
+        paymentLink = '/thanks';
     }
     return json({ message: "order success created", url: paymentLink });
 

@@ -10,7 +10,7 @@ type Footer = {
 };
 
 export function Footer({ menu: footerMenu, shop }: Footer) {
-  const { menu, secondMenu } = footerMenu;
+  const { menu, secondMenu } = footerMenu || {menu: [], secondMenu:[]};
   return (
     <footer className="bg-black pt-[81px] text-placeholderText">
        <div 
