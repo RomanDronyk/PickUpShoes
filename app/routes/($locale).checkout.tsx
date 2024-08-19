@@ -48,8 +48,10 @@ export default function Checkout() {
     const navigate = useNavigate()
 
     if(urlFromAction=="/thanks"){
+        console.log(urlFromAction)
     urlFromAction? navigate(urlFromAction): null;
     }else if(urlFromAction !==null && urlFromAction){
+        console.log(urlFromAction)
         window.location.href = urlFromAction;
     }
 
