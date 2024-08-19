@@ -1,7 +1,12 @@
 // Checkout component
 export default function Thanks() {
-    const styleS = {
-        backgroudColor: "rgba(255, 255, 255, 0)",
+    return (
+        <div className="flex flex-col contaier  md:grid  lg:grid-cols-[1fr_1fr]  w-full "
+            style={{ height: "90vh", maxWidth: "100%", overflow: "hidden" }}
+            >
+            <div className=' leading-7 lg:leading-10 -scale-x-[1] bg-cover relative flex items-center justify-center w-full bg-no-repeat  bg-center bg-contain   bg-blend-screen h-full bg-thankBg'>
+                <div style={{
+        backgroundColor: "rgba(255, 255, 255, 0)",
         borderRadius: "16px",
         boxShadow: "0 4px 30px rgba(0, 0, 0, 0.1)",
         backdropFilter: "blur(9.6px)",
@@ -10,14 +15,7 @@ export default function Thanks() {
         left: 0,
         right: 0,
         position: "absolute"
-    }
-
-    return (
-        <div className="flex flex-col contaier  md:grid  lg:grid-cols-[1fr_1fr]  w-full "
-            style={{ height: "90vh", maxWidth: "100%", overflow: "hidden" }}
-            >
-            <div className=' leading-7 lg:leading-10 -scale-x-[1] bg-cover relative flex items-center justify-center w-full bg-no-repeat  bg-center bg-contain   bg-blend-screen h-full bg-thankBg'>
-                <div style={styleS} >
+    }} >
                 </div>
                 <div className=' -scale-x-[1]  lg:items-start items-center' style={{display: "flex", flexDirection: "column",   padding: "10vh 0", zIndex: 23, color: "#fff", margin: "auto auto" }}>
                     <h1  className='px-6 mb-[46px] text-[24px] lg:text-[36px]'>Дякуєм! Ваше замовлення  було успішно прийняте.</h1>
