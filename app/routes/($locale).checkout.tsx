@@ -47,7 +47,7 @@ export default function Checkout() {
     const urlFromAction = response?.url;
     const navigate = useNavigate()
     urlFromAction? navigate(urlFromAction): null;
-
+    console.log(urlFromAction, "url from actions ")
 
     return (
 
@@ -425,7 +425,7 @@ async function generateOrderInKeycrm(formData: FormData) {
     const firstName = formData.get('firstName') || "null"
     const lastName = formData.get('lastName') || "null"
     const amount = formData.get('amount') || 0
-    let paymentLink = ''
+    let paymentLink = '/thanks'
 
     const orderData = {
         source_id: 1,
