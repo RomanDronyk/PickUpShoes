@@ -56,7 +56,7 @@ export default function NovaPoshtaDepartent({ setDepartment, city }: any) {
         setLoading(true)
         fetcher.submit(
           { action: "get department", city: city,department: inputDepartment  },
-          { method: "post", action: "/$locale/checkout-api" }
+          { method: "post", action: "/checkout-api" }
         );
 
       } else {

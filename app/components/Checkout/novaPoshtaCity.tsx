@@ -34,7 +34,7 @@ export default function NovaPoshtaCity({ setCity }: any) {
     //   if (active) {
     //     fetcher.submit(
     //       { action: "get city", city: inputCity },
-    //       { method: "post", action: "/$locale/checkout-api" }
+    //       { method: "post", action: "/checkout-api" }
     //     );
     //   }
     // })();
@@ -61,7 +61,7 @@ export default function NovaPoshtaCity({ setCity }: any) {
         setOptions([])
         fetcher.submit(
           { action: "get city", city: inputCity },
-          { method: "post", action: "/$locale/checkout-api" }
+          { method: "post", action: "/checkout-api" }
         );
       }
     }, 1000);
