@@ -9,9 +9,9 @@ const CheckoutCartMobile = ({ cartsFromCart }: any) => {
         setLoading(true)
     }
     return (
-        <div className='flex flex-col min-h-[100px] relative  justify-center  register   pt-[24px] mb-[30px] lg:mb-0'>
+        <div className='flex flex-col  relative  justify-center  register max-h-[250px] overflow-hidden   pt-[24px] mb-[30px] lg:mb-0'>
             <div className='grid' style={{ minWidth: "100%", gridTemplateColumns: "1fr", position: "relative", justifyContent: 'space-between', alignItems: "center", gap: 0, }}>
-                <div className="flex gap-[16px]  min-h-[100%] pb-[7px]">
+                <div className="flex gap-[16px]   pb-[7px]">
                     <div
                         style={{
                             maxWidth: 70
