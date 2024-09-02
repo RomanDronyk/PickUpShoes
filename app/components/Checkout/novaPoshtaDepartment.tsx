@@ -54,7 +54,10 @@ export default function NovaPoshtaDepartent({ setDepartment, city }: any) {
     const timer = setTimeout(() => {
       if (inputDepartment.length > 0) {
         setLoading(true)
-        fetcher.load(`/checkout?department=${encodeURIComponent(inputDepartment)}&city=${encodeURIComponent(city.MainDescription)}`);
+        fetcher.submit(
+          { action: "get department", city: city,department: inputDepartment  },
+          { method: "post", action: "/$locale/checkout-api" }
+        );
 
       } else {
         setLoading(false)
@@ -98,6 +101,7 @@ export default function NovaPoshtaDepartent({ setDepartment, city }: any) {
               placeholder='Відділення'
               value={inputDepartment}
               required
+              disabled = {city? false: true}
               onChange={(element) => setInputDepartment(element.target.value)}
               InputProps={{
                 ...params.InputProps,

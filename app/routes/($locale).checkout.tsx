@@ -28,7 +28,7 @@ export const meta: MetaFunction = () => {
 export default function Checkout() {
     const data: any = useLoaderData();
     const response: any = useActionData();
-    const [city, setCity] = useState("")
+    const [city, setCity] = useState({})
     const [userName, setUserName] = useState({ firstName: "", lastName: "" });
     const [userPhone, setUserPhone] = useState("")
     const isMobile = useMedia('(max-width: 767px)', false);
@@ -47,14 +47,17 @@ export default function Checkout() {
     const urlFromAction = response?.url;
     const navigate = useNavigate()
 
-    if(urlFromAction=="/thanks"){
+    if (urlFromAction == "/thanks") {
         console.log(urlFromAction)
-    urlFromAction? navigate(urlFromAction): null;
-    }else if(urlFromAction !==null && urlFromAction){
+        urlFromAction ? navigate(urlFromAction) : null;
+    } else if (urlFromAction !== null && urlFromAction) {
         console.log(urlFromAction)
         window.location.href = urlFromAction;
     }
 
+    useEffect(() => {
+        console.log(city, "console.log city")
+    }, [city])
     return (
 
         <div className="flex flex-col-reverse contaier gap-[20px] md:gap-[40px] md:grid md:grid-cols-2 lg:grid-cols-[1fr_1fr] md:grid-cols-2 md:gap-y-10 md:gap-x-10 lg:px-24 px-[10px] my-10 w-full mt-[1rem]"
@@ -101,9 +104,7 @@ export default function Checkout() {
                                     className="bg-input px-6 py-3 text-xl placeholder:text-xl h-[52px] "
                                 />
                             </div>
-
                             <div className='pb-[15px] border-b border-black/20'>
-
                                 <Input
                                     id="lastName"
                                     name="lastName"
@@ -122,9 +123,7 @@ export default function Checkout() {
                                     className="bg-input px-6 py-3 text-xl placeholder:text-xl h-[52px] "
                                 />
                             </div>
-
                             <div className='pb-[15px] border-b border-black/20'>
-
                                 <Input
                                     id="phone"
                                     name="phone"
@@ -147,7 +146,7 @@ export default function Checkout() {
                                 <NovaPoshtaCity setCity={setCity} />
                             </div>
                             <div className='pb-[15px] border-b border-black/20'>
-                                <NovaPoshtaDepartent setDepartment={setDepartment} city={city} />
+                                <NovaPoshtaDepartent setDepartment={setDepartment} city={city?.MainDescription} />
 
                             </div>
 
@@ -159,7 +158,6 @@ export default function Checkout() {
                                     autoComplete="email"
                                     placeholder="E-mail"
                                     aria-label="Re-enter E-mail"
-
                                     minLength={4}
                                     required
                                     className="bg-input px-6 py-3 text-xl placeholder:text-xl h-[52px] "
@@ -167,10 +165,7 @@ export default function Checkout() {
                             </div>
                             <>
                             </>
-
                         </fieldset>
-
-
                     </div>
                     <div className="register rounded-[20px] border border-black/10 p-[20px_24px] ">
                         <div>
@@ -229,7 +224,6 @@ export default function Checkout() {
                                 />
                                 <Button className='rounded-[64px]'>
                                     Додати
-
                                 </Button>
                             </div>
                             <div>
@@ -241,11 +235,10 @@ export default function Checkout() {
                             </div>
                             <Button className='rounded-[64px] w-[100%] text-semibold text-[18px] text-white py-[16px]'>
                                 Оформити замовлення
-                                <span style={{marginLeft:15}}>
+                                <span style={{ marginLeft: 15 }}>
                                     <svg width="16" height="16" viewBox="0 0 20 16" fill="none" xmlns="http://www.w3.org/2000/svg">
                                         <path d="M12.2959 0.454104L19.0459 7.2041C19.1508 7.30862 19.234 7.43281 19.2908 7.56956C19.3476 7.7063 19.3768 7.85291 19.3768 8.00098C19.3768 8.14904 19.3476 8.29565 19.2908 8.4324C19.234 8.56915 19.1508 8.69334 19.0459 8.79785L12.2959 15.5479C12.0846 15.7592 11.7979 15.8779 11.4991 15.8779C11.2002 15.8779 10.9135 15.7592 10.7022 15.5479C10.4908 15.3365 10.3721 15.0499 10.3721 14.751C10.3721 14.4521 10.4908 14.1654 10.7022 13.9541L15.5313 9.12504L1.75 9.12504C1.45163 9.12504 1.16548 9.00651 0.954505 8.79554C0.743527 8.58456 0.625 8.29841 0.625 8.00004C0.625 7.70167 0.743527 7.41552 0.954505 7.20455C1.16548 6.99357 1.45163 6.87504 1.75 6.87504L15.5313 6.87504L10.7013 2.04598C10.4899 1.83463 10.3712 1.54799 10.3712 1.2491C10.3712 0.950218 10.4899 0.663574 10.7013 0.45223C10.9126 0.240885 11.1992 0.122151 11.4981 0.122151C11.797 0.122151 12.0837 0.240885 12.295 0.45223L12.2959 0.454104Z" fill="white" />
                                     </svg>
-
                                 </span>
                             </Button>
                         </div>
@@ -256,11 +249,11 @@ export default function Checkout() {
                 <h1 className="xl:text-[32px] text-[24px] text-left  font-medium mb-[20px]">Ви обрали:</h1>
                 <div className="register rounded-[20px] border border-black/10 p-[0px_24px] ">
                     {cartsFromCart.length > 0 && cartsFromCart.map((product: any, index: number) => {
-                        return <React.Fragment key={product.id} >
+                        return <React.Fragment key={product.id || index} >
                             {
                                 isMobile ?
-                                    <CheckoutCartMobile cartsFromCart={product} /> :
-                                    <CheckoutCart cartsFromCart={product} />
+                                    <CheckoutCartMobile key="sfsfssdfsf" cartsFromCart={product} /> :
+                                    <CheckoutCart key="3123" cartsFromCart={product} />
                             }
                             {cartsFromCart.length - 1 !== index && <div key={cartsFromCart.length - 1 + index} className='border border-black/10'></div>}
                         </React.Fragment>
@@ -278,82 +271,9 @@ export default function Checkout() {
 export const loader = async ({ context, request }: { context: any, request: Request }) => {
     const { storefront, cart } = context;
     const cartPromise = await cart.get();
-    const url = new URL(request.url);
-    const inputCity = url.searchParams.get('city') || '';
-    const inputDepartment = url.searchParams.get("department") || ""
-    let cities = [];
-    let department: any = []
-
-    if (inputDepartment) {
-        try {
-            department = await fetchDepartment(inputCity, inputDepartment); // fetchCity та API ключі мають бути імпортовані з novaPoshta.tsx
-        } catch (e) {
-            console.log(e)
-            department = []
-        }
-    }
-    if (inputCity) {
-        try {
-            cities = await fetchCity(inputCity); // fetchCity та API ключі мають бути імпортовані з novaPoshta.tsx
-        } catch (e) {
-            console.log(e)
-            cities = []
-        }
-
-    }
-    return json({ cartPromise,  cities, department });
+    return json({ cartPromise });
 
 };
-const fetchDepartment = async (inputCity: string, department: string) => {
-    const response: any = await fetch(API_POSHTA_URL, {
-        method: "POST",
-        body: JSON.stringify({
-            apiKey: API_POSHTA_KEY,
-            modelName: "Address",
-            calledMethod: "getWarehouses",
-            methodProperties: {
-                CityName: inputCity,
-                Page: "1",
-                Limit: "10",
-                Language: "UA",
-                WarehouseId: department,
-            },
-        }),
-    });
-    const { data, success } = await response.json();
-    if (success) {
-        return data;
-    } else {
-        return []
-    }
-};
-
-const fetchCity = async (cityName: string) => {
-    const response: any = await fetch(API_POSHTA_URL, {
-        method: "POST",
-        body: JSON.stringify({
-            apiKey: API_POSHTA_KEY,
-            modelName: "Address",
-            calledMethod: "searchSettlements",
-            methodProperties: {
-                CityName: cityName,
-                Limit: "10",
-                Page: "1",
-            },
-        }),
-    });
-    const { data, success } = await response.json();
-    let datsadf: any = []
-    if (success) {
-        datsadf = data[0].Addresses
-    } else {
-        datsadf = []
-    }
-    return datsadf
-};
-
-const API_POSHTA_URL = "https://api.novaposhta.ua/v2.0/json/"
-const API_POSHTA_KEY = "fac23a4d2d34c603535680b0e25fac94"
 
 
 export const action: ActionFunction = async ({ request, context }) => {
@@ -366,13 +286,11 @@ export const action: ActionFunction = async ({ request, context }) => {
     const actionType = formData.get('action');
     const lineItems: any = formData.get('lineItems') ? JSON.parse(formData.get('lineItems') as string) : [];
 
+
     try {
         switch (actionType) {
             case 'create url':
                 return createUrl(lineItems, storefront);
-
-            case 'generate order':
-                return generateOrder(lineItems);
 
             case 'create order':
                 const result = await createOrder(formData);
@@ -419,11 +337,6 @@ async function createUrl(lineItems: any[], storefront: any) {
 
 }
 
-async function generateOrder(lineItems: any[]) {
-    // Логіка генерації замовлення на основі lineItems
-    const orderId = "12345";
-    return json({ message: "Order generated successfully", orderId });
-}
 
 async function generateOrderInKeycrm(formData: FormData) {
 
@@ -485,10 +398,10 @@ async function generateOrderInKeycrm(formData: FormData) {
     if (paymentMethod === "card") {
         paymentLink = await generageMonoUrl(amount, products, result.id)
 
-    }else{
+    } else {
         paymentLink = '/thanks';
     }
-    return json({ message: "order success created", url: paymentLink});
+    return json({ message: "order success created", url: paymentLink });
 
 }
 const generateProductForKeycrm = (products: any) => {
