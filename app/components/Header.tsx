@@ -80,7 +80,6 @@ export function Header({ header, isLoggedIn, cart }: HeaderProps) {
 
             <NavLink  prefetch="intent" to="/liked" style={activeLinkStyle}>
 
-
               <div style={{display: "flex", alignItems: "center", justifyContent: "center"}}>
                 {isMobile?
                 <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">

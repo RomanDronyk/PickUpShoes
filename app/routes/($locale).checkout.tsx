@@ -29,6 +29,8 @@ export default function Checkout() {
     const data: any = useLoaderData();
     const response: any = useActionData();
     const [city, setCity] = useState({})
+    const [options, setOptions] = useState([]);
+
     const [userName, setUserName] = useState({ firstName: "", lastName: "" });
     const [userPhone, setUserPhone] = useState("")
     const isMobile = useMedia('(max-width: 767px)', false);
@@ -40,6 +42,10 @@ export default function Checkout() {
         Description: "",
         Ref: ""
     })
+
+    useEffect(() => {
+        console.log(department, " change department")
+    }, [department]);
 
     const cartsFromCart = data?.cartPromise?.lines?.nodes.map((element: any) => element);
     console.log(cartsFromCart, "cartsFromCart")
@@ -143,10 +149,11 @@ export default function Checkout() {
                                 <ContactType />
                             </div>
                             <div className='pb-[15px] border-b border-black/20'>
-                                <NovaPoshtaCity setCity={setCity} />
+                                <NovaPoshtaCity setDepartment={setOptions} setCity={setCity} />
                             </div>
                             <div className='pb-[15px] border-b border-black/20'>
-                                <NovaPoshtaDepartent setDepartment={setDepartment} city={city?.MainDescription} />
+                                <NovaPoshtaDepartent options={options} setDepartment={setDepartment}
+                                    setOptions={setOptions} city={city?.MainDescription} />
 
                             </div>
 

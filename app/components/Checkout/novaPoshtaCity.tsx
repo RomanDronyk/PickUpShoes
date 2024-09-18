@@ -12,7 +12,7 @@ interface Film {
   Present: string;
 }
 
-export default function NovaPoshtaCity({ setCity }: any) {
+export default function NovaPoshtaCity({ setCity,setDepartment }: any) {
   const [open, setOpen] = useState(false);
   const [options, setOptions] = useState<readonly Film[]>([]);
   const [inputCity, setInputCity] = useState("")
@@ -21,6 +21,7 @@ export default function NovaPoshtaCity({ setCity }: any) {
 
   useEffect(() => {
     setOptions(fetcher?.data?.cities || [])
+    setDepartment(fetcher?.data?.department|| [])
   }, [fetcher])
 
   const [debounceTimer, setDebounceTimer] = useState<NodeJS.Timeout | null>(null);

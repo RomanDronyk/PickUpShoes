@@ -777,6 +777,8 @@ function ProductForm({
   selectedVariant: ProductFragment['selectedVariant'];
   variants: Array<ProductVariantFragment>;
 }) {
+  const { setCartShow } = useContext(HeaderBasketContext) as HeaderContextInterface;
+
 
   const checkAllVarians = () => {
     const allUnavailable = variants.every(variant => variant.availableForSale === false);
@@ -820,6 +822,7 @@ function ProductForm({
         <AddToCartButton
           disabled={!selectedVariant || !selectedVariant.availableForSale}
           onClick={() => {
+            setCartShow(true)
             window.scrollTo({
               top: 0,
               left: 0,

@@ -1,13 +1,9 @@
 // @ts-nocheck
 import {
     Image,
-    Money,
-    type VariantOption,
-    VariantSelector,
     CartForm,
 } from '@shopify/hydrogen';
 import { FetcherWithComponents, Link, NavLink, useActionData, useFetcher } from '@remix-run/react';
-import type { CartApiQueryFragment, ProductItemFragment } from 'storefrontapi.generated';
 import { useVariantUrl } from '~/utils';
 import { useContext, useEffect, useRef, useState } from 'react';
 import { ProductLabel } from '../ProductCard';
@@ -71,8 +67,10 @@ export interface ILikedCart {
 
 export function LikedCart({ product }: ILikedCart) {
     const {
-        removeLikeCart
+        removeLikeCart,
+        setCartShow
     } = useContext(HeaderBasketContext) as HeaderContextInterface
+
     const imageRef = useRef<HTMLDivElement>(null);
 
     const firstVariant = product.variants.nodes?.find(variant => variant.availableForSale) || product.variants.nodes[0];
@@ -166,6 +164,11 @@ export function LikedCart({ product }: ILikedCart) {
                                             'bg-black text-white font-medium text-[18px] w-full rounded-[62px] py-[10px] px-[37px] cursor-pointer',
                                             false && 'bg-white text-black border border-black',
                                         )}
+                                        onClick={()=>{
+                                            setCartShow(true)
+
+                                            
+                                        }}
                                     >
                                         {fetcher.state == 'idle' ? "Додати в корзину" : "Загрузка"}
 
@@ -267,6 +270,11 @@ export function LikedCart({ product }: ILikedCart) {
                                     false && 'bg-white text-black border border-black',
                                 )}
 
+                                onClick={()=>{
+                                    setCartShow(true)
+
+                                    
+                                }}
                             >
                                 {fetcher.state == 'idle' ? "Додати в корзину" : "Загрузка"}
 

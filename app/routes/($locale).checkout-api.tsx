@@ -90,14 +90,42 @@ const fetchCity = async (cityName: string) => {
         }),
     });
     const { data, success } = await response.json();
-    let datsadf: any = []
-    if (success) {
-        datsadf = data[0].Addresses
+    let city: any = []
+    let department: any = []
+
+    const getDepartment: any = await fetch(API_POSHTA_URL, {
+        method: "POST",
+        body: JSON.stringify({
+            apiKey: API_POSHTA_KEY,
+            modelName: "Address",
+            calledMethod: "getWarehouses",
+            methodProperties: {
+                CityName: "",
+                Page: "1",
+                Limit: "50",
+                Language: "UA",
+                WarehouseId: "",
+            },
+        }),
+    });
+    const { data:dataDepartment, success: successDepartment } =await getDepartment.json();
+
+    if (success &&successDepartment) {
+    console.log( "sdlf")
+
+        dataDepartment.forEach((element:any) => {
+            department.push(element)
+        });
+        city = data[0].Addresses
     } else {
-        datsadf = []
+        city = []
+        department = []
+
     }
-    return json({ cities: datsadf })
+    return json({ cities: city, department:dataDepartment})
 };
+
+
 
 const fetchDepartment = async (inputCity: string, department: string) => {
     const response: any = await fetch(API_POSHTA_URL, {

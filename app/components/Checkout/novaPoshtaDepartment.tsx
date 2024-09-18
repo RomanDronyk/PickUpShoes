@@ -15,9 +15,8 @@ interface Film {
 }
 
 
-export default function NovaPoshtaDepartent({ setDepartment, city }: any) {
+export default function NovaPoshtaDepartent({options,setOptions, setDepartment, city }: any) {
   const [open, setOpen] = useState(false);
-  const [options, setOptions] = useState<readonly Film[]>([]);
   const [loading, setLoading] = useState(false);
   const [inputDepartment, setInputDepartment] = useState("")
   const fetcher: any = useFetcher();
@@ -44,6 +43,7 @@ export default function NovaPoshtaDepartent({ setDepartment, city }: any) {
     }
   }, [open]);
 
+  
   useEffect(() => {
     setDepartment(() => options.filter(element => element.Description === inputDepartment))
 
