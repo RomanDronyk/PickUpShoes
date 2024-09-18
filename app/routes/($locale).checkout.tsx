@@ -215,7 +215,7 @@ export default function Checkout() {
                                 <h2 className="xl:text-[32px] text-nowrap sm:text-[24px] text-left  mb-[15px] text-[22px]  sm:mb-[20px]">
                                     До сплати:
                                 </h2>
-                                <input style={{ width: 127 }} name="amount" disabled value={`${amount} грн.`} className='xl:text-[32px] text-nowrap sm:text-[24px] text-left  mb-[15px] text-[22px]  sm:mb-[20px]' />
+                                <input style={{ maxWidth: 200 }} name="amount" disabled value={`${amount} грн.`} className='xl:text-[32px] text-nowrap sm:text-[24px] text-right  mb-[15px] text-[22px]  sm:mb-[20px]' />
                             </div>
                             <div className='hidden flex justify-between gap-[12px] pb-[24px]'>
                                 <Input

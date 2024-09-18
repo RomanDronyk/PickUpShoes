@@ -68,7 +68,8 @@ export interface ILikedCart {
 export function LikedCart({ product }: ILikedCart) {
     const {
         removeLikeCart,
-        setCartShow
+        setCartShow,
+        setCartShowMobile
     } = useContext(HeaderBasketContext) as HeaderContextInterface
 
     const imageRef = useRef<HTMLDivElement>(null);
@@ -165,7 +166,7 @@ export function LikedCart({ product }: ILikedCart) {
                                             false && 'bg-white text-black border border-black',
                                         )}
                                         onClick={()=>{
-                                            setCartShow(true)
+                                            isMobile? setCartShowMobile(true) : setCartShow(true)
 
                                             
                                         }}
@@ -271,7 +272,7 @@ export function LikedCart({ product }: ILikedCart) {
                                 )}
 
                                 onClick={()=>{
-                                    setCartShow(true)
+                                    isMobile? setCartShowMobile(true) : setCartShow(true)
 
                                     
                                 }}

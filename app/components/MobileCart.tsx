@@ -12,9 +12,10 @@ import {Link} from '@remix-run/react';
 import {Button} from './ui/button';
 import {ArrowRight, Minus, Plus, X} from 'lucide-react';
 import {CartForm, Image, Money} from '@shopify/hydrogen';
-import {useEffect, useState} from 'react';
+import {useContext, useEffect, useState} from 'react';
 import {useVariantUrl} from '~/utils';
 import EmptyCart from './ui/emptyCart';
+import { HeaderBasketContext, HeaderContextInterface } from '~/context/HeaderCarts';
 
 type DropDownCartLine = CartApiQueryFragment['lines']['nodes'][0];
 
@@ -27,7 +28,11 @@ export function MobileCart({
   cart: CartApiQueryFragment | null |any;
 
 }) {
-  const [open, setOpen] = useState(false);
+  const {
+    cartShowMobile:open,
+    setCartShowMobile:setOpen
+  } = useContext(HeaderBasketContext) as HeaderContextInterface
+  // const [open, setOpen] = useState(false);
   
   return (
     <Drawer open={open} onOpenChange={setOpen} direction="right">

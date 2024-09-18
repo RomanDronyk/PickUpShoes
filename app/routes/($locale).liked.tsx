@@ -41,6 +41,7 @@ export default function Liked() {
   const { recommendedProducts, bestSellers } =
     useLoaderData<typeof loader>();
 
+    
   const {
     likedCart,
   } = useContext(HeaderBasketContext) as HeaderContextInterface

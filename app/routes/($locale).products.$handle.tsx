@@ -793,7 +793,8 @@ function ProductForm({
   selectedVariant: ProductFragment['selectedVariant'];
   variants: Array<ProductVariantFragment>;
 }) {
-  const { setCartShow } = useContext(HeaderBasketContext) as HeaderContextInterface;
+  const { setCartShow,setCartShowMobile} = useContext(HeaderBasketContext) as HeaderContextInterface;
+  const isMobile = useMedia('(max-width: 767px)', false);
 
 
   const checkAllVarians = () => {
@@ -838,7 +839,7 @@ function ProductForm({
         <AddToCartButton
           disabled={!selectedVariant || !selectedVariant.availableForSale}
           onClick={() => {
-            setCartShow(true)
+            isMobile? setCartShowMobile(true): setCartShow(true)
             window.scrollTo({
               top: 0,
               left: 0,

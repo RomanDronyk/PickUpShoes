@@ -15,12 +15,15 @@ export interface HeaderContextInterface {
     count: number;
     removeLikeCart:any
     addLikedCart:any,
+    cartShowMobile:any,
+setCartShowMobile:any,
 
     setCartShow: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const HeaderContext = ({ children }: HeaderContextProps) => {
     const [cartShow, setCartShow] = useState(false);
+    const [cartShowMobile, setCartShowMobile] = useState(false);
 
     const [likedCart, setLikedCart] = useState<any>(() => {
         const cartFromCookies = Cookies.get("likedCart");
@@ -59,7 +62,9 @@ const HeaderContext = ({ children }: HeaderContextProps) => {
         count,
         removeLikeCart,
         addLikedCart,
-        setCartShow
+        setCartShow,
+        cartShowMobile,
+setCartShowMobile,
     } as HeaderContextInterface;
 
     return (
