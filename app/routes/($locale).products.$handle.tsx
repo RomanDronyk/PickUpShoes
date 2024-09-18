@@ -120,6 +120,7 @@ export async function loader({ params, request, context }: LoaderFunctionArgs) {
 
   return defer(
     {
+      somenew: variants?.product?.variants?.nodes,
       product,
       variants,
       viewedProducts: viewed,
@@ -145,7 +146,19 @@ function redirectToFirstVariant({
   request: Request;
 }) {
   const url = new URL(request.url);
-  const firstVariant = variants?.product?.variants?.nodes.find(variant => variant?.availableForSale) || product?.variants?.nodes[0];
+
+  const searchParams = new URLSearchParams(url.search);
+  const color = searchParams.get('Color');
+
+  console.log(variants?.product?.variants?.nodes, "redirects")
+  // const firstVariant = variants?.product?.variants?.nodes.find(variant => variant?.availableForSale) || product?.variants?.nodes[0];
+  const firstVariant = variants?.product?.variants?.nodes.find(
+    (variant) =>
+      variant?.availableForSale &&
+      variant?.selectedOptions.some(
+        (option) => option?.name === 'Color' && option?.value === color
+      )
+  ) || product?.variants?.nodes[0];
 
   return redirect(
     getVariantUrl({
@@ -161,10 +174,13 @@ function redirectToFirstVariant({
 }
 
 export default function Product() {
-  const { product, variants, viewedProducts, recommendations } =
+  const { product, variants, viewedProducts, recommendations, somenew } =
     useLoaderData<typeof loader>();
   const { selectedVariant, descriptionHtml } = product;
 
+  useEffect(() => {
+    console.log(somenew)
+  }, [somenew])
 
 
 
@@ -256,8 +272,8 @@ function ProductTabs({ description }: { description: string }) {
           className="flex items-center mt-[25px]"
         >
           <div>
-          <h3 className='sm:text-[24px] text-[18px] font-semibold  mb-[20px]'
->
+            <h3 className='sm:text-[24px] text-[18px] font-semibold  mb-[20px]'
+            >
               Опис товару
             </h3>
             <div
@@ -267,8 +283,8 @@ function ProductTabs({ description }: { description: string }) {
           </div>
         </TabsContent>
         <TabsContent value="product-payment">
-        <h2 className='sm:text-[24px] text-[18px] font-semibold  mb-[20px]'
-           >Оплата і доставка</h2>
+          <h2 className='sm:text-[24px] text-[18px] font-semibold  mb-[20px]'
+          >Оплата і доставка</h2>
           <div className="p-3 sm:p-6 border border-black/10 rounded-[20px] w-full">
             <div className="grid md:grid-cols-[1fr,_minmax(40%,_585px)] gap-x-5">
               <div className="flex flex-col gap-5">
@@ -406,7 +422,7 @@ function ProductTabs({ description }: { description: string }) {
         </TabsContent>
         <TabsContent value="product-delivery">
           <h2 className='sm:text-[24px] text-[18px] font-semibold  mb-[20px]'
-           >Обмін та повернення</h2>
+          >Обмін та повернення</h2>
           <div className="p-3 sm:p-6 border border-black/10 rounded-[20px] w-full">
 
             <div className="grid md:grid-cols-[4fr_5fr] grid-cols-1 gap-y-5 md:gap-y-0 md:gap-x-5">
@@ -685,7 +701,7 @@ function ProductMain({
   selectedVariant: any;
   variants: Promise<ProductVariantsQuery>;
 }) {
-  const { title, descriptionHtml, vendor, collections } = product || {title:"", descriptionHtml:"", vendor:"", collections:[]};
+  const { title, descriptionHtml, vendor, collections } = product || { title: "", descriptionHtml: "", vendor: "", collections: [] };
   return (
     <div className="product-main">
       <div className="flex flex-col border-b pb-6 border-b-black/10">
@@ -800,13 +816,13 @@ function ProductForm({
     <div className=" product-form pt-6">
       <div className="grid gap-[20px] justify-between flex-wrap-reverse lg:grid-cols-[1fr_0.3fr]">
         <div>
-        <VariantSelector
-          handle={product.handle}
-          options={product.options}
-          variants={variants}
-        >
-          {({ option }) => <ProductOptions objGalery={objGalery} product={product} key={option.name} option={option} />}
-        </VariantSelector>
+          <VariantSelector
+            handle={product.handle}
+            options={product.options}
+            variants={variants}
+          >
+            {({ option }) => <ProductOptions objGalery={objGalery} product={product} key={option.name} option={option} />}
+          </VariantSelector>
         </div>
         <div className="w-[300x] text-2xl">
           <SizeGrid vendor={product.vendor} />
