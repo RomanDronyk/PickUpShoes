@@ -25,6 +25,8 @@ export function ProductCard({
   product: ProductItemFragment;
   label?: Label;
 }) {
+  const firstVariant = product.variants.nodes.find(variant => variant.availableForSale) || product.variants.nodes[0];
+
   const [ignored, forceUpdate] = useReducer((x) => x + 1, 0);
   const optionsRef = useRef<HTMLDivElement>(null);
   const imageRef = useRef<HTMLDivElement>(null);
@@ -33,10 +35,16 @@ export function ProductCard({
   const variantUrl = useVariantUrl(product.handle, variant.selectedOptions);
   const isMobile = useMedia('(max-width: 767px)', false);
   const navigate = useNavigate()
-  useEffect(() => {
-    forceUpdate();
-  }, []);
-
+  const [dataForLike, setDataForLike] = useState({
+    variants: {
+      nodes: [...product.variants.nodes]
+    },
+    handle: product.handle,
+    id: product.id,
+    selectedVariant: { selectedOptions: [...firstVariant.selectedOptions], id: firstVariant.id, image: { ...product.featuredImage } },
+    title: product.title,
+    isLiked: false
+  });
 
   const {
     likedCart,
@@ -44,8 +52,6 @@ export function ProductCard({
     addLikedCart
   } = useContext(HeaderBasketContext) as HeaderContextInterface;
 
-
-  const firstVariant = product.variants.nodes.find(variant => variant.availableForSale) || product.variants.nodes[0];
 
 
 
@@ -62,18 +68,22 @@ export function ProductCard({
     return option.name === 'Size' || option.name === 'Розмір';
   });
 
-  const [dataForLike, setDataForLike] = useState({
-    variants: {
-      nodes:[...product.variants.nodes]
-    },
-    handle: product.handle,
-    id: product.id,
-    selectedVariant: {selectedOptions: [...firstVariant.selectedOptions],id: firstVariant.id, image:{...product.featuredImage}},
-    title: product.title,
-    isLiked: false
-  });
-  
 
+
+  const toggleLike = () => {
+    if (dataForLike.isLiked) {
+      setDataForLike({ ...dataForLike, isLiked: false })
+      removeLikeCart(dataForLike)
+    } else {
+      addLikedCart(dataForLike)
+      setDataForLike({ ...dataForLike, isLiked: true })
+      navigate("/liked")
+    }
+  }
+
+  useEffect(() => {
+    forceUpdate();
+  }, []);
 
   useEffect(() => {
     const productIndex = likedCart.findIndex((item: any) => item.id === dataForLike.id);
@@ -86,16 +96,7 @@ export function ProductCard({
       }
     })
   }, [likedCart])
-  const toggleLike = () => {
-    if (dataForLike.isLiked) {
-      setDataForLike({ ...dataForLike, isLiked: false })
-      removeLikeCart(dataForLike)
-    } else {
-      addLikedCart(dataForLike)
-      setDataForLike({ ...dataForLike, isLiked: true })
-      navigate("/liked")
-    }
-  }
+
   return (
     <div className="group/card">
       <div
@@ -139,10 +140,11 @@ export function ProductCard({
 
           </Link>
         )}
-        <div
+        {!isMobile &&<div
           ref={optionsRef}
           className="w-full top-full bg-white  transition-all ease-in-out  duration-100 group-hover/card:bottom-0 group-hover/card:top-[unset] "
         >
+
           <VariantSelector
             handle={product.handle}
             options={sizeOptions}
@@ -151,7 +153,8 @@ export function ProductCard({
             {({ option }) => <ProductOptions key={option.name} option={option} options={product.options} />}
 
           </VariantSelector>
-        </div>
+        </div> }
+        
       </div>
       <div className="flex flex-col mt-3">
         <Link to={variantUrl}>
