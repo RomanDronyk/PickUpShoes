@@ -101,9 +101,9 @@ export async function loader({ params, request, context }: LoaderFunctionArgs) {
 
   const isRequestedVariantAvailable = product?.selectedVariant?.availableForSale;
 
-  if (!isRequestedVariantAvailable) {
-    throw redirectToFirstVariant({ product, variants, request });
-  }
+  // if (!isRequestedVariantAvailable) {
+  //   throw redirectToFirstVariant({ product, variants, request });
+  // }
 
   const cookieHeader = request.headers.get('Cookie');
   const cookie = (await viewedProductsCookie.parse(cookieHeader)) || [];
@@ -575,7 +575,7 @@ function ProductGalery({ product, objGalery, media }: { product: any, objGalery:
 
   useEffect(() => {
     setProductWithLike({ ...product, isLiked: false })
-  }, [product.selectedVariant.id])
+  }, [product?.selectedVariant?.id])
   useEffect(() => {
     const productIndex = likedCart.findIndex((item: any) => item?.selectedVariant?.id === productWithLike?.selectedVariant?.id);
     if (productIndex === -1) {
@@ -887,6 +887,7 @@ function ProductOptions({ objGalery, product, option }: { objGalery: any, produc
         <h5 className="text-[16px] text-black/60 mb-4">{option.name}</h5>
         <div className="product-options-grid grid grid-cols-5 gap-y-[10px] gap-x-[10px] items-start">
           {option.values.map(({ value, isAvailable, isActive, to }, index) => {
+            console.log(product.media.nodes, "sdfsdfs")
             return <Link
               key={option.name + value}
               prefetch="intent"
@@ -908,10 +909,10 @@ function ProductOptions({ objGalery, product, option }: { objGalery: any, produc
                     crop: 'center',
                   },
                 }}
-                data={product.media.nodes[index]}
+                data={product.media.nodes[0]}
                 className="w-full rounded-[20px]"
               />
-              {/* {value} */}
+             
             </Link>
           })}
         </div>
