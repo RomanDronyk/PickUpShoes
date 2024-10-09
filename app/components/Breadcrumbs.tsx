@@ -19,7 +19,8 @@ export const breadcrumbsSchema = z.enum([
   'profile',
   "liked",
   "likes",
-  "likedsd"
+  "likedsd",
+  "checkout"
 ]);
 export type TBreadcrumbsType = z.infer<typeof breadcrumbsSchema>;
 
@@ -91,7 +92,6 @@ export function Breadcrumbs() {
         });
         break;
       case 'liked':
-        
         pages.push({
           href: `${deepsRoute?.pathname}`,
           name: 'Вподобані',
@@ -107,8 +107,17 @@ export function Breadcrumbs() {
           href: `/account/liked`,
           name: 'Вподобані',
         });
-
         break;
+      case "checkout":
+        pages.push({
+          href: `/checkout`,
+          name: 'Кошик',
+        });
+        pages.push({
+          href: `/checkout`,
+          name: 'Оформити замовлення',
+        });
+        break
       default:
         break;
     }

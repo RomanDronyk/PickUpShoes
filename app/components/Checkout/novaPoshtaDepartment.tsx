@@ -15,7 +15,7 @@ interface Film {
 }
 
 
-export default function NovaPoshtaDepartent({options,setOptions, setDepartment, city }: any) {
+export default function NovaPoshtaDepartent({ options, setOptions, setDepartment, city }: any) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [inputDepartment, setInputDepartment] = useState("")
@@ -43,7 +43,7 @@ export default function NovaPoshtaDepartent({options,setOptions, setDepartment, 
     }
   }, [open]);
 
-  
+
   useEffect(() => {
     setDepartment(() => options.filter(element => element.Description === inputDepartment))
 
@@ -55,7 +55,7 @@ export default function NovaPoshtaDepartent({options,setOptions, setDepartment, 
       if (inputDepartment.length > 0) {
         setLoading(true)
         fetcher.submit(
-          { action: "get department", city: city,department: inputDepartment  },
+          { action: "get department", city: city, department: inputDepartment },
           { method: "post", action: "/checkout-api" }
         );
 
@@ -79,7 +79,6 @@ export default function NovaPoshtaDepartent({options,setOptions, setDepartment, 
       <Autocomplete
         id="asynchronous-demo"
         sx={style}
-
         open={open}
         onOpen={() => {
           setOpen(true);
@@ -92,8 +91,7 @@ export default function NovaPoshtaDepartent({options,setOptions, setDepartment, 
         options={options}
         onChange={(event, department) => setDepartment(department)}
         loading={loading}
-        
-      noOptionsText="Відділення, не знайдено"
+        noOptionsText="Відділення, не знайдено"
         renderInput={(params) => {
           return (
             <TextField
@@ -101,7 +99,7 @@ export default function NovaPoshtaDepartent({options,setOptions, setDepartment, 
               placeholder='Відділення'
               value={inputDepartment}
               required
-              disabled = {city? false: true}
+              disabled={city ? false : true}
               onChange={(element) => setInputDepartment(element.target.value)}
               InputProps={{
                 ...params.InputProps,

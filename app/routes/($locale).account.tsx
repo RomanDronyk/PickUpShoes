@@ -5,6 +5,7 @@ import { Scroll } from 'lucide-react';
 import type { CustomerFragment } from 'storefrontapi.generated';
 import { Button } from '~/components/ui/button';
 import { cn } from '~/lib/utils';
+import { CUSTOMER_QUERY } from '~/graphql/queries';
 
 export function shouldRevalidate() {
   return true;
@@ -207,49 +208,3 @@ function Logout() {
   );
 }
 
-export const CUSTOMER_FRAGMENT = `#graphql
-  fragment Customer on Customer {
-    acceptsMarketing
-    addresses(first: 6) {
-      nodes {
-        ...Address
-      }
-    }
-    defaultAddress {
-      ...Address
-    }
-    email
-    firstName
-    lastName
-    numberOfOrders
-    phone
-  }
-  fragment Address on MailingAddress {
-    id
-    formatted
-    firstName
-    lastName
-    company
-    address1
-    address2
-    country
-    province
-    city
-    zip
-    phone
-  }
-` as const;
-
-// NOTE: https://shopify.dev/docs/api/storefront/latest/queries/customer
-const CUSTOMER_QUERY = `#graphql
-  query Customer(
-    $customerAccessToken: String!
-    $country: CountryCode
-    $language: LanguageCode
-  ) @inContext(country: $country, language: $language) {
-    customer(customerAccessToken: $customerAccessToken) {
-      ...Customer
-    }
-  }
-  ${CUSTOMER_FRAGMENT}
-` as const;

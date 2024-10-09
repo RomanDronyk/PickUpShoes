@@ -2,12 +2,10 @@ import {
   Await,
   Link,
   useLoaderData,
-  useLocation,
   useNavigate,
   type FetcherWithComponents,
   type MetaFunction,
 } from '@remix-run/react';
-import type { RecommendedProductFragment } from 'storefrontapi.generated';
 
 import {
   CartForm,
@@ -17,13 +15,17 @@ import {
   getSelectedProductOptions,
   type VariantOption,
 } from '@shopify/hydrogen';
+
+
 import type {
   CartLineInput,
   SelectedOption,
 } from '@shopify/hydrogen/storefront-api-types';
+
 import { defer, redirect, type LoaderFunctionArgs } from '@shopify/remix-oxygen';
 import { Suspense, useCallback, useContext, useEffect, useState } from 'react';
 import { useMedia } from 'react-use';
+
 import type {
   ProductFragment,
   ProductVariantFragment,
@@ -45,6 +47,7 @@ import { cn } from '~/lib/utils';
 import { getVariantUrl } from '~/utils';
 import monoLogo from '../assets/images/mono.svg';
 import { HeaderBasketContext, HeaderContextInterface } from '~/context/HeaderCarts';
+import { PRODUCT_QUERY, RECOMENDED_PRODUCT_QUERY, VARIANTS_QUERY, VIEWED_PRODUCT_QUERY } from '~/graphql/queries';
 
 export const meta: MetaFunction<typeof loader> = ({ data }) => {
   return [{ title: `Hydrogen | ${data?.product?.title ?? ''}` }];
@@ -83,7 +86,7 @@ export async function loader({ params, request, context }: LoaderFunctionArgs) {
   });
 
   const { productRecommendations } = await storefront.query(
-    RECOMMENDED_PRODUCTS,
+    RECOMENDED_PRODUCT_QUERY,
     {
       variables: {
         id: product?.id || "0"
@@ -112,7 +115,7 @@ export async function loader({ params, request, context }: LoaderFunctionArgs) {
     cookie.push(product.id);
   }
 
-  const viewed = await storefront.query(VIEWED_PRODUCT, {
+  const viewed = await storefront.query(VIEWED_PRODUCT_QUERY, {
     variables: {
       ids: cookie,
     },
@@ -178,12 +181,6 @@ export default function Product() {
     useLoaderData<typeof loader>();
   const { selectedVariant, descriptionHtml } = product;
 
-  useEffect(() => {
-    console.log(somenew)
-  }, [somenew])
-
-
-
   const [selectedIndex, setSelectedIndex] = useState<number | undefined>(0);
   const [api, setApi] = useState<CarouselApi>();
   const [thumbApi, setThumbApi] = useState<CarouselApi>();
@@ -223,7 +220,6 @@ export default function Product() {
     <div className="pt-[16px] product lg:px-24 md:px-10 px-[10px] w-full ">
       <div className="sm:grid sm:grid-cols-2 flex flex-col gap-y-5 gap-x-10">
         <ProductGalery product={product} objGalery={objGalery} media={product?.media} />
-        {/* <ProductImage image={selectedVariant?.image} /> */}
         <ProductMain
           objGalery={objGalery}
           selectedVariant={selectedVariant}
@@ -234,7 +230,7 @@ export default function Product() {
       <ProductTabs description={descriptionHtml} />
       <div className="flex flex-col my-4 pt-[50px] border-t border-r-black/10 mt-[50px]">
         <ViewedProducts products={viewedProducts} />
-        <RecommendationProducts recommended={recommendations as unknown as RecommendedProductFragment[]} />
+        <RecommendationProducts recommended={recommendations} />
       </div>
     </div>
   );
@@ -582,7 +578,7 @@ function ProductGalery({ product, objGalery, media }: { product: any, objGalery:
       setProductWithLike({ ...product, sizeVariants: product?.variants?.nodes, isLiked: false });
     }
     likedCart.map((element: any, index: number) => {
-      if (element?.selectedVariant.id == productWithLike?.selectedVariant.id) {
+      if (element?.selectedVariant?.id == productWithLike?.selectedVariant?.id) {
         setProductWithLike({ ...element, isLiked: true })
       }
     })
@@ -632,6 +628,7 @@ function ProductGalery({ product, objGalery, media }: { product: any, objGalery:
                 data={item}
                 className="w-full rounded-[20px]"
               />
+
             </CarouselItem>
           ))}
         </CarouselContent>
@@ -793,7 +790,7 @@ function ProductForm({
   selectedVariant: ProductFragment['selectedVariant'];
   variants: Array<ProductVariantFragment>;
 }) {
-  const { setCartShow,setCartShowMobile} = useContext(HeaderBasketContext) as HeaderContextInterface;
+  const { setCartShow, setCartShowMobile } = useContext(HeaderBasketContext) as HeaderContextInterface;
   const isMobile = useMedia('(max-width: 767px)', false);
 
 
@@ -839,7 +836,7 @@ function ProductForm({
         <AddToCartButton
           disabled={!selectedVariant || !selectedVariant.availableForSale}
           onClick={() => {
-            isMobile? setCartShowMobile(true): setCartShow(true)
+            isMobile ? setCartShowMobile(true) : setCartShow(true)
             window.scrollTo({
               top: 0,
               left: 0,
@@ -909,10 +906,10 @@ function ProductOptions({ objGalery, product, option }: { objGalery: any, produc
                     crop: 'center',
                   },
                 }}
-                data={product.media.nodes[0]}
+                data={product.media.nodes[index] ? product.media.nodes[index] : product.media.nodes[0]}
                 className="w-full rounded-[20px]"
               />
-             
+
             </Link>
           })}
         </div>
@@ -992,240 +989,3 @@ export function AddToCartButton({
     </div>
   );
 }
-
-const PRODUCT_VARIANT_FRAGMENT = `#graphql
-  fragment ProductVariant on ProductVariant {
-    availableForSale
-    quantityAvailable
-    currentlyNotInStock
-    compareAtPrice {
-      amount
-      currencyCode
-    }
-    id
-    image {
-      __typename
-      id
-      url
-      altText
-      width
-      height
-    }
-    
-    price {
-      amount
-      currencyCode
-    }
-    product {
-      title
-      handle
-    }
-    selectedOptions {
-      name
-      value
-    }
-    sku
-    title
-    unitPrice {
-      amount
-      currencyCode
-    }
-  }
-` as const;
-
-const PRODUCT_FRAGMENT = `#graphql
-  fragment Product on Product {
-    id
-    title
-    vendor
-    handle
-    descriptionHtml
-    description
-    options {
-      name
-      values
-    }
-    selectedVariant: variantBySelectedOptions(selectedOptions: $selectedOptions) {
-      ...ProductVariant
-    }
-    variants(first: 10) {
-      nodes {
-        ...ProductVariant
-      }
-    }
-    media(first: 10) {
-      nodes {
-        ... on MediaImage {
-          __typename
-          id
-          previewImage {
-            url
-            id
-            height
-            width
-          }
-          image {
-            url
-          }
-        }
-      }
-    }
-    seo {
-      description
-      title
-    }
-    collections(first:1){
-      nodes {
-        title
-        handle
-      }
-    }
-    tags
-  }
-  ${PRODUCT_VARIANT_FRAGMENT}
-` as const;
-
-const PRODUCT_QUERY = `#graphql
-  query Product(
-    $country: CountryCode
-    $handle: String!
-    $language: LanguageCode
-    $selectedOptions: [SelectedOptionInput!]!
-  ) @inContext(country: $country, language: $language) {
-    product(handle: $handle) {
-      ...Product
-    }
-  }
-  ${PRODUCT_FRAGMENT}
-` as const;
-
-const PRODUCT_VARIANTS_FRAGMENT = `#graphql
-  fragment ProductVariants on Product {
-    variants(first: 250) {
-      nodes {
-        ...ProductVariant
-      }
-    }
-  }
-  ${PRODUCT_VARIANT_FRAGMENT}
-` as const;
-
-const VARIANTS_QUERY = `#graphql
-  ${PRODUCT_VARIANTS_FRAGMENT}
-  query ProductVariants(
-    $country: CountryCode
-    $language: LanguageCode
-    $handle: String!
-  ) @inContext(country: $country, language: $language) {
-    product(handle: $handle) {
-      ...ProductVariants
-    }
-  }
-` as const;
-
-const PRODUCT_ITEM_FRAGMENT = `#graphql
-  fragment MoneyProductItem on MoneyV2 {
-    amount
-    currencyCode
-  }
-  fragment ProductItem on Product {
-    id
-    handle
-    title
-    featuredImage {
-      id
-      altText
-      url
-      width
-      height
-    }
-    options {
-      name
-      values
-    }
-    priceRange {
-      minVariantPrice {
-        ...MoneyProductItem
-      }
-    }
-    variants(first: 10) {
-      nodes {
-        ...ProductVariant
-      }
-    }
-  }
-  ${PRODUCT_VARIANT_FRAGMENT}
-` as const;
-
-const VIEWED_PRODUCT = `#graphql
-
-  query ViewedProducts(
-    $ids: [ID!]!
-  ) {
- nodes(ids: $ids) {
-    ... on Product {
-      id
-      title
-      handle
-      featuredImage {
-        id
-        altText
-        url
-        width
-        height
-      }
-      options {
-        name
-        values
-      }
-      priceRange {
-        minVariantPrice {
-          amount
-          currencyCode
-        }
-      }
-      variants(first: 10) {
-        nodes {
-          ...ProductVariant
-        }
-      }
-    }
-  }
-}
-${PRODUCT_VARIANT_FRAGMENT}
-` as const;
-
-const RECOMMENDED_PRODUCTS = `#graphql
-  query RecomendedProducts($id: ID!){
-    productRecommendations(productId: $id){
-     ... on Product {
-      id
-      title
-      handle
-      featuredImage {
-        id
-        altText
-        url
-        width
-        height
-      }
-      options {
-        name
-        values
-      }
-      priceRange {
-        minVariantPrice {
-          amount
-          currencyCode
-        }
-      }
-      variants(first: 10) {
-        nodes {
-          ...ProductVariant
-        }
-      }
-    }
-  }
-}
-${PRODUCT_VARIANT_FRAGMENT}
-` as const;

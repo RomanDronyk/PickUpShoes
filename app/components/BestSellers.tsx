@@ -16,7 +16,7 @@ export default function BestSellers({items}: {items: BestSellersQuery}) {
     },
   } = items;
   return (
-    <div className="flex flex-col w-full gap-[30px] max-w-[1240px] pb-[0px] px-5 md:px-0">
+    <div className="flex flex-col w-full gap-[30px] max-w-[1240px] pb-[0px] px-5 md:px-0 ">
       <div className="flex md:justify-between justify-center">
         <div className="font-semibold text-black text-[36px]">
           <h3>Хіти продажів</h3>

@@ -2,6 +2,7 @@ import {type ActionFunctionArgs, json, redirect} from '@shopify/remix-oxygen';
 import {Form, Link, useActionData, type MetaFunction} from '@remix-run/react';
 import {Input} from '~/components/ui/input';
 import { Button } from '~/components/ui/button';
+import { CUSTOMER_RESET_MUTATION } from '~/graphql/mutations';
 
 type ActionResponse = {
   error: string | null;
@@ -124,25 +125,3 @@ export default function Reset() {
     </div>
   );
 }
-
-// NOTE: https://shopify.dev/docs/api/storefront/latest/mutations/customerreset
-const CUSTOMER_RESET_MUTATION = `#graphql
-  mutation customerReset(
-    $id: ID!,
-    $input: CustomerResetInput!
-    $country: CountryCode
-    $language: LanguageCode
-  ) @inContext(country: $country, language: $language) {
-    customerReset(id: $id, input: $input) {
-      customerAccessToken {
-        accessToken
-        expiresAt
-      }
-      customerUserErrors {
-        code
-        field
-        message
-      }
-    }
-  }
-` as const;

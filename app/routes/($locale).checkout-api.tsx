@@ -1,7 +1,7 @@
 import { json, MetaFunction } from '@remix-run/react';
 import { ActionFunction } from '@remix-run/node';
+import { CREATE_CHEKOUT_URL } from '~/graphql/mutations';
 
-import CREATE_CHEKOUT_URL from '~/graphqlRequests/CREATE_CHEKOUT_URL';
 // GraphQL запит для отримання даних чекауту
 
 
@@ -9,7 +9,6 @@ import CREATE_CHEKOUT_URL from '~/graphqlRequests/CREATE_CHEKOUT_URL';
 // // Loader function to get checkout data
 export const loader = async ({ context, request }: { context: any, request: Request }) => {
     const { storefront } = context;
-
     return json({ "data": "data" });
 };
 
@@ -60,7 +59,6 @@ async function createUrl(lineItems: any[], storefront: any) {
         return json({ response: data });
 
     } catch (e) {
-        console.log(e)
         return json({ response: "data" });
 
     }

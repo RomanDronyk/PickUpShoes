@@ -24,6 +24,7 @@ import { useMedia } from 'react-use';
 import { Button } from '~/components/ui/button';
 import { MoveDown, MoveUp } from 'lucide-react';
 import Loader from '~/components/Loader';
+import { COLLECTION_FILTER_QUERY, COLLECTION_QUERY } from '~/graphql/queries';
 
 export type SortParam =
   | 'price-low-high'
@@ -71,7 +72,7 @@ export async function loader({ request, params, context }: LoaderFunctionArgs) {
     return redirect('/collections/catalog');
   }
   const { collection: filtersCollection } =
-    await storefront.query<CollectionFiltersQuery>(FILTER_QUERY, {
+    await storefront.query<CollectionFiltersQuery>(COLLECTION_FILTER_QUERY, {
       variables: {
         handle,
         first: 1,
@@ -98,7 +99,7 @@ export async function loader({ request, params, context }: LoaderFunctionArgs) {
   const allFilterValues = collection.products.filters.flatMap(
     (filter) => filter.values,
   );
-  const appliedFilters = filters
+  const appliedFilters:any = filters
     .map((filter) => {
       const foundValue = allFilterValues.find((value) => {
         const valueInput = JSON.parse(value.input as string) as ProductFilter;
@@ -213,130 +214,7 @@ function ProductsGrid({ products }: { products: ProductItemFragment[] }) {
   );
 }
 
-const PRODUCT_ITEM_FRAGMENT = `#graphql
-  fragment MoneyProductItem on MoneyV2 {
-    amount
-    currencyCode
-  }
-  fragment ProductItem on Product {
-    id
-    handle
-    title
-    featuredImage {
-      id
-      altText
-      url
-      width
-      height
-    }
-    options {
-      name
-      values
-    }
-    priceRange {
-      minVariantPrice {
-        ...MoneyProductItem
-      }
-    }
-    variants(first: 10) {
-      nodes {
-        selectedOptions {
-          name
-          value
-        }
-        price {
-          amount
-          currencyCode
-        }
-        compareAtPrice {
-          amount
-          currencyCode
-        }
 
-      }
-    }
-  }
-` as const;
-
-const FILTER_QUERY = `#graphql
-  query CollectionFilters(
-    $handle: String! 
-    $country: CountryCode 
-    $language: LanguageCode
-    $first: Int
-  ) @inContext(country: $country, language: $language){
-    collection(handle: $handle){
-      products(first: $first){
-        filters {
-          id
-          label
-          type
-          values {
-            id
-            label
-            input
-            count
-          }
-        }
-      }
-    }
-}
-` as const;
-
-// NOTE: https://shopify.dev/docs/api/storefront/2022-04/objects/collection
-const COLLECTION_QUERY = `#graphql
-  ${PRODUCT_ITEM_FRAGMENT}
-  query Collection(
-    $handle: String!
-    $country: CountryCode
-    $language: LanguageCode
-    $filters: [ProductFilter!]
-    $sortKey: ProductCollectionSortKeys!
-    $reverse: Boolean
-    $first: Int
-    $last: Int
-    $startCursor: String
-    $endCursor: String
-  ) @inContext(country: $country, language: $language) {
-    collection(handle: $handle) {
-      id
-      handle
-      title
-      description
-      products(
-        first: $first,
-        last: $last,
-        before: $startCursor,
-        after: $endCursor,
-        filters: $filters,
-        sortKey: $sortKey,
-        reverse: $reverse
-      ) {
-        filters {
-          id
-          label
-          type
-          values {
-            id
-            label
-            input
-            count
-          }
-        }
-        nodes {
-          ...ProductItem
-        }
-        pageInfo {
-          hasPreviousPage
-          hasNextPage
-          endCursor
-          startCursor
-        }
-      }
-    }
-  }
-
-` as const;
 function getSortValuesFromParam(sortParam: SortParam | null): {
   sortKey: ProductCollectionSortKeys;
   reverse: boolean;

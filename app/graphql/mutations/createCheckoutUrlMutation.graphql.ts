@@ -1,4 +1,4 @@
-const CREATE_CHEKOUT_URL = `#graphql
+export const CREATE_CHEKOUT_URL = `#graphql
 mutation createCheckout($input: CheckoutCreateInput!) {
   checkoutCreate(input: $input) {
     checkout {
@@ -39,4 +39,3 @@ mutation createCheckout($input: CheckoutCreateInput!) {
   }
 }
 `
-export default CREATE_CHEKOUT_URL

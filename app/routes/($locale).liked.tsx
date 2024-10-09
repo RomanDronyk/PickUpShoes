@@ -1,36 +1,14 @@
-import { Link, useLoaderData, type MetaFunction } from '@remix-run/react';
-import { Pagination, getPaginationVariables } from '@shopify/hydrogen';
-import type {
-  ProductFilter,
-  Collection,
-  ProductCollectionSortKeys,
-  Filter,
-} from '@shopify/hydrogen/storefront-api-types';
-import { defer, json, redirect, type LoaderFunctionArgs } from '@shopify/remix-oxygen';
-import type {
-  CollectionQuery,
-  ProductItemFragment,
-  CollectionFiltersQuery,
-} from 'storefrontapi.generated';
-import { ProductCard } from '~/components/ProductCard';
-import {
-  ProductsFilter,
-  SortProducts,
-  AppliedFilters,
-  MobileFilters,
-} from '~/components/ProductsFilter';
-import { parseAsCurrency } from '~/utils';
+import { Link, useLoaderData } from '@remix-run/react';
+import { defer, type LoaderFunctionArgs } from '@shopify/remix-oxygen';
 import { useMedia } from 'react-use';
-import { Button } from '~/components/ui/button';
-import { MoveDown, MoveUp } from 'lucide-react';
-import Loader from '~/components/Loader';
 import RecommendationProducts from '~/components/RecommendationProducts';
 import BestSellers from '~/components/BestSellers';
 import BlockNewsletter from '~/components/BlockNewsletter';
 import { HeaderBasketContext, HeaderContextInterface } from '~/context/HeaderCarts';
 import { useContext } from 'react';
-import { LikedCart } from '~/components/LikedCart/LikedCart';
+import {ILikedNewCart, LikedCart } from '~/components/LikedCart/LikedCart';
 import { cn } from '~/lib/utils';
+import { BEST_SELLERS_QUERY, RECOMENDED_PRODUCT_QUERY } from '~/graphql/queries';
 
 
 export const handle: { breadcrumb: string } = {
@@ -40,8 +18,6 @@ export const handle: { breadcrumb: string } = {
 export default function Liked() {
   const { recommendedProducts, bestSellers } =
     useLoaderData<typeof loader>();
-
-    
   const {
     likedCart,
   } = useContext(HeaderBasketContext) as HeaderContextInterface
@@ -58,7 +34,7 @@ export default function Liked() {
       <div className={isMobile ? "flex flex-col min-h-[100px] relative  " : 'flex flex-col min-h-[100px] relative  justify-center  register rounded-[20px] border border-black/10 p-6 my-[12px] mb-[34px]'}>
         {likedCart.length > 0 ?
           <div style={{ display: "grid", gap: 18 }}>
-            {likedCart.map((product: ProductItemFragment) => <LikedCart key={product.handle} product={product} />)}
+            {likedCart.map((product: ILikedNewCart) => <LikedCart key={product.handle} product={product} />)}
           </div>
           :
           <h2 className="text-gray-500 text-2xl  font-semibold left-1/2 opacity-70 absolute text-center top-[50%] transform -translate-x-1/2 -translate-y-1/2">
@@ -82,11 +58,11 @@ export default function Liked() {
       </Link>
 
 
-      {/* <RecommendationProducts recommended={recommendedProducts}/> */}
       <div className='flex flex-col justify-center items-center' >
+        <RecommendationProducts recommended={recommendedProducts} />
         <BestSellers items={bestSellers} />
         <div className='h-[40px]'>
-
+          
         </div>
         <BlockNewsletter />
       </div>
@@ -97,8 +73,15 @@ export default function Liked() {
 
 export async function loader({ context }: LoaderFunctionArgs) {
   const { storefront } = context;
-  const recommendedProducts = await storefront.query(RECOMMENDED_PRODUCTS_QUERY);
-  const bestSellers = await storefront.query(BEST_SELLERS, {
+  const { recommendedProducts } = await storefront.query(
+    RECOMENDED_PRODUCT_QUERY,
+    {
+      variables: {
+        // id: 0
+      },
+    },
+  );
+  const bestSellers = await storefront.query(BEST_SELLERS_QUERY, {
     variables: {
       country: context.storefront.i18n.country,
       language: context.storefront.i18n.language,
@@ -110,97 +93,3 @@ export async function loader({ context }: LoaderFunctionArgs) {
     bestSellers
   });
 }
-
-const PRODUCT_ITEM_FRAGMENT = `#graphql
-  fragment MoneyProductItem on MoneyV2 {
-    amount
-    currencyCode
-  }
-  fragment ProductItem on Product {
-    id
-    handle
-    title
-    featuredImage {
-      id
-      altText
-      url
-      width
-      height
-    }
-    options {
-      name
-      values
-    }
-    priceRange {
-      minVariantPrice {
-        ...MoneyProductItem
-      }
-    }
-    variants(first: 10) {
-      nodes {
-        selectedOptions {
-          name
-          value
-        }
-        availableForSale
-        id
-        price {
-          amount
-          currencyCode
-        }
-        compareAtPrice {
-          amount
-          currencyCode
-        }
-
-      }
-    }
-  }
-` as const;
-
-const BEST_SELLERS = `#graphql 
-${PRODUCT_ITEM_FRAGMENT}
-query BestSellers($country: CountryCode, $language: LanguageCode) 
-@inContext(country: $country, language: $language){
-  collection(handle: "bestsellers"){
-    products(first: 10) {
-      nodes {
-        ...ProductItem
-      }
-    }
-    
-  }
-}
-`;
-
-
-const RECOMMENDED_PRODUCTS_QUERY = `#graphql
-  fragment RecommendedProduct on Product {
-    id
-    title
-    handle
-    priceRange {
-      minVariantPrice {
-        amount
-        currencyCode
-      }
-    }
-    images(first: 1) {
-      nodes {
-        id
-        url
-        altText
-        width
-        height
-      }
-    }
-  }
-  query RecommendedProducts ($country: CountryCode, $language: LanguageCode)
-    @inContext(country: $country, language: $language) {
-    products(first: 4, sortKey: UPDATED_AT, reverse: true) {
-      nodes {
-        ...RecommendedProduct
-      }
-    }
-  }
-` as const;

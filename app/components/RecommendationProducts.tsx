@@ -13,6 +13,7 @@ export default function RecommendationProducts({
 }: {
   recommended: RecommendedProductFragment[];
 }) {
+  console.log(recommended)
   return (
     <div className="flex flex-col w-full gap-[30px]  pb-[35px] px-5 md:px-0">
       {recommended && (

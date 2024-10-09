@@ -24,7 +24,8 @@ import {useMedia} from 'react-use';
 import {Button} from '~/components/ui/button';
 import {MoveDown, MoveUp} from 'lucide-react';
 import Loader from '~/components/Loader';
-import { useEffect } from 'react';
+import { COLLECTION_FILTER_QUERY, COLLECTION_QUERY } from '~/graphql/queries';
+import { HEADER_QUERY } from '~/graphql/queries/headerQuery.graphql';
 
 export type SortParam =
   | 'price-low-high'
@@ -32,6 +33,8 @@ export type SortParam =
   | 'best-selling'
   | 'newest'
   | 'featured';
+
+
 
 export const FILTER_URL_PREFIX = 'filter.';
 
@@ -72,7 +75,7 @@ export async function loader({request, params, context}: LoaderFunctionArgs) {
     return redirect('/collections/catalog');
   }
   const {collection: filtersCollection} =
-    await storefront.query<CollectionFiltersQuery>(FILTER_QUERY, {
+    await storefront.query<CollectionFiltersQuery>(COLLECTION_FILTER_QUERY, {
       variables: {
         handle,
         first: 1,
@@ -207,7 +210,7 @@ export default function Collection() {
 
 export function ProductsGrid({products}: {products: ProductItemFragment[]}) {
   const availableProducts = products.filter(product =>
-    product.variants.nodes.some(variant => {
+    product.variants.nodes.some((variant:any) => {
       if(variant.availableForSale){
         return {...variant, product}
       }
@@ -229,132 +232,8 @@ export function ProductsGrid({products}: {products: ProductItemFragment[]}) {
   );
 }
 
-const PRODUCT_ITEM_FRAGMENT = `#graphql
-  fragment MoneyProductItem on MoneyV2 {
-    amount
-    currencyCode
-  }
-  fragment ProductItem on Product {
-    id
-    handle
-    title
-    featuredImage {
-      id
-      altText
-      url
-      width
-      height
-    }
-    options {
-      name
-      values
-    }
-    priceRange {
-      minVariantPrice {
-        ...MoneyProductItem
-      }
-    }
-    variants(first: 10) {
-      nodes {
-        availableForSale
-        id
-        selectedOptions {
-          name
-          value
-        }
-        price {
-          amount
-          currencyCode
-        }
-        compareAtPrice {
-          amount
-          currencyCode
-        }
-      }
-    }
-  }
-` as const;
-
-const FILTER_QUERY = `#graphql
-  query CollectionFilters(
-    $handle: String! 
-    $country: CountryCode 
-    $language: LanguageCode
-    $first: Int
-  ) @inContext(country: $country, language: $language){
-    collection(handle: $handle){
-      products(first: $first){
-        filters {
-          id
-          label
-          type
-          values {
-            id
-            label
-            input
-            count
-          }
-        }
-      }
-    }
-}
-` as const;
 
 
-
-
-const COLLECTION_QUERY = `#graphql
-  ${PRODUCT_ITEM_FRAGMENT}
-  query Collection(
-    $handle: String!
-    $country: CountryCode
-    $language: LanguageCode
-    $filters: [ProductFilter!]
-    $sortKey: ProductCollectionSortKeys!
-    $reverse: Boolean
-    $first: Int
-    $last: Int
-    $startCursor: String
-    $endCursor: String
-  ) @inContext(country: $country, language: $language) {
-    collection(handle: $handle) {
-      id
-      handle
-      title
-      description
-      products(
-        first: $first,
-        last: $last,
-        before: $startCursor,
-        after: $endCursor,
-        filters: $filters,
-        sortKey: $sortKey,
-        reverse: $reverse
-      ) {
-        filters {
-          id
-          label
-          type
-          values {
-            id
-            label
-            input
-            count
-          }
-        }
-        nodes {
-          ...ProductItem
-        }
-        pageInfo {
-          hasPreviousPage
-          hasNextPage
-          endCursor
-          startCursor
-        }
-      }
-    }
-  }
-` as const;
 
 
 
@@ -395,61 +274,8 @@ function getSortValuesFromParam(sortParam: SortParam | null): {
       };
   }
 }
-const MENU_FRAGMENT = `#graphql
-  fragment MenuItem on MenuItem {
-    id
-    resourceId
-    tags
-    title
-    type
-    url
-  }
-  fragment ChildMenuItem on MenuItem {
-    ...MenuItem
-  }
-  fragment ParentMenuItem on MenuItem {
-    ...MenuItem
-    items {
-      ...ChildMenuItem
-    }
-  }
-  fragment Menu on Menu {
-    id
-    items {
-      ...ParentMenuItem
-    }
-  }
-` as const;
 
 
 
-const HEADER_QUERY = `#graphql
-  fragment Shop on Shop {
-    id
-    name
-    description
-    primaryDomain {
-      url
-    }
-    brand {
-      logo {
-        image {
-          url
-        }
-      }
-    }
-  }
-  query Header(
-    $country: CountryCode
-    $headerMenuHandle: String!
-    $language: LanguageCode
-  ) @inContext(language: $language, country: $country) {
-    shop {
-      ...Shop
-    }
-    menu(handle: $headerMenuHandle) {
-      ...Menu
-    }
-  }
-  ${MENU_FRAGMENT}
-` as const;
+
+

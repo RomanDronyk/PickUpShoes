@@ -7,6 +7,7 @@ import {
 import {Form, Link, useActionData} from '@remix-run/react';
 import {Input} from '~/components/ui/input';
 import {Button} from '~/components/ui/button';
+import { CUSTOMER_RECOVER_MUTATION } from '~/graphql/mutations';
 
 type ActionResponse = {
   error?: string;
@@ -113,19 +114,3 @@ export default function Recover() {
   );
 }
 
-// NOTE: https://shopify.dev/docs/api/storefront/latest/mutations/customerrecover
-const CUSTOMER_RECOVER_MUTATION = `#graphql
-  mutation customerRecover(
-    $email: String!,
-    $country: CountryCode,
-    $language: LanguageCode
-  ) @inContext(country: $country, language: $language) {
-    customerRecover(email: $email) {
-      customerUserErrors {
-        code
-        field
-        message
-      }
-    }
-  }
-` as const;

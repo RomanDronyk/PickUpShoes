@@ -56,7 +56,7 @@ export interface IVariants {
 export interface ILikedNewCart {
     variants: IVariants;
     handle: string;
-    selectedVariant: IVariant;
+    selectedVariant?: IVariant |null |any;
     title: string;
     id: string,
 }

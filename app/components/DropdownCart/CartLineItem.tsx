@@ -24,7 +24,6 @@ const CartLineItem = React.memo(({ line }: { line: CartLine }) => {
     setIsLoading(false)
   }), [line])
 
-
   return (
     <li key={id} className="xl:grid xl:grid-cols-12 flex justify-between">
       <div className="grid grid-cols-[70px_250px_110px] items-center gap-[14px] 2xl:col-span-9 xl:col-span-8 col-span-7">

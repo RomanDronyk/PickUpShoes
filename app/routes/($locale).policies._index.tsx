@@ -1,5 +1,6 @@
 import {json, type LoaderFunctionArgs} from '@shopify/remix-oxygen';
 import {useLoaderData, Link} from '@remix-run/react';
+import { POLICIES_QUERY } from '~/graphql/queries';
 
 export async function loader({context}: LoaderFunctionArgs) {
   const data = await context.storefront.query(POLICIES_QUERY);
@@ -31,33 +32,3 @@ export default function Policies() {
     </div>
   );
 }
-
-const POLICIES_QUERY = `#graphql
-  fragment PolicyItem on ShopPolicy {
-    id
-    title
-    handle
-  }
-  query Policies ($country: CountryCode, $language: LanguageCode)
-    @inContext(country: $country, language: $language) {
-    shop {
-      privacyPolicy {
-        ...PolicyItem
-      }
-      shippingPolicy {
-        ...PolicyItem
-      }
-      termsOfService {
-        ...PolicyItem
-      }
-      refundPolicy {
-        ...PolicyItem
-      }
-      subscriptionPolicy {
-        id
-        title
-        handle
-      }
-    }
-  }
-` as const;

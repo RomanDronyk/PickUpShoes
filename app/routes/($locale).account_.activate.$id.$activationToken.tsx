@@ -8,6 +8,7 @@ import {Form, Link, useActionData, type MetaFunction} from '@remix-run/react';
 
 import { Button } from '~/components/ui/button';
 import { Input } from '~/components/ui/input';
+import { CUSTOMER_ACTIVATE_MUTATION } from '~/graphql/mutations';
 
 type ActionResponse = {
   error: string | null;
@@ -146,25 +147,3 @@ export default function Activate() {
     </div>
   );
 }
-
-// NOTE: https://shopify.dev/docs/api/storefront/latest/mutations/customeractivate
-const CUSTOMER_ACTIVATE_MUTATION = `#graphql
-  mutation customerActivate(
-    $id: ID!,
-    $input: CustomerActivateInput!,
-    $country: CountryCode,
-    $language: LanguageCode
-  ) @inContext(country: $country, language: $language) {
-    customerActivate(id: $id, input: $input) {
-      customerAccessToken {
-        accessToken
-        expiresAt
-      }
-      customerUserErrors {
-        code
-        field
-        message
-      }
-    }
-  }
-` as const;

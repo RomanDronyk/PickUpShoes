@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Input } from './ui/input';
-import { Form, useActionData, useFetcher, useLoaderData } from '@remix-run/react';
-import { ActionFunctionArgs, LoaderFunctionArgs, json } from '@remix-run/server-runtime';
+import { useFetcher } from '@remix-run/react';
 import { Button } from './ui/button';
 
 export default function BlockNewsletter({ storefront }: any) {

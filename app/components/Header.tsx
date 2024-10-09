@@ -36,7 +36,6 @@ export function Header({ header, isLoggedIn, cart }: HeaderProps) {
   const { key } = useLocation();
   const isMobile = useMedia('(max-width: 767px)', false);
 
-
   useEffect(() => {
     if (cartShow) setCartShow(false);
   }, [key]);

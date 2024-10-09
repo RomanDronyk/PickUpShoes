@@ -2,6 +2,7 @@ import {json, redirect, type LoaderFunctionArgs} from '@shopify/remix-oxygen';
 import {Link, useLoaderData, type MetaFunction} from '@remix-run/react';
 import {Money, Image, flattenConnection} from '@shopify/hydrogen';
 import type {OrderLineItemFullFragment} from 'storefrontapi.generated';
+import { CUSTOMER_ORDER_QUERY } from '~/graphql/queries';
 
 export const handle = {
   breadcrumb: 'order',
@@ -129,7 +130,7 @@ export default function OrderRoute() {
             )}
             <h3>Статус</h3>
             <div>
-              <p>{fulfillmentStatusTranslations[order.fulfillmentStatus] || order.fulfillmentStatus}</p>
+              <p>{fulfillmentStatusTranslations[order?.fulfillmentStatus] || order.fulfillmentStatus}</p>
             </div>
           </div>
         </div>
@@ -178,119 +179,3 @@ function OrderLineRow({lineItem}: {lineItem: OrderLineItemFullFragment}) {
     </div>
   );
 }
-
-// NOTE: https://shopify.dev/docs/api/storefront/latest/objects/Order
-const CUSTOMER_ORDER_QUERY = `#graphql
-  fragment OrderMoney on MoneyV2 {
-    amount
-    currencyCode
-  }
-  fragment AddressFull on MailingAddress {
-    address1
-    address2
-    city
-    company
-    country
-    countryCodeV2
-    firstName
-    formatted
-    id
-    lastName
-    name
-    phone
-    province
-    provinceCode
-    zip
-  }
-  fragment DiscountApplication on DiscountApplication {
-    value {
-      __typename
-      ... on MoneyV2 {
-        ...OrderMoney
-      }
-      ... on PricingPercentageValue {
-        percentage
-      }
-    }
-  }
-  fragment OrderLineProductVariant on ProductVariant {
-    id
-    image {
-      altText
-      height
-      url
-      id
-      width
-    }
-    price {
-      ...OrderMoney
-    }
-    product {
-      handle
-    }
-    sku
-    title
-  }
-  fragment OrderLineItemFull on OrderLineItem {
-    title
-    quantity
-    discountAllocations {
-      allocatedAmount {
-        ...OrderMoney
-      }
-      discountApplication {
-        ...DiscountApplication
-      }
-    }
-    originalTotalPrice {
-      ...OrderMoney
-    }
-    discountedTotalPrice {
-      ...OrderMoney
-    }
-    variant {
-      ...OrderLineProductVariant
-    }
-  }
-  fragment Order on Order {
-    id
-    name
-    orderNumber
-    statusUrl
-    processedAt
-    fulfillmentStatus
-    totalTaxV2 {
-      ...OrderMoney
-    }
-    totalPriceV2 {
-      ...OrderMoney
-    }
-    subtotalPriceV2 {
-      ...OrderMoney
-    }
-    shippingAddress {
-      ...AddressFull
-    }
-    discountApplications(first: 100) {
-      nodes {
-        ...DiscountApplication
-      }
-    }
-    lineItems(first: 100) {
-      nodes {
-        ...OrderLineItemFull
-      }
-    }
-  }
-  query Order(
-    $country: CountryCode
-    $language: LanguageCode
-    $orderId: ID!
-  ) @inContext(country: $country, language: $language) {
-    order: node(id: $orderId) {
-      ... on Order {
-        ...Order
-      }
-    }
-  }
-` as const;

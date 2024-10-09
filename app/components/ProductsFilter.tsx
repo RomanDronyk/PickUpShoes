@@ -666,8 +666,8 @@ export function MobileFilters({
   initialFilters,
   headerPromise,
 }: {
-  appliedFilters: any
-  headerPromise: any;
+  appliedFilters?: any
+  headerPromise?: any;
   filters: Filter[] | any;
   initialFilters: Filter[] | any;
 }) {

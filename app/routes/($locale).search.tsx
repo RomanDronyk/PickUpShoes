@@ -1,12 +1,27 @@
 import {defer, type LoaderFunctionArgs} from '@shopify/remix-oxygen';
 import {useLoaderData, type MetaFunction} from '@remix-run/react';
 import {getPaginationVariables} from '@shopify/hydrogen';
-
 import {SearchForm, SearchResults, NoSearchResults} from '~/components/Search';
+import { SEARCH_QUERY } from '~/graphql/queries';
 
 export const meta: MetaFunction = () => {
   return [{title: `Hydrogen | Search`}];
 };
+
+export default function SearchPage() {
+  const {searchTerm, searchResults} = useLoaderData<typeof loader>();
+  return (
+    <div className="search">
+      <h1>Search</h1>
+      <SearchForm searchTerm={searchTerm} />
+      {!searchTerm || !searchResults.totalResults ? (
+        <NoSearchResults />
+      ) : (
+        <SearchResults results={searchResults.results} />
+      )}
+    </div>
+  );
+}
 
 export async function loader({request, context}: LoaderFunctionArgs) {
   const url = new URL(request.url);
@@ -33,7 +48,7 @@ export async function loader({request, context}: LoaderFunctionArgs) {
   }
 
   const totalResults = Object.values(data).reduce((total, value) => {
-    return total + value.nodes.length;
+    return total + value?.nodes?.length;
   }, 0);
 
   const searchResults = {
@@ -43,91 +58,3 @@ export async function loader({request, context}: LoaderFunctionArgs) {
 
   return defer({searchTerm, searchResults});
 }
-
-export default function SearchPage() {
-  const {searchTerm, searchResults} = useLoaderData<typeof loader>();
-
-  return (
-    <div className="search">
-      <h1>Search</h1>
-      <SearchForm searchTerm={searchTerm} />
-      {!searchTerm || !searchResults.totalResults ? (
-        <NoSearchResults />
-      ) : (
-        <SearchResults results={searchResults.results} />
-      )}
-    </div>
-  );
-}
-
-const SEARCH_QUERY = `#graphql
-  fragment SearchProduct on Product {
-    __typename
-    handle
-    id
-    publishedAt
-    title
-    trackingParameters
-    vendor
-    variants(first: 10) {
-      nodes {
-        id
-        image {
-          url
-          altText
-          width
-          height
-        }
-        price {
-          amount
-          currencyCode
-        }
-        compareAtPrice {
-          amount
-          currencyCode
-        }
-        selectedOptions {
-          name
-          value
-        }
-        product {
-          handle
-          title
-        }
-      }
-    }
-  }
-  query search(
-    $country: CountryCode
-    $endCursor: String
-    $first: Int
-    $language: LanguageCode
-    $last: Int
-    $query: String!
-    $startCursor: String
-  ) @inContext(country: $country, language: $language) {
-    products: search(
-      query: $query,
-      unavailableProducts: HIDE,
-      types: [PRODUCT],
-      first: $first,
-      sortKey: RELEVANCE,
-      last: $last,
-      before: $startCursor,
-      after: $endCursor
-    ) {
-      nodes {
-        ...on Product {
-          ...SearchProduct
-        }
-      }
-      pageInfo {
-        hasNextPage
-        hasPreviousPage
-        startCursor
-        endCursor
-      }
-    }
-    
-  }
-` as const;

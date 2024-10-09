@@ -10,6 +10,7 @@ import type {
   PredictiveQueryFragment,
   PredictiveSearchQuery,
 } from 'storefrontapi.generated';
+import { PREDICTIVE_PRODUCT_SEARCH_QUERY } from '~/graphql/queries';
 
 type PredictiveSearchResultItem = PredictiveProductFragment;
 
@@ -66,7 +67,7 @@ async function fetchPredictiveSearchResults({
     };
   }
 
-  const data = await context.storefront.query(PREDICTIVE_SEARCH_QUERY, {
+  const data = await context.storefront.query(PREDICTIVE_PRODUCT_SEARCH_QUERY, {
     variables: {
       limit,
       limitScope: 'EACH',
@@ -166,55 +167,3 @@ export function normalizePredictiveSearchResults(
   return {results, totalResults};
 }
 
-const PREDICTIVE_SEARCH_QUERY = `#graphql
-  fragment PredictiveProduct on Product {
-    __typename
-    id
-    title
-    handle
-    trackingParameters
-    variants(first: 10) {
-      nodes {
-        id
-        image {
-          url
-          altText
-          width
-          height
-        }
-        price {
-          amount
-          currencyCode
-        }
-      }
-    }
-  }
-  fragment PredictiveQuery on SearchQuerySuggestion {
-    __typename
-    text
-    styledText
-    trackingParameters
-  }
-  query predictiveSearch(
-    $country: CountryCode
-    $language: LanguageCode
-    $limit: Int!
-    $limitScope: PredictiveSearchLimitScope!
-    $searchTerm: String!
-    $types: [PredictiveSearchType!]
-  ) @inContext(country: $country, language: $language) {
-    predictiveSearch(
-      limit: $limit,
-      limitScope: $limitScope,
-      query: $searchTerm,
-      types: $types,
-    ) {
-      products {
-        ...PredictiveProduct
-      }
-      queries {
-        ...PredictiveQuery
-      }
-    }
-  }
-` as const;

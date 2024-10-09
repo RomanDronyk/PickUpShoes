@@ -1,5 +1,7 @@
 import invariant from 'tiny-invariant';
-import {json, redirect, type ActionArgs} from '@shopify/remix-oxygen';
+import { json, redirect, type ActionArgs } from '@shopify/remix-oxygen';
+import { CUSTOMER_EMAIL_CONSENT_QUERY } from '~/graphql/queries';
+import { CREATE_SUBSCRIBER, UPDATE_CUSTOMER_MARKETING_CONSENT } from '~/graphql/mutations';
 
 type Subscriber = {
   id: string;
@@ -18,12 +20,12 @@ type CustomerMutationSuccess = {
 
 type CustomerMutationError = {
   customer: null;
-  error: {field: string; message: string};
+  error: { field: string; message: string };
 };
 
 type CustomerMutation = CustomerMutationSuccess | CustomerMutationError;
 
-export async function action({context, request}: ActionArgs) {
+export async function action({ context, request }: ActionArgs) {
   const formData = await request.formData();
   const email = formData.get('email') as string;
 
@@ -56,7 +58,7 @@ export async function action({context, request}: ActionArgs) {
       });
 
       if (created.error) {
-        return returnError({error: created.error});
+        return returnError({ error: created.error });
       }
 
       return await returnSuccess({
@@ -71,7 +73,7 @@ export async function action({context, request}: ActionArgs) {
       });
 
       if (updated.error) {
-        return returnError({error: updated.error});
+        return returnError({ error: updated.error });
       }
 
       return await returnSuccess({
@@ -81,9 +83,9 @@ export async function action({context, request}: ActionArgs) {
     }
   } catch (error) {
     if (error instanceof Error) {
-      return returnError({error});
+      return returnError({ error });
     }
-    return returnError({error: {message: JSON.stringify(error)}});
+    return returnError({ error: { message: JSON.stringify(error) } });
   }
 }
 
@@ -110,7 +112,7 @@ async function returnSuccess({
     subscriber.emailMarketingConsent.marketingState,
   );
   return json(
-    {subscriber, error: null},
+    { subscriber, error: null },
     {
       headers: {
         'Set-Cookie': await session.commit(),
@@ -119,22 +121,10 @@ async function returnSuccess({
   );
 }
 
-function returnError({error}: {error: {message: string}}) {
+function returnError({ error }: { error: { message: string } }) {
   console.error(error.message);
-  return json({subscriber: null, error});
+  return json({ subscriber: null, error });
 }
-
-const CUSTOMER_FRAGMENT = `#graphql
-  fragment CustomerFragment on Customer {
-    id
-    email
-    emailMarketingConsent{
-      consentUpdatedAt
-      marketingOptInLevel
-      marketingState
-    }
-  }
-`;
 
 /**
  * Get a customer marketing consent by email
@@ -148,30 +138,19 @@ async function getCustomerConsent({
   email: string;
   context: ActionArgs['context'];
 }) {
-  const CUSTOMER_EMAIL_CONSENT_QUERY = `#graphql
-    ${CUSTOMER_FRAGMENT}
-    query getCustomerByEmail($query: String!) {
-      customers(first: 1, query: $query ) {
-        edges {
-          node {
-            ...CustomerFragment
-          }
-        }
-      }
-    }
-  `;
 
-  const {customers} = await context.admin(CUSTOMER_EMAIL_CONSENT_QUERY, {
-    variables: {query: `email:${email}`},
+
+  const { customers } = await context.admin(CUSTOMER_EMAIL_CONSENT_QUERY, {
+    variables: { query: `email:${email}` },
   });
 
   const customer = customers.edges[0]?.node;
 
   if (!customer) {
-    return {customer: null, error: null};
+    return { customer: null, error: null };
   }
 
-  return {customer, error: null};
+  return { customer, error: null };
 }
 
 /**
@@ -190,20 +169,7 @@ async function updateCustomerMarketingConsent({
     new Date().getTime() - new Date().getTimezoneOffset() * 60000,
   ).toISOString();
 
-  const UPDATE_CUSTOMER_MARKETING_CONSENT = `#graphql
-    ${CUSTOMER_FRAGMENT}
-    mutation ($input: CustomerEmailMarketingConsentUpdateInput!) {
-      customerEmailMarketingConsentUpdate(input: $input) {
-        customer {
-          ...CustomerFragment
-        }
-        userErrors {
-          field
-          message
-        }
-      }
-    }
-  `;
+
 
   const input = {
     customerId,
@@ -214,16 +180,16 @@ async function updateCustomerMarketingConsent({
     },
   };
 
-  const {customerEmailMarketingConsentUpdate} = await context.admin(
+  const { customerEmailMarketingConsentUpdate } = await context.admin(
     UPDATE_CUSTOMER_MARKETING_CONSENT,
     {
-      variables: {input},
+      variables: { input },
     },
   );
 
   if (customerEmailMarketingConsentUpdate.userErrors.length) {
-    const [{field, message}] = customerEmailMarketingConsentUpdate.userErrors;
-    return {error: {field, message}, customer: null};
+    const [{ field, message }] = customerEmailMarketingConsentUpdate.userErrors;
+    return { error: { field, message }, customer: null };
   }
 
   // success
@@ -240,20 +206,7 @@ async function createSubscriber({
   email: string;
   context: ActionArgs['context'];
 }): Promise<CustomerMutation> {
-  const CREATE_SUBSCRIBER = `#graphql
-    ${CUSTOMER_FRAGMENT}
-    mutation newCustomerLead($input: CustomerInput!) {
-      customerCreate(input: $input) {
-        customer {
-          ...CustomerFragment
-        }
-        userErrors {
-          field
-          message
-        }
-      }
-    }
-  `;
+
   const consentUpdatedAt = new Date(
     new Date().getTime() - new Date().getTimezoneOffset() * 60000,
   ).toISOString();
@@ -269,16 +222,16 @@ async function createSubscriber({
 
   };
 
-  const {customerCreate} = await context.admin(CREATE_SUBSCRIBER, {
-    variables: {input},
+  const { customerCreate } = await context.admin(CREATE_SUBSCRIBER, {
+    variables: { input },
   });
 
   if (customerCreate.userErrors.length) {
-    const [{field, message}] = customerCreate.userErrors;
-    return {error: {field, message}, customer: null};
+    const [{ field, message }] = customerCreate.userErrors;
+    return { error: { field, message }, customer: null };
   }
 
   // success
-  const {customer} = customerCreate;
-  return {customer, error: null};
+  const { customer } = customerCreate;
+  return { customer, error: null };
 }

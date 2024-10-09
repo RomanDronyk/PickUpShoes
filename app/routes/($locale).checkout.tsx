@@ -1,9 +1,7 @@
-import { useLoaderData, json, MetaFunction, Form, Link, FetcherWithComponents, useActionData, redirect, useNavigate } from '@remix-run/react';
+import { useLoaderData, json, MetaFunction, Form, useActionData, useNavigate, redirect } from '@remix-run/react';
 import { Input } from '~/components/ui/input';
 import { ActionFunction } from '@remix-run/node';
-import GET_CHECKOUT_QUERY from '~/graphqlRequests/GET_CHECKOUT_QUERY';
-import CREATE_CHEKOUT_URL from '~/graphqlRequests/CREATE_CHEKOUT_URL';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import CheckoutCart from '~/components/CheckoutCart';
 import { Button } from '~/components/ui/button';
 import NovaPoshtaCity from '~/components/Checkout/novaPoshtaCity';
@@ -11,25 +9,72 @@ import NovaPoshtaDepartent from '~/components/Checkout/novaPoshtaDepartment';
 import ContactType from '~/components/Checkout/contactType';
 import { useMedia } from 'react-use';
 import CheckoutCartMobile from '~/components/CheckoutCartMobile';
+import { CREATE_CHEKOUT_URL } from '~/graphql/mutations';
+import { generageMonoUrl, generateOrderInKeycrm, generateOrderInShopifyAdmin, generateProductForKeycrm } from '~/utils';
 
 
+
+export const handle: { breadcrumb: string } = {
+    breadcrumb: 'checkout',
+};
 
 // Meta function for the page
 export const meta: MetaFunction = () => {
-
     return [{
-        title: `Hydrogen | Checkout`, 'http-equiv': {
+        title: `Оформити замовлення | Pick Up Shoes`, 'http-equiv': {
             'Content-Security-Policy': "connect-src 'self' https://api.novaposhta.ua;"
         }
     }];
+};
+
+
+export const loader = async ({ context, request }: { context: any, request: Request }) => {
+    const { storefront, cart } = context;
+    const cartPromise = await cart.get();
+    if (cartPromise?.lines?.nodes?.length == 0 || !cartPromise?.lines?.nodes?.length) {
+        throw redirect("/", 302);
+    }
+    return json({ cartPromise });
+
+};
+
+
+export const action: ActionFunction = async ({ request, context }) => {
+    const { session, storefront } = context;
+    if (request.method !== 'POST') {
+        return json({ error: 'Method not allowed' }, { status: 405 });
+    }
+    const formData = await request.formData();
+
+    const actionType = formData.get('action');
+    const lineItems: any = formData.get('lineItems') ? JSON.parse(formData.get('lineItems') as string) : [];
+
+
+    try {
+        switch (actionType) {
+            case 'create url':
+                return createUrl(lineItems, storefront);
+            case 'create order':
+                const result = await createOrder(formData, context);
+                return result;
+            default:
+                return json({ error: "Invalid action" }, { status: 400 });
+        }
+    } catch (e) {
+        console.error('Error handling action:', e);
+        return json({ error: "Internal server error" }, { status: 500 });
+    }
 };
 
 // Checkout component
 export default function Checkout() {
     const data: any = useLoaderData();
     const response: any = useActionData();
-    const [city, setCity] = useState({})
+    const [city, setCity] = useState<any>({})
     const [options, setOptions] = useState([]);
+
+    console.log(data,"data")
+    console.log(response,"response")
 
     const [userName, setUserName] = useState({ firstName: "", lastName: "" });
     const [userPhone, setUserPhone] = useState("")
@@ -43,27 +88,17 @@ export default function Checkout() {
         Ref: ""
     })
 
-    useEffect(() => {
-        console.log(department, " change department")
-    }, [department]);
-
     const cartsFromCart = data?.cartPromise?.lines?.nodes.map((element: any) => element);
-    console.log(cartsFromCart, "cartsFromCart")
     const amount = data?.cartPromise?.cost?.subtotalAmount?.amount || 0
     const urlFromAction = response?.url;
     const navigate = useNavigate()
 
     if (urlFromAction == "/thanks") {
-        console.log(urlFromAction)
         urlFromAction ? navigate(urlFromAction) : null;
     } else if (urlFromAction !== null && urlFromAction) {
-        console.log(urlFromAction)
         window.location.href = urlFromAction;
     }
 
-    useEffect(() => {
-        console.log(city, "console.log city")
-    }, [city])
     return (
 
         <div className="flex flex-col-reverse contaier gap-[20px] md:gap-[40px] md:grid md:grid-cols-2 lg:grid-cols-[1fr_1fr] md:grid-cols-2 md:gap-y-10 md:gap-x-10 lg:px-24 px-[10px] my-10 w-full mt-[1rem]"
@@ -103,9 +138,7 @@ export default function Checkout() {
                                     onChange={(event) => setUserName((prevData) => {
                                         return { ...prevData, firstName: event.target.value }
                                     })}
-                                    // eslint-disable-next-line jsx-a11y/no-autofocus
                                     autoFocus
-                                    // value={data?.node?.shippingAddress?.firstName}
                                     required
                                     className="bg-input px-6 py-3 text-xl placeholder:text-xl h-[52px] "
                                 />
@@ -118,10 +151,7 @@ export default function Checkout() {
                                     autoComplete="lastName"
                                     placeholder="Прізвище"
                                     aria-label="Last Name"
-
-                                    // eslint-disable-next-line jsx-a11y/no-autofocus
                                     autoFocus
-                                    // value={data?.node?.shippingAddress?.lastName}
                                     required
                                     onChange={(event) => setUserName((prevData) => {
                                         return { ...prevData, lastName: event.target.value }
@@ -275,54 +305,57 @@ export default function Checkout() {
 
 
 // // Loader function to get checkout data
-export const loader = async ({ context, request }: { context: any, request: Request }) => {
-    const { storefront, cart } = context;
-    const cartPromise = await cart.get();
-    return json({ cartPromise });
 
-};
-
-
-export const action: ActionFunction = async ({ request, context }) => {
-    const { session, storefront } = context;
-    if (request.method !== 'POST') {
-        return json({ error: 'Method not allowed' }, { status: 405 });
-    }
-    const formData = await request.formData();
-
-    const actionType = formData.get('action');
-    const lineItems: any = formData.get('lineItems') ? JSON.parse(formData.get('lineItems') as string) : [];
-
-
-    try {
-        switch (actionType) {
-            case 'create url':
-                return createUrl(lineItems, storefront);
-
-            case 'create order':
-                const result = await createOrder(formData);
-                console.log("Action result:", result);
-                return result;
-
-            default:
-                return json({ error: "Invalid action" }, { status: 400 });
-        }
-    } catch (e) {
-        console.error('Error handling action:', e);
-        return json({ error: "Internal server error" }, { status: 500 });
-    }
-};
-async function createOrder(data: FormData) {
+async function createOrder(data: FormData, context: any) {
     const paymentMethod = data.get("payment");
-    const deliveryMethod = data.get("delivery")
-    if (!paymentMethod) {
-        return json({ error: 'Виберіть спосіб оплатии' }, { status: 405 });
-    }
-    if (!deliveryMethod) {
-        return json({ error: 'Виберіть спосіб доставки' }, { status: 405 });
+    const deliveryMethod = data.get("delivery");
+    const productsString: any = data.get('products') || '[]';
+    const amount = data.get('amount') || 0
+    const products = JSON.parse(productsString);
+    const lineItems = products.map((element:any)=>{
+        return {
+            variantId:element.merchandise.id,
+            quantity:element.quantity
+        }
+    })
+
+    const orderData = {
+        email: data.get('email') || '',
+        note: data.get('note') || '',
+        phone: data.get('phone') || '',
+        lineItems,
+        shippingAddress:{
+            address1: data.get('shipping_receive_point') || '',
+            address2: "",
+            city: data.get('shipping_address_city') || '',
+            country: "UA",
+            firstName: data.get('firstName') || "null",
+            lastName: data.get('lastName') || "null",
+            phone: data.get('phone') || '',
+            province: data.get('shipping_address_region') || '',
+            zip: data.get('shipping_address_zip') || '',
+        }
     }
 
-    return await generateOrderInKeycrm(data)
+    let paymentLink = '/thanks'
+
+    if (!paymentMethod) return json({ error: 'Виберіть спосіб оплатии' }, { status: 405 });
+    if (!deliveryMethod) return json({ error: 'Виберіть спосіб доставки' }, { status: 405 });
+
+    const generageOrderKeycrm = await generateOrderInKeycrm(data)
+
+    if (!generageOrderKeycrm.id) return json({ generageOrderKeycrm, error: "error" + generageOrderKeycrm.message || 'Failed to create order' });
+
+    console.log("slfajk")
+    const generateOrderInShopifyAdminPromise = await generateOrderInShopifyAdmin(context, orderData)
+    console.log("complete create")
+
+    if (paymentMethod === "card") {
+        console.log(generateOrderInShopifyAdminPromise.draftOrderComplete.draftOrder.order.id,"slkfja;l")
+        paymentLink = await generageMonoUrl(amount, products, `${generageOrderKeycrm.id}___${generateOrderInShopifyAdminPromise.draftOrderComplete.draftOrder.order.id}`)
+    }
+    return redirect(paymentLink, 302);
+
 }
 async function createUrl(lineItems: any[], storefront: any) {
     try {
@@ -335,153 +368,14 @@ async function createUrl(lineItems: any[], storefront: any) {
             },
         );
         return json({ response: data });
-
     } catch (e) {
         console.log(e)
         return json({ response: "data" });
-
     }
-
 }
 
 
-async function generateOrderInKeycrm(formData: FormData) {
 
-    const productsString: any = formData.get('products') || '[]';
-    const products = JSON.parse(productsString);
-    const paymentMethod = formData.get("payment");
-    const firstName = formData.get('firstName') || "null"
-    const lastName = formData.get('lastName') || "null"
-    const amount = formData.get('amount') || 0
-    let paymentLink = '/thanks'
 
-    const orderData = {
-        source_id: 1,
-        manager_id: 1,
-        buyer_comment: `Звязатись через ${formData.get('contactType')}  \n Оплата: ${paymentMethod}`,
-        buyer: {
-            full_name: firstName + " " + lastName || '',
-            email: formData.get('email') || '',
-            phone: formData.get('phone') || ''
-        },
-        shipping: {
-            delivery_service_id: formData.get('delivery') === "novaposhta" ? 1 : 2,
-            tracking_code: formData.get('tracking_code') || '',
-            shipping_service: formData.get('delivery') || '',
-            shipping_address_city: formData.get('city') || '',
-            shipping_address_country: "Ukraine",
-            shipping_address_region: formData.get('region') || '',
-            shipping_address_zip: formData.get('zip') || '',
-            shipping_secondary_line: formData.get('address2') || '',
-            shipping_receive_point: formData.get('receive_point') || '',
-            recipient_full_name: formData.get('recipient_full_name') || '',
-            recipient_phone: formData.get('recipient_phone') || '',
-            warehouse_ref: formData.get('warehouse_ref') || '',
-        },
-        marketing: {
-            utm_source: formData.get('utm_source') || '',
-            utm_medium: formData.get('utm_medium') || '',
-            utm_campaign: formData.get('utm_campaign') || '',
-            utm_term: formData.get('utm_term') || '',
-            utm_content: formData.get('utm_content') || ''
-        },
-        products: generateProductForKeycrm(products),
-    };
-    const response = await fetch(`${KEYCRM_URL}/order`, {
-        method: "POST",
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${KEYCRM_API_KEY}`,
-        },
-        body: JSON.stringify(orderData),
-    })
 
-    const result: any = await response.json();
-    if (!response.ok) {
-        return json({ result, error: "error" + result.message || 'Failed to create order' });
-    }
-    console.log(result)
 
-    if (paymentMethod === "card") {
-        paymentLink = await generageMonoUrl(amount, products, result.id)
-
-    } else {
-        paymentLink = '/thanks';
-    }
-    return json({ message: "order success created", url: paymentLink });
-
-}
-const generateProductForKeycrm = (products: any) => {
-    return products.map((product: any) => {
-        const splitVariant = product.merchandise.id.split('/')
-        const variantId = splitVariant[splitVariant.length - 1]
-        return {
-            "sku": variantId,
-            "price": product?.merchandise?.price?.amount || 0,
-            "quantity": product?.quantity || 0,
-            "unit_type": "шт",
-            "name": product?.merchandise?.product?.title || " ",
-            "picture": product?.merchandise?.image?.url,
-            "properties": product?.merchandise?.selectedOptions
-        }
-
-    })
-}
-
-const generageMonoUrl = async (amount: any, products: any, id: string) => {
-    const productsForMono = getDataFromMonoUser(products);
-
-    return await fetch("https://api.monobank.ua/api/merchant/invoice/create", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            "X-Token": MONO_TOKEN,
-        },
-        body: JSON.stringify({
-            amount: amount * 100,
-            ccy: 980,
-            redirectUrl: "https://pick-up-shoes.com.ua/thanks",
-            webHookUrl: `https://pick-up-shoes.com.ua/checkout-webhook`,
-            merchantPaymInfo: {
-                reference: `${id}`,
-                destination: "Подарунок від MISTER GIFTER",
-                comment: "Подарунок від MISTER GIFTER",
-                basketOrder: productsForMono,
-            },
-            paymentType: "debit",
-            validity: 3600,
-        }),
-    })
-        .then((response) => {
-            return response.json();
-        })
-        .then((data: any) => {
-            return data.pageUrl;
-        })
-        .catch((response) => console.log(response));
-}
-
-const getDataFromMonoUser = (products: any) => {
-    return products.map(
-        (product: any, index: number) => {
-            const splitVariant = product.merchandise.id.split('/')
-            const variantId = splitVariant[splitVariant.length - 1]
-            return {
-                name: product?.merchandise?.product?.title || " ",
-                qty: product?.quantity || 0,
-                sum: +product?.merchandise?.price?.amount * 100,
-                icon: product?.merchandise?.image?.url,
-                unit: "шт.",
-                barcode: variantId,
-                header: "header",
-                code: variantId,
-                footer: "footer",
-                tax: [0],
-                uktzed: "uktzedcode",
-            };
-        }
-    );
-};
-const MONO_TOKEN = "utR_bnF6LUzdc4pr3yFNFF2kKEPk75xeIlItZx9QfaxY"
-const KEYCRM_URL = "https://openapi.keycrm.app/v1"
-const KEYCRM_API_KEY = "Mjg3ZTM0OGJlMWRiYjQxZmU2MmM1MWY4MTgxNmNjNjc4MWRjYWFlYg"

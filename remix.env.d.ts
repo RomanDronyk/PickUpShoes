@@ -12,6 +12,7 @@ import type {
 } from '@shopify/hydrogen/storefront-api-types';
 import type {CustomerAccessToken} from '@shopify/hydrogen/storefront-api-types';
 import type {HydrogenSession} from './server';
+import { AdminApiContext } from '@shopify/shopify-app-remix/server';
 
 declare global {
   /**
@@ -26,6 +27,8 @@ declare global {
     SESSION_SECRET: string;
     PUBLIC_STOREFRONT_API_TOKEN: string;
     PRIVATE_STOREFRONT_API_TOKEN: string;
+    KEYCRM_API_KEY:string;
+    MONO_TOKEN: string;
     PUBLIC_STORE_DOMAIN: string;
     PUBLIC_STOREFRONT_ID: string;
     PUBLIC_CUSTOMER_ACCOUNT_API_CLIENT_ID: string;
@@ -50,6 +53,7 @@ declare module '@shopify/remix-oxygen' {
    * Declare local additions to the Remix loader context.
    */
   export interface AppLoadContext {
+    admin: AdminApiContext;
     env: Env;
     cart: HydrogenCart;
     storefront: Storefront<I18nLocale>;

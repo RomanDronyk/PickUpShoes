@@ -7,6 +7,7 @@ import {
 import {Form, Link, useActionData, type MetaFunction} from '@remix-run/react';
 import {Input} from '~/components/ui/input';
 import {Button} from '~/components/ui/button';
+import { CUSTOMER_CREATE_MUTATION, LOGIN_MUTATION, REGISTER_LOGIN_MUTATION } from '~/graphql/mutations';
 
 enum FormNames {
   LOGIN_FORM = 'loginForm',
@@ -329,62 +330,3 @@ export default function Login() {
     </div>
   );
 }
-
-// NOTE: https://shopify.dev/docs/api/storefront/latest/mutations/customeraccesstokencreate
-export const LOGIN_MUTATION = `#graphql
-  mutation login($input: CustomerAccessTokenCreateInput!) {
-    customerAccessTokenCreate(input: $input) {
-      customerUserErrors {
-        code
-        field
-        message
-      }
-      customerAccessToken {
-        accessToken
-        expiresAt
-      }
-    }
-  }
-` as const;
-
-// NOTE: https://shopify.dev/docs/api/storefront/latest/mutations/customerCreate
-export const CUSTOMER_CREATE_MUTATION = `#graphql
-  mutation customerCreate(
-    $input: CustomerCreateInput!,
-    $country: CountryCode,
-    $language: LanguageCode
-  ) @inContext(country: $country, language: $language) {
-    customerCreate(input: $input) {
-      customer {
-        id
-      }
-      customerUserErrors {
-        code
-        field
-        message
-      }
-    }
-  }
-` as const;
-
-// NOTE: https://shopify.dev/docs/api/storefront/latest/mutations/customeraccesstokencreate
-
-export const REGISTER_LOGIN_MUTATION = `#graphql
-  mutation registerLogin(
-    $input: CustomerAccessTokenCreateInput!,
-    $country: CountryCode,
-    $language: LanguageCode
-  ) @inContext(country: $country, language: $language) {
-    customerAccessTokenCreate(input: $input) {
-      customerUserErrors {
-        code
-        field
-        message
-      }
-      customerAccessToken {
-        accessToken
-        expiresAt
-      }
-    }
-  }
-` as const;

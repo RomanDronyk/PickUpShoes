@@ -1,13 +1,8 @@
-import { ActionFunctionArgs, defer, type LoaderFunctionArgs } from '@shopify/remix-oxygen';
+import { defer, type LoaderFunctionArgs } from '@shopify/remix-oxygen';
 import { Await, useLoaderData, Link, type MetaFunction, Form, useActionData } from '@remix-run/react';
 import { Suspense } from 'react';
 import BlockNewsletter from '~/components/BlockNewsletter';
-import { Image, Money, createStorefrontClient } from '@shopify/hydrogen';
-import {
-  json,
-  redirect,
-  type ActionArgs
-} from '@shopify/remix-oxygen';
+import { Image, Money } from '@shopify/hydrogen';
 
 import type {
   FeaturedCollectionFragment,
@@ -15,14 +10,15 @@ import type {
   BestSellersQuery,
 } from 'storefrontapi.generated';
 
-
-
-
 import { Hero } from '~/components/Hero';
 import { MainCollections } from '~/components/MainCollections';
 import BestSellers from '~/components/BestSellers';
 import NewProducts from '~/components/NewProducts';
-// import shopify from '~/shopify.server';
+import { RECOMENDED_PRODUCT_QUERY } from '~/graphql/queries';
+import RecommendationProducts from '~/components/RecommendationProducts';
+
+
+
 export const handle: { breadcrumb: string } = {
   breadcrumb: 'home',
 };
@@ -37,12 +33,39 @@ export const meta: MetaFunction = () => {
   return [{ title: 'PickupShoes | Головна' }];
 };
 
+
+
+
+export default function Homepage() {
+  const { heroCollection, mainCollections,recommendedProducts, bestSellers, newProducts, storefront } =
+    useLoaderData<typeof loader>();
+  const actionData = useActionData();
+  return (
+    <div className="home w-full flex flex-col items-center justify-center gap-y-[58px]">
+      <Hero heroData={heroCollection} />
+      <MainCollections collection={mainCollections} />
+      <BestSellers items={bestSellers} />
+      <NewProducts items={newProducts} />
+      {/* <RecommendationProducts recommended={recommendedProducts} /> */}
+      <BlockNewsletter />
+    </div>
+  );
+}
+
 export async function loader({ context }: LoaderFunctionArgs) {
   const { storefront } = context;
 
   const { collections } = await storefront.query(FEATURED_COLLECTION_QUERY);
   const featuredCollection = collections.nodes[0];
-  const recommendedProducts = storefront.query(RECOMMENDED_PRODUCTS_QUERY);
+  const { productRecommendations } = await storefront.query(
+    RECOMENDED_PRODUCT_QUERY,
+    {
+      variables: {
+        id:  "gid://shopify/Product/9138246943028",
+        intent:"complementary",
+      },
+    },
+  );
 
   const heroCollection = await storefront.query(HERO_QUERY);
   const mainCollections = await storefront.query(MAIN_COOLLECTIONS, {
@@ -65,12 +88,9 @@ export async function loader({ context }: LoaderFunctionArgs) {
     },
   });
 
-
-
-
   return defer({
     featuredCollection,
-    recommendedProducts,
+    recommendedProducts:productRecommendations,
     heroCollection,
     mainCollections,
     bestSellers,
@@ -79,23 +99,6 @@ export async function loader({ context }: LoaderFunctionArgs) {
   });
 }
 
-
-
-export default function Homepage() {
-  const { heroCollection, mainCollections, bestSellers, newProducts, storefront } =
-    useLoaderData<typeof loader>();
-  const actionData = useActionData();
-  return (
-    <div className="home w-full flex flex-col items-center justify-center gap-y-[58px]">
-      <Hero heroData={heroCollection} />
-      <MainCollections collection={mainCollections} />
-      <BestSellers items={bestSellers} />
-      <NewProducts items={newProducts} />
-      {/* <RecommendedProducts products={data.recommendedProducts} /> */}
-      <BlockNewsletter />
-    </div>
-  );
-}
 
 function FeaturedCollection({
   collection,
@@ -234,7 +237,6 @@ query NewProducts($country: CountryCode, $language: LanguageCode)
 `;
 
 const FEATURED_COLLECTION_QUERY = `#graphql
-
   fragment FeaturedCollection on Collection {
     id
     title
@@ -257,36 +259,6 @@ const FEATURED_COLLECTION_QUERY = `#graphql
   }
 ` as const;
 
-const RECOMMENDED_PRODUCTS_QUERY = `#graphql
-  fragment RecommendedProduct on Product {
-    id
-    title
-    handle
-    priceRange {
-      minVariantPrice {
-        amount
-        currencyCode
-      }
-    }
-    images(first: 1) {
-      nodes {
-        id
-        url
-        altText
-        width
-        height
-      }
-    }
-  }
-  query RecommendedProducts ($country: CountryCode, $language: LanguageCode)
-    @inContext(country: $country, language: $language) {
-    products(first: 4, sortKey: UPDATED_AT, reverse: true) {
-      nodes {
-        ...RecommendedProduct
-      }
-    }
-  }
-` as const;
 
 const HERO_QUERY = `#graphql
   query HomeHero ($country: CountryCode, $language: LanguageCode)
@@ -335,24 +307,3 @@ const MAIN_COOLLECTIONS = `#graphql
 ` as const;
 
 
-
-export const CUSOMTER_CREATE_WITHOUT_PASS = `#graphql
-mutation customerCreate($input: CustomerCreateInput!) {
-  customerCreate(input: $input) {
-    customer {
-      email
-      acceptsMarketing
-    }
-    customerUserErrors {
-      field
-      message
-      code
-    }
-  }
-}
-`;
-
-
-
-
-///////

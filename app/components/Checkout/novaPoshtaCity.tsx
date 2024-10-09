@@ -12,7 +12,7 @@ interface Film {
   Present: string;
 }
 
-export default function NovaPoshtaCity({ setCity,setDepartment }: any) {
+export default function NovaPoshtaCity({ setCity, setDepartment }: any) {
   const [open, setOpen] = useState(false);
   const [options, setOptions] = useState<readonly Film[]>([]);
   const [inputCity, setInputCity] = useState("")
@@ -21,9 +21,11 @@ export default function NovaPoshtaCity({ setCity,setDepartment }: any) {
 
   useEffect(() => {
     setOptions(fetcher?.data?.cities || [])
-    setDepartment(fetcher?.data?.department|| [])
+    setDepartment(fetcher?.data?.department || [])
   }, [fetcher])
 
+  
+  
   const [debounceTimer, setDebounceTimer] = useState<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
@@ -31,15 +33,6 @@ export default function NovaPoshtaCity({ setCity,setDepartment }: any) {
     if (!loading) {
       return undefined;
     }
-    // (async () => {
-    //   if (active) {
-    //     fetcher.submit(
-    //       { action: "get city", city: inputCity },
-    //       { method: "post", action: "/checkout-api" }
-    //     );
-    //   }
-    // })();
-
     return () => {
       active = false;
     };

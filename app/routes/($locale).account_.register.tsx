@@ -6,6 +6,7 @@ import {
 } from '@shopify/remix-oxygen';
 import {Form, Link, useActionData} from '@remix-run/react';
 import type {CustomerCreateMutation} from 'storefrontapi.generated';
+import { CUSTOMER_CREATE_MUTATION, REGISTER_LOGIN_MUTATION } from '~/graphql/mutations';
 
 type ActionResponse = {
   error: string | null;
@@ -164,44 +165,3 @@ export default function Register() {
     </div>
   );
 }
-
-// NOTE: https://shopify.dev/docs/api/storefront/latest/mutations/customerCreate
-const CUSTOMER_CREATE_MUTATION = `#graphql
-  mutation customerCreate(
-    $input: CustomerCreateInput!,
-    $country: CountryCode,
-    $language: LanguageCode
-  ) @inContext(country: $country, language: $language) {
-    customerCreate(input: $input) {
-      customer {
-        id
-      }
-      customerUserErrors {
-        code
-        field
-        message
-      }
-    }
-  }
-` as const;
-
-// NOTE: https://shopify.dev/docs/api/storefront/latest/mutations/customeraccesstokencreate
-const REGISTER_LOGIN_MUTATION = `#graphql
-  mutation registerLogin(
-    $input: CustomerAccessTokenCreateInput!,
-    $country: CountryCode,
-    $language: LanguageCode
-  ) @inContext(country: $country, language: $language) {
-    customerAccessTokenCreate(input: $input) {
-      customerUserErrors {
-        code
-        field
-        message
-      }
-      customerAccessToken {
-        accessToken
-        expiresAt
-      }
-    }
-  }
-` as const;

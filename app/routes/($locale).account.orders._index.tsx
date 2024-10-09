@@ -10,6 +10,7 @@ import type {
   CustomerOrdersFragment,
   OrderItemFragment,
 } from 'storefrontapi.generated';
+import { CUSTOMER_ORDERS_QUERY } from '~/graphql/queries';
 
 export const handle = {
   breadcrumb: 'orders',
@@ -180,75 +181,6 @@ function OrderItem({ order }: { order: OrderItemFragment }) {
 }
 
 
-const ORDER_ITEM_FRAGMENT = `#graphql
-  fragment OrderItem on Order {
-    currentTotalPrice {
-      amount
-      currencyCode
-    }
-    financialStatus
-    fulfillmentStatus
-    id
-    lineItems(first: 1) {
-      nodes {
-        title
-        variant {
-          sku
-          image {
-            url
-            altText
-            height
-            width
-          }
-        }
-      }
-    }
-    orderNumber
-    customerUrl
-    statusUrl
-    processedAt
-  }
-` as const;
 
-export const CUSTOMER_FRAGMENT = `#graphql
-  fragment CustomerOrders on Customer {
-    numberOfOrders
-    orders(
-      sortKey: PROCESSED_AT,
-      reverse: true,
-      first: $first,
-      last: $last,
-      before: $startCursor,
-      after: $endCursor
-    ) {
-      nodes {
-        ...OrderItem
-      }
-      pageInfo {
-        hasPreviousPage
-        hasNextPage
-        endCursor
-        startCursor
-      }
-    }
-  }
-  ${ORDER_ITEM_FRAGMENT}
-` as const;
 
-// NOTE: https://shopify.dev/docs/api/storefront/latest/queries/customer
-const CUSTOMER_ORDERS_QUERY = `#graphql
-  ${CUSTOMER_FRAGMENT}
-  query CustomerOrders(
-    $country: CountryCode
-    $customerAccessToken: String!
-    $endCursor: String
-    $first: Int
-    $language: LanguageCode
-    $last: Int
-    $startCursor: String
-  ) @inContext(country: $country, language: $language) {
-    customer(customerAccessToken: $customerAccessToken) {
-      ...CustomerOrders
-    }
-  }
-` as const;
+
