@@ -348,6 +348,7 @@ async function createOrder(data: FormData, context: any) {
 
     console.log("slfajk")
     const generateOrderInShopifyAdminPromise = await generateOrderInShopifyAdmin(context, orderData)
+    console.log(generateOrderInShopifyAdminPromise)
     console.log("complete create")
 
     if (paymentMethod === "card") {

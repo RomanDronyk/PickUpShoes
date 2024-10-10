@@ -37,9 +37,9 @@ export default function Thanks() {
                         Очікуйте на зв’язок із нашим менеджером
                     </p>
                     <span className="lg:ml-6 lg:text-[26px] text-black rounded-[40px] bg-[#fff] p-[20px_35px] text-nowrap  text-[18px]">Найкращі — обирають найкращих</span>
-                    <Form method="post">
+                    {/* <Form method="post">
                         <button type="submit">slakfjasf</button>
-                    </Form>
+                    </Form> */}
                 </div>
             </div>
             <div className=' bg-cover flex items-center justify-center w-full bg-no-repeat  bg-center bg-contain bg-white/7 bg-blend-screen h-full bg-thankBg'>
@@ -47,7 +47,7 @@ export default function Thanks() {
         </div>
     )
 }
-export async function action({ context, request }: ActionFunctionArgs) {
+// export async function action({ context, request }: ActionFunctionArgs) {
     // const createDraftOrder = await context.admin(DRAF_ORDER_CREATE, {
     //     variables: {
     //         input: {
@@ -85,13 +85,13 @@ export async function action({ context, request }: ActionFunctionArgs) {
     //         paymentPending: false,
     //     }
     // })
-    const createDraftOrder = await context.admin(MARK_AS_PAID, {
-        variables: {
-            input: {
-                id:"gid://shopify/Order/6049442365748"
-            }
-        }
-    })
+    // const createDraftOrder = await context.admin(MARK_AS_PAID, {
+    //     variables: {
+    //         input: {
+    //             id:"gid://shopify/Order/6049442365748"
+    //         }
+    //     }
+    // })
     /**
  * Not suported in this version api
  */
@@ -110,14 +110,14 @@ export async function action({ context, request }: ActionFunctionArgs) {
     //     }
     // })
 
-    return json({
-        // createOrder,
-        createDraftOrder,
-        // completeDraftOrder,
-        name: 'sadl;kfja'
-    })
+    // return json({
+    //     // createOrder,
+    //     createDraftOrder,
+    //     // completeDraftOrder,
+    //     name: 'sadl;kfja'
+    // })
 
-}
+// }
 export async function loader({ request, context }: LoaderFunctionArgs) {
 
     const dataOrders = await context.admin(`#graphql

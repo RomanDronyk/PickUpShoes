@@ -31,11 +31,15 @@ export const action: ActionFunction = async ({context, request }) => {
 };
 
 const updateStatusInShopify = async (context: any, id: string) => {
+    console.log("updates status "+id)
     const updateStatus = await context.admin(MARK_AS_PAID_MUTATION, {
         variables: {
-            id
+            input:{
+                id: id
+            }
         }
     });
+    console.log(updateStatus)
 }
 
 const updateStatus = async (Amount: any, orderId: any) => {
