@@ -423,11 +423,6 @@ async function createOrder(data: FormData, context: any) {
     if (!generageOrderKeycrm.id) return json({ generageOrderKeycrm, error: "error" + generageOrderKeycrm.message || 'Failed to create order' });
     const generateOrderInShopifyAdminPromise = await generateOrderInShopifyAdmin(context, orderData)
 
-    if (paymentMethod === "card") {
-        console.log(generateOrderInShopifyAdminPromise.draftOrderComplete.draftOrder.order.id, "slkfja;l")
-        paymentLink = await generageMonoUrl(amount, products, `${generageOrderKeycrm.id}___${generateOrderInShopifyAdminPromise.draftOrderComplete.draftOrder.order.id}`)
-    }
-
     const { storefront, cart } = context;
     const productIds = products.map((product: any) => product.id);
     try {
@@ -437,6 +432,12 @@ async function createOrder(data: FormData, context: any) {
       } catch (error) {
         console.error('Failed to clear cart:', error);
       }
+
+    if (paymentMethod === "card") {
+        console.log(generateOrderInShopifyAdminPromise.draftOrderComplete.draftOrder.order.id, "slkfja;l")
+        paymentLink = await generageMonoUrl(amount, products, `${generageOrderKeycrm.id}___${generateOrderInShopifyAdminPromise.draftOrderComplete.draftOrder.order.id}`)
+    }
+
 
     return redirect(paymentLink, 302);
 
