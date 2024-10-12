@@ -17,6 +17,7 @@ import ua from 'react-phone-number-input/locale/ua'
 import PhoneInput, { isValidPhoneNumber } from 'react-phone-number-input/input'
 import { RECOMENDED_PRODUCT_QUERY } from '~/graphql/queries';
 import RecommendedCart, { RecommendedCartMobile } from '~/components/RecommendedCart';
+import { CartForm } from '@shopify/hydrogen';
 export const handle: { breadcrumb: string } = {
     breadcrumb: 'checkout',
 };
@@ -38,8 +39,8 @@ export const loader = async ({ context, request }: { context: any, request: Requ
         throw redirect("/", 302);
     }
 
-    const productIds = cartPromise.lines.nodes.map((product:any)=>product.merchandise.product.id);
-    const recommendedProductPromises = productIds.map((id:string)=>{
+    const productIds = cartPromise.lines.nodes.map((product: any) => product.merchandise.product.id);
+    const recommendedProductPromises = productIds.map((id: string) => {
         return context.storefront.query(RECOMENDED_PRODUCT_QUERY, {
             variables: {
                 country: context.storefront.i18n.country,
@@ -50,7 +51,7 @@ export const loader = async ({ context, request }: { context: any, request: Requ
         })
     })
     const recommendedProductResponce = await Promise.all(recommendedProductPromises)
-    const recommendedCarts = recommendedProductResponce.map((responce:any)=>{
+    const recommendedCarts = recommendedProductResponce.map((responce: any) => {
         const recommendedProduct = responce.productRecommendations;
         const filteredProducts = recommendedProduct.map((product: any) => {
             return {
@@ -120,11 +121,14 @@ export default function Checkout() {
         Description: "",
         Ref: ""
     })
+    useEffect(()=>{
+        console.log(department, "sldkfjs")
+    },[department])
 
 
     const { recommendedCarts } = data;
     const cartsFromCart = data?.cartPromise?.lines?.nodes.map((element: any) => element);
-    console.log(data.cartPromise,"cartPromise")
+    console.log(data.cartPromise, "cartPromise")
     const amount = data?.cartPromise?.cost?.subtotalAmount?.amount || 0
     const urlFromAction = response?.url;
     const navigate = useNavigate()
@@ -314,14 +318,16 @@ export default function Checkout() {
                                 )}
                             </div>
                             <Button onClick={(e) => {
-                                e.preventDefault()
-                                console.log(isValidPhoneNumber(userPhone), userPhone)
-                                if (!isValidPhoneNumber(userPhone)) {
-                                    return setError("Заповніть правильно номер")
-                                } else {
-                                    return setError("")
+                                // e.preventDefault()
+                                // console.log(isValidPhoneNumber(userPhone), userPhone)
+                                // if (!isValidPhoneNumber(userPhone)) {
+                                //     return setError("Заповніть правильно номер")
+                                // } else {
+                                //     return setError("")
 
-                                }
+
+                                // }
+
 
                             }} className='rounded-[64px] w-[100%] text-semibold text-[18px] text-white py-[16px]'>
                                 Оформити замовлення
@@ -364,7 +370,6 @@ export default function Checkout() {
                             </React.Fragment>
                         }
                         )}
-
                     </div>
                 </div>
             </div>
@@ -422,6 +427,17 @@ async function createOrder(data: FormData, context: any) {
         console.log(generateOrderInShopifyAdminPromise.draftOrderComplete.draftOrder.order.id, "slkfja;l")
         paymentLink = await generageMonoUrl(amount, products, `${generageOrderKeycrm.id}___${generateOrderInShopifyAdminPromise.draftOrderComplete.draftOrder.order.id}`)
     }
+
+    const { storefront, cart } = context;
+    const productIds = products.map((product: any) => product.id);
+    try {
+        if (cart) {
+          await cart.removeLines(productIds);
+        }
+      } catch (error) {
+        console.error('Failed to clear cart:', error);
+      }
+
     return redirect(paymentLink, 302);
 
 }

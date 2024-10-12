@@ -38,17 +38,15 @@ export default function NovaPoshtaCity({ setCity, setDepartment }: any) {
         formData.append("action", "get city");
         formData.append("city", inputCity);
 
-        // Fetch city data using the native fetch API and send FormData
         try {
           const response = await fetch("/checkout-api", {
             method: "POST",
-            body: formData, // Send FormData object
+            body: formData,
           });
 
           if (response.ok) {
             const data:any = await response.json();
             setOptions(data?.cities || []);
-            setDepartment(data?.department || []);
           } else {
             console.error("Failed to fetch city data");
           }
@@ -56,7 +54,7 @@ export default function NovaPoshtaCity({ setCity, setDepartment }: any) {
           console.error("Error occurred while fetching:", error);
         }
       }
-    }, 1000); // Debouncing for 1 second
+    }, 1000);
 
     setDebounceTimer(timer);
 
@@ -78,7 +76,10 @@ export default function NovaPoshtaCity({ setCity, setDepartment }: any) {
         onClose={() => {
           setOpen(false);
         }}
-        onChange={(event, city) => setCity(city)}
+        onChange={(event, city) => {
+          setCity(city)
+          setInputCity(city)
+        }}
         isOptionEqualToValue={(option, value) => option.Present === value.Present}
         getOptionLabel={(option) => option.Present}
         options={options}
