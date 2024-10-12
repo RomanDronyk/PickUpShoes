@@ -1,6 +1,8 @@
 import { CartForm, Image } from "@shopify/hydrogen"
 import CartLineQuantity from "../DropdownCart/CartLineQuantity"
 import { useState } from "react"
+import { useVariantUrl } from "~/utils"
+import { Link } from "@remix-run/react"
 
 const CheckoutCartMobile = ({ cartsFromCart }: any) => {
 
@@ -8,6 +10,8 @@ const CheckoutCartMobile = ({ cartsFromCart }: any) => {
     const updateQuantity = (value: any) => {
         setLoading(true)
     }
+    const variantUrl = useVariantUrl(cartsFromCart.merchandise.product.handle, cartsFromCart.merchandise.selectedOptions);
+
     return (
         <div className='flex flex-col  relative  justify-center  register max-h-[250px] overflow-hidden   pt-[24px] mb-[30px] lg:mb-0'>
             <div className='grid' style={{ minWidth: "100%", gridTemplateColumns: "1fr", position: "relative", justifyContent: 'space-between', alignItems: "center", gap: 0, }}>
@@ -36,9 +40,11 @@ const CheckoutCartMobile = ({ cartsFromCart }: any) => {
 
                     </div>
                     <div className="flex flex-col justify-between min-h-[100%]">
-                        <div style={{ maxWidth: 160, display: "block" }}>
+                        <div style={{  display: "block" }}>
                             <h4 className="md:text-xl text-lg font-semibold line-clamp-1 pr-[10px] mb-[7px]">
-                                {cartsFromCart?.merchandise?.product?.title}
+                                <Link to={variantUrl}>
+                                    {cartsFromCart?.merchandise?.product?.title}
+                                </Link>
                             </h4>
                         </div>
 

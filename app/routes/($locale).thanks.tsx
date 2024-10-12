@@ -1,12 +1,5 @@
-import { Form, useActionData, useLoaderData } from "@remix-run/react";
-import { ActionFunctionArgs, LoaderFunctionArgs, defer, json } from "@remix-run/server-runtime";
-
 // Checkout component
 export default function Thanks() {
-    const dataOrders = useLoaderData<typeof loader>();
-    const dataAction = useActionData<typeof action>();
-    console.log(dataAction, "dataActions")
-    console.log(dataOrders, "dataOrders")
     return (
         <div className="flex flex-col contaier  md:grid  lg:grid-cols-[1fr_1fr]  w-full "
             style={{ height: "90vh", maxWidth: "100%", overflow: "hidden" }}
@@ -37,9 +30,7 @@ export default function Thanks() {
                         Очікуйте на зв’язок із нашим менеджером
                     </p>
                     <span className="lg:ml-6 lg:text-[26px] text-black rounded-[40px] bg-[#fff] p-[20px_35px] text-nowrap  text-[18px]">Найкращі — обирають найкращих</span>
-                    {/* <Form method="post">
-                        <button type="submit">slakfjasf</button>
-                    </Form> */}
+
                 </div>
             </div>
             <div className=' bg-cover flex items-center justify-center w-full bg-no-repeat  bg-center bg-contain bg-white/7 bg-blend-screen h-full bg-thankBg'>
@@ -47,113 +38,4 @@ export default function Thanks() {
         </div>
     )
 }
-// export async function action({ context, request }: ActionFunctionArgs) {
-    // const createDraftOrder = await context.admin(DRAF_ORDER_CREATE, {
-    //     variables: {
-    //         input: {
-    //             email: "ivan.kalunuch12@gmail.com",
-    //             note: "testing note for draft order",
-    //             lineItems: {
-    //                 variantId: "gid://shopify/ProductVariant/47843539878196",
-    //                 quantity: 1,
-    //             },
-    //             paymentTerms:{
-    //                 paymentTermsTemplateId:"gid://shopify/PaymentTermsTemplate/9",
-    //             },
-    //             sourceName:"Hydrogen",
-    //             visibleToCustomer: true,
-    //             "phone": "+380934638895",
-    //             "shippingAddress": {
-    //                 "address1": "123 Тестова Вулиця",
-    //                 "address2": "Квартира 4",
-    //                 "city": "Львів",
-    //                 "company": "Тестова компанія",
-    //                 "country": "UA", 
-    //                 "firstName": "Іван",
-    //                 "lastName": "Калинч",
-    //                 "phone": "+380934638895",
-    //                 "province": "Львівська область",  
-    //                 "zip": "79007"  
-    //               },
-    //         }
-    //     }
-    // })
-    // const createDraftOrder = await context.admin(DRAFT_ORDER_COMPLETE, {
-    //     variables: {
-    //         id: "gid://shopify/DraftOrder/1170610356532",
-    //         sourceName: "Hydrogen",
-    //         paymentPending: false,
-    //     }
-    // })
-    // const createDraftOrder = await context.admin(MARK_AS_PAID, {
-    //     variables: {
-    //         input: {
-    //             id:"gid://shopify/Order/6049442365748"
-    //         }
-    //     }
-    // })
-    /**
- * Not suported in this version api
- */
-    // const createOrder = await context.admin(ORDER_CREATE, {
-    //     variables: {
-    //         order: {
-    //             email: "ivan.kalunuch12@gmail.com",
-    //             note: "testing note for draft order",
-    //             lineItems: {
-    //                 variantId: "gid://shopify/ProductVariant/47843539878196",
-    //                 quantity: 1,
-    //             },
-    //             phone: "+380934638895",
-    //             currency: "UAH"
-    //         }
-    //     }
-    // })
 
-    // return json({
-    //     // createOrder,
-    //     createDraftOrder,
-    //     // completeDraftOrder,
-    //     name: 'sadl;kfja'
-    // })
-
-// }
-export async function loader({ request, context }: LoaderFunctionArgs) {
-
-    const dataOrders = await context.admin(`#graphql
-    query {
-      order1: order(id: "gid://shopify/Order/5760155156788") {
-        name
-        
-      }
-      order2: order(id: "gid://shopify/Order/5769770271028") {
-        name
-        
-      }
-    }`,
-        {
-            variables: {
-
-            }
-        });
-    const getPaymentTems = await context.admin(PAYMENT_TERMS_TEMPLATE,{
-        variables: {}
-    })
-    return defer({
-        dataOrders,
-        getPaymentTems
-    })
-
-}
-
-const PAYMENT_TERMS_TEMPLATE = `#graphql
-query {
-  paymentTermsTemplates {
-    id
-    name
-    paymentTermsType
-    dueInDays
-    description
-    translatedName
-  }
-}`

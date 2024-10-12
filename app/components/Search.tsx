@@ -529,12 +529,15 @@ type SearchResultItemProps = Pick<SearchResultTypeProps, 'goToSearchResult'> & {
 
 function SearchResultItem({goToSearchResult, item}: SearchResultItemProps) {
   const isMobile = useMedia('(max-width: 767px)', false);
+  console.log(item)
   return (
     <li
       key={item.id}
       className="border-b border-b-black/30 pb-5 md:pb-[10px] last-of-type:border-none"
     >
-      <Link onClick={goToSearchResult} to={item.url} className="flex w-full">
+      <Link 
+      onClick={goToSearchResult}
+       to={`/products/${item.handle}`} className="flex w-full">
         {item.image?.url && (
           <Image
             alt={item.image.altText ?? ''}

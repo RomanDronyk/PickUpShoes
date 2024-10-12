@@ -13,6 +13,7 @@ import { COLLECTION_FILTER_QUERY } from "./collectionFilterQuery.graphql";
 import { COLLECTION_QUERY } from "./collectionQuery.graphql";
 import { PREDICTIVE_PRODUCT_SEARCH_QUERY } from "./predictiveProductSearchQuery.graphql";
 import { CUSTOMER_ORDERS_QUERY, CUSTOMER_ORDER_QUERY, CUSTOMER_QUERY } from "./customerQuery.graphql";
+import { PAYMENT_TERMS_TEMPLATE } from "./paymentTemrmsTemplateQuery.mutation";
 
 
 export {
@@ -33,5 +34,6 @@ export {
   CUSTOMER_QUERY,
   CUSTOMER_ORDER_QUERY,
   CUSTOMER_ORDERS_QUERY,
+  PAYMENT_TERMS_TEMPLATE,
 
 }

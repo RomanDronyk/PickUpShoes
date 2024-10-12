@@ -5,14 +5,19 @@ export const PREDICTIVE_PRODUCT_SEARCH_QUERY = `#graphql
     title
     handle
     trackingParameters
-    variants(first: 10) {
+    variants(first: 1) {
       nodes {
         id
+        sku
         image {
           url
           altText
           width
           height
+        }
+        selectedOptions {
+          name
+          value
         }
         price {
           amount
@@ -38,6 +43,7 @@ export const PREDICTIVE_PRODUCT_SEARCH_QUERY = `#graphql
     predictiveSearch(
       limit: $limit,
       limitScope: $limitScope,
+      searchableFields: [VARIANTS_SKU, TITLE],
       query: $searchTerm,
       types: $types,
     ) {

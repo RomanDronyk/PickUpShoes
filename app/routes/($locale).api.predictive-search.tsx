@@ -11,6 +11,7 @@ import type {
   PredictiveSearchQuery,
 } from 'storefrontapi.generated';
 import { PREDICTIVE_PRODUCT_SEARCH_QUERY } from '~/graphql/queries';
+import { PresenceContext } from 'framer-motion';
 
 type PredictiveSearchResultItem = PredictiveProductFragment;
 
@@ -120,6 +121,7 @@ export function normalizePredictiveSearchResults(
   const localePrefix = locale ? `/${locale}` : '';
   const results: NormalizedPredictiveSearchResults = [];
 
+  // console.log(predictiveSearch.products[0].variants.nodes[0].selectedOptions[0], "sdl;kfjs;ldfkjs")
   if (predictiveSearch.queries.length) {
     results.push({
       type: 'queries',
@@ -158,6 +160,7 @@ export function normalizePredictiveSearchResults(
             title: product.title,
             url: `${localePrefix}/products/${product.handle}${trackingParams}`,
             price: product.variants.nodes[0].price,
+            variants: product.variants
           };
         },
       ),

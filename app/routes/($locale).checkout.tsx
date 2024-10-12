@@ -1,7 +1,7 @@
-import { useLoaderData, json, MetaFunction, Form, useActionData, useNavigate, redirect } from '@remix-run/react';
+import { useLoaderData, json, MetaFunction, Form, useActionData, useNavigate, redirect, useNavigation } from '@remix-run/react';
 import { Input } from '~/components/ui/input';
 import { ActionFunction } from '@remix-run/node';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import CheckoutCart from '~/components/CheckoutCart';
 import { Button } from '~/components/ui/button';
 import NovaPoshtaCity from '~/components/Checkout/novaPoshtaCity';
@@ -12,8 +12,11 @@ import CheckoutCartMobile from '~/components/CheckoutCartMobile';
 import { CREATE_CHEKOUT_URL } from '~/graphql/mutations';
 import { generageMonoUrl, generateOrderInKeycrm, generateOrderInShopifyAdmin, generateProductForKeycrm } from '~/utils';
 
-
-
+import 'react-phone-number-input/style.css'
+import ua from 'react-phone-number-input/locale/ua'
+import PhoneInput, { isValidPhoneNumber } from 'react-phone-number-input/input'
+import { RECOMENDED_PRODUCT_QUERY } from '~/graphql/queries';
+import RecommendedCart, { RecommendedCartMobile } from '~/components/RecommendedCart';
 export const handle: { breadcrumb: string } = {
     breadcrumb: 'checkout',
 };
@@ -34,8 +37,34 @@ export const loader = async ({ context, request }: { context: any, request: Requ
     if (cartPromise?.lines?.nodes?.length == 0 || !cartPromise?.lines?.nodes?.length) {
         throw redirect("/", 302);
     }
-    return json({ cartPromise });
 
+    const productIds = cartPromise.lines.nodes.map((product:any)=>product.merchandise.product.id);
+    const recommendedProductPromises = productIds.map((id:string)=>{
+        return context.storefront.query(RECOMENDED_PRODUCT_QUERY, {
+            variables: {
+                country: context.storefront.i18n.country,
+                language: context.storefront.i18n.language,
+                id: id,
+                intent: "complementary",
+            }
+        })
+    })
+    const recommendedProductResponce = await Promise.all(recommendedProductPromises)
+    const recommendedCarts = recommendedProductResponce.map((responce:any)=>{
+        const recommendedProduct = responce.productRecommendations;
+        const filteredProducts = recommendedProduct.map((product: any) => {
+            return {
+                ...product, variants: product.variants.nodes.filter((variant: any) => {
+                    if (variant.availableForSale && variant.quantityAvailable > 0)
+                        return variant;
+                })
+            }
+        })
+        const randomIndex = Math.floor(Math.random() * filteredProducts.length);
+        return filteredProducts[randomIndex];
+    })
+
+    return json({ recommendedCarts: recommendedCarts, cartPromise });
 };
 
 
@@ -72,9 +101,13 @@ export default function Checkout() {
     const response: any = useActionData();
     const [city, setCity] = useState<any>({})
     const [options, setOptions] = useState([]);
+    const navigation = useNavigation();
+    const [error, setError] = useState(response?.error)
 
-    console.log(data,"data")
-    console.log(response,"response")
+
+    useEffect(() => {
+        response?.error && setError(response?.error)
+    }, [response])
 
     const [userName, setUserName] = useState({ firstName: "", lastName: "" });
     const [userPhone, setUserPhone] = useState("")
@@ -88,6 +121,8 @@ export default function Checkout() {
         Ref: ""
     })
 
+
+    const { recommendedCarts } = data;
     const cartsFromCart = data?.cartPromise?.lines?.nodes.map((element: any) => element);
     const amount = data?.cartPromise?.cost?.subtotalAmount?.amount || 0
     const urlFromAction = response?.url;
@@ -98,7 +133,6 @@ export default function Checkout() {
     } else if (urlFromAction !== null && urlFromAction) {
         window.location.href = urlFromAction;
     }
-
     return (
 
         <div className="flex flex-col-reverse contaier gap-[20px] md:gap-[40px] md:grid md:grid-cols-2 lg:grid-cols-[1fr_1fr] md:grid-cols-2 md:gap-y-10 md:gap-x-10 lg:px-24 px-[10px] my-10 w-full mt-[1rem]"
@@ -160,21 +194,31 @@ export default function Checkout() {
                                 />
                             </div>
                             <div className='pb-[15px] border-b border-black/20'>
-                                <Input
+                                <PhoneInput
                                     id="phone"
                                     name="phone"
                                     type="phone"
                                     autoComplete="phone"
+                                    initialValueFormat="national"
+                                    countryCallingCodeEditable
+                                    international={true}
                                     placeholder="+ 38 (098) 999 99-99"
-                                    aria-label="Password"
-
-                                    minLength={4}
-                                    required
-                                    onChange={(event) => setUserPhone(event.target.value)}
+                                    labels={ua}
+                                    smartCaret={true}
+                                    withCountryCallingCode={true}
+                                    useNationalFormatForDefaultCountryValue={true}
+                                    country="UA"
+                                    inputComponent={Input}
                                     className="bg-input px-6 py-3 text-xl placeholder:text-xl h-[52px] "
-                                />
+                                    value={userPhone}
+                                    maxLength="16"
+                                    minLength="16"
+                                    required
+                                    onChange={(e: any) => {
+                                        setError("")
+                                        setUserPhone(e)
+                                    }} />
                             </div>
-
                             <div className='pb-[15px] border-b border-black/20'>
                                 <ContactType />
                             </div>
@@ -184,9 +228,7 @@ export default function Checkout() {
                             <div className='pb-[15px] border-b border-black/20'>
                                 <NovaPoshtaDepartent options={options} setDepartment={setDepartment}
                                     setOptions={setOptions} city={city?.MainDescription} />
-
                             </div>
-
                             <div className=''>
                                 <Input
                                     id="email"
@@ -200,8 +242,6 @@ export default function Checkout() {
                                     className="bg-input px-6 py-3 text-xl placeholder:text-xl h-[52px] "
                                 />
                             </div>
-                            <>
-                            </>
                         </fieldset>
                     </div>
                     <div className="register rounded-[20px] border border-black/10 p-[20px_24px] ">
@@ -245,7 +285,9 @@ export default function Checkout() {
                                 <h2 className="xl:text-[32px] text-nowrap sm:text-[24px] text-left  mb-[15px] text-[22px]  sm:mb-[20px]">
                                     До сплати:
                                 </h2>
-                                <input style={{ maxWidth: 200 }} name="amount" disabled value={`${amount} грн.`} className='xl:text-[32px] text-nowrap sm:text-[24px] text-right  mb-[15px] text-[22px]  sm:mb-[20px]' />
+                                <span className='xl:text-[32px] text-nowrap sm:text-[24px] text-right  mb-[15px] text-[22px]  sm:mb-[20px]' >
+                                    {`${amount} грн`}
+                                </span>
                             </div>
                             <div className='hidden flex justify-between gap-[12px] pb-[24px]'>
                                 <Input
@@ -264,13 +306,23 @@ export default function Checkout() {
                                 </Button>
                             </div>
                             <div>
-                                {response?.error && (
+                                {error && (
                                     <>
-                                        {response?.error}
+                                        {error}
                                     </>
                                 )}
                             </div>
-                            <Button className='rounded-[64px] w-[100%] text-semibold text-[18px] text-white py-[16px]'>
+                            <Button onClick={(e) => {
+                                e.preventDefault()
+                                console.log(isValidPhoneNumber(userPhone), userPhone)
+                                if (!isValidPhoneNumber(userPhone)) {
+                                    return setError("Заповніть правильно номер")
+                                } else {
+                                    return setError("")
+
+                                }
+
+                            }} className='rounded-[64px] w-[100%] text-semibold text-[18px] text-white py-[16px]'>
                                 Оформити замовлення
                                 <span style={{ marginLeft: 15 }}>
                                     <svg width="16" height="16" viewBox="0 0 20 16" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -297,7 +349,25 @@ export default function Checkout() {
                     }
                     )}
                 </div>
+                <div>
+                    <h1 className="xl:text-[32px] mt-[20px] text-[24px] text-left  font-medium mb-[20px]">Також рекомендуєм:</h1>
+                    <div className="register rounded-[20px] border border-black/10 p-[0px_24px] ">
+                        {recommendedCarts.length > 0 && recommendedCarts.map((product: any, index: number) => {
+                            return <React.Fragment key={product.id || index} >
+                                {
+                                    isMobile ?
+                                        <RecommendedCartMobile key={product.id + "recommended"} product={product} /> :
+                                        <RecommendedCart key={product.id + "recommended"} product={product} />
+                                }
+                                {recommendedCarts.length - 1 !== index && <div key={recommendedCarts.length - 1 + index} className='border border-black/10'></div>}
+                            </React.Fragment>
+                        }
+                        )}
+
+                    </div>
+                </div>
             </div>
+
 
         </div>
     );
@@ -311,11 +381,11 @@ async function createOrder(data: FormData, context: any) {
     const deliveryMethod = data.get("delivery");
     const productsString: any = data.get('products') || '[]';
     const amount = data.get('amount') || 0
-    const products = JSON.parse(productsString);
-    const lineItems = products.map((element:any)=>{
+    const products: any = JSON.parse(productsString);
+    const lineItems = products.map((element: any) => {
         return {
-            variantId:element.merchandise.id,
-            quantity:element.quantity
+            variantId: element.merchandise.id,
+            quantity: element.quantity
         }
     })
 
@@ -324,7 +394,7 @@ async function createOrder(data: FormData, context: any) {
         note: data.get('note') || '',
         phone: data.get('phone') || '',
         lineItems,
-        shippingAddress:{
+        shippingAddress: {
             address1: data.get('shipping_receive_point') || '',
             address2: "",
             city: data.get('shipping_address_city') || '',
@@ -345,14 +415,10 @@ async function createOrder(data: FormData, context: any) {
     const generageOrderKeycrm = await generateOrderInKeycrm(data)
 
     if (!generageOrderKeycrm.id) return json({ generageOrderKeycrm, error: "error" + generageOrderKeycrm.message || 'Failed to create order' });
-
-    console.log("slfajk")
     const generateOrderInShopifyAdminPromise = await generateOrderInShopifyAdmin(context, orderData)
-    console.log(generateOrderInShopifyAdminPromise)
-    console.log("complete create")
 
     if (paymentMethod === "card") {
-        console.log(generateOrderInShopifyAdminPromise.draftOrderComplete.draftOrder.order.id,"slkfja;l")
+        console.log(generateOrderInShopifyAdminPromise.draftOrderComplete.draftOrder.order.id, "slkfja;l")
         paymentLink = await generageMonoUrl(amount, products, `${generageOrderKeycrm.id}___${generateOrderInShopifyAdminPromise.draftOrderComplete.draftOrder.order.id}`)
     }
     return redirect(paymentLink, 302);
@@ -374,9 +440,4 @@ async function createUrl(lineItems: any[], storefront: any) {
         return json({ response: "data" });
     }
 }
-
-
-
-
-
 

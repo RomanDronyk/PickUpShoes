@@ -51,6 +51,7 @@ export function Layout({
           {children}
         </motion.main>
       </AnimatePresence>
+      {/* <CartAside  cart={cart}/> */}
       <Suspense>
         <Await resolve={footer}>
           {(footer) => <Footer menu={footer} shop={header?.shop} />}

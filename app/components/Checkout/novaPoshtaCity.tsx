@@ -11,38 +11,17 @@ interface Film {
   Ref: string;
   Present: string;
 }
-
 export default function NovaPoshtaCity({ setCity, setDepartment }: any) {
   const [open, setOpen] = useState(false);
-  const [options, setOptions] = useState<readonly Film[]>([]);
-  const [inputCity, setInputCity] = useState("")
+  const [options, setOptions] = useState<readonly any[]>([]); // Assuming 'Film' is the type of city options
+  const [inputCity, setInputCity] = useState("");
   const loading = open && options.length === 0 && inputCity.length > 2;
-  const fetcher: any = useFetcher();
 
-  useEffect(() => {
-    setOptions(fetcher?.data?.cities || [])
-    setDepartment(fetcher?.data?.department || [])
-  }, [fetcher])
-
-  
-  
   const [debounceTimer, setDebounceTimer] = useState<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
-    let active = true;
-    if (!loading) {
-      return undefined;
-    }
-    return () => {
-      active = false;
-    };
-  }, [loading]);
-
-  useEffect(() => {
     if (!open) {
-      (async () => {
-        setOptions([]);
-      })();
+      setOptions([]);
     }
   }, [open]);
 
@@ -50,16 +29,37 @@ export default function NovaPoshtaCity({ setCity, setDepartment }: any) {
     if (debounceTimer) {
       clearTimeout(debounceTimer);
     }
-    const timer = setTimeout(() => {
+    const timer = setTimeout(async () => {
       if (inputCity.length > 0) {
-        setOptions([])
-        fetcher.submit(
-          { action: "get city", city: inputCity },
-          { method: "post", action: "/checkout-api" }
-        );
+        setOptions([]); // Reset the options before fetching
+
+        // Create FormData object
+        const formData = new FormData();
+        formData.append("action", "get city");
+        formData.append("city", inputCity);
+
+        // Fetch city data using the native fetch API and send FormData
+        try {
+          const response = await fetch("/checkout-api", {
+            method: "POST",
+            body: formData, // Send FormData object
+          });
+
+          if (response.ok) {
+            const data:any = await response.json();
+            setOptions(data?.cities || []);
+            setDepartment(data?.department || []);
+          } else {
+            console.error("Failed to fetch city data");
+          }
+        } catch (error) {
+          console.error("Error occurred while fetching:", error);
+        }
       }
-    }, 1000);
+    }, 1000); // Debouncing for 1 second
+
     setDebounceTimer(timer);
+
     return () => {
       if (timer) {
         clearTimeout(timer);
