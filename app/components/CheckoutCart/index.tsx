@@ -10,8 +10,8 @@ const CheckoutCart = ({ cartsFromCart }: any) => {
     const updateQuantity = (value: any) => {
         setLoading(true)
     }
-    console.log(cartsFromCart)
-  const variantUrl = useVariantUrl(cartsFromCart.merchandise.product.handle, cartsFromCart.merchandise.selectedOptions);
+    console.log(cartsFromCart, "checkout cart")
+    const variantUrl = useVariantUrl(cartsFromCart.merchandise.product.handle, cartsFromCart.merchandise.selectedOptions);
 
     return (
         <div className='flex flex-col min-h-[100px] relative  justify-center  register   py-[24px] mb-[30px] lg:mb-0'>
@@ -41,10 +41,10 @@ const CheckoutCart = ({ cartsFromCart }: any) => {
 
                     </div>
                     <div className="flex flex-col justify-between min-h-[100%]">
-                        <div style={{  display: "block" }}>
+                        <div style={{ display: "block" }}>
                             <h4 className="md:text-xl text-lg font-semibold line-clamp-1 pr-[10px] mb-[7px]">
                                 <Link to={variantUrl}>
-                                {cartsFromCart?.merchandise?.product?.title}
+                                    {cartsFromCart?.merchandise?.product?.title}
                                 </Link>
                             </h4>
                         </div>
@@ -56,6 +56,9 @@ const CheckoutCart = ({ cartsFromCart }: any) => {
                                     </h4>
                                 </>
                             })}
+                            <h4>
+                                Артикул: <span className="text-black/50">{cartsFromCart?.merchandise?.sku}</span>
+                            </h4>
                         </div>
                         <div>
                             <h4 className="md:text-xl text-lg font-semibold line-clamp-1 pr-[10px] mb-[7px]">
