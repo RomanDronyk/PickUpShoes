@@ -81,7 +81,7 @@ export const generageMonoUrl = async ( amount: any, products: any, id: string,si
       return data.pageUrl;
     })
     .catch((response) => {
-      return response
+      return {response, paymentUrl: "/tanks"}
     });
 }
 
