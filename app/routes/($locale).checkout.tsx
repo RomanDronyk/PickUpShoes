@@ -436,7 +436,7 @@ async function createOrder(data: FormData, context: any) {
 
     if (paymentMethod === "card") {
         console.log(generateOrderInShopifyAdminPromise.draftOrderComplete.draftOrder.order.id, "slkfja;l")
-        paymentLink = await generageMonoUrl(amount, products, `${generageOrderKeycrm.id}___${generateOrderInShopifyAdminPromise.draftOrderComplete.draftOrder.order.id}`)
+        paymentLink = await generageMonoUrl(amount, products, `${generageOrderKeycrm.id}___${generateOrderInShopifyAdminPromise.draftOrderComplete.draftOrder.order.id}`,"https://pick-up-shoes.com.ua")
     }
 
 

@@ -65,7 +65,7 @@ export const generageMonoUrl = async ( amount: any, products: any, id: string,si
       redirectUrl: `${siteUrl}/thanks`,
       webHookUrl: `${siteUrl}/checkout-webhook`,
       merchantPaymInfo: {
-        reference: `${id}`,
+        reference: id,
         destination: "Подарунок від MISTER GIFTER",
         comment: "Подарунок від MISTER GIFTER",
         basketOrder: getDataFromMonoUser(products),
