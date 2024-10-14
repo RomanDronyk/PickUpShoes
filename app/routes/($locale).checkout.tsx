@@ -328,7 +328,7 @@ export default function Checkout() {
                                     </>
                                 )}
                             </div>
-                            <Button disabled={isLoading} onClick={(e) => {
+                            <Button onClick={(e) => {
                                 setIsLoading(true)
                             }} className='rounded-[64px] w-[100%] text-semibold text-[18px] text-white py-[16px]'>
                                 {isLoading ? "Загрузка" : "Оформити замовлення"}
