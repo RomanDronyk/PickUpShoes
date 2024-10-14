@@ -443,6 +443,7 @@ async function createOrder(data: FormData, context: any) {
     } catch (error) {
         console.error('Failed to clear cart:', error);
     }
+    return redirect(paymentLink?.pageUrl, 302)
 
     return json(paymentLink);
 
