@@ -328,10 +328,8 @@ export default function Checkout() {
                                     </>
                                 )}
                             </div>
-                            <Button onClick={(e) => {
+                            <Button disabled={isLoading} onClick={(e) => {
                                 setIsLoading(true)
-
-
                             }} className='rounded-[64px] w-[100%] text-semibold text-[18px] text-white py-[16px]'>
                                 {isLoading ? "Загрузка" : "Оформити замовлення"}
                                 <span style={{ marginLeft: 15 }}>
