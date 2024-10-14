@@ -24,8 +24,9 @@ export const handle: { breadcrumb: string } = {
 // Meta function for the page
 export const meta: MetaFunction = () => {
     return [{
-        title: `Оформити замовлення | Pick Up Shoes`, 'http-equiv': {
-            'Content-Security-Policy': "connect-src 'self' https://api.novaposhta.ua;"
+        title: `Оформити замовлення | Pick Up Shoes`, 
+        'http-equiv': {
+            'Content-Security-Policy': "connect-src 'self' https://api.novaposhta.ua https://api.monobank.ua;"
         }
     }];
 };
