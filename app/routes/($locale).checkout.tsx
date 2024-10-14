@@ -24,7 +24,7 @@ export const handle: { breadcrumb: string } = {
 // Meta function for the page
 export const meta: MetaFunction = () => {
     return [{
-        title: `Оформити замовлення | Pick Up Shoes`, 
+        title: `Оформити замовлення | Pick Up Shoes`,
         'http-equiv': {
             'Content-Security-Policy': "connect-src 'self' https://api.novaposhta.ua https://api.monobank.ua;"
         }
@@ -41,7 +41,7 @@ export const loader = async ({ context, request }: { context: any, request: Requ
 
     const productIds = cartPromise.lines.nodes.map((product: any) => product.merchandise.product.id);
     let recommendedProductPromises;
-    if(productIds.length>0){
+    if (productIds.length > 0) {
         recommendedProductPromises = productIds.map((id: string) => {
             return context.storefront.query(RECOMENDED_PRODUCT_QUERY, {
                 variables: {
@@ -52,13 +52,13 @@ export const loader = async ({ context, request }: { context: any, request: Requ
                 }
             })
         })
-    }else{
-        recommendedProductPromises=[]
+    } else {
+        recommendedProductPromises = []
     }
     const recommendedProductResponce = await Promise.all(recommendedProductPromises)
     let recommendedCarts = [];
-    if(productIds.length>0){
-        recommendedCarts= recommendedProductResponce.map((responce: any) => {
+    if (productIds.length > 0) {
+        recommendedCarts = recommendedProductResponce.map((responce: any) => {
             const recommendedProduct = responce.productRecommendations;
             const filteredProducts = recommendedProduct.map((product: any) => {
                 return {
@@ -131,18 +131,18 @@ export default function Checkout() {
         Description: "",
         Ref: ""
     })
-    useEffect(()=>{
+    useEffect(() => {
         console.log(department, "sldkfjs")
-    },[department])
+    }, [department])
 
 
     const { recommendedCarts } = data;
     const cartsFromCart = data?.cartPromise?.lines?.nodes.map((element: any) => element);
-    console.log(data,response, "cartPromise")
+    console.log(data, response, "cartPromise")
     const amount = data?.cartPromise?.cost?.subtotalAmount?.amount || 0
     const urlFromAction = response?.url;
     const navigate = useNavigate()
-    const [isLoading, setIsLoading]=useState(false)
+    const [isLoading, setIsLoading] = useState(false)
 
     // if (urlFromAction == "/thanks") {
     //     urlFromAction ? navigate(urlFromAction) : null;
@@ -333,7 +333,7 @@ export default function Checkout() {
 
 
                             }} className='rounded-[64px] w-[100%] text-semibold text-[18px] text-white py-[16px]'>
-                                {isLoading?"Загрузка": "Оформити замовлення"} 
+                                {isLoading ? "Загрузка" : "Оформити замовлення"}
                                 <span style={{ marginLeft: 15 }}>
                                     <svg width="16" height="16" viewBox="0 0 20 16" fill="none" xmlns="http://www.w3.org/2000/svg">
                                         <path d="M12.2959 0.454104L19.0459 7.2041C19.1508 7.30862 19.234 7.43281 19.2908 7.56956C19.3476 7.7063 19.3768 7.85291 19.3768 8.00098C19.3768 8.14904 19.3476 8.29565 19.2908 8.4324C19.234 8.56915 19.1508 8.69334 19.0459 8.79785L12.2959 15.5479C12.0846 15.7592 11.7979 15.8779 11.4991 15.8779C11.2002 15.8779 10.9135 15.7592 10.7022 15.5479C10.4908 15.3365 10.3721 15.0499 10.3721 14.751C10.3721 14.4521 10.4908 14.1654 10.7022 13.9541L15.5313 9.12504L1.75 9.12504C1.45163 9.12504 1.16548 9.00651 0.954505 8.79554C0.743527 8.58456 0.625 8.29841 0.625 8.00004C0.625 7.70167 0.743527 7.41552 0.954505 7.20455C1.16548 6.99357 1.45163 6.87504 1.75 6.87504L15.5313 6.87504L10.7013 2.04598C10.4899 1.83463 10.3712 1.54799 10.3712 1.2491C10.3712 0.950218 10.4899 0.663574 10.7013 0.45223C10.9126 0.240885 11.1992 0.122151 11.4981 0.122151C11.797 0.122151 12.0837 0.240885 12.295 0.45223L12.2959 0.454104Z" fill="white" />
@@ -429,19 +429,19 @@ async function createOrder(data: FormData, context: any) {
     // const generateOrderInShopifyAdminPromise = await generateOrderInShopifyAdmin(context, orderData)
 
 
-    try {
-        if (cart) {
-          await cart.removeLines(productIds);
-        }
-      } catch (error) {
-        console.error('Failed to clear cart:', error);
-      }
+    // try {
+    //     if (cart) {
+    //         await cart.removeLines(productIds);
+    //     }
+    // } catch (error) {
+    //     console.error('Failed to clear cart:', error);
+    // }
 
     if (paymentMethod == "card") {
         paymentLink = await generageMonoUrl(amount, products,
             //  `${generageOrderKeycrm.id}___${generateOrderInShopifyAdminPromise.draftOrderComplete.draftOrder.order.id}`,
-             `${generageOrderKeycrm.id}___${123123}`,
-             "https://pick-up-shoes.com.ua")
+            `${generageOrderKeycrm.id}___${123123}`,
+            "https://pick-up-shoes.com.ua")
     }
 
 
