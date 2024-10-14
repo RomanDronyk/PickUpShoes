@@ -436,7 +436,7 @@ async function createOrder(data: FormData, context: any) {
         console.error('Failed to clear cart:', error);
       }
 
-    if (paymentMethod === "card") {
+    if (paymentMethod == "card") {
         paymentLink = await generageMonoUrl(amount, products, `${generageOrderKeycrm.id}___${generateOrderInShopifyAdminPromise.draftOrderComplete.draftOrder.order.id}`,"https://pick-up-shoes.com.ua")
     }
 
