@@ -137,7 +137,7 @@ export default function Checkout() {
 
     const { recommendedCarts } = data;
     const cartsFromCart = data?.cartPromise?.lines?.nodes.map((element: any) => element);
-    console.log(data.cartPromise, "cartPromise")
+    console.log(data,response, "cartPromise")
     const amount = data?.cartPromise?.cost?.subtotalAmount?.amount || 0
     const urlFromAction = response?.url;
     const navigate = useNavigate()
