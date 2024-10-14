@@ -429,8 +429,8 @@ async function createOrder(data: FormData, context: any) {
 
     if (paymentMethod == "card") {
         paymentLink = await generageMonoUrl(amount, products,
-            // `${generageOrderKeycrm.id}___${generateOrderInShopifyAdminPromise.draftOrderComplete.draftOrder.order.id}`,
-            `${generageOrderKeycrm.id}`,
+            `${generageOrderKeycrm.id}___${generateOrderInShopifyAdminPromise.draftOrderComplete.draftOrder.order.id}`,
+            // `${generageOrderKeycrm.id}`,
             "https://pick-up-shoes.com.ua")
     }
 
@@ -441,9 +441,7 @@ async function createOrder(data: FormData, context: any) {
     } catch (error) {
         console.error('Failed to clear cart:', error);
     }
-    // return redirect(paymentLink?.pageUrl, 302)
-
-    return json(paymentLink);
+    return redirect(paymentLink?.pageUrl, 302)
 
 }
 async function createUrl(lineItems: any[], storefront: any) {
