@@ -1,6 +1,6 @@
 import { generateProductForKeycrm } from "./generateProductForKeycrm";
 
-export const generateOrderInKeycrm = async(formData: FormData)=> {
+export const generateOrderInKeycrm = async (formData: FormData) => {
 
   const productsString: any = formData.get('products') || '[]';
   const products = JSON.parse(productsString);
@@ -9,80 +9,77 @@ export const generateOrderInKeycrm = async(formData: FormData)=> {
   const lastName = formData.get('lastName') || "null"
 
   const orderData = {
-      source_id: 1,
-      manager_id: 1,
-      buyer_comment: `Звязатись через ${formData.get('contactType')}  \n Оплата: ${paymentMethod}`,
-      buyer: {
-          full_name: firstName + " " + lastName || '',
-          email: formData.get('email') || '',
-          phone: formData.get('phone') || ''
-      },
-      shipping: {
-          delivery_service_id: formData.get('delivery') === "novaposhta" ? 1 : 2,
-          tracking_code: formData.get('tracking_code') || '',
-          shipping_service: formData.get('delivery') || '',
-          shipping_address_city: formData.get('city') || '',
-          shipping_address_country: "Ukraine",
-          shipping_address_region: formData.get('region') || '',
-          shipping_address_zip: formData.get('zip') || '',
-          shipping_secondary_line: formData.get('address2') || '',
-          shipping_receive_point: formData.get('receive_point') || '',
-          recipient_full_name: formData.get('recipient_full_name') || '',
-          recipient_phone: formData.get('recipient_phone') || '',
-          warehouse_ref: formData.get('warehouse_ref') || '',
-      },
-      marketing: {
-          utm_source: formData.get('utm_source') || '',
-          utm_medium: formData.get('utm_medium') || '',
-          utm_campaign: formData.get('utm_campaign') || '',
-          utm_term: formData.get('utm_term') || '',
-          utm_content: formData.get('utm_content') || ''
-      },
-      products: generateProductForKeycrm(products),
+    source_id: 1,
+    manager_id: 1,
+    buyer_comment: `Звязатись через ${formData.get('contactType')}  \n Оплата: ${paymentMethod}`,
+    buyer: {
+      full_name: firstName + " " + lastName || '',
+      email: formData.get('email') || '',
+      phone: formData.get('phone') || ''
+    },
+    shipping: {
+      delivery_service_id: formData.get('delivery') === "novaposhta" ? 1 : 2,
+      tracking_code: formData.get('tracking_code') || '',
+      shipping_service: formData.get('delivery') || '',
+      shipping_address_city: formData.get('city') || '',
+      shipping_address_country: "Ukraine",
+      shipping_address_region: formData.get('region') || '',
+      shipping_address_zip: formData.get('zip') || '',
+      shipping_secondary_line: formData.get('address2') || '',
+      shipping_receive_point: formData.get('receive_point') || '',
+      recipient_full_name: formData.get('recipient_full_name') || '',
+      recipient_phone: formData.get('recipient_phone') || '',
+      warehouse_ref: formData.get('warehouse_ref') || '',
+    },
+    marketing: {
+      utm_source: formData.get('utm_source') || '',
+      utm_medium: formData.get('utm_medium') || '',
+      utm_campaign: formData.get('utm_campaign') || '',
+      utm_term: formData.get('utm_term') || '',
+      utm_content: formData.get('utm_content') || ''
+    },
+    products: generateProductForKeycrm(products),
   };
   const response = await fetch(`${KEYCRM_URL}/order`, {
-      method: "POST",
-      headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${KEYCRM_API_KEY}`,
-      },
-      body: JSON.stringify(orderData),
+    method: "POST",
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${KEYCRM_API_KEY}`,
+    },
+    body: JSON.stringify(orderData),
   })
   const result: any = await response.json();
   return result
 }
-export const generageMonoUrl = async ( amount: any, products: any, id: string,siteUrl="https://pick-up-shoes.com.ua",) => {
-
-  return await fetch(MONO_URL, {
-    method: "POST",
-    headers: {
-      "X-Token": MONO_TOKEN,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      amount: amount * 100,
-      ccy: 980,
-      redirectUrl: `${siteUrl}/thanks`,
-      webHookUrl: `${siteUrl}/checkout-webhook`,
-      merchantPaymInfo: {
-        reference: id,
-        destination: "Подарунок від MISTER GIFTER",
-        comment: "Подарунок від MISTER GIFTER",
-        basketOrder: getDataFromMonoUser(products),
+export const generageMonoUrl = async (amount: any, products: any, id: string, siteUrl = "https://pick-up-shoes.com.ua",) => {
+  try {
+    const response = await fetch(MONO_URL, {
+      method: "POST",
+      headers: {
+        "X-Token": MONO_TOKEN,
+        "Content-Type": "application/json",
       },
-      paymentType: "debit",
-      validity: 3600,
-    }),
-  })
-    .then((response) => {
-      return response.json();
+      body: JSON.stringify({
+        amount: amount * 100,
+        ccy: 980,
+        redirectUrl: `${siteUrl}/thanks`,
+        webHookUrl: `${siteUrl}/checkout-webhook`,
+        merchantPaymInfo: {
+          reference: id,
+          destination: "Подарунок від MISTER GIFTER",
+          comment: "Подарунок від MISTER GIFTER",
+          basketOrder: getDataFromMonoUser(products),
+        },
+        paymentType: "debit",
+        validity: 3600,
+      }),
     })
-    .then((data: any) => {
-      return data.pageUrl;
-    })
-    .catch((response) => {
-      return {response, paymentUrl: "/tanks"}
-    });
+    const result:any = await response.json();
+    return {pageUrl:result.pageUrl};
+  } catch (error) {
+    console.error("Ошибка:", error);
+    return {error, pageUrl: "/thanks"}
+  }
 }
 
 const getDataFromMonoUser = (products: any) => {

@@ -418,7 +418,7 @@ async function createOrder(data: FormData, context: any) {
         }
     }
 
-    let paymentLink = '/thanks'
+    let paymentLink
 
     if (!paymentMethod) return json({ error: 'Виберіть спосіб оплатии' }, { status: 405 });
     if (!deliveryMethod) return json({ error: 'Виберіть спосіб доставки' }, { status: 405 });
@@ -440,7 +440,7 @@ async function createOrder(data: FormData, context: any) {
     if (paymentMethod == "card") {
         paymentLink = await generageMonoUrl(amount, products,
             //  `${generageOrderKeycrm.id}___${generateOrderInShopifyAdminPromise.draftOrderComplete.draftOrder.order.id}`,
-            `${generageOrderKeycrm.id}___${123123}`,
+            `${generageOrderKeycrm.id}`,
             "https://pick-up-shoes.com.ua")
     }
 
