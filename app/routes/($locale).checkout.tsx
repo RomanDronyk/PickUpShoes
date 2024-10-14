@@ -14,11 +14,9 @@ import { generageMonoUrl, generateOrderInKeycrm, generateOrderInShopifyAdmin, ge
 
 import 'react-phone-number-input/style.css'
 import ua from 'react-phone-number-input/locale/ua'
-import PhoneInput, { isValidPhoneNumber } from 'react-phone-number-input/input'
+import PhoneInput from 'react-phone-number-input/input'
 import { RECOMENDED_PRODUCT_QUERY } from '~/graphql/queries';
 import RecommendedCart, { RecommendedCartMobile } from '~/components/RecommendedCart';
-import { CartForm } from '@shopify/hydrogen';
-import Loader from '~/components/Loader';
 export const handle: { breadcrumb: string } = {
     breadcrumb: 'checkout',
 };

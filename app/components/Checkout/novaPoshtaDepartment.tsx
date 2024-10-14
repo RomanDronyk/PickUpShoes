@@ -3,8 +3,7 @@ import TextField from '@mui/material/TextField';
 import Autocomplete from '@mui/material/Autocomplete';
 import CircularProgress from '@mui/material/CircularProgress';
 import { useEffect, useState } from 'react';
-import { useFetcher } from '@remix-run/react';
-import { cn } from '~/lib/utils';
+
 import style from './style';
 
 interface Film {
@@ -19,13 +18,7 @@ export default function NovaPoshtaDepartent({ options, setOptions, setDepartment
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [inputDepartment, setInputDepartment] = useState("")
-  const fetcher: any = useFetcher();
 
-  useEffect(() => {
-    if (fetcher?.data?.department?.length > 0) {
-      setOptions(fetcher?.data?.department || [])
-    }
-  }, [fetcher])
   useEffect(() => {
     if (options.length > 0) {
       setLoading(false)
@@ -51,14 +44,27 @@ export default function NovaPoshtaDepartent({ options, setOptions, setDepartment
       clearTimeout(debounceTimer);
     }
 
-    const timer = setTimeout(() => {
+    const timer = setTimeout(async () => {
+      const formData = new FormData();
+      formData.append("action", "get department");
+      formData.append("city", city);
+      formData.append("department", inputDepartment);
       if (inputDepartment.length > 0) {
-        setLoading(true)
-        fetcher.submit(
-          { action: "get department", city: city, department: inputDepartment },
-          { method: "post", action: "/checkout-api" }
-        );
+        try {
+          const response = await fetch("/checkout-api", {
+            method: "POST",
+            body: formData,
+          });
 
+          if (response.ok) {
+            const data: any = await response.json();
+            setOptions(data?.department || []);
+          } else {
+            console.error("Failed to fetch city data");
+          }
+        } catch (error) {
+          console.error("Error occurred while fetching:", error);
+        }
       } else {
         setLoading(false)
       }
