@@ -143,11 +143,11 @@ export default function Checkout() {
     const navigate = useNavigate()
     const [isLoading, setIsLoading]=useState(false)
 
-    if (urlFromAction == "/thanks") {
-        urlFromAction ? navigate(urlFromAction) : null;
-    } else if (urlFromAction !== null && urlFromAction) {
-        window.location.href = urlFromAction;
-    }
+    // if (urlFromAction == "/thanks") {
+    //     urlFromAction ? navigate(urlFromAction) : null;
+    // } else if (urlFromAction !== null && urlFromAction) {
+    //     window.location.href = urlFromAction;
+    // }
     return (
 
         <div className="flex flex-col-reverse contaier gap-[20px] md:gap-[40px] md:grid md:grid-cols-2 lg:grid-cols-[1fr_1fr] md:grid-cols-2 md:gap-y-10 md:gap-x-10 lg:px-24 px-[10px] my-10 w-full mt-[1rem]"
@@ -441,7 +441,7 @@ async function createOrder(data: FormData, context: any) {
     }
 
 
-    return redirect(paymentLink, 302);
+    return paymentLink;
 
 }
 async function createUrl(lineItems: any[], storefront: any) {
