@@ -73,14 +73,23 @@ export const generageMonoUrl = async (amount: any, products: any, id: string, si
         paymentType: "debit",
         validity: 3600,
       }),
-    })
+    });
+
+    if (!response.ok) {
+      // Логування статусу помилки
+      const errorText = await response.text();
+      console.error(`Monobank API error (status: ${response.status}):`, errorText);
+      return { error: errorText, pageUrl: "/thanks" };
+    }
+
     const result:any = await response.json();
-    return {pageUrl:result.pageUrl};
+    return { pageUrl: result.pageUrl };
   } catch (error) {
     console.error("Ошибка:", error);
-    return {error, pageUrl: "/thanks"}
+    return { error: error.message || "Unknown error", pageUrl: "/thanks", amount, products,id, siteUrl };
   }
 }
+
 
 const getDataFromMonoUser = (products: any) => {
   return products.map(
