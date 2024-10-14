@@ -83,7 +83,8 @@ export const generageMonoUrl = async (amount: any, products: any, id: string, si
     }
 
     const result:any = await response.json();
-    return { pageUrl: result.pageUrl };
+    return {pageUrl: result.pageUrl , amount, products,id, siteUrl };
+
   } catch (error) {
     console.error("Ошибка:", error);
     return { error: error.message || "Unknown error", pageUrl: "/thanks", amount, products,id, siteUrl };
