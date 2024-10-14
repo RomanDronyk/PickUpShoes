@@ -80,7 +80,9 @@ export const generageMonoUrl = async ( amount: any, products: any, id: string,si
     .then((data: any) => {
       return data.pageUrl;
     })
-    .catch((response) => response);
+    .catch((response) => {
+      return response
+    });
 }
 
 const getDataFromMonoUser = (products: any) => {

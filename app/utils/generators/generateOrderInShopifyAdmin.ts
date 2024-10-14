@@ -18,7 +18,6 @@ export const generateOrderInShopifyAdmin = async (context: any, orderData: any) 
       }
     }
   })
-  console.log(createDraftOrder,createDraftOrder?.draftOrderCreate?.draftOrder?.id)
   const completeOrder = await context.admin(DRAFT_ORDER_COMPLETE_MUTATION, {
     variables: {
       id: createDraftOrder?.draftOrderCreate?.draftOrder?.id,

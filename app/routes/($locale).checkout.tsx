@@ -441,7 +441,7 @@ async function createOrder(data: FormData, context: any) {
     }
 
 
-    return paymentLink;
+    return json(paymentLink);
 
 }
 async function createUrl(lineItems: any[], storefront: any) {
