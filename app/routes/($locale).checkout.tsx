@@ -41,30 +41,38 @@ export const loader = async ({ context, request }: { context: any, request: Requ
     }
 
     const productIds = cartPromise.lines.nodes.map((product: any) => product.merchandise.product.id);
-    const recommendedProductPromises = productIds.map((id: string) => {
-        return context.storefront.query(RECOMENDED_PRODUCT_QUERY, {
-            variables: {
-                country: context.storefront.i18n.country,
-                language: context.storefront.i18n.language,
-                id: id,
-                intent: "complementary",
-            }
+    let recommendedProductPromises;
+    if(productIds.length>0){
+        recommendedProductPromises = productIds.map((id: string) => {
+            return context.storefront.query(RECOMENDED_PRODUCT_QUERY, {
+                variables: {
+                    country: context.storefront.i18n.country,
+                    language: context.storefront.i18n.language,
+                    id: id,
+                    intent: "complementary",
+                }
+            })
         })
-    })
+    }else{
+        recommendedProductPromises=[]
+    }
     const recommendedProductResponce = await Promise.all(recommendedProductPromises)
-    const recommendedCarts = recommendedProductResponce.map((responce: any) => {
-        const recommendedProduct = responce.productRecommendations;
-        const filteredProducts = recommendedProduct.map((product: any) => {
-            return {
-                ...product, variants: product.variants.nodes.filter((variant: any) => {
-                    if (variant.availableForSale && variant.quantityAvailable > 0)
-                        return variant;
-                })
-            }
+    let recommendedCarts = [];
+    if(productIds.length>0){
+        recommendedCarts= recommendedProductResponce.map((responce: any) => {
+            const recommendedProduct = responce.productRecommendations;
+            const filteredProducts = recommendedProduct.map((product: any) => {
+                return {
+                    ...product, variants: product.variants.nodes.filter((variant: any) => {
+                        if (variant.availableForSale && variant.quantityAvailable > 0)
+                            return variant;
+                    })
+                }
+            })
+            const randomIndex = Math.floor(Math.random() * filteredProducts.length);
+            return filteredProducts[randomIndex];
         })
-        const randomIndex = Math.floor(Math.random() * filteredProducts.length);
-        return filteredProducts[randomIndex];
-    })
+    }
 
     return json({ recommendedCarts: recommendedCarts, cartPromise });
 };
@@ -382,6 +390,8 @@ async function createOrder(data: FormData, context: any) {
     const productsString: any = data.get('products') || '[]';
     const amount = data.get('amount') || 0
     const products: any = JSON.parse(productsString);
+    const { storefront, cart } = context;
+    const productIds = products.map((product: any) => product.id);
     const lineItems = products.map((element: any) => {
         return {
             variantId: element.merchandise.id,
@@ -417,8 +427,7 @@ async function createOrder(data: FormData, context: any) {
     if (!generageOrderKeycrm.id) return json({ generageOrderKeycrm, error: "error" + generageOrderKeycrm.message || 'Failed to create order' });
     const generateOrderInShopifyAdminPromise = await generateOrderInShopifyAdmin(context, orderData)
 
-    const { storefront, cart } = context;
-    const productIds = products.map((product: any) => product.id);
+
     try {
         if (cart) {
           await cart.removeLines(productIds);
