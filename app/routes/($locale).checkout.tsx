@@ -113,8 +113,10 @@ export default function Checkout() {
     const [error, setError] = useState(response?.error)
 
 
+
     useEffect(() => {
         response?.error && setError(response?.error)
+        console.log(response)
     }, [response])
 
     const [userName, setUserName] = useState({ firstName: "", lastName: "" });
