@@ -426,7 +426,7 @@ async function createOrder(data: FormData, context: any) {
     const generageOrderKeycrm = await generateOrderInKeycrm(data)
 
     if (!generageOrderKeycrm.id) return json({ generageOrderKeycrm, error: "error" + generageOrderKeycrm.message || 'Failed to create order' });
-    const generateOrderInShopifyAdminPromise = await generateOrderInShopifyAdmin(context, orderData)
+    // const generateOrderInShopifyAdminPromise = await generateOrderInShopifyAdmin(context, orderData)
 
 
     try {
@@ -438,7 +438,10 @@ async function createOrder(data: FormData, context: any) {
       }
 
     if (paymentMethod == "card") {
-        paymentLink = await generageMonoUrl(amount, products, `${generageOrderKeycrm.id}___${generateOrderInShopifyAdminPromise.draftOrderComplete.draftOrder.order.id}`,"https://pick-up-shoes.com.ua")
+        paymentLink = await generageMonoUrl(amount, products,
+            //  `${generageOrderKeycrm.id}___${generateOrderInShopifyAdminPromise.draftOrderComplete.draftOrder.order.id}`,
+             `${generageOrderKeycrm.id}___${123123}`,
+             "https://pick-up-shoes.com.ua")
     }
 
 
