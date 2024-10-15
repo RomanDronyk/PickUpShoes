@@ -93,8 +93,9 @@ export const action: ActionFunction = async ({ request, context }) => {
             case 'create url':
                 return createUrl(lineItems, storefront);
             case 'create order':
-                const result = await createOrder(formData, context);
-                return result;
+                const result:any = await createOrder(formData, context);
+                return json(result);
+
             default:
                 return json({ error: "Invalid action" }, { status: 400 });
         }
@@ -140,15 +141,15 @@ export default function Checkout() {
     const cartsFromCart = data?.cartPromise?.lines?.nodes.map((element: any) => element);
     console.log(data, response, "cartPromise")
     const amount = data?.cartPromise?.cost?.subtotalAmount?.amount || 0
-    const urlFromAction = response?.url;
+    const urlFromAction = response?.pageUrl;
     const navigate = useNavigate()
     const [isLoading, setIsLoading] = useState(false)
 
-    // if (urlFromAction == "/thanks") {
-    //     urlFromAction ? navigate(urlFromAction) : null;
-    // } else if (urlFromAction !== null && urlFromAction) {
-    //     window.location.href = urlFromAction;
-    // }
+    if (urlFromAction == "/thanks") {
+        urlFromAction ? navigate(urlFromAction) : null;
+    } else if (urlFromAction !== null && urlFromAction) {
+        window.location.href = urlFromAction;
+    }
     return (
 
         <div className="flex flex-col-reverse contaier gap-[20px] md:gap-[40px] md:grid md:grid-cols-2 lg:grid-cols-[1fr_1fr] md:grid-cols-2 md:gap-y-10 md:gap-x-10 lg:px-24 px-[10px] my-10 w-full mt-[1rem]"
@@ -441,8 +442,7 @@ async function createOrder(data: FormData, context: any) {
     } catch (error) {
         console.error('Failed to clear cart:', error);
     }
-    return redirect(paymentLink?.pageUrl, 302)
-
+    return paymentLink
 }
 async function createUrl(lineItems: any[], storefront: any) {
     try {
