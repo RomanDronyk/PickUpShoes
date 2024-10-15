@@ -231,6 +231,7 @@ export function PredictiveSearchForm({
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [focusForm, setFocusForm] = useState<boolean>(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [inputValue, setInputValue]=useState("")
 
   function fetchResults(event: React.ChangeEvent<HTMLInputElement>) {
     const searchAction = action ?? '/api/predictive-search';
@@ -238,6 +239,7 @@ export function PredictiveSearchForm({
       ? `/${params.locale}${searchAction}`
       : searchAction;
     const newSearchTerm = event.target.value || '';
+    setInputValue(event.target.value)
     fetcher.submit(
       {q: newSearchTerm, limit: '6'},
       {method, action: localizedAction},
@@ -284,6 +286,7 @@ export function PredictiveSearchForm({
           <SearchIcon />
           <Input
             name="q"
+            value={inputValue}
             placeholder="Що ти шукаєш?"
             ref={inputRef}
             onChange={fetchResults}

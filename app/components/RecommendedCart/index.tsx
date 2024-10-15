@@ -56,7 +56,7 @@ interface Options {
 
 const TranslateOptions: Options = {
   Color: "Колір",
-  Колір:"Колір",
+  Колір: "Колір",
   Розмір: "Розмір",
   Size: "Розмір"
 }
@@ -96,19 +96,17 @@ const RecommendedCart: FC<IRecommendedCart> = ({ product }) => {
           <div className="flex flex-col justify-between min-h-[100%]">
             <div style={{ display: "block" }}>
               <h4 className="md:text-xl text-lg font-semibold line-clamp-1 pr-[10px] mb-[7px]">
-              <Link to={variantUrl}>
+                <Link to={variantUrl}>
 
-                {product?.title}
+                  {product?.title}
                 </Link>
               </h4>
             </div>
             <div>
               {selectedVariant.selectedOptions.map((option) => {
-                return <>
-                  <h4 key={option.name}>
-                    {TranslateOptions[option.name]}: <span className="text-black/50">{option.value}</span>
-                  </h4>
-                </>
+                return <h4 key={option.name}>
+                  {TranslateOptions[option.name]}: <span className="text-black/50">{option.value}</span>
+                </h4>
               })}
               <h4>
                 Артикул: <span className="text-black/50">{selectedVariant.sku}</span>
@@ -215,11 +213,9 @@ export const RecommendedCartMobile: FC<IRecommendedCart> = ({ product }) => {
         <div >
           <div className="pb-[12px]">
             {selectedVariant.selectedOptions.map((option) => {
-              return <>
-                <h4 key={option.name}>
+              return<h4 key={option.name}>
                   {TranslateOptions[option.name]}: <span className="text-black/50">{option.value}</span>
                 </h4>
-              </>
             })}
             <h4>
               Артикул: <span className="text-black/50">{selectedVariant.sku}</span>

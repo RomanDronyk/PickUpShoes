@@ -19,6 +19,18 @@ export default function NovaPoshtaCity({ setCity, setDepartment }: any) {
 
   const [debounceTimer, setDebounceTimer] = useState<NodeJS.Timeout | null>(null);
 
+  const [isReady, setIsReady] = useState(false)
+
+  useEffect(() => {
+    setIsReady(true);
+  }, []);
+
+  if (typeof window === 'undefined') {
+    return null;
+  }
+
+
+
   useEffect(() => {
     if (!open) {
       setOptions([]);
@@ -45,7 +57,7 @@ export default function NovaPoshtaCity({ setCity, setDepartment }: any) {
           });
 
           if (response.ok) {
-            const data:any = await response.json();
+            const data: any = await response.json();
             setOptions(data?.cities || []);
           } else {
             console.error("Failed to fetch city data");
@@ -64,47 +76,42 @@ export default function NovaPoshtaCity({ setCity, setDepartment }: any) {
       }
     };
   }, [inputCity]);
-  return (
-    <>
-      <Autocomplete
-        id="asynchronous-demo"
-        sx={style}
-        open={open}
-        onOpen={() => {
-          setOpen(true);
+  return isReady ? (<Autocomplete
+    id="asynchronous-demo"
+    sx={style}
+    open={open}
+    onOpen={() => {
+      setOpen(true);
+    }}
+    onClose={() => {
+      setOpen(false);
+    }}
+    onChange={(event, city) => {
+      setCity(city)
+      setInputCity(city)
+    }}
+    isOptionEqualToValue={(option, value) => option.Present === value.Present}
+    getOptionLabel={(option) => option.Present}
+    options={options}
+    loading={loading}
+    noOptionsText="Місто не знайдено"
+    renderInput={(params) => (
+      <TextField
+        {...params}
+        placeholder='Місто'
+        required
+        value={inputCity}
+        onChange={(element) => setInputCity(element.target.value)}
+        InputProps={{
+          ...params.InputProps,
+          endAdornment: (
+            <React.Fragment>
+              {loading ? <CircularProgress color="inherit" size={20} /> : null}
+              {params.InputProps.endAdornment}
+            </React.Fragment>
+          ),
         }}
-        onClose={() => {
-          setOpen(false);
-        }}
-        onChange={(event, city) => {
-          setCity(city)
-          setInputCity(city)
-        }}
-        isOptionEqualToValue={(option, value) => option.Present === value.Present}
-        getOptionLabel={(option) => option.Present}
-        options={options}
-        loading={loading}
-        noOptionsText="Місто не знайдено"
-        renderInput={(params) => (
-          <TextField
-            {...params}
-            placeholder='Місто'
-            required
-            value={inputCity}
-            onChange={(element) => setInputCity(element.target.value)}
-            InputProps={{
-              ...params.InputProps,
-              endAdornment: (
-                <React.Fragment>
-                  {loading ? <CircularProgress color="inherit" size={20} /> : null}
-                  {params.InputProps.endAdornment}
-                </React.Fragment>
-              ),
-            }}
-          />
-        )}
       />
-
-    </>
-  );
+    )}
+  />) : null
 }

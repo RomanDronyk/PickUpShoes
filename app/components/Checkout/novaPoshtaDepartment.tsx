@@ -19,6 +19,17 @@ export default function NovaPoshtaDepartent({ options, setOptions, setDepartment
   const [loading, setLoading] = useState(false);
   const [inputDepartment, setInputDepartment] = useState("")
 
+  const [isReady, setIsReady] = useState(false)
+
+  useEffect(() => {
+    setIsReady(true);
+  }, []);
+
+  if (typeof window === 'undefined') {
+    return null;
+  }
+
+
   useEffect(() => {
     if (options.length > 0) {
       setLoading(false)
@@ -80,46 +91,44 @@ export default function NovaPoshtaDepartent({ options, setOptions, setDepartment
   }, [inputDepartment]);
 
 
-  return (
-    <>
-      <Autocomplete
-        id="asynchronous-demo"
-        sx={style}
-        open={open}
-        onOpen={() => {
-          setOpen(true);
-        }}
-        onClose={() => {
-          setOpen(false);
-        }}
-        isOptionEqualToValue={(option, value) => option.Description === value.Description}
-        getOptionLabel={(option) => option.Description}
-        options={options}
-        onChange={(event, department) => setDepartment(department)}
-        loading={loading}
-        noOptionsText="Відділення, не знайдено"
-        renderInput={(params) => {
-          return (
-            <TextField
-              {...params}
-              placeholder='Відділення'
-              value={inputDepartment}
-              required
-              disabled={city ? false : true}
-              onChange={(element) => setInputDepartment(element.target.value)}
-              InputProps={{
-                ...params.InputProps,
-                endAdornment: (
-                  <React.Fragment >
-                    {loading ? <CircularProgress color="inherit" size={20} /> : null}
-                    {params.InputProps.endAdornment}
-                  </React.Fragment>
-                ),
-              }}
-            />
-          )
-        }}
-      />
-    </>
-  );
+  return isReady ? (
+  <Autocomplete
+      id="asynchronous-demo"
+      sx={style}
+      open={open}
+      onOpen={() => {
+        setOpen(true);
+      }}
+      onClose={() => {
+        setOpen(false);
+      }}
+      isOptionEqualToValue={(option, value) => option.Description === value.Description}
+      getOptionLabel={(option) => option.Description}
+      options={options}
+      onChange={(event, department) => setDepartment(department)}
+      loading={loading}
+      noOptionsText="Відділення, не знайдено"
+      renderInput={(params) => {
+        return (
+          <TextField
+            {...params}
+            placeholder='Відділення'
+            value={inputDepartment}
+            required
+            disabled={city ? false : true}
+            onChange={(element) => setInputDepartment(element.target.value)}
+            InputProps={{
+              ...params.InputProps,
+              endAdornment: (
+                <React.Fragment >
+                  {loading ? <CircularProgress color="inherit" size={20} /> : null}
+                  {params.InputProps.endAdornment}
+                </React.Fragment>
+              ),
+            }}
+          />
+        )
+      }}
+    />):null
+  
 }

@@ -54,11 +54,9 @@ const CheckoutCartMobile = ({ cartsFromCart }: any) => {
                 <div >
                     <div className="pb-[12px]">
                         {cartsFromCart?.merchandise?.selectedOptions.map((option: any) => {
-                            return <>
-                                <h4 key={option.name}>
+                            return<h4 key={option.name}>
                                     {option.name}: <span className="text-black/50">{option.value}</span>
                                 </h4>
-                            </>
                         })}
                         <h4>
                             Артикул: <span className="text-black/50">{cartsFromCart?.merchandise?.sku}</span>

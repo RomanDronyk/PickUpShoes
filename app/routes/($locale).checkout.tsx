@@ -123,6 +123,7 @@ export default function Checkout() {
 
     const [userName, setUserName] = useState({ firstName: "", lastName: "" });
     const [userPhone, setUserPhone] = useState("")
+    const [emailInput,setEmailInput]=useState('')
     const isMobile = useMedia('(max-width: 767px)', false);
 
     const [department, setDepartment] = useState({
@@ -164,7 +165,7 @@ export default function Checkout() {
                         <input style={{ width: "0% !important" }} type="hidden" name="shipping_address_country" value={"Ukraine"} />
                         <input style={{ width: "0% !important" }} type="hidden" name="shipping_address_region" value={department?.SettlementAreaDescription} />
                         <input style={{ width: "0% !important" }} type="hidden" name="shipping_address_zip" value={department?.PostalCodeUA} />
-                        <input style={{ width: "0% !important" }} type="hidden" name="shipping_secondary_line" value={"string"} />
+                        <input style={{ width: "0% !important" }} type="hidden" name="shipping_secondary_line" value="string" />
                         <input style={{ width: "0% !important" }} type="hidden" name="shipping_receive_point" value={department?.Description} />
                         <input style={{ width: "0% !important" }} type="hidden" name="recipient_full_name" value={`${userName.firstName} ${userName.lastName}`} />
                         <input style={{ width: "0% !important" }} type="hidden" name="recipient_phone" value={userPhone} />
@@ -185,7 +186,7 @@ export default function Checkout() {
                                     autoComplete="firstName"
                                     placeholder="Ім’я отримувача"
                                     aria-label="First Name"
-
+                                    value={userName.firstName}
                                     onChange={(event) => setUserName((prevData) => {
                                         return { ...prevData, firstName: event.target.value }
                                     })}
@@ -207,6 +208,7 @@ export default function Checkout() {
                                     onChange={(event) => setUserName((prevData) => {
                                         return { ...prevData, lastName: event.target.value }
                                     })}
+                                    value={userName.lastName}
                                     className="bg-input px-6 py-3 text-xl placeholder:text-xl h-[52px] "
                                 />
                             </div>
@@ -216,8 +218,6 @@ export default function Checkout() {
                                     name="phone"
                                     type="phone"
                                     autoComplete="phone"
-                                    initialValueFormat="national"
-                                    countryCallingCodeEditable
                                     international={true}
                                     placeholder="+ 38 (098) 999 99-99"
                                     labels={ua}
@@ -255,6 +255,8 @@ export default function Checkout() {
                                     placeholder="E-mail"
                                     aria-label="Re-enter E-mail"
                                     minLength={4}
+                                    value={emailInput}
+                                    onChange={(e)=>setEmailInput(e.target.value)}
                                     required
                                     className="bg-input px-6 py-3 text-xl placeholder:text-xl h-[52px] "
                                 />
@@ -307,17 +309,17 @@ export default function Checkout() {
                                 </span>
                             </div>
                             <div className='hidden flex justify-between gap-[12px] pb-[24px]'>
-                                <Input
+                                {/* <Input
                                     id="promo"
                                     name="promo"
                                     type="number"
                                     autoComplete="promo"
                                     placeholder="Ваш промокод"
                                     aria-label="Не правильний промокод"
-
+                                    value={""}
                                     minLength={4}
                                     className="bg-input px-6 py-3 text-xl placeholder:text-xl h-[52px] "
-                                />
+                                /> */}
                                 <Button className='rounded-[64px]'>
                                     Додати
                                 </Button>
@@ -347,11 +349,11 @@ export default function Checkout() {
                 <h1 className="xl:text-[32px] text-[24px] text-left  font-medium mb-[20px]">Ви обрали:</h1>
                 <div className="register rounded-[20px] border border-black/10 p-[0px_24px] ">
                     {cartsFromCart.length > 0 && cartsFromCart.map((product: any, index: number) => {
-                        return <React.Fragment key={product.id || index} >
+                        return <React.Fragment key={`123123${index}`} >
                             {
                                 isMobile ?
-                                    <CheckoutCartMobile key="sfsfssdfsf" cartsFromCart={product} /> :
-                                    <CheckoutCart key="3123" cartsFromCart={product} />
+                                    <CheckoutCartMobile key={`sfsfssdfsf${index}`}  cartsFromCart={product} /> :
+                                    <CheckoutCart key={`123123123${index}`} cartsFromCart={product} />
                             }
                             {cartsFromCart.length - 1 !== index && <div key={cartsFromCart.length - 1 + index} className='border border-black/10'></div>}
                         </React.Fragment>
@@ -362,10 +364,10 @@ export default function Checkout() {
                     <h1 className="xl:text-[32px] mt-[20px] text-[24px] text-left  font-medium mb-[20px]">Також рекомендуєм:</h1>
                     <div className="register rounded-[20px] border border-black/10 p-[0px_24px] ">
                         {recommendedCarts.length > 0 && recommendedCarts.map((product: any, index: number) => {
-                            return <React.Fragment key={product.id || index} >
+                            return <React.Fragment  key={product.id + "recommendedee"}>
                                 {
                                     isMobile ?
-                                        <RecommendedCartMobile key={product.id + "recommended"} product={product} /> :
+                                        <RecommendedCartMobile key={product.id + "recommendede"} product={product} /> :
                                         <RecommendedCart key={product.id + "recommended"} product={product} />
                                 }
                                 {recommendedCarts.length - 1 !== index && <div key={recommendedCarts.length - 1 + index} className='border border-black/10'></div>}
