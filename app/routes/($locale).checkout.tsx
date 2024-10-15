@@ -422,15 +422,15 @@ async function createOrder(data: FormData, context: any) {
     if (!paymentMethod) return json({ error: 'Виберіть спосіб оплатии' }, { status: 405 });
     if (!deliveryMethod) return json({ error: 'Виберіть спосіб доставки' }, { status: 405 });
 
-    const generageOrderKeycrm = await generateOrderInKeycrm(data)
+    // const generageOrderKeycrm = await generateOrderInKeycrm(data)
 
-    if (!generageOrderKeycrm.id) return json({ generageOrderKeycrm, error: "error" + generageOrderKeycrm.message || 'Failed to create order' });
+    // if (!generageOrderKeycrm.id) return json({ generageOrderKeycrm, error: "error" + generageOrderKeycrm.message || 'Failed to create order' });
     const generateOrderInShopifyAdminPromise = await generateOrderInShopifyAdmin(context, orderData)
 
 
     if (paymentMethod == "card") {
         paymentLink = await generageMonoUrl(amount, products,
-            `${generageOrderKeycrm.id}___${generateOrderInShopifyAdminPromise.draftOrderComplete.draftOrder.order.id}`,
+            `${generateOrderInShopifyAdminPromise.draftOrderComplete.draftOrder.order.id}`,
             // `${generageOrderKeycrm.id}`,
             "https://pick-up-shoes.com.ua")
     }

@@ -14,12 +14,13 @@ export const action: ActionFunction = async ({context, request }) => {
     }
     try {
         const data: any = await request.json();
-        const reference = data.reference.split("___");
+        // const reference = data.reference.split("___");
+        const reference = data.reference;
         const amount = data.amount / 100;
         console.log(reference, data.reference)
         if (data.status === "success") {
-            await updateStatus(amount, reference[0])
-            await updateStatusInShopify(context,reference[1])
+            // await updateStatus(amount, reference[0])
+            await updateStatusInShopify(context,reference)
         }
 
         return json({ error: "Invalid Content-Type" }, { status: 200 });

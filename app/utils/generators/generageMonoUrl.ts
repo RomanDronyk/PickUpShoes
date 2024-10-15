@@ -66,8 +66,8 @@ export const generageMonoUrl = async (amount: any, products: any, id: string, si
         webHookUrl: `${siteUrl}/checkout-webhook`,
         merchantPaymInfo: {
           reference: id,
-          destination: "Подарунок від MISTER GIFTER",
-          comment: "Подарунок від MISTER GIFTER",
+          destination: `Оплата замовлення: ${id}`,
+          comment: `Оплата замовлення: ${id}`,
           basketOrder: getDataFromMonoUser(products),
         },
         paymentType: "debit",
@@ -116,7 +116,7 @@ const getDataFromMonoUser = (products: any) => {
 
 
 const KEYCRM_API_KEY = "ZWNmN2RlMzY5MDhjZTEwZGRkN2JkNGYwNTMzNDIwNDZmNzgzODU0MA";
-const MONO_TOKEN = "utR_bnF6LUzdc4pr3yFNFF2kKEPk75xeIlItZx9QfaxY";
+const MONO_TOKEN = "mcj6m0Oy6AyAVLqfvAHk3jA";
 
 const MONO_URL = "https://api.monobank.ua/api/merchant/invoice/create"
 const KEYCRM_URL = "https://openapi.keycrm.app/v1"
