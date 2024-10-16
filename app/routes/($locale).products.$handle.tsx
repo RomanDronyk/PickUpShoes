@@ -49,6 +49,10 @@ import monoLogo from '../assets/images/mono.svg';
 import { HeaderBasketContext, HeaderContextInterface } from '~/context/HeaderCarts';
 import { PRODUCT_QUERY, RECOMENDED_PRODUCT_QUERY, VARIANTS_QUERY, VIEWED_PRODUCT_QUERY } from '~/graphql/queries';
 
+
+
+
+
 export const meta: MetaFunction<typeof loader> = ({ data }) => {
   return [{ title: `Hydrogen | ${data?.product?.title ?? ''}` }];
 };
@@ -98,7 +102,7 @@ export async function loader({ params, request, context }: LoaderFunctionArgs) {
     throw new Response(null, { status: 404 });
   }
 
-  const variants = await storefront.query(VARIANTS_QUERY, {
+  const variants:ProductVariantsQuery = await storefront.query(VARIANTS_QUERY, {
     variables: { handle },
   });
 
@@ -156,10 +160,10 @@ function redirectToFirstVariant({
   console.log(variants?.product?.variants?.nodes, "redirects")
   // const firstVariant = variants?.product?.variants?.nodes.find(variant => variant?.availableForSale) || product?.variants?.nodes[0];
   const firstVariant = variants?.product?.variants?.nodes.find(
-    (variant) =>
+    (variant:any) =>
       variant?.availableForSale &&
       variant?.selectedOptions.some(
-        (option) => option?.name === 'Color' && option?.value === color
+        (option:any) => option?.name === 'Color' && option?.value === color
       )
   ) || product?.variants?.nodes[0];
 
@@ -696,7 +700,7 @@ function ProductMain({
   objGalery: any
   product: ProductFragment;
   selectedVariant: any;
-  variants: Promise<ProductVariantsQuery>;
+  variants: ProductVariantsQuery;
 }) {
   const { title, descriptionHtml, vendor, collections } = product || { title: "", descriptionHtml: "", vendor: "", collections: [] };
   return (

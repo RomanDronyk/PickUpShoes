@@ -10,13 +10,15 @@ import ContactType from '~/components/Checkout/contactType';
 import { useMedia } from 'react-use';
 import CheckoutCartMobile from '~/components/CheckoutCartMobile';
 import { CREATE_CHEKOUT_URL } from '~/graphql/mutations';
-import { generageMonoUrl, generateOrderInKeycrm, generateOrderInShopifyAdmin, generateProductForKeycrm } from '~/utils';
+import { generageMonoUrl, generateOrderInShopifyAdmin, getRecommendationsById } from '~/utils';
 
 import 'react-phone-number-input/style.css'
 import ua from 'react-phone-number-input/locale/ua'
 import PhoneInput from 'react-phone-number-input/input'
-import { RECOMENDED_PRODUCT_QUERY } from '~/graphql/queries';
-import RecommendedCart, { RecommendedCartMobile } from '~/components/RecommendedCart';
+import RecommendedCart, { IProduct, RecommendedCartMobile } from '~/components/RecommendedCart';
+import { AppLoadContext } from '@shopify/remix-oxygen';
+
+
 export const handle: { breadcrumb: string } = {
     breadcrumb: 'checkout',
 };
@@ -32,48 +34,34 @@ export const meta: MetaFunction = () => {
 };
 
 
-export const loader = async ({ context, request }: { context: any, request: Request }) => {
+export const loader = async ({ context, request }: { context: AppLoadContext, request: Request }) => {
     const { storefront, cart } = context;
-    const cartPromise = await cart.get();
-    if (cartPromise?.lines?.nodes?.length == 0 || !cartPromise?.lines?.nodes?.length) {
-        throw redirect("/", 302);
-    }
+    const cartData = await cart.get();
+    const cartNodes:any = cartData?.lines?.nodes;
 
-    const productIds = cartPromise.lines.nodes.map((product: any) => product.merchandise.product.id);
-    let recommendedProductPromises;
-    if (productIds.length > 0) {
-        recommendedProductPromises = productIds.map((id: string) => {
-            return context.storefront.query(RECOMENDED_PRODUCT_QUERY, {
-                variables: {
-                    country: context.storefront.i18n.country,
-                    language: context.storefront.i18n.language,
-                    id: id,
-                    intent: "complementary",
-                }
-            })
-        })
-    } else {
-        recommendedProductPromises = []
+    if (cartNodes?.length == 0 || !cartNodes?.length) {
+        throw new Response("Кошик порожній", { status: 302, headers: { Location: "/" } })
     }
+    const productIds = cartNodes?.map((product: IProduct) => product?.merchandise?.product?.id);
+
+    const cache = new Map();
+
+    const recommendedProductPromises = productIds.map((id) => getRecommendationsById(id, cache, context));
     const recommendedProductResponce = await Promise.all(recommendedProductPromises)
-    let recommendedCarts = [];
-    if (productIds.length > 0) {
-        recommendedCarts = recommendedProductResponce.map((responce: any) => {
-            const recommendedProduct = responce.productRecommendations;
-            const filteredProducts = recommendedProduct.map((product: any) => {
-                return {
-                    ...product, variants: product.variants.nodes.filter((variant: any) => {
-                        if (variant.availableForSale && variant.quantityAvailable > 0)
-                            return variant;
-                    })
-                }
-            })
+
+    const recommendedCarts = recommendedProductResponce.map((responce: any) => {
+        const recommendedProduct = responce.productRecommendations;
+        const filteredProducts = recommendedProduct.map((product: any) => ({
+            ...product,
+            variants: product.variants.nodes.filter((variant: any) => variant.availableForSale && variant.quantityAvailable > 0)
+        }));
+        if (filteredProducts.length > 0) {
             const randomIndex = Math.floor(Math.random() * filteredProducts.length);
             return filteredProducts[randomIndex];
-        })
-    }
+        }
+    })
 
-    return json({ recommendedCarts: recommendedCarts, cartPromise });
+    return json({ recommendedCarts: recommendedCarts, cartData });
 };
 
 
@@ -93,7 +81,7 @@ export const action: ActionFunction = async ({ request, context }) => {
             case 'create url':
                 return createUrl(lineItems, storefront);
             case 'create order':
-                const result:any = await createOrder(formData, context);
+                const result: any = await createOrder(formData, context);
                 return json(result);
 
             default:
@@ -111,21 +99,13 @@ export default function Checkout() {
     const response: any = useActionData();
     const [city, setCity] = useState<any>({})
     const [options, setOptions] = useState([]);
-    const navigation = useNavigation();
     const [error, setError] = useState(response?.error)
-
-
-
-    useEffect(() => {
-        response?.error && setError(response?.error)
-        console.log(response)
-    }, [response])
-
     const [userName, setUserName] = useState({ firstName: "", lastName: "" });
     const [userPhone, setUserPhone] = useState("")
-    const [emailInput,setEmailInput]=useState('')
+    const [emailInput, setEmailInput] = useState('')
+    const [promoInput, setPromoInput] = useState('')
+    const [isLoading, setIsLoading] = useState(false)
     const isMobile = useMedia('(max-width: 767px)', false);
-
     const [department, setDepartment] = useState({
         CityDescription: "",
         SettlementAreaDescription: "",
@@ -133,29 +113,35 @@ export default function Checkout() {
         Description: "",
         Ref: ""
     })
-    useEffect(() => {
-        console.log(department, "sldkfjs")
-    }, [department])
-
 
     const { recommendedCarts } = data;
-    const cartsFromCart = data?.cartPromise?.lines?.nodes.map((element: any) => element);
-    console.log(data, response, "cartPromise")
-    const amount = data?.cartPromise?.cost?.subtotalAmount?.amount || 0
+    const cartsFromCart = data?.cartData?.lines?.nodes.map((element: any) => element);
+    const amount = data?.cartData?.cost?.subtotalAmount?.amount || 0
     const urlFromAction = response?.pageUrl;
     const navigate = useNavigate()
-    const [isLoading, setIsLoading] = useState(false)
+
+    console.log(data, response, "cartData")
+
 
     if (urlFromAction == "/thanks") {
         urlFromAction ? navigate(urlFromAction) : null;
     } else if (urlFromAction !== null && urlFromAction) {
         window.location.href = urlFromAction;
     }
+    useEffect(() => {
+        response?.error && setError(response?.error)
+        console.log(response)
+    }, [response])
+
+
+    useEffect(() => {
+        console.log(department, "sldkfjs")
+    }, [department])
+
     return (
 
         <div className="flex flex-col-reverse contaier gap-[20px] md:gap-[40px] md:grid md:grid-cols-2 lg:grid-cols-[1fr_1fr] md:grid-cols-2 md:gap-y-10 md:gap-x-10 lg:px-24 px-[10px] my-10 w-full mt-[1rem]"
             style={{ maxWidth: "100%", overflow: "hidden" }}>
-
             <div className=''>
                 <Form method="POST" className='grid gap-[35px]'
                     style={{ maxWidth: "100%", overflow: "hidden" }}>
@@ -256,7 +242,7 @@ export default function Checkout() {
                                     aria-label="Re-enter E-mail"
                                     minLength={4}
                                     value={emailInput}
-                                    onChange={(e)=>setEmailInput(e.target.value)}
+                                    onChange={(e) => setEmailInput(e.target.value)}
                                     required
                                     className="bg-input px-6 py-3 text-xl placeholder:text-xl h-[52px] "
                                 />
@@ -309,17 +295,18 @@ export default function Checkout() {
                                 </span>
                             </div>
                             <div className='hidden flex justify-between gap-[12px] pb-[24px]'>
-                                {/* <Input
+                                <Input
                                     id="promo"
                                     name="promo"
-                                    type="number"
+                                    type="text"
                                     autoComplete="promo"
                                     placeholder="Ваш промокод"
                                     aria-label="Не правильний промокод"
-                                    value={""}
                                     minLength={4}
+                                    value={promoInput}
+                                    onChange={(e) => setPromoInput(e.target.value)}
                                     className="bg-input px-6 py-3 text-xl placeholder:text-xl h-[52px] "
-                                /> */}
+                                />
                                 <Button className='rounded-[64px]'>
                                     Додати
                                 </Button>
@@ -348,11 +335,11 @@ export default function Checkout() {
             <div>
                 <h1 className="xl:text-[32px] text-[24px] text-left  font-medium mb-[20px]">Ви обрали:</h1>
                 <div className="register rounded-[20px] border border-black/10 p-[0px_24px] ">
-                    {cartsFromCart.length > 0 && cartsFromCart.map((product: any, index: number) => {
+                    {cartsFromCart.length > 0 && cartsFromCart.map((product: IProduct, index: number) => {
                         return <React.Fragment key={`123123${index}`} >
                             {
                                 isMobile ?
-                                    <CheckoutCartMobile key={`sfsfssdfsf${index}`}  cartsFromCart={product} /> :
+                                    <CheckoutCartMobile key={`sfsfssdfsf${index}`} cartsFromCart={product} /> :
                                     <CheckoutCart key={`123123123${index}`} cartsFromCart={product} />
                             }
                             {cartsFromCart.length - 1 !== index && <div key={cartsFromCart.length - 1 + index} className='border border-black/10'></div>}
@@ -363,8 +350,8 @@ export default function Checkout() {
                 <div>
                     <h1 className="xl:text-[32px] mt-[20px] text-[24px] text-left  font-medium mb-[20px]">Також рекомендуєм:</h1>
                     <div className="register rounded-[20px] border border-black/10 p-[0px_24px] ">
-                        {recommendedCarts.length > 0 && recommendedCarts.map((product: any, index: number) => {
-                            return <React.Fragment  key={product.id + "recommendedee"}>
+                        {recommendedCarts.length > 0 && recommendedCarts.map((product: IProduct, index: number) => {
+                            return <React.Fragment key={product.id + "recommendedee"}>
                                 {
                                     isMobile ?
                                         <RecommendedCartMobile key={product.id + "recommendede"} product={product} /> :
@@ -377,8 +364,6 @@ export default function Checkout() {
                     </div>
                 </div>
             </div>
-
-
         </div>
     );
 }
@@ -392,7 +377,7 @@ async function createOrder(data: FormData, context: any) {
     const productsString: any = data.get('products') || '[]';
     const amount = data.get('amount') || 0
     const products: any = JSON.parse(productsString);
-    const { storefront, cart } = context;
+    const { cart } = context;
     const productIds = products.map((product: any) => product.id);
     const lineItems = products.map((element: any) => {
         return {
@@ -419,16 +404,11 @@ async function createOrder(data: FormData, context: any) {
         }
     }
 
-    let paymentLink
-
     if (!paymentMethod) return json({ error: 'Виберіть спосіб оплатии' }, { status: 405 });
     if (!deliveryMethod) return json({ error: 'Виберіть спосіб доставки' }, { status: 405 });
 
-    // const generageOrderKeycrm = await generateOrderInKeycrm(data)
-
-    // if (!generageOrderKeycrm.id) return json({ generageOrderKeycrm, error: "error" + generageOrderKeycrm.message || 'Failed to create order' });
+    let paymentLink;
     const generateOrderInShopifyAdminPromise = await generateOrderInShopifyAdmin(context, orderData)
-
 
     if (paymentMethod == "card") {
         paymentLink = await generageMonoUrl(amount, products,

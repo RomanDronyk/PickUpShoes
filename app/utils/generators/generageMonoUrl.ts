@@ -76,7 +76,6 @@ export const generageMonoUrl = async (amount: any, products: any, id: string, si
     });
 
     if (!response.ok) {
-      // Логування статусу помилки
       const errorText = await response.text();
       console.error(`Monobank API error (status: ${response.status}):`, errorText);
       return { error: errorText, pageUrl: "/thanks" };

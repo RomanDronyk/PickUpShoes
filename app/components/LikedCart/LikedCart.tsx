@@ -51,8 +51,6 @@ export interface IVariants {
     nodes: IVariant[]
 }
 
-
-// product?.selectedVariant?.image
 export interface ILikedNewCart {
     variants: IVariants;
     handle: string;
@@ -172,8 +170,6 @@ export function LikedCart({ product }: ILikedCart) {
                                         }}
                                     >
                                         {fetcher.state == 'idle' ? "Додати в корзину" : "Загрузка"}
-
-
                                     </button>
                                 </>
                             )}

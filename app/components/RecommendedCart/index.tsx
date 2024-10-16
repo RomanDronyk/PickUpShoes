@@ -3,6 +3,7 @@ import { CartForm, Image } from "@shopify/hydrogen";
 import { FC, useState } from "react";
 import { cn } from "~/lib/utils";
 import { useVariantUrl } from "~/utils";
+import OptionList from "../ui/optionList";
 
 interface IImage {
   altText: string,
@@ -36,7 +37,7 @@ interface IVariant {
   title: string,
   unitPrice: null | any
 }
-interface IProduct {
+export interface IProduct {
   id: string,
   featuredImage: IImage,
   handle: string,
@@ -50,22 +51,11 @@ interface IProduct {
 interface IRecommendedCart {
   product: IProduct,
 }
-interface Options {
-  [key: string]: string;
-}
-
-const TranslateOptions: Options = {
-  Color: "Колір",
-  Колір: "Колір",
-  Розмір: "Розмір",
-  Size: "Розмір"
-}
 
 
 const RecommendedCart: FC<IRecommendedCart> = ({ product }) => {
   const [selectedVariant, setSelectedVarian] = useState<IVariant>(product.variants[0])
   const variantUrl = useVariantUrl(product.handle, selectedVariant.selectedOptions);
-
   return (
     <div className='flex flex-col min-h-[100px] relative  justify-center  register   py-[24px] mb-[30px] lg:mb-0'>
       <div className='grid' style={{ minWidth: "100%", gridTemplateColumns: "1fr", position: "relative", justifyContent: 'space-between', alignItems: "center", gap: 10, }}>
@@ -96,21 +86,11 @@ const RecommendedCart: FC<IRecommendedCart> = ({ product }) => {
           <div className="flex flex-col justify-between min-h-[100%]">
             <div style={{ display: "block" }}>
               <h4 className="md:text-xl text-lg font-semibold line-clamp-1 pr-[10px] mb-[7px]">
-                <Link to={variantUrl}>
-
-                  {product?.title}
-                </Link>
+                <Link to={variantUrl}>{product?.title}</Link>
               </h4>
             </div>
             <div>
-              {selectedVariant.selectedOptions.map((option) => {
-                return <h4 key={option.name}>
-                  {TranslateOptions[option.name]}: <span className="text-black/50">{option.value}</span>
-                </h4>
-              })}
-              <h4>
-                Артикул: <span className="text-black/50">{selectedVariant.sku}</span>
-              </h4>
+              <OptionList sku={selectedVariant.sku} options={selectedVariant?.selectedOptions}/>
             </div>
             <div>
               <h4 className="md:text-xl text-lg font-semibold line-clamp-1 pr-[10px] mb-[7px]">
@@ -119,8 +99,6 @@ const RecommendedCart: FC<IRecommendedCart> = ({ product }) => {
             </div>
           </div>
           <div
-
-
             className="self-end flex self-center absolute bottom-0 right-0 items-center justify-center"
           >
             <CartForm
@@ -171,7 +149,6 @@ const RecommendedCart: FC<IRecommendedCart> = ({ product }) => {
 export const RecommendedCartMobile: FC<IRecommendedCart> = ({ product }) => {
   const [selectedVariant, setSelectedVarian] = useState<IVariant>(product.variants[0])
   const variantUrl = useVariantUrl(product.handle, selectedVariant.selectedOptions);
-
   return (
     <div className='flex flex-col  relative  justify-center  register max-h-[250px] overflow-hidden   pt-[24px] mb-[30px] lg:mb-0'>
       <div className='grid' style={{ minWidth: "100%", gridTemplateColumns: "1fr", position: "relative", justifyContent: 'space-between', alignItems: "center", gap: 0, }}>
@@ -197,29 +174,18 @@ export const RecommendedCartMobile: FC<IRecommendedCart> = ({ product }) => {
                 crop="bottom"
               />
             </div>
-
           </div>
           <div className="flex flex-col justify-between min-h-[100%]">
             <div style={{ maxWidth: "100%", display: "block" }}>
               <h4 className="md:text-xl text-lg font-semibold line-clamp-1 pr-[10px] mb-[7px]">
-                <Link to={variantUrl}>
-                  {product?.title}
-                </Link>
+                <Link to={variantUrl}>{product?.title}</Link>
               </h4>
             </div>
-
           </div>
         </div>
         <div >
           <div className="pb-[12px]">
-            {selectedVariant.selectedOptions.map((option) => {
-              return<h4 key={option.name}>
-                  {TranslateOptions[option.name]}: <span className="text-black/50">{option.value}</span>
-                </h4>
-            })}
-            <h4>
-              Артикул: <span className="text-black/50">{selectedVariant.sku}</span>
-            </h4>
+            <OptionList  sku={selectedVariant.sku} options={selectedVariant?.selectedOptions} />
           </div>
           <div>
             <h4 className="md:text-xl text-lg font-semibold line-clamp-1 pr-[10px] mb-[7px]">
@@ -260,8 +226,6 @@ export const RecommendedCartMobile: FC<IRecommendedCart> = ({ product }) => {
                   )}
                 >
                   {fetcher.state == 'idle' ? "Додати" : "Загрузка"}
-
-
                 </button>
               </>
             )}
