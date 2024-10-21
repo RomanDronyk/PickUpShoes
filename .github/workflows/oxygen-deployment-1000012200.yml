@@ -38,12 +38,11 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Build and Publish to Oxygen
-        id: deploy
-        uses: shopify/oxygenctl-action@v4
-        with:
-          oxygen_deployment_token: ${{ secrets.OXYGEN_DEPLOYMENT_TOKEN_1000012200 }}
-          build_command: "npm run build"
+      - name: Build project
+        run: npm run build
+
+      - name: Deploy to Oxygen using Hydrogen CLI
+        run: npx shopify hydrogen deploy --token ${{ secrets.OXYGEN_DEPLOYMENT_TOKEN_1000012200 }}
 
       # Create GitHub Deployment
       - name: Create GitHub Deployment
@@ -54,4 +53,3 @@ jobs:
           environment: 'preview'
           preview_url: ${{ steps.deploy.outputs.url }}
           description: ${{ github.event.head_commit.message }}
-        
