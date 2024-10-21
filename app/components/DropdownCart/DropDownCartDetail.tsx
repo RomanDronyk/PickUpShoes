@@ -10,28 +10,28 @@ import CartLineItem from './CartLineItem';
 
 const DropDownCartDetail = React.memo(({ cart }: { cart: CartApiQueryFragment | null }) => {
   const [shopifyCheckoutId, setShopifyCheckoutId] = useState("")
-  useEffect(()=>{
-    const lineItems =  cart?.lines?.nodes?.map(element=>{
-      return {
-        quantity: element?.quantity,
-        variantId: element?.merchandise?.id
-      }
-    }) 
-    if (lineItems) {
-      const formData = new FormData();
-      formData.append('action', 'create url');
-      formData.append('lineItems', JSON.stringify(lineItems)); // Передавайте об'єкти як рядок JSON
+  // useEffect(()=>{
+  //   const lineItems =  cart?.lines?.nodes?.map(element=>{
+  //     return {
+  //       quantity: element?.quantity,
+  //       variantId: element?.merchandise?.id
+  //     }
+  //   }) 
+  //   if (lineItems) {
+  //     const formData = new FormData();
+  //     formData.append('action', 'create url');
+  //     formData.append('lineItems', JSON.stringify(lineItems)); // Передавайте об'єкти як рядок JSON
       
-      fetch('/checkout-api', {
-        method: 'POST',
-        body: formData
-      }).then(response => response.json())
-        .then((data:any) =>{
-          setShopifyCheckoutId( data?.response?.checkoutCreate?.checkout?.id) 
-        })
-        .catch(error => console.error('Error:', error));
-    }
-  },[cart])
+  //     fetch('/checkout-api', {
+  //       method: 'POST',
+  //       body: formData
+  //     }).then(response => response.json())
+  //       .then((data:any) =>{
+  //         setShopifyCheckoutId( data?.response?.checkoutCreate?.checkout?.id) 
+  //       })
+  //       .catch(error => console.error('Error:', error));
+  //   }
+  // },[cart])
 
   const cost = cart?.cost;
   return (

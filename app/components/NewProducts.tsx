@@ -1,20 +1,13 @@
-import {Link} from '@remix-run/react';
-import {ProductCard, Label} from './ProductCard';
+import { Link } from '@remix-run/react';
+import { ProductCard } from './ProductCard';
 import {
   Carousel,
   CarouselContent,
   CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
 } from './ui/carousel';
-import type {NewProductsQuery} from 'storefrontapi.generated';
 
-export default function NewProducts({items}: {items: NewProductsQuery}) {
-  const {
-    collection: {
-      products: {nodes: newProducts},
-    },
-  } = items;
+export default function NewProducts({ items }: { items: any }) {
+
   return (
     <div className="flex flex-col w-full gap-[30px] max-w-[1240px] pb-[0px] px-5 md:px-0">
       <div className="flex md:justify-between justify-center">
@@ -32,8 +25,8 @@ export default function NewProducts({items}: {items: NewProductsQuery}) {
       <div>
         <Carousel>
           <CarouselContent>
-            {newProducts &&
-              newProducts.map((item) => (
+            {items &&
+              items.map((item: any) => (
                 <CarouselItem
                   key={item.id}
                   className="md:basis-1/4 basis-3/4 ml-1 px-3"

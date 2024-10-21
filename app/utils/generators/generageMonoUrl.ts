@@ -2,6 +2,10 @@ import { generateProductForKeycrm } from "./generateProductForKeycrm";
 
 export const generateOrderInKeycrm = async (formData: FormData) => {
 
+
+  const KEYCRM_API_KEY = "ZWNmN2RlMzY5MDhjZTEwZGRkN2JkNGYwNTMzNDIwNDZmNzgzODU0MA";
+  const KEYCRM_URL = "https://openapi.keycrm.app/v1"
+
   const productsString: any = formData.get('products') || '[]';
   const products = JSON.parse(productsString);
   const paymentMethod = formData.get("payment");
@@ -52,6 +56,8 @@ export const generateOrderInKeycrm = async (formData: FormData) => {
   return result
 }
 export const generageMonoUrl = async (amount: any, products: any, id: string, siteUrl = "https://pick-up-shoes.com.ua",) => {
+  const MONO_TOKEN = "mcj6m0Oy6AyAVLqfvAHk3jA";
+  const MONO_URL = "https://api.monobank.ua/api/merchant/invoice/create"
   try {
     const response = await fetch(MONO_URL, {
       method: "POST",
@@ -81,12 +87,12 @@ export const generageMonoUrl = async (amount: any, products: any, id: string, si
       return { error: errorText, pageUrl: "/thanks" };
     }
 
-    const result:any = await response.json();
-    return {pageUrl: result.pageUrl , amount, products,id, siteUrl };
+    const result: any = await response.json();
+    return { pageUrl: result.pageUrl, amount, products, id, siteUrl };
 
-  } catch (error) {
+  } catch (error:any) {
     console.error("Ошибка:", error);
-    return { error: error.message || "Unknown error", pageUrl: "/thanks", amount, products,id, siteUrl };
+    return { error: error.message || "Unknown error", pageUrl: "/thanks", amount, products, id, siteUrl };
   }
 }
 
@@ -113,9 +119,3 @@ const getDataFromMonoUser = (products: any) => {
   );
 };
 
-
-const KEYCRM_API_KEY = "ZWNmN2RlMzY5MDhjZTEwZGRkN2JkNGYwNTMzNDIwNDZmNzgzODU0MA";
-const MONO_TOKEN = "mcj6m0Oy6AyAVLqfvAHk3jA";
-
-const MONO_URL = "https://api.monobank.ua/api/merchant/invoice/create"
-const KEYCRM_URL = "https://openapi.keycrm.app/v1"

@@ -8,7 +8,7 @@ export const loader = async () => {
     return redirect('/');
 };
 
-export const action: ActionFunction = async ({context, request }) => {
+export const action: ActionFunction = async ({ context, request }) => {
     if (request.method !== 'POST') {
         return json({ error: 'Method not allowed' }, { status: 405 });
     }
@@ -20,7 +20,7 @@ export const action: ActionFunction = async ({context, request }) => {
         console.log(reference, data.reference)
         if (data.status === "success") {
             // await updateStatus(amount, reference[0])
-            await updateStatusInShopify(context,reference)
+            await updateStatusInShopify(context, reference)
         }
 
         return json({ error: "Invalid Content-Type" }, { status: 200 });
@@ -32,10 +32,10 @@ export const action: ActionFunction = async ({context, request }) => {
 };
 
 const updateStatusInShopify = async (context: any, id: string) => {
-    console.log("updates status "+id)
+    console.log("updates status " + id)
     const updateStatus = await context.admin(MARK_AS_PAID_MUTATION, {
         variables: {
-            input:{
+            input: {
                 id: id
             }
         }
@@ -44,6 +44,9 @@ const updateStatusInShopify = async (context: any, id: string) => {
 }
 
 const updateStatus = async (Amount: any, orderId: any) => {
+
+    const KEYCRM_URL = "https://openapi.keycrm.app/v1"
+    const KEYCRM_API_KEY = "Mjg3ZTM0OGJlMWRiYjQxZmU2MmM1MWY4MTgxNmNjNjc4MWRjYWFlYg"
     try {
         const response = await fetch(`${KEYCRM_URL}/order/${orderId}/payment`, {
             method: 'POST',
@@ -71,6 +74,3 @@ const updateStatus = async (Amount: any, orderId: any) => {
     }
 }
 
-
-const KEYCRM_URL = "https://openapi.keycrm.app/v1"
-const KEYCRM_API_KEY = "Mjg3ZTM0OGJlMWRiYjQxZmU2MmM1MWY4MTgxNmNjNjc4MWRjYWFlYg"

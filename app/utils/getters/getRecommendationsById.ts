@@ -6,7 +6,8 @@ import { RECOMENDED_PRODUCT_QUERY } from "~/graphql/queries";
       return cache.get(id)
   }
   const response = await context.storefront.query(RECOMENDED_PRODUCT_QUERY, {
-      variables: { id, country: context.storefront.i18n.country, language: context.storefront.i18n.language }
+      variables: { id, country: context.storefront.i18n.country, language: context.storefront.i18n.language },
+      cache: context.storefront.CacheLong()
   });
   cache.set(id, response);
   return response;

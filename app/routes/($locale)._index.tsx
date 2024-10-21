@@ -16,6 +16,7 @@ import BestSellers from '~/components/BestSellers';
 import NewProducts from '~/components/NewProducts';
 import { RECOMENDED_PRODUCT_QUERY } from '~/graphql/queries';
 import RecommendationProducts from '~/components/RecommendationProducts';
+import { filterAvailablesProductOptions } from '~/utils';
 
 
 
@@ -93,8 +94,8 @@ export async function loader({ context }: LoaderFunctionArgs) {
     recommendedProducts:productRecommendations,
     heroCollection,
     mainCollections,
-    bestSellers,
-    newProducts,
+    bestSellers: filterAvailablesProductOptions(bestSellers.collection.products.nodes)||[],
+    newProducts: filterAvailablesProductOptions(newProducts.collection.products.nodes)||[],
     storefront
   });
 }

@@ -1,37 +1,24 @@
-import {defer, type LoaderFunctionArgs} from '@shopify/remix-oxygen';
-import {useLoaderData, type MetaFunction} from '@remix-run/react';
-import {getPaginationVariables} from '@shopify/hydrogen';
-import {SearchForm, SearchResults, NoSearchResults} from '~/components/Search';
+import { defer, type LoaderFunctionArgs } from '@shopify/remix-oxygen';
+import { useLoaderData, type MetaFunction } from '@remix-run/react';
+import { getPaginationVariables } from '@shopify/hydrogen';
+import { SearchForm } from '~/components/Search';
 import { SEARCH_QUERY } from '~/graphql/queries';
+import { SearchResults } from '~/components/Search/SearchResults';
+import { NoSearchResults } from '~/components/NoSearchResults';
 
 export const meta: MetaFunction = () => {
-  return [{title: `Hydrogen | Search`}];
+  return [{ title: `Hydrogen | Search` }];
 };
 
-export default function SearchPage() {
-  const {searchTerm, searchResults} = useLoaderData<typeof loader>();
-  return (
-    <div className="search">
-      <h1>Search</h1>
-      <SearchForm searchTerm={searchTerm} />
-      {!searchTerm || !searchResults.totalResults ? (
-        <NoSearchResults />
-      ) : (
-        <SearchResults results={searchResults.results} />
-      )}
-    </div>
-  );
-}
-
-export async function loader({request, context}: LoaderFunctionArgs) {
+export async function loader({ request, context }: LoaderFunctionArgs) {
   const url = new URL(request.url);
   const searchParams = new URLSearchParams(url.search);
-  const variables = getPaginationVariables(request, {pageBy: 8});
+  const variables = getPaginationVariables(request, { pageBy: 8 });
   const searchTerm = String(searchParams.get('q') || '');
 
   if (!searchTerm) {
     return {
-      searchResults: {results: null, totalResults: 0},
+      searchResults: { results: null, totalResults: 0 },
       searchTerm,
     };
   }
@@ -56,5 +43,21 @@ export async function loader({request, context}: LoaderFunctionArgs) {
     totalResults,
   };
 
-  return defer({searchTerm, searchResults});
+  return defer({ searchTerm, searchResults });
 }
+
+export default function SearchPage() {
+  const { searchTerm, searchResults }: any = useLoaderData<typeof loader>();
+  return (
+    <div className="search">
+      <h1>Search</h1>
+      <SearchForm searchTerm={searchTerm} />
+      {!searchTerm || !searchResults.totalResults ? (
+        <NoSearchResults />
+      ) : (
+        <SearchResults results={searchResults.results} />
+      )}
+    </div>
+  );
+}
+

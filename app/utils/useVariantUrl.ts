@@ -1,11 +1,12 @@
-import {useLocation} from '@remix-run/react';
+import { useLocation } from '@remix-run/react';
 import type {
   SelectedOption,
   CountryCode,
   CurrencyCode,
   LanguageCode,
 } from '@shopify/hydrogen/storefront-api-types';
-import {useMemo} from 'react';
+import { useMemo } from 'react';
+import { traslationOptionDict } from './traslationOptionDict';
 
 export type Locale = {
   language: LanguageCode;
@@ -24,7 +25,7 @@ export function useVariantUrl(
   handle: string,
   selectedOptions: SelectedOption[],
 ) {
-  const {pathname} = useLocation();
+  const { pathname } = useLocation();
 
   return useMemo(() => {
     return getVariantUrl({
@@ -35,6 +36,15 @@ export function useVariantUrl(
     });
   }, [handle, selectedOptions, pathname]);
 }
+
+export const getVariantUrl2 = (handle: string, id: string): string => {
+  const arrayFromId = id.split("/");
+  const newUrl = `/products/${handle}?variant=${arrayFromId[arrayFromId.length - 1]}`
+  return newUrl;
+}
+
+
+
 
 export function getVariantUrl({
   handle,
@@ -47,14 +57,7 @@ export function getVariantUrl({
   searchParams: URLSearchParams;
   selectedOptions: SelectedOption[];
 }) {
-  type TranslationDict = {
-    [key: string]: string;
-  };
-  
-  const translationDict: TranslationDict = {
-    Size: 'Розмір',
-    Color: 'Color',
-  };
+
   const match = /(\/[a-zA-Z]{2}-[a-zA-Z]{2}\/)/g.exec(pathname);
   const isLocalePathname = match && match.length > 0;
 
@@ -62,14 +65,14 @@ export function getVariantUrl({
     ? `${match![0]}products/${handle}`
     : `/products/${handle}`;
 
-    const translatedSearchParams = new URLSearchParams();
+  const translatedSearchParams = new URLSearchParams();
 
-    selectedOptions.forEach((option) => {
-      const translatedKey = translationDict[option.name] || option.name;
-      translatedSearchParams.set(translatedKey, option.value);
-    });
+  selectedOptions.forEach((option) => {
+    const translatedKey = traslationOptionDict[option.name] || option.name;
+    translatedSearchParams.set(translatedKey, option.value);
+  });
 
-    const searchString = translatedSearchParams.toString();
+  const searchString = translatedSearchParams.toString();
 
   return path + (searchString ? '?' + searchString.toString() : '');
 }

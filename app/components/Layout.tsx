@@ -8,13 +8,8 @@ import type {
 import {AnimatePresence, motion} from 'framer-motion';
 import {Aside} from '~/components/Aside';
 import {Footer} from '~/components/Footer';
-import {Header, HeaderMenu} from '~/components/Header';
-import HeaderContext, { HeaderContextInterface } from '~/context/HeaderCarts';
+import {Header} from '~/components/Header';
 import {CartMain} from '~/components/Cart';
-import {
-  PredictiveSearchForm,
-  PredictiveSearchResults,
-} from '~/components/Search';
 import {Breadcrumbs} from './Breadcrumbs';
 
 export type LayoutProps = {
@@ -51,7 +46,6 @@ export function Layout({
           {children}
         </motion.main>
       </AnimatePresence>
-      {/* <CartAside  cart={cart}/> */}
       <Suspense>
         <Await resolve={footer}>
           {(footer) => <Footer menu={footer} shop={header?.shop} />}
@@ -61,16 +55,4 @@ export function Layout({
   );
 }
 
-function CartAside({cart}: {cart: LayoutProps['cart']}) {
-  return (
-    <Aside id="cart-aside" heading="CART">
-      <Suspense fallback={<p>Loading cart ...</p>}>
-        <Await resolve={cart}>
-          {(cart) => {
-            return <CartMain cart={cart} layout="aside" />;
-          }}
-        </Await>
-      </Suspense>
-    </Aside>
-  );
-}
+

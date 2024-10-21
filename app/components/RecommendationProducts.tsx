@@ -1,19 +1,15 @@
-import {ProductCard} from './ProductCard';
+import { ProductCard } from './ProductCard';
 import {
   Carousel,
   CarouselContent,
   CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
 } from './ui/carousel';
-import type {ProductItemFragment, RecommendedProductFragment} from 'storefrontapi.generated';
 
 export default function RecommendationProducts({
   recommended,
 }: {
-  recommended: RecommendedProductFragment[];
+  recommended:any;
 }) {
-  console.log(recommended)
   return (
     <div className="flex flex-col w-full gap-[30px]  pb-[35px] px-5 md:px-0">
       {recommended && (
@@ -26,12 +22,12 @@ export default function RecommendationProducts({
           <Carousel>
             <CarouselContent>
               {recommended &&
-                recommended.map((item) => (
+                recommended.map((item:any) => (
                   <CarouselItem
                     key={item.id}
                     className="md:basis-1/4 basis-3/4 ml-1 px-3"
                   >
-                    <ProductCard product={item as unknown as ProductItemFragment} />
+                    <ProductCard product={item} />
                   </CarouselItem>
                 ))}
             </CarouselContent>

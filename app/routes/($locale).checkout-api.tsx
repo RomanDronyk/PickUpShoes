@@ -33,8 +33,8 @@ export const action: ActionFunction = async ({ request, context }) => {
     const inputCity: any = formData.get('city') || "";
     const inputDepartment: any = formData.get('department') || "";
     switch (actionType) {
-        case 'create url':
-            return createUrl(lineItems, storefront);
+        // case 'create url':
+        //     return createUrl(lineItems, storefront);
         case 'generate order':
             return generateOrder(lineItems);
         case 'get city':

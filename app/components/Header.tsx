@@ -6,9 +6,8 @@ import { DropDownCart } from './DropdownCart/DropdownCart';
 import type { LayoutProps } from './Layout';
 import { MobileCart } from './MobileCart';
 import { MobileMenu } from './MobileMenu';
-import { PredictiveSearchForm } from './Search';
 import { Button } from './ui/button';
-import HeaderContext, { HeaderContextInterface } from '~/context/HeaderCarts';
+import  { HeaderContextInterface } from '~/context/HeaderCarts';
 import { HeaderBasketContext } from '~/context/HeaderCarts';
 import {
   NavigationMenu,
@@ -19,6 +18,7 @@ import {
   NavigationMenuTrigger,
 } from './ui/navigation-menu';
 import { useMedia } from 'react-use';
+import { PredictiveSearchForm } from './PredictiveSearchForm';
 
 export type HeaderProps = Pick<
   LayoutProps,

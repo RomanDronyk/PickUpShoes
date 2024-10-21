@@ -3,9 +3,9 @@ import CartLineQuantity from "../DropdownCart/CartLineQuantity"
 import { useState } from "react"
 import { useVariantUrl } from "~/utils"
 import { Link } from "@remix-run/react"
+import OptionList from "../common/optionList"
 
 const CheckoutCartMobile = ({ cartsFromCart }: any) => {
-
     const [loading, setLoading] = useState(false)
     const updateQuantity = (value: any) => {
         setLoading(true)
@@ -14,20 +14,15 @@ const CheckoutCartMobile = ({ cartsFromCart }: any) => {
 
     return (
         <div className='flex flex-col  relative  justify-center  register max-h-[250px] overflow-hidden   pt-[24px] mb-[30px] lg:mb-0'>
-            <div className='grid' style={{ minWidth: "100%", gridTemplateColumns: "1fr", position: "relative", justifyContent: 'space-between', alignItems: "center", gap: 0, }}>
+            <div className='grid min-w-full grid-cols-1 relative justify-between items-center gap-0'>
+
                 <div className="flex gap-[16px]   pb-[7px]">
                     <div
-                        style={{
-                            maxWidth: 70
-                        }}
-                        className="relative block rounded-[20px] overflow-hidden group-hover/card:h-[calc(var(--image-height)-var(--options-height)+10px)] w-full h-full transition-all duration-100 ease-in-out"
+                        className="max-w-[70px] relative block rounded-[20px] overflow-hidden group-hover/card:h-[calc(var(--image-height)-var(--options-height)+10px)] w-full h-full transition-all duration-100 ease-in-out"
                     >
-                        <div
-                            className="relative overflow-hidden"
-                            style={{
-                                height: 'var(--image-height)',
-                                maxWidth: 70
-                            }}
+                        <Link to={variantUrl}
+                            className="relative overflow-hidden max-w-[70px]"
+                            style={{ height: 'var(--image-height)' }}
                         >
                             <Image
                                 alt={cartsFromCart?.merchandise?.image?.altText || cartsFromCart?.merchandise?.product?.title}
@@ -36,7 +31,7 @@ const CheckoutCartMobile = ({ cartsFromCart }: any) => {
                                 className="rounded-[20px] object-cover relative overflow-hidden"
                                 crop="bottom"
                             />
-                        </div>
+                        </Link>
 
                     </div>
                     <div className="flex flex-col justify-between min-h-[100%]">
@@ -51,16 +46,9 @@ const CheckoutCartMobile = ({ cartsFromCart }: any) => {
                     </div>
                     <CartLineQuantity setNewQuantity={updateQuantity} isAbsolute={true} line={cartsFromCart} />
                 </div>
-                <div >
+                <div>
                     <div className="pb-[12px]">
-                        {cartsFromCart?.merchandise?.selectedOptions.map((option: any) => {
-                            return<h4 key={option.name}>
-                                    {option.name}: <span className="text-black/50">{option.value}</span>
-                                </h4>
-                        })}
-                        <h4>
-                            Артикул: <span className="text-black/50">{cartsFromCart?.merchandise?.sku}</span>
-                        </h4>
+                        <OptionList sku={cartsFromCart?.merchandise?.sku} options={cartsFromCart?.merchandise?.selectedOptions} />
                     </div>
                     <div>
                         <h4 className="md:text-xl text-lg font-semibold line-clamp-1 pr-[10px] mb-[7px]">

@@ -26,7 +26,6 @@ export async function loader({request, context, params}: LoaderFunctionArgs) {
     const lineDetails = line.split(':');
     const variantId = lineDetails[0];
     const quantity = parseInt(lineDetails[1], 10);
-
     return {
       merchandiseId: `gid://shopify/ProductVariant/${variantId}`,
       quantity,

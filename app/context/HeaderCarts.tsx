@@ -13,10 +13,10 @@ export interface HeaderContextInterface {
     setLikedCart: React.Dispatch<React.SetStateAction<any[]>>;
     cartShow: boolean;
     count: number;
-    removeLikeCart:any
-    addLikedCart:any,
-    cartShowMobile:any,
-setCartShowMobile:any,
+    removeLikeCart: any
+    addLikedCart: any,
+    cartShowMobile: any,
+    setCartShowMobile: any,
 
     setCartShow: React.Dispatch<React.SetStateAction<boolean>>;
 }
@@ -31,20 +31,20 @@ const HeaderContext = ({ children }: HeaderContextProps) => {
     });
     const location = useLocation();
     const [count, setCount] = useState(0);
-    const addLikedCart = (product:any)=>{
-            setLikedCart((prev:any)=>{
-                return [...prev,product]
-            })
+    const addLikedCart = (product: any) => {
+        setLikedCart((prev: any) => {
+            return [...prev, product]
+        })
     }
 
-      const removeLikeCart = (product:any)=>{
-        setLikedCart((prev:any)=>{
-            const productIndex = prev.findIndex((item:any) => item.id === product.id);
+    const removeLikeCart = (product: any) => {
+        setLikedCart((prev: any) => {
+            const productIndex = prev.findIndex((item: any) => item.id === product.id);
             if (productIndex > -1) {
-                return prev.filter((_:any, index:any) => index !== productIndex);
-              }
+                return prev.filter((_: any, index: any) => index !== productIndex);
+            }
         })
-      }
+    }
 
     useEffect(() => {
         Cookies.set("likedCart", JSON.stringify(likedCart), { expires: 7 });
@@ -64,7 +64,7 @@ const HeaderContext = ({ children }: HeaderContextProps) => {
         addLikedCart,
         setCartShow,
         cartShowMobile,
-setCartShowMobile,
+        setCartShowMobile,
     } as HeaderContextInterface;
 
     return (

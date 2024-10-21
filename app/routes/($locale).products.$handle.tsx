@@ -9,7 +9,6 @@ import {
 
 import {
   CartForm,
-  Image,
   MediaFile,
   VariantSelector,
   getSelectedProductOptions,
@@ -44,73 +43,84 @@ import { ScrollArea, ScrollBar } from '~/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/ui/tabs';
 import { viewedProductsCookie } from '~/cookies.server';
 import { cn } from '~/lib/utils';
-import { getVariantUrl } from '~/utils';
+import { filterAvailablesProductOptions, getVariantUrl } from '~/utils';
 import monoLogo from '../assets/images/mono.svg';
 import { HeaderBasketContext, HeaderContextInterface } from '~/context/HeaderCarts';
-import { PRODUCT_QUERY, RECOMENDED_PRODUCT_QUERY, VARIANTS_QUERY, VIEWED_PRODUCT_QUERY } from '~/graphql/queries';
+import { PRODUCT_QUERY, RECOMENDED_PRODUCT_QUERY, RECOMMENDED_PRODUCTS_QUERY, VARIANTS_QUERY, VIEWED_PRODUCT_QUERY } from '~/graphql/queries';
+import HeartIcon from '~/components/ui/heartIcon';
 
 
 
-
-
-export const meta: MetaFunction<typeof loader> = ({ data }) => {
-  return [{ title: `Hydrogen | ${data?.product?.title ?? ''}` }];
+export const meta: MetaFunction<typeof loader> = ({ data }: any) => {
+  return [{ title: `PickUpShoes | ${data?.product?.title ?? ''}` }];
 };
 
 export const handle = {
   breadcrumb: 'product',
 };
 
-export async function loader({ params, request, context }: LoaderFunctionArgs) {
+function loadDeferredData({ context, params }: LoaderFunctionArgs) {
+  // In order to show which variants are available in the UI, we need to query
+  // all of them. But there might be a *lot*, so instead separate the variants
+  // into it's own separate query that is deferred. So there's a brief moment
+  // where variant options might show as available when they're not, but after
+  // this deffered query resolves, the UI will update.
+  const variants = context.storefront
+    .query(VARIANTS_QUERY, {
+      variables: { handle: params.handle! },
+    })
+    .catch((error) => {
+      console.error(error);
+      return null;
+    });
+
+  return {
+    variants,
+  };
+}
+
+
+async function loadCriticalData({
+  context,
+  params,
+  request,
+}: LoaderFunctionArgs) {
   const { handle } = params;
   const { storefront } = context;
-  const url = new URL(request.url);
 
-  const selectedOptions = getSelectedProductOptions(request).filter(
-    (option) =>
-      !option.name.startsWith('_sid') &&
-      !option.name.startsWith('_pos') &&
-      !option.name.startsWith('_psq') &&
-      !option.name.startsWith('_ss') &&
-      !option.name.startsWith('_v') &&
-      !option.name.startsWith('fbclid'),
-  );
+  const url = new URL(request.url);
+  const variant = url.searchParams.get("variant");
 
   if (!handle) {
     throw new Error('Expected product handle to be defined');
   }
-  const locale = context.storefront.i18n;
 
-  const { product } = await storefront.query(PRODUCT_QUERY, {
-    variables: {
-      language: locale.language,
-      handle,
-      selectedOptions,
-    },
-  });
-
-  const { productRecommendations } = await storefront.query(
-    RECOMENDED_PRODUCT_QUERY,
-    {
+  const [{ product }] = await Promise.all([
+    storefront.query(PRODUCT_QUERY, {
       variables: {
-        id: product?.id || "0"
+        handle,
+        language: 'UK',
+        country: 'UA',
+        selectedOptions: getSelectedProductOptions(request)
       },
-    },
-  );
+    }),
+  ]);
+
+
 
   if (!product?.id) {
     throw new Response(null, { status: 404 });
   }
 
-  const variants:ProductVariantsQuery = await storefront.query(VARIANTS_QUERY, {
-    variables: { handle },
-  });
-
-  const isRequestedVariantAvailable = product?.selectedVariant?.availableForSale;
-
-  // if (!isRequestedVariantAvailable) {
-  //   throw redirectToFirstVariant({ product, variants, request });
-  // }
+  const [{ productRecommendations }] = await Promise.all([
+    storefront.query(
+      RECOMENDED_PRODUCT_QUERY,
+      {
+        variables: {
+          id: product?.id || "0"
+        },
+      })],
+  );
 
   const cookieHeader = request.headers.get('Cookie');
   const cookie = (await viewedProductsCookie.parse(cookieHeader)) || [];
@@ -125,13 +135,68 @@ export async function loader({ params, request, context }: LoaderFunctionArgs) {
     },
   });
 
+  const firstVariant = product.variants.nodes[0];
+  const firstVariantIsDefault = Boolean(
+    firstVariant.selectedOptions.find(
+      (option: SelectedOption) =>
+        option.name === 'Title' && option.value === 'Default Title',
+    ),
+  );
+
+  if (firstVariantIsDefault) {
+    product.selectedVariant = firstVariant;
+  } else {
+    // if no selected variant was returned from the selected options,
+    // we redirect to the first variant's url with it's selected options applied
+    if (!product.selectedVariant) {
+      throw redirectToFirstVariant({ product, request });
+    }
+  }
+
+  return {
+    cookie,
+    product,
+    viewedProducts: filterAvailablesProductOptions(viewed.nodes) || [],
+    recommendations: filterAvailablesProductOptions(productRecommendations) || [],
+  };
+}
+
+function redirectToFirstVariant({
+  product,
+  request,
+}: {
+  product: ProductFragment;
+  request: Request;
+}) {
+  const url = new URL(request.url);
+  const firstVariant = product.variants.nodes.filter(element => element.availableForSale)[0];
+
+  return redirect(
+
+    getVariantUrl({
+      pathname: url.pathname,
+      handle: product.handle,
+      selectedOptions: firstVariant.selectedOptions,
+      searchParams: new URLSearchParams(url.search),
+    }),
+    {
+      status: 302,
+    },
+  );
+}
+
+
+
+export async function loader(args: LoaderFunctionArgs) {
+
+  // Start fetching non-critical data without blocking time to first byte
+  const deferredData = loadDeferredData(args);
+  const criticalData = await loadCriticalData(args);
+  const { cookie } = criticalData;
   return defer(
     {
-      somenew: variants?.product?.variants?.nodes,
-      product,
-      variants,
-      viewedProducts: viewed,
-      recommendations: productRecommendations,
+      ...deferredData,
+      ...criticalData,
     },
     {
       headers: {
@@ -143,46 +208,13 @@ export async function loader({ params, request, context }: LoaderFunctionArgs) {
 
 
 
-function redirectToFirstVariant({
-  product,
-  variants,
-  request,
-}: {
-  product: ProductFragment;
-  variants: any;
-  request: Request;
-}) {
-  const url = new URL(request.url);
 
-  const searchParams = new URLSearchParams(url.search);
-  const color = searchParams.get('Color');
 
-  console.log(variants?.product?.variants?.nodes, "redirects")
-  // const firstVariant = variants?.product?.variants?.nodes.find(variant => variant?.availableForSale) || product?.variants?.nodes[0];
-  const firstVariant = variants?.product?.variants?.nodes.find(
-    (variant:any) =>
-      variant?.availableForSale &&
-      variant?.selectedOptions.some(
-        (option:any) => option?.name === 'Color' && option?.value === color
-      )
-  ) || product?.variants?.nodes[0];
-
-  return redirect(
-    getVariantUrl({
-      pathname: url?.pathname,
-      handle: product?.handle,
-      selectedOptions: firstVariant?.selectedOptions,
-      searchParams: new URLSearchParams(url?.search),
-    }),
-    {
-      status: 302,
-    },
-  );
-}
 
 export default function Product() {
-  const { product, variants, viewedProducts, recommendations, somenew } =
+  const { product, variants, viewedProducts, recommendations }: any =
     useLoaderData<typeof loader>();
+  console.log(filterAvailablesProductOptions(recommendations), viewedProducts)
   const { selectedVariant, descriptionHtml } = product;
 
   const [selectedIndex, setSelectedIndex] = useState<number | undefined>(0);
@@ -277,7 +309,7 @@ function ProductTabs({ description }: { description: string }) {
               Опис товару
             </h3>
             <div
-              className="grid grid-cols-2 border border-black/10 rounded-[20px] px-[25px] py-[30px] [&>div]:flex [&>div]:flex-col [&>*:nth-child(even)]:font-medium lg:text-2xl text-base"
+              className=" border border-black/10 rounded-[20px] px-[25px] py-[30px] [&>div]:flex [&>div]:flex-col [&>*:nth-child(even)]:font-medium lg:text-2xl text-base"
               dangerouslySetInnerHTML={{ __html: description }}
             />
           </div>
@@ -528,22 +560,6 @@ function ProductTabs({ description }: { description: string }) {
     </div>
   );
 }
-function ProductImage({ image }: { image: ProductVariantFragment['image'] }) {
-  if (!image) {
-    return <div className="product-image" />;
-  }
-  return (
-    <div className="product-image rounded-[20px]">
-      <Image
-        alt={image.altText || 'Product Image'}
-        aspectRatio="1/1.1"
-        data={image}
-        key={image.id}
-        className="rounded-[20px] max-h-[830px]"
-      />
-    </div>
-  );
-}
 
 function ProductGalery({ product, objGalery, media }: { product: any, objGalery: any, media: ProductFragment['media'] }) {
   const {
@@ -595,7 +611,6 @@ function ProductGalery({ product, objGalery, media }: { product: any, objGalery:
     } else {
       addLikedCart(productWithLike)
       setProductWithLike({ ...productWithLike, isLiked: true })
-      navigate("/liked")
     }
   }
 
@@ -659,7 +674,7 @@ function ProductGalery({ product, objGalery, media }: { product: any, objGalery:
                 className="rounded-[20px] aspect-1 image-product-aspect "
               />
               <button
-                onClick={() => toggleLike()} // Функція для додавання/видалення зі списку бажань
+                onClick={toggleLike} // Функція для додавання/видалення зі списку бажань
                 className=" absolute p-2 rounded-full bg-white shadow-lg  top-[1.35rem] right-3 p-2"
                 style={{ zIndex: 32 }}
                 aria-label="Add to wishlist"
@@ -673,22 +688,7 @@ function ProductGalery({ product, objGalery, media }: { product: any, objGalery:
     </div>
   );
 }
-const HeartIcon = ({ isFavorited }: { isFavorited: boolean }) => {
 
-  if (isFavorited) {
-    return (
-      <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlnsXlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
-        width="15px" height="15px" viewBox="0 0 15 15" xmlSpace="preserve">
-        <path d="M13.91,6.75c-1.17,2.25-4.3,5.31-6.07,6.94c-0.1903,0.1718-0.4797,0.1718-0.67,0C5.39,12.06,2.26,9,1.09,6.75
-       C-1.48,1.8,5-1.5,7.5,3.45C10-1.5,16.48,1.8,13.91,6.75z"/>
-      </svg>
-    )
-  } else {
-    return <svg width="18" height="16" viewBox="0 0 18 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M5 1C2.7912 1 1 2.73964 1 4.88594C1 6.61852 1.7 10.7305 8.5904 14.8873C8.71383 14.961 8.85552 15 9 15C9.14448 15 9.28617 14.961 9.4096 14.8873C16.3 10.7305 17 6.61852 17 4.88594C17 2.73964 15.2088 1 13 1C10.7912 1 9 3.35511 9 3.35511C9 3.35511 7.2088 1 5 1Z" stroke="black" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  }
-};
 
 
 function ProductMain({
@@ -711,7 +711,7 @@ function ProductMain({
         </h1>
         <div className="flex items-center gap-x-[16px] mb-[30px]">
           <span className="font-semibold text-[20px] text-black/50">
-            {product.selectedVariant?.sku}
+            {product.selectedVariant?.sku ? product.selectedVariant?.sku : "Sku - не вказаний"}
           </span>
           <Link
             to={`/collections/${collections?.nodes[0]?.handle}?filter.productVendor="${vendor}"`}
@@ -882,13 +882,12 @@ function ProductOptions({ objGalery, product, option }: { objGalery: any, produc
   } = objGalery;
 
 
-  if (option.name === "Колір" || option.name === "Color") {
+  if ((option.name === "Колір" || option.name === "Color") && option.values.length > 1) {
     return (
       <div className="product-options max-w-[370px]" key={option.name}>
         <h5 className="text-[16px] text-black/60 mb-4">{option.name}</h5>
         <div className="product-options-grid grid grid-cols-5 gap-y-[10px] gap-x-[10px] items-start">
           {option.values.map(({ value, isAvailable, isActive, to }, index) => {
-            console.log(product.media.nodes, "sdfsdfs")
             return <Link
               key={option.name + value}
               prefetch="intent"

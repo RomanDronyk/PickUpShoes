@@ -26,7 +26,8 @@ export type TBreadcrumbsType = z.infer<typeof breadcrumbsSchema>;
 
 export function Breadcrumbs() {
   const matches = useMatches();
-  const deepsRoute = matches.at(-1);
+  const deepsRoute: any = matches.at(-1);
+
   const pages: { href: string; name: string }[] = [{ href: '/', name: 'Головна' }];
 
   const parsedBreadcrumbType = breadcrumbsSchema.safeParse(
@@ -37,12 +38,12 @@ export function Breadcrumbs() {
     switch (parsedBreadcrumbType.data) {
       case 'collection':
         pages.push({
-          href: `/collections/${deepsRoute?.data.collection.handle}`,
-          name: `${deepsRoute.data.collection.title}`,
+          href: `/collections/${deepsRoute?.data?.collection?.handle}`,
+          name: `${deepsRoute?.data?.collection?.title ? deepsRoute?.data?.collection?.title : "sladkjf"}`,
         });
         break;
       case 'product':
-        const collection = deepsRoute.data.product.collections.nodes.at(0);
+        const collection = deepsRoute?.data?.product?.collections?.nodes.at(0);
 
         pages.push({
           href: `/collections/${collection.handle}`,

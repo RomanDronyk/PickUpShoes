@@ -22,18 +22,13 @@ import type { CustomerAccessToken } from '@shopify/hydrogen/storefront-api-types
 import favicon from '../public/favicon.ico';
 import { Layout } from '~/components/Layout';
 import styles from 'app/styles/tailwind.css';
-// import vaulStyles from 'vaul/dist/index.css';
-import NotFound from './components/NotFound';
 import { google } from 'worker-auth-providers';
-import HeaderContext, { HeaderContextInterface } from '~/context/HeaderCarts';
+import HeaderContext from '~/context/HeaderCarts';
 
 import { CacheProvider } from '@emotion/react';
 import createCache from '@emotion/cache';
+import NotFoundScreen from './screens/NotFoundScreen';
 
-
-/**
- * This is important to avoid re-fetching root queries on sub-navigations
- */
 
 export const shouldRevalidate: ShouldRevalidateFunction = ({
   formMethod,
@@ -173,7 +168,7 @@ export function ErrorBoundary() {
       </head>
       <body className="font-sans">
         <Layout {...rootData}>
-          <NotFound />
+          <NotFoundScreen/>
         </Layout>
         <ScrollRestoration nonce={nonce} />
         <Scripts nonce={nonce} />

@@ -3,16 +3,17 @@ import TextField from '@mui/material/TextField';
 import Autocomplete from '@mui/material/Autocomplete';
 import { useState, useEffect } from 'react';
 import style from './style';
+import { IInputField, IInputState } from '~/screens/CheckoutScreen';
 
-interface Film {
-  MainDescription: string;
-  Ref: string;
-  Present: string;
+interface IContactType {
+  inputState: IInputState,
+  onInputChange: (value: string | boolean, fieldName: keyof IInputField, id: string) => void
 }
 
-export default function ContactType() {
+const ContactType: React.FC<IContactType> = ({ onInputChange, inputState }) => {
   const [open, setOpen] = useState(false);
-  const [isReady, setIsReady] = useState(false)
+  const [isReady, setIsReady] = useState(false);
+
   useEffect(() => {
     setIsReady(true);
   }, []);
@@ -22,39 +23,53 @@ export default function ContactType() {
   }
   return isReady ? (
 
-    <Autocomplete
-      id="asynchronous-demo"
-      sx={style}
-      open={open}
-      onOpen={() => {
-        setOpen(true);
-      }}
-      onClose={() => {
-        setOpen(false);
-      }}
-      isOptionEqualToValue={(option, value) => option.name === value.name}
-      getOptionLabel={(option) => option.name}
-      options={contactType}
-      noOptionsText="Місто не знайдено"
-      renderInput={(params) => (
-        <TextField
-          {...params}
-          placeholder='Спосіб звязку'
-          name="contactType"
-          required
-          InputProps={{
-            ...params.InputProps,
-            endAdornment: (
-              <React.Fragment>
-                {params.InputProps.endAdornment}
-              </React.Fragment>
-            ),
-          }}
-        />
-      )}
-    />
+    <>
+      <Autocomplete
+        id="contactType"
+        sx={style}
+        open={open}
+        onOpen={() => {
+          setOpen(true);
+        }}
+        onClose={() => {
+          setOpen(false);
+          onInputChange(true, "isBlur", "contactType")
+        }}
+        isOptionEqualToValue={(option, value) => option.name === value.name}
+        getOptionLabel={(option) => option.name}
+        options={contactType}
+        onChange={(event, selectedOption) => {
+          onInputChange(selectedOption?.name || "", "value", "contactType")
+          onInputChange("", "errorMessage", "contactType")
+          onInputChange(false, "isBlur", "contactType")
+
+        }}
+        renderInput={(params) => (
+          <TextField
+            {...params}
+            placeholder='Спосіб звязку'
+            name="contactType"
+            required
+            InputProps={{
+              ...params.InputProps,
+              endAdornment: (
+                <React.Fragment>
+                  {params.InputProps.endAdornment}
+                </React.Fragment>
+              ),
+            }}
+          />
+        )}
+      />
+      {(!inputState.contactType.value && inputState.contactType.isBlur) && <div className='text-red'>{inputState.contactType.errorMessage}</div>}
+
+    </>
+
   ) : null;
+
 }
+export default ContactType
+
 
 const contactType = [
   {

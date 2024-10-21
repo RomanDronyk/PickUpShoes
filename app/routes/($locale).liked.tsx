@@ -1,27 +1,40 @@
 import { Link, useLoaderData } from '@remix-run/react';
 import { defer, type LoaderFunctionArgs } from '@shopify/remix-oxygen';
 import { useMedia } from 'react-use';
-import RecommendationProducts from '~/components/RecommendationProducts';
 import BestSellers from '~/components/BestSellers';
 import BlockNewsletter from '~/components/BlockNewsletter';
 import { HeaderBasketContext, HeaderContextInterface } from '~/context/HeaderCarts';
 import { useContext } from 'react';
-import {ILikedNewCart, LikedCart } from '~/components/LikedCart/LikedCart';
+import { ILikedNewCart, LikedCart } from '~/components/LikedCart/LikedCart';
 import { cn } from '~/lib/utils';
 import { BEST_SELLERS_QUERY, RECOMENDED_PRODUCT_QUERY } from '~/graphql/queries';
+import { filterAvailablesProductOptions } from '~/utils';
 
 
 export const handle: { breadcrumb: string } = {
   breadcrumb: 'liked',
 };
 
+export async function loader({ context }: LoaderFunctionArgs) {
+  const { storefront } = context;
+  const bestSellers = await storefront.query(BEST_SELLERS_QUERY, {
+    variables: {
+      country: context.storefront.i18n.country,
+      language: context.storefront.i18n.language,
+    },
+  });
+
+  return defer({
+    bestSellers : filterAvailablesProductOptions(bestSellers.collection.products.nodes),
+  });
+}
+
+
 export default function Liked() {
-  const { recommendedProducts, bestSellers } =
-    useLoaderData<typeof loader>();
-  const {
-    likedCart,
-  } = useContext(HeaderBasketContext) as HeaderContextInterface
+  const { bestSellers }: any = useLoaderData<typeof loader>();
+  const {likedCart} = useContext(HeaderBasketContext) as HeaderContextInterface
   const isMobile = useMedia('(max-width: 767px)', false);
+  console.log(bestSellers)
 
   return (
     <div className="w-full  flex flex-col  lg:px-24 md:px-12 px-[10px]  mb-8"
@@ -56,13 +69,9 @@ export default function Liked() {
           </svg>
         </button>
       </Link>
-
-
       <div className='flex flex-col justify-center items-center' >
-        <RecommendationProducts recommended={recommendedProducts} />
         <BestSellers items={bestSellers} />
         <div className='h-[40px]'>
-          
         </div>
         <BlockNewsletter />
       </div>
@@ -70,26 +79,3 @@ export default function Liked() {
   );
 }
 
-
-export async function loader({ context }: LoaderFunctionArgs) {
-  const { storefront } = context;
-  const { recommendedProducts } = await storefront.query(
-    RECOMENDED_PRODUCT_QUERY,
-    {
-      variables: {
-        // id: 0
-      },
-    },
-  );
-  const bestSellers = await storefront.query(BEST_SELLERS_QUERY, {
-    variables: {
-      country: context.storefront.i18n.country,
-      language: context.storefront.i18n.language,
-    },
-  });
-
-  return defer({
-    recommendedProducts,
-    bestSellers
-  });
-}

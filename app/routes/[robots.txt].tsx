@@ -65,7 +65,8 @@ function generalDisallowRules({
   shopId?: string;
   sitemapUrl?: string;
 }) {
-  return `Disallow: /admin
+  return `
+Disallow: /admin
 Disallow: /cart
 Disallow: /orders
 Disallow: /checkouts/
@@ -101,7 +102,8 @@ Allow: /search/
 Disallow: /search/?*
 Disallow: /apple-app-site-association
 Disallow: /.well-known/shopify/monorail
-${sitemapUrl ? `Sitemap: ${sitemapUrl}` : ''}`;
+${sitemapUrl ? `Sitemap: ${sitemapUrl}` : ''}
+`;
 }
 
 

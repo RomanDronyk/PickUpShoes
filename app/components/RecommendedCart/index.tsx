@@ -3,7 +3,7 @@ import { CartForm, Image } from "@shopify/hydrogen";
 import { FC, useState } from "react";
 import { cn } from "~/lib/utils";
 import { useVariantUrl } from "~/utils";
-import OptionList from "../ui/optionList";
+import OptionList from "../common/optionList";
 
 interface IImage {
   altText: string,
@@ -61,17 +61,12 @@ const RecommendedCart: FC<IRecommendedCart> = ({ product }) => {
       <div className='grid' style={{ minWidth: "100%", gridTemplateColumns: "1fr", position: "relative", justifyContent: 'space-between', alignItems: "center", gap: 10, }}>
         <div className="flex gap-[16px] items-center min-h-[100%]">
           <div
-            style={{
-              maxWidth: 124
-            }}
-            className="relative block rounded-[20px] overflow-hidden group-hover/card:h-[calc(var(--image-height)-var(--options-height)+10px)] w-full h-full transition-all duration-100 ease-in-out"
+            className=" max-w-[124px]  relative block rounded-[20px] overflow-hidden group-hover/card:h-[calc(var(--image-height)-var(--options-height)+10px)] w-full h-full transition-all duration-100 ease-in-out"
           >
-            <div
-              className="relative overflow-hidden"
-              style={{
-                height: 'var(--image-height)',
-                maxWidth: 124
-              }}
+            <Link
+              to={variantUrl}
+              className=" max-w-[124px] relative overflow-hidden"
+              style={{ height: 'var(--image-height)' }}
             >
               <Image
                 alt={product?.featuredImage?.altText || product?.title}
@@ -80,8 +75,7 @@ const RecommendedCart: FC<IRecommendedCart> = ({ product }) => {
                 className="rounded-[20px] object-cover relative overflow-hidden"
                 crop="bottom"
               />
-            </div>
-
+            </Link>
           </div>
           <div className="flex flex-col justify-between min-h-[100%]">
             <div style={{ display: "block" }}>
@@ -90,7 +84,7 @@ const RecommendedCart: FC<IRecommendedCart> = ({ product }) => {
               </h4>
             </div>
             <div>
-              <OptionList sku={selectedVariant.sku} options={selectedVariant?.selectedOptions}/>
+              <OptionList sku={selectedVariant.sku} options={selectedVariant?.selectedOptions} />
             </div>
             <div>
               <h4 className="md:text-xl text-lg font-semibold line-clamp-1 pr-[10px] mb-[7px]">
@@ -131,8 +125,6 @@ const RecommendedCart: FC<IRecommendedCart> = ({ product }) => {
                     )}
                   >
                     {fetcher.state == 'idle' ? "Додати" : "Загрузка"}
-
-
                   </button>
                 </>
               )}
@@ -145,26 +137,19 @@ const RecommendedCart: FC<IRecommendedCart> = ({ product }) => {
   )
 }
 
-
 export const RecommendedCartMobile: FC<IRecommendedCart> = ({ product }) => {
   const [selectedVariant, setSelectedVarian] = useState<IVariant>(product.variants[0])
   const variantUrl = useVariantUrl(product.handle, selectedVariant.selectedOptions);
   return (
     <div className='flex flex-col  relative  justify-center  register max-h-[250px] overflow-hidden   pt-[24px] mb-[30px] lg:mb-0'>
       <div className='grid' style={{ minWidth: "100%", gridTemplateColumns: "1fr", position: "relative", justifyContent: 'space-between', alignItems: "center", gap: 0, }}>
-        <div className="flex gap-[16px]   pb-[7px]">
+        <div className=" flex gap-[16px]   pb-[7px]">
           <div
-            style={{
-              maxWidth: 70
-            }}
-            className="relative block rounded-[20px] overflow-hidden group-hover/card:h-[calc(var(--image-height)-var(--options-height)+10px)] w-full h-full transition-all duration-100 ease-in-out"
+            className=" max-w-[70px] relative block rounded-[20px] overflow-hidden group-hover/card:h-[calc(var(--image-height)-var(--options-height)+10px)] w-full h-full transition-all duration-100 ease-in-out"
           >
             <div
-              className="relative overflow-hidden"
-              style={{
-                height: 'var(--image-height)',
-                maxWidth: 70
-              }}
+              className=" max-w-[70px] relative overflow-hidden"
+              style={{ height: 'var(--image-height)' }}
             >
               <Image
                 alt={product?.featuredImage?.altText || product?.title}
@@ -176,7 +161,7 @@ export const RecommendedCartMobile: FC<IRecommendedCart> = ({ product }) => {
             </div>
           </div>
           <div className="flex flex-col justify-between min-h-[100%]">
-            <div style={{ maxWidth: "100%", display: "block" }}>
+            <div className="max-w-full block">
               <h4 className="md:text-xl text-lg font-semibold line-clamp-1 pr-[10px] mb-[7px]">
                 <Link to={variantUrl}>{product?.title}</Link>
               </h4>
@@ -185,7 +170,7 @@ export const RecommendedCartMobile: FC<IRecommendedCart> = ({ product }) => {
         </div>
         <div >
           <div className="pb-[12px]">
-            <OptionList  sku={selectedVariant.sku} options={selectedVariant?.selectedOptions} />
+            <OptionList sku={selectedVariant.sku} options={selectedVariant?.selectedOptions} />
           </div>
           <div>
             <h4 className="md:text-xl text-lg font-semibold line-clamp-1 pr-[10px] mb-[7px]">

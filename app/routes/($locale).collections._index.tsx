@@ -9,7 +9,6 @@ import type {
 import { json, redirect, type LoaderFunctionArgs } from '@shopify/remix-oxygen';
 import type {
   CollectionQuery,
-  ProductItemFragment,
   CollectionFiltersQuery,
 } from 'storefrontapi.generated';
 import { ProductCard } from '~/components/ProductCard';
@@ -25,6 +24,7 @@ import { Button } from '~/components/ui/button';
 import { MoveDown, MoveUp } from 'lucide-react';
 import Loader from '~/components/Loader';
 import { COLLECTION_FILTER_QUERY, COLLECTION_QUERY } from '~/graphql/queries';
+import { Product } from '@shopify/hydrogen-react/storefront-api-types';
 
 export type SortParam =
   | 'price-low-high'
@@ -39,7 +39,7 @@ export const handle: { breadcrumb: string } = {
   breadcrumb: 'collection',
 };
 
-export const meta: MetaFunction<typeof loader> = ({ data }) => {
+export const meta: MetaFunction<typeof loader> = ({ data }: any) => {
   return [{ title: `PickUpShoes | ${data?.collection.title ?? ''} Collection` }];
 };
 
@@ -99,7 +99,7 @@ export async function loader({ request, params, context }: LoaderFunctionArgs) {
   const allFilterValues = collection.products.filters.flatMap(
     (filter) => filter.values,
   );
-  const appliedFilters:any = filters
+  const appliedFilters: any = filters
     .map((filter) => {
       const foundValue = allFilterValues.find((value) => {
         const valueInput = JSON.parse(value.input as string) as ProductFilter;
@@ -170,7 +170,7 @@ export default function Collection() {
             <SortProducts />
           ) : (
             <MobileFilters
-               appliedFilters= {appliedFilters}
+              appliedFilters={appliedFilters}
               filters={collection.products.filters as Filter[]}
               initialFilters={filtersCollection?.products.filters as Filter[]}
             />
@@ -201,7 +201,7 @@ export default function Collection() {
   );
 }
 
-function ProductsGrid({ products }: { products: ProductItemFragment[] }) {
+function ProductsGrid({ products }: { products: any[] }) {
   return (
     <div className="product-grid grid md:grid-cols-3 xl:grid-cols-3 grid-cols-2  gap-x-[20px] gap-y-10 mt-5">
       {(products.length > 0) ?

@@ -1,4 +1,3 @@
-import { useLoaderData, type MetaFunction } from '@remix-run/react';
 import {
   Link,
   useLocation,
@@ -13,7 +12,7 @@ import type {
   ProductFilter,
 } from '@shopify/hydrogen/storefront-api-types';
 import { ChevronDown } from 'lucide-react';
-import { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useDebounce } from 'react-use';
 import type { SortParam, loader } from '~/routes/($locale).collections.$handle';
 import {
@@ -47,7 +46,7 @@ export type AppliedFilter = {
   name?: string;
 };
 
-export function ProductsFilter({
+export const ProductsFilter = React.memo(function ProductsFilter({
   filters,
   initialFilters,
   appliedFilters,
@@ -58,6 +57,7 @@ export function ProductsFilter({
   appliedFilters?: AppliedFilter[] | any;
   headerPromise?: any
 }) {
+  console.log("ProductFilter");
 
 
   return (
@@ -87,7 +87,7 @@ export function ProductsFilter({
       <FilterDraw headerPromise={headerPromise} appliedFilters={appliedFilters} initial={initialFilters} filters={filters} />
     </div>
   );
-}
+})
 
 function FilterDraw({
   filters,
@@ -112,12 +112,6 @@ function FilterDraw({
     setInitialRangePrice(JSON.parse(initialFilterPrice?.values[0].input || "[]"));
   }, [params])
   const { publicStoreDomain } = useRootLoaderData();
-
-
-
-
-
-
 
   const markup = (filter: Filter | any) => {
     switch (filter.type) {
@@ -149,16 +143,16 @@ function FilterDraw({
   };
   const location = useLocation();
   useEffect(() => {
-    setValue(location.pathname)
-  }, [location.pathname])
+    setValue(location.pathname);
+  }, [location.pathname]);
   useEffect(() => {
-    navigate(value)
-  }, [value, location.pathname])
+    // navigate(value);
+  }, [value, location.pathname]);
 
   return (
     <div className="flex flex-col">
       <div className="md:flex flex-col hidden">
-        {menu && menu?.items.map((item) => {
+        {menu && menu?.items.map((item:any) => {
           return (
             <Accordion key={item.id} type="single" collapsible className="w-full">
               <AccordionItem value="sizes" >
@@ -244,7 +238,8 @@ function PriceFilter({
     () => {
       if (priceRange[0] === min && priceRange[1] === max) {
         params.delete(`${FILTER_URL_PREFIX}price`);
-        navigate(`${location.pathname}?${params.toString()}`);
+        console.log(`${location.pathname}?${params.toString()}`)
+        // navigate(`${location.pathname}?${params.toString()}`);
         return;
       }
       const price = {
@@ -308,21 +303,21 @@ interface ListFilterProps {
   appliedFilters: any
 }
 
-const ListFilter: React.FC<ListFilterProps> = ({ filter:newFilter, appliedFilters }) => {
+const ListFilter: React.FC<ListFilterProps> = ({ filter: newFilter, appliedFilters }) => {
   const [value, setValue] = useState<string[]>([]);
   const [filterValues, setFilterValues] = useState<any>([]);
   const location = useLocation();
   const navigate = useNavigate();
   const matches = useMatches();
-  const [filter,setFilters] =useState(()=>{
-    const newValues = newFilter.values.map(value=>{
-      if(value.id.slice(-1) ==="."){
-        return {...value, id: value.id + value.label}
-      }else{
+  const [filter, setFilters] = useState(() => {
+    const newValues = newFilter.values.map(value => {
+      if (value.id.slice(-1) === ".") {
+        return { ...value, id: value.id + value.label }
+      } else {
         return value
       }
     })
-    return {...newFilter, values: newValues}
+    return { ...newFilter, values: newValues }
   })
 
 
@@ -388,14 +383,14 @@ const ListFilter: React.FC<ListFilterProps> = ({ filter:newFilter, appliedFilter
     () => {
       if (value.length === 0) {
         params.delete(`${FILTER_URL_PREFIX}${filterKey}`);
-        navigate(`${location.pathname}?${params.toString()}`);
+        // navigate(`${location.pathname}?${params.toString()}`);
         return;
       } else {
         const selectedItems: any = filter.values.filter((item) =>
           value.includes(item.id),
         );
         const link = getFilterLink(selectedItems, params, location);
-        navigate(`${link}`);
+        // navigate(`${link}`);
       }
 
     },

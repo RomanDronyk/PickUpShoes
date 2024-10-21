@@ -1,5 +1,5 @@
 import { PRODUCT_QUERY } from "./productQuery.graphql";
-import { RECOMENDED_PRODUCT_QUERY } from "./recommendedProductsQuery.graphql";
+import { RECOMENDED_PRODUCT_QUERY, RECOMMENDED_PRODUCTS_QUERY } from "./recommendedProductsQuery.graphql";
 import { VARIANTS_QUERY } from "./variantsQuery.graphql";
 import { VIEWED_PRODUCT_QUERY } from "./viewedProductsQuery.graphql";
 import { SEARCH_QUERY } from "./searchQuery.graphql";
@@ -35,5 +35,6 @@ export {
   CUSTOMER_ORDER_QUERY,
   CUSTOMER_ORDERS_QUERY,
   PAYMENT_TERMS_TEMPLATE,
+  RECOMMENDED_PRODUCTS_QUERY,
 
 }

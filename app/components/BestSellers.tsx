@@ -1,6 +1,5 @@
-import {Link} from '@remix-run/react';
-import type {BestSellersQuery} from 'storefrontapi.generated';
-import {ProductCard, Label} from './ProductCard';
+import { Link } from '@remix-run/react';
+import { ProductCard, Label } from './ProductCard';
 import {
   Carousel,
   CarouselContent,
@@ -8,13 +7,9 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from './ui/carousel';
+import { Product } from '@shopify/hydrogen-react/storefront-api-types';
 
-export default function BestSellers({items}: {items: BestSellersQuery}) {
-  const {
-    collection: {
-      products: {nodes: bestsellers},
-    },
-  } = items;
+export default function BestSellers({ items }:any) {
   return (
     <div className="flex flex-col w-full gap-[30px] max-w-[1240px] pb-[0px] px-5 md:px-0 ">
       <div className="flex md:justify-between justify-center">
@@ -32,8 +27,8 @@ export default function BestSellers({items}: {items: BestSellersQuery}) {
       <div>
         <Carousel>
           <CarouselContent>
-            {bestsellers &&
-              bestsellers.map((item) => (
+            {items &&
+              items.map((item: Product) => (
                 <CarouselItem
                   key={item.id}
                   className="md:basis-1/4 basis-3/4 ml-1 px-3"

@@ -1,15 +1,15 @@
-// @ts-nocheck
 import {
     Image,
     CartForm,
 } from '@shopify/hydrogen';
-import { FetcherWithComponents, Link, NavLink, useActionData, useFetcher } from '@remix-run/react';
+import { FetcherWithComponents, Link } from '@remix-run/react';
 import { useVariantUrl } from '~/utils';
-import { useContext, useEffect, useRef, useState } from 'react';
+import { useContext, useRef, useState } from 'react';
 import { ProductLabel } from '../ProductCard';
 import { cn } from '~/lib/utils';
 import { HeaderBasketContext, HeaderContextInterface } from '~/context/HeaderCarts';
 import { useMedia } from 'react-use';
+import OptionList from '../common/optionList';
 
 export interface IProductVariantPrice {
     amount: string,
@@ -54,7 +54,7 @@ export interface IVariants {
 export interface ILikedNewCart {
     variants: IVariants;
     handle: string;
-    selectedVariant?: IVariant |null |any;
+    selectedVariant?: IVariant | null | any;
     title: string;
     id: string,
 }
@@ -69,16 +69,13 @@ export function LikedCart({ product }: ILikedCart) {
         setCartShow,
         setCartShowMobile
     } = useContext(HeaderBasketContext) as HeaderContextInterface
-
+    
     const imageRef = useRef<HTMLDivElement>(null);
-
     const firstVariant = product.variants.nodes?.find(variant => variant.availableForSale) || product.variants.nodes[0];
     const variantUrl = useVariantUrl(product.handle, firstVariant.selectedOptions);
-
     const [disabled, setDisable] = useState(false)
-
     const isMobile = useMedia('(max-width: 1024px)', false);
-    
+
     if (isMobile) {
         return (
             <div className='flex flex-col min-h-[100px] relative  justify-center  register rounded-[20px] border border-black/10 p-6 my-[10px] mb-[30px] lg:mb-0'>
@@ -108,7 +105,6 @@ export function LikedCart({ product }: ILikedCart) {
                                 />
                                 <ProductLabel />
                             </div>
-
                         </Link>
                         <div>
                             <Link to={variantUrl} style={{ maxWidth: 160, display: "block" }}>
@@ -116,17 +112,10 @@ export function LikedCart({ product }: ILikedCart) {
                                     {product.title}
                                 </h4>
                             </Link>
-                            <h5>Артикул: {product.id.split("/")[product.id.split("/").length - 1]}</h5>
                         </div>
                     </div>
                     <div>
-                    {product.selectedVariant.selectedOptions.map((option:ISelectedOptions) => {
-                            return <>
-                                <h4 >
-                                    {option.name}: {option.value}
-                                </h4>
-                            </>
-                        })}
+                        <OptionList options={product.selectedVariant.selectedOptions} />
                     </div>
                     <div>
                         <h4 className="md:text-xl text-lg font-semibold line-clamp-1 pr-[10px] mb-[7px]">
@@ -158,15 +147,15 @@ export function LikedCart({ product }: ILikedCart) {
                                     />
                                     <button
                                         type="submit"
-                                        disabled={ fetcher.state !== 'idle'}
+                                        disabled={fetcher.state !== 'idle'}
                                         className={cn(
                                             'bg-black text-white font-medium text-[18px] w-full rounded-[62px] py-[10px] px-[37px] cursor-pointer',
                                             false && 'bg-white text-black border border-black',
                                         )}
-                                        onClick={()=>{
-                                            isMobile? setCartShowMobile(true) : setCartShow(true)
+                                        onClick={() => {
+                                            isMobile ? setCartShowMobile(true) : setCartShow(true)
 
-                                            
+
                                         }}
                                     >
                                         {fetcher.state == 'idle' ? "Додати в корзину" : "Загрузка"}
@@ -217,17 +206,10 @@ export function LikedCart({ product }: ILikedCart) {
                             {product.title}
                         </h4>
                     </Link>
-                    <h5>Артикул: {product.id.split("/")[product.id.split("/").length - 1]}</h5>
+                    {/* <h5>Артикул: {product.id.split("/")[product.id.split("/").length - 1]}</h5> */}
                 </div>
                 <div>
-
-                    {product.selectedVariant.selectedOptions.map((option:ISelectedOptions) => {
-                        return <>
-                            <h4 >
-                                {option.name}: {option.value}
-                            </h4>
-                        </>
-                    })}
+                    <OptionList options={product.selectedVariant.selectedOptions} />
                 </div>
             </div>
             <div>
@@ -267,10 +249,10 @@ export function LikedCart({ product }: ILikedCart) {
                                     false && 'bg-white text-black border border-black',
                                 )}
 
-                                onClick={()=>{
-                                    isMobile? setCartShowMobile(true) : setCartShow(true)
+                                onClick={() => {
+                                    isMobile ? setCartShowMobile(true) : setCartShow(true)
 
-                                    
+
                                 }}
                             >
                                 {fetcher.state == 'idle' ? "Додати в корзину" : "Загрузка"}
