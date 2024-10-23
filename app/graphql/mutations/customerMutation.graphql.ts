@@ -156,3 +156,26 @@ export const CUSTOMER_RESET_MUTATION = `#graphql
     }
   }
 ` as const;
+
+export const UPDATE_CUSTOMER_METAFIELDS_MUTATION = `#graphql
+mutation updateCustomerMetafields($input: CustomerInput!) {
+customerUpdate(input: $input) {
+customer {
+  id
+  metafields(first: 3) {
+    edges {
+      node {
+        id
+        namespace
+        key
+        value
+      }
+    }
+  }
+}
+userErrors {
+  message
+  field
+}
+}
+}`

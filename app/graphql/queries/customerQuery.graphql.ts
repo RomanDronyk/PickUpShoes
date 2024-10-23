@@ -151,3 +151,45 @@ export const CUSTOMER_ORDERS_QUERY = `#graphql
     }
   }
 ` as const;
+
+export const USER_ID_BY_ACCESS_TOKEN_QUERY = `#graphql
+query customerGetId (
+  $customerAccessToken: String!
+) {
+  customer(customerAccessToken: $customerAccessToken) {
+    id
+  }
+}`;
+export const USER_CART_ID_QUERY = `#graphql 
+query getCustomerAllField($id: ID!) {
+    customer(id:$id) {
+      metafield(key: "nickname", namespace: "cartId") {
+        description
+        id
+        namespace
+        key
+        type
+        value
+      }
+      metafields(first: 5) {
+        edges {
+          node {
+            id
+            namespace
+            key
+            type
+            value
+          }
+        }
+      }
+    }
+  }
+`
+export const CUSTOMER_DATA_BY_ACCESS_TOKEN_QUERY = `#graphql
+query customerGetId (
+  $customerAccessToken: String!
+) {
+  customer(customerAccessToken: $customerAccessToken) {
+    id
+  }
+}`;

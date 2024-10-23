@@ -1,9 +1,6 @@
 import { Link, useLoaderData, useNavigate, type MetaFunction } from '@remix-run/react';
 import {
   getPaginationVariables,
-  Image,
-  Money,
-  Analytics,
   Pagination,
 } from '@shopify/hydrogen';
 import type {
@@ -11,7 +8,6 @@ import type {
   Collection,
   ProductCollectionSortKeys,
   Filter,
-  Product,
 } from '@shopify/hydrogen/storefront-api-types';
 import { defer, redirect, type LoaderFunctionArgs } from '@shopify/remix-oxygen';
 import type {

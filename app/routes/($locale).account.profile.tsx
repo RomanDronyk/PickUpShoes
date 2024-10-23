@@ -1,5 +1,5 @@
-import type {CustomerFragment} from 'storefrontapi.generated';
-import type {CustomerUpdateInput} from '@shopify/hydrogen/storefront-api-types';
+import type { CustomerFragment } from 'storefrontapi.generated';
+import type { CustomerUpdateInput } from '@shopify/hydrogen/storefront-api-types';
 import {
   json,
   redirect,
@@ -9,13 +9,17 @@ import {
 import {
   Form,
   useActionData,
+  useLoaderData,
   useNavigation,
   useOutletContext,
   type MetaFunction,
 } from '@remix-run/react';
-import {Button} from '~/components/ui/button';
-import {Input} from '~/components/ui/input';
+import { Button } from '~/components/ui/button';
+import { Input } from '~/components/ui/input';
 import { CUSTOMER_UPDATE_MUTATION } from '~/graphql/mutations';
+import { USER_CART_ID_QUERY, USER_ID_BY_ACCESS_TOKEN_QUERY } from '~/graphql/queries';
+import { getUserCartId } from '~/utils';
+import { syncUserCart } from '~/utils/syncUserCart';
 
 export const handle = {
   breadcrumb: 'profile',
@@ -32,15 +36,17 @@ export type ActionResponse = {
 };
 
 export const meta: MetaFunction = () => {
-  return [{title: 'Profile'}];
+  return [{ title: 'Profile' }];
 };
 
 
 export default function AccountProfile() {
-  const account = useOutletContext<{customer: CustomerFragment}>();
-  const {state} = useNavigation();
+  const account = useOutletContext<{ customer: CustomerFragment }>();
+  const { state } = useNavigation();
   const action = useActionData<ActionResponse>();
   const customer = action?.customer ?? account?.customer;
+  const loaderData = useLoaderData()
+  console.log(loaderData)
 
   return (
     <div className="contaier grid md:grid-cols-2 grid-cols-1 gap-y-10 gap-x-10 my-10 w-full mt-0">
@@ -253,26 +259,34 @@ export default function AccountProfile() {
 }
 
 
-export async function loader({context}: LoaderFunctionArgs) {
+
+export async function loader({ context }: LoaderFunctionArgs) {
+  const { cart } = context;
   const customerAccessToken = await context.session.get('customerAccessToken');
   if (!customerAccessToken) {
     return redirect('/account/login');
   }
+  const userCartId = await getUserCartId(customerAccessToken.accessToken, context)
+  if (userCartId) {
+    const headers = cart.setCartId(userCartId)
+    return json({}, { headers });
+  } 
   return json({});
+
 }
 
-export async function action({request, context}: ActionFunctionArgs) {
-  const {session, storefront} = context;
+export async function action({ request, context }: ActionFunctionArgs) {
+  const { session, storefront } = context;
 
   if (request.method !== 'PUT') {
-    return json({error: 'Method not allowed'}, {status: 405});
+    return json({ error: 'Method not allowed' }, { status: 405 });
   }
 
   const form = await request.formData();
   const formName = form.get('formName');
   const customerAccessToken = await session.get('customerAccessToken');
   if (!customerAccessToken) {
-    return json({error: 'Unauthorized'}, {status: 401});
+    return json({ error: 'Unauthorized' }, { status: 401 });
   }
 
   try {
@@ -312,8 +326,8 @@ export async function action({request, context}: ActionFunctionArgs) {
     // check for mutation errors
     if (updated.customerUpdate?.customerUserErrors?.length) {
       return json(
-        {error: updated.customerUpdate?.customerUserErrors[0]},
-        {status: 400},
+        { error: updated.customerUpdate?.customerUserErrors[0] },
+        { status: 400 },
       );
     }
 
@@ -326,7 +340,7 @@ export async function action({request, context}: ActionFunctionArgs) {
     }
 
     return json(
-      {error: null, customer: updated.customerUpdate?.customer},
+      { error: null, customer: updated.customerUpdate?.customer },
       {
         headers: {
           'Set-Cookie': await session.commit(),
@@ -334,7 +348,7 @@ export async function action({request, context}: ActionFunctionArgs) {
       },
     );
   } catch (error: any) {
-    return json({error: error.message, customer: null}, {status: 400});
+    return json({ error: error.message, customer: null }, { status: 400 });
   }
 }
 

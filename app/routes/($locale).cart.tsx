@@ -1,23 +1,25 @@
-import {Await, type MetaFunction} from '@remix-run/react';
-import {Suspense} from 'react';
-import {CartForm} from '@shopify/hydrogen';
-import {json, type ActionFunctionArgs} from '@shopify/remix-oxygen';
-import {CartMain} from '~/components/Cart';
-import {useRootLoaderData} from '~/root';
+import { Await, FetcherWithComponents, type MetaFunction } from '@remix-run/react';
+import { Suspense } from 'react';
+import { CartForm } from '@shopify/hydrogen';
+import { json, type ActionFunctionArgs } from '@shopify/remix-oxygen';
+import { CartMain } from '~/components/Cart';
+import { useRootLoaderData } from '~/root';
+import { cn } from '~/lib/utils';
+import { syncUserCart } from '~/utils/syncUserCart';
 
 export const meta: MetaFunction = () => {
-  return [{title: `Hydrogen | Cart`}];
+  return [{ title: `Hydrogen | Cart` }];
 };
 
-export async function action({request, context}: ActionFunctionArgs) {
-  const {session, cart} = context;
+export async function action({ request, context }: ActionFunctionArgs) {
+  const { session, cart } = context;
 
   const [formData, customerAccessToken] = await Promise.all([
     request.formData(),
     session.get('customerAccessToken'),
   ]);
 
-  const {action, inputs} = CartForm.getFormInput(formData);
+  const { action, inputs } = CartForm.getFormInput(formData);
 
   if (!action) {
     throw new Error('No action provided');
@@ -38,7 +40,6 @@ export async function action({request, context}: ActionFunctionArgs) {
       break;
     case CartForm.ACTIONS.DiscountCodesUpdate: {
       const formDiscountCode = inputs.discountCode;
-
       // User inputted discount code
       const discountCodes = (
         formDiscountCode ? [formDiscountCode] : []
@@ -53,7 +54,7 @@ export async function action({request, context}: ActionFunctionArgs) {
     case CartForm.ACTIONS.BuyerIdentityUpdate: {
       result = await cart.updateBuyerIdentity({
         ...inputs.buyerIdentity,
-        customerAccessToken: customerAccessToken?.accessToken,
+        customerAccessToken: inputs.buyerIdentity.customerAccessToken ? inputs.buyerIdentity.customerAccessToken : customerAccessToken?.accessToken,
       });
       break;
     }
@@ -61,9 +62,14 @@ export async function action({request, context}: ActionFunctionArgs) {
       throw new Error(`${action} cart action is not defined`);
   }
 
-  const cartId = result.cart.id;
+  const resultCartId = result.cart.id;
+  if (customerAccessToken?.accessToken) {
+    syncUserCart(customerAccessToken.accessToken, resultCartId, context)
+  }
+
+
   const headers = cart.setCartId(result.cart.id);
-  const {cart: cartResult, errors} = result;
+  const { cart: cartResult, errors } = result;
 
   const redirectTo = formData.get('redirectTo') ?? null;
   if (typeof redirectTo === 'string') {
@@ -76,16 +82,17 @@ export async function action({request, context}: ActionFunctionArgs) {
       cart: cartResult,
       errors,
       analytics: {
-        cartId,
+        cartId: resultCartId,
       },
     },
-    {status, headers},
+    { status, headers },
   );
 }
 
 export default function Cart() {
   const rootData = useRootLoaderData();
   const cartPromise = rootData.cart;
+
 
   return (
     <div className="cart">
@@ -96,10 +103,39 @@ export default function Cart() {
           errorElement={<div>An error occurred</div>}
         >
           {(cart) => {
+            console.log(cart)
             return <CartMain layout="page" cart={cart} />;
           }}
         </Await>
       </Suspense>
+      <div >
+        <CartForm
+          route="/cart"
+          inputs={{
+            buyerIdentity: {
+              email: "ivan.kalunuch12@gmail.com",
+            }
+          }}
+          action={CartForm.ACTIONS.BuyerIdentityUpdate}
+        >
+          {(fetcher: FetcherWithComponents<any>) => (
+            <>
+              <button
+                type="submit"
+                disabled={fetcher.state !== 'idle'}
+                className={cn(
+                  'bg-black text-white font-medium text-[18px] w-full rounded-[62px] py-[15px] cursor-pointer',
+                  fetcher.state !== 'idle' && 'bg-white text-black border border-black',
+                )}
+              >
+                {fetcher.state == 'idle' ?
+                  "Обновить"
+                  : "Загрузка"}
+              </button>
+            </>
+          )}
+        </CartForm>
+      </div>
     </div>
   );
 }

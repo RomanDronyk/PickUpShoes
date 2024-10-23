@@ -4,6 +4,7 @@ import { generageMonoUrl, generateOrderInKeycrm } from "./generators/generageMon
 import { generateOrderInShopifyAdmin } from "./generators/generateOrderInShopifyAdmin";
 import { generateProductForKeycrm } from "./generators/generateProductForKeycrm";
 import getRecommendationsById from "./getters/getRecommendationsById";
+import { getUserCartId } from "./getters/getUserCartId";
 import { getVariantUrl, parseAsCurrency, useVariantUrl } from "./useVariantUrl";
 
 
@@ -17,5 +18,6 @@ export {
   generageMonoUrl,
   generateOrderInKeycrm,
   generateOrderInShopifyAdmin,
-  filterAvailablesProductOptions
+  filterAvailablesProductOptions,
+  getUserCartId,
 }

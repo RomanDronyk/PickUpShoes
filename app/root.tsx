@@ -28,6 +28,8 @@ import HeaderContext from '~/context/HeaderCarts';
 import { CacheProvider } from '@emotion/react';
 import createCache from '@emotion/cache';
 import NotFoundScreen from './screens/NotFoundScreen';
+import { GET_CART_DATA_BY_ID, USER_ID_BY_ACCESS_TOKEN_QUERY } from './graphql/queries';
+import { USER_CART_ID_QUERY } from './graphql/queries/customerQuery.graphql';
 
 
 export const shouldRevalidate: ShouldRevalidateFunction = ({
@@ -69,8 +71,8 @@ export const useRootLoaderData = () => {
   return root?.data as SerializeFrom<typeof loader>;
 };
 
-export async function loader({ context }: LoaderFunctionArgs) {
-  const { storefront, session, cart } = context;
+export async function loader({ context }: any) {
+  const { storefront, session, cart, admin } = context;
   const customerAccessToken = await session.get('customerAccessToken');
   const publicStoreDomain = context.env.PUBLIC_STORE_DOMAIN;
 
@@ -79,8 +81,62 @@ export async function loader({ context }: LoaderFunctionArgs) {
     session,
     customerAccessToken,
   );
+
+  const getUserCartId = async (accessToken: string, context: any) => {
+    const { storefront, admin, } = context;
+    if (accessToken) {
+      const { customer } = await storefront.query(USER_ID_BY_ACCESS_TOKEN_QUERY, {
+        variables: {
+          customerAccessToken: accessToken,
+        },
+      })
+      if (!customer) return cart.get();
+      const getCustomerWithCartId = await admin(USER_CART_ID_QUERY, {
+        variables: {
+          id: customer.id
+        }
+      })
+
+      const userCartId = getCustomerWithCartId?.customer?.metafield?.value
+      return userCartId;
+    } else {
+      return ""
+    }
+  }
+
+  const getUserCart = async (accessToken: string, isLoggedIn: boolean, context: any) => {
+    const { storefront, admin, session } = context;
+    if (accessToken && isLoggedIn) {
+      const { customer } = await storefront.query(USER_ID_BY_ACCESS_TOKEN_QUERY, {
+        variables: {
+          customerAccessToken: accessToken,
+        },
+      })
+      if (!customer) return cart.get();
+      const getCustomerWithCartId = await admin(USER_CART_ID_QUERY, {
+        variables: {
+          id: customer.id
+        }
+      })
+
+      const userCartId = getCustomerWithCartId?.customer?.metafield?.value
+
+      if (!userCartId) return cart.get();
+      const { cart: userCart } = await storefront.query(GET_CART_DATA_BY_ID, {
+        variables: {
+          id: userCartId,
+        }
+      })
+      return userCart;
+    } else {
+      return cart.get();
+    }
+  }
+
+  // let cartPromise = await getUserCart(customerAccessToken?.accessToken, isLoggedIn, context);
+  let cartPromise = cart.get()
+
   // defer the cart query by not awaiting it
-  const cartPromise = cart.get();
 
   // defer the footer query (below the fold)
   const footerPromise = await storefront.query(FOOTER_QUERY, {
@@ -107,7 +163,11 @@ export async function loader({ context }: LoaderFunctionArgs) {
       isLoggedIn,
       publicStoreDomain,
     },
-    { headers },
+    {
+      headers: {
+        ...headers,
+      }
+    },
   );
 }
 
@@ -125,11 +185,8 @@ export default function App() {
         <Links />
       </head>
       <CacheProvider value={cache}>
-
         <HeaderContext>
-
           <body className="font-sans">
-
             <Layout {...data}>
               <Outlet />
             </Layout>
@@ -139,7 +196,6 @@ export default function App() {
           </body>
         </HeaderContext>
       </CacheProvider>
-
     </html>
   );
 }
@@ -168,7 +224,7 @@ export function ErrorBoundary() {
       </head>
       <body className="font-sans">
         <Layout {...rootData}>
-          <NotFoundScreen/>
+          <NotFoundScreen />
         </Layout>
         <ScrollRestoration nonce={nonce} />
         <Scripts nonce={nonce} />

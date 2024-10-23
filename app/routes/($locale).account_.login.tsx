@@ -8,6 +8,7 @@ import {Form, Link, useActionData, type MetaFunction} from '@remix-run/react';
 import {Input} from '~/components/ui/input';
 import {Button} from '~/components/ui/button';
 import { CUSTOMER_CREATE_MUTATION, LOGIN_MUTATION, REGISTER_LOGIN_MUTATION } from '~/graphql/mutations';
+import { USER_CART_ID_QUERY, USER_ID_BY_ACCESS_TOKEN_QUERY } from '~/graphql/queries';
 
 enum FormNames {
   LOGIN_FORM = 'loginForm',
@@ -38,8 +39,10 @@ export async function loader({context}: LoaderFunctionArgs) {
   return json({});
 }
 
+
+
 export async function action({request, context}: ActionFunctionArgs) {
-  const {session, storefront} = context;
+  const {session, storefront,cart} = context;
 
   if (request.method !== 'POST') {
     return json({error: 'Method not allowed'}, {status: 405});
@@ -76,6 +79,7 @@ export async function action({request, context}: ActionFunctionArgs) {
 
         const {customerAccessToken} = customerAccessTokenCreate;
         session.set('customerAccessToken', customerAccessToken);
+
 
         return redirect('/account/profile', {
           headers: {
