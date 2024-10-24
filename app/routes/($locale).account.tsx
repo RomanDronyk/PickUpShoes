@@ -1,7 +1,6 @@
 import { ScrollArea, ScrollBar } from '~/components/ui/scroll-area';
 import { Form, Link, NavLink, Outlet, useLoaderData } from '@remix-run/react';
 import { json, redirect, type LoaderFunctionArgs } from '@shopify/remix-oxygen';
-import { Scroll } from 'lucide-react';
 import type { CustomerFragment } from 'storefrontapi.generated';
 import { Button } from '~/components/ui/button';
 import { cn } from '~/lib/utils';
@@ -10,6 +9,7 @@ import { CUSTOMER_QUERY } from '~/graphql/queries';
 export function shouldRevalidate() {
   return true;
 }
+
 export const handle = {
   breadcrumb: () => <Link to="/account">Особистий кабінет</Link>,
 };

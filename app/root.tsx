@@ -18,19 +18,16 @@ import {
   isRouteErrorResponse,
   type ShouldRevalidateFunction,
 } from '@remix-run/react';
-import type { CustomerAccessToken } from '@shopify/hydrogen/storefront-api-types';
 import favicon from '../public/favicon.ico';
 import { Layout } from '~/components/Layout';
 import styles from 'app/styles/tailwind.css';
 import { google } from 'worker-auth-providers';
 import HeaderContext from '~/context/HeaderCarts';
-
 import { CacheProvider } from '@emotion/react';
 import createCache from '@emotion/cache';
 import NotFoundScreen from './screens/NotFoundScreen';
-import { GET_CART_DATA_BY_ID, USER_ID_BY_ACCESS_TOKEN_QUERY } from './graphql/queries';
-import { USER_CART_ID_QUERY } from './graphql/queries/customerQuery.graphql';
-
+import { likedProductsCookie } from './cookies.server';
+import { getUserCartId, getUserLikedCartIds, validateCustomerAccessToken } from './utils';
 
 export const shouldRevalidate: ShouldRevalidateFunction = ({
   formMethod,
@@ -71,8 +68,8 @@ export const useRootLoaderData = () => {
   return root?.data as SerializeFrom<typeof loader>;
 };
 
-export async function loader({ context }: any) {
-  const { storefront, session, cart, admin } = context;
+export async function loader({ context, request }: any) {
+  const { storefront, session, cart } = context;
   const customerAccessToken = await session.get('customerAccessToken');
   const publicStoreDomain = context.env.PUBLIC_STORE_DOMAIN;
 
@@ -81,62 +78,19 @@ export async function loader({ context }: any) {
     session,
     customerAccessToken,
   );
+  const cookieHeader = request.headers.get('Cookie');
+  let likedCookes = (await likedProductsCookie.parse(cookieHeader)) || [];
 
-  const getUserCartId = async (accessToken: string, context: any) => {
-    const { storefront, admin, } = context;
-    if (accessToken) {
-      const { customer } = await storefront.query(USER_ID_BY_ACCESS_TOKEN_QUERY, {
-        variables: {
-          customerAccessToken: accessToken,
-        },
-      })
-      if (!customer) return cart.get();
-      const getCustomerWithCartId = await admin(USER_CART_ID_QUERY, {
-        variables: {
-          id: customer.id
-        }
-      })
-
-      const userCartId = getCustomerWithCartId?.customer?.metafield?.value
-      return userCartId;
-    } else {
-      return ""
-    }
-  }
-
-  const getUserCart = async (accessToken: string, isLoggedIn: boolean, context: any) => {
-    const { storefront, admin, session } = context;
-    if (accessToken && isLoggedIn) {
-      const { customer } = await storefront.query(USER_ID_BY_ACCESS_TOKEN_QUERY, {
-        variables: {
-          customerAccessToken: accessToken,
-        },
-      })
-      if (!customer) return cart.get();
-      const getCustomerWithCartId = await admin(USER_CART_ID_QUERY, {
-        variables: {
-          id: customer.id
-        }
-      })
-
-      const userCartId = getCustomerWithCartId?.customer?.metafield?.value
-
-      if (!userCartId) return cart.get();
-      const { cart: userCart } = await storefront.query(GET_CART_DATA_BY_ID, {
-        variables: {
-          id: userCartId,
-        }
-      })
-      return userCart;
-    } else {
-      return cart.get();
-    }
+  if (isLoggedIn && customerAccessToken?.accessToken) {
+    likedCookes = await getUserLikedCartIds(customerAccessToken.accessToken, context)
+    const userCartId = await getUserCartId(customerAccessToken.accessToken, context)
+    const cartHeaders = cart.setCartId(userCartId)
+  } else {
+    likedCookes = (await likedProductsCookie.parse(cookieHeader)) || [];
   }
 
   // let cartPromise = await getUserCart(customerAccessToken?.accessToken, isLoggedIn, context);
   let cartPromise = cart.get()
-
-  // defer the cart query by not awaiting it
 
   // defer the footer query (below the fold)
   const footerPromise = await storefront.query(FOOTER_QUERY, {
@@ -157,6 +111,7 @@ export async function loader({ context }: any) {
 
   return defer(
     {
+      likeProductIds: likedCookes,
       cart: cartPromise,
       footer: footerPromise,
       header: headerPromise,
@@ -175,6 +130,7 @@ export default function App() {
   const nonce = useNonce();
   const data = useLoaderData<typeof loader>();
   const cache = createCache({ key: 'css', prepend: true });
+
 
   return (
     <html lang="uk">
@@ -246,29 +202,7 @@ export function ErrorBoundary() {
  * );
  * ```
  */
-async function validateCustomerAccessToken(
-  session: LoaderFunctionArgs['context']['session'],
-  customerAccessToken?: CustomerAccessToken,
-) {
-  let isLoggedIn = false;
-  const headers = new Headers();
-  if (!customerAccessToken?.accessToken || !customerAccessToken?.expiresAt) {
-    return { isLoggedIn, headers };
-  }
 
-  const expiresAt = new Date(customerAccessToken.expiresAt).getTime();
-  const dateNow = Date.now();
-  const customerAccessTokenExpired = expiresAt < dateNow;
-
-  if (customerAccessTokenExpired) {
-    session.unset('customerAccessToken');
-    headers.append('Set-Cookie', await session.commit());
-  } else {
-    isLoggedIn = true;
-  }
-
-  return { isLoggedIn, headers };
-}
 
 const MENU_FRAGMENT = `#graphql
   fragment MenuItem on MenuItem {

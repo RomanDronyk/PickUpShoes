@@ -1,23 +1,19 @@
-import type { AddressFragment, CustomerFragment, ProductItemFragment } from 'storefrontapi.generated';
+import type { AddressFragment } from 'storefrontapi.generated';
 import {
-  json,
+  defer,
   redirect,
-  type ActionFunctionArgs,
   type LoaderFunctionArgs,
 } from '@shopify/remix-oxygen';
 import {
-  Form,
-  useActionData,
-  useNavigation,
-  useOutletContext,
+  useLoaderData,
   type MetaFunction,
 } from '@remix-run/react';
-import { Button } from '~/components/ui/button';
-import { Input } from '~/components/ui/input';
-import { HeaderBasketContext, HeaderContextInterface } from '~/context/HeaderCarts';
-import { useContext } from 'react';
 import { LikedCart } from '~/components/LikedCart/LikedCart';
 import { useMedia } from 'react-use';
+import { likedProductsCookie } from '~/cookies.server';
+import { getUserLikedCartIds, validateCustomerAccessToken } from '~/utils';
+import { LIKED_PRODUCT_QUERY } from '~/graphql/queries';
+
 
 export type ActionResponse = {
   addressId?: string | null;
@@ -28,37 +24,67 @@ export type ActionResponse = {
   updatedAddress?: AddressFragment;
 };
 
+
 export const meta: MetaFunction = () => {
   return [{ title: 'Вподобане' }];
 };
+
 
 export const handle = {
   breadcrumb: 'likes',
 };
 
-export async function loader({ context }: LoaderFunctionArgs) {
-  const { session } = context;
+
+export async function loader({ context, request }: LoaderFunctionArgs) {
+  const { session, admin }: any = context;
   const customerAccessToken = await session.get('customerAccessToken');
+
+
+  const { isLoggedIn, headers } = await validateCustomerAccessToken(
+    session,
+    customerAccessToken,
+  );
+  const cookieHeader = request.headers.get('Cookie');
+  let likedCookes = (await likedProductsCookie.parse(cookieHeader)) || [];
+
+  if (isLoggedIn && customerAccessToken?.accessToken) {
+    likedCookes = await getUserLikedCartIds(customerAccessToken.accessToken, context)
+  }
+  const likedPromises = likedCookes.map((id: string) => {
+    return admin(LIKED_PRODUCT_QUERY, {
+      variables: {
+        id
+      }
+    })
+  })
+
+  const products = await Promise.all(likedPromises)
+
   if (!customerAccessToken) {
     return redirect('/account/login');
   }
-  return json({});
+  return defer(
+    {
+      products,
+    },
+    {
+      headers: {
+        'Set-Cookie': await likedProductsCookie.serialize(likedCookes),
+      },
+    });
 }
 
 
 export default function Liked() {
+  const loaderData = useLoaderData<typeof loader>()
+  const { products }: any = loaderData;
 
-  const isMobile = useMedia('(max-width: 1024px)', false);
-
-  const {
-    likedCart,
-  } = useContext(HeaderBasketContext) as HeaderContextInterface
 
   return (
-    <div style={{minHeight:90}} className={ "mb-[60px] relative addresses rounded-[20px] border border-black/10 p-6" }>
-      {likedCart.length > 0 ?
+    <div style={{ minHeight: 100 }} className={"mb-[60px] relative addresses rounded-[20px] border border-black/10 p-6"}>
+      {products.length > 0 ?
         <div style={{ display: "grid", gap: 10 }}>
-          {likedCart.map((product: any) => <LikedCart key={product.id} product={product} />)}
+          {products.map((product: any) => <LikedCart key={product.productVariant.id} product={product.productVariant} />)}
         </div>
         :
         <h2 className="text-gray-500 text-2xl  font-semibold left-1/2 opacity-70 absolute text-center top-[50%] transform -translate-x-1/2 -translate-y-1/2">

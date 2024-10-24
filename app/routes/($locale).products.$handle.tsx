@@ -207,10 +207,6 @@ export async function loader(args: LoaderFunctionArgs) {
 }
 
 
-
-
-
-
 export default function Product() {
   const { product, variants, viewedProducts, recommendations }: any =
     useLoaderData<typeof loader>();
@@ -255,7 +251,7 @@ export default function Product() {
   return (
     <div className="pt-[16px] product lg:px-24 md:px-10 px-[10px] w-full ">
       <div className="sm:grid sm:grid-cols-2 flex flex-col gap-y-5 gap-x-10">
-        <ProductGalery product={product} objGalery={objGalery} media={product?.media} />
+        <ProductGalery selectedVariantId={selectedVariant.id} product={product} objGalery={objGalery} media={product?.media} />
         <ProductMain
           objGalery={objGalery}
           selectedVariant={selectedVariant}
@@ -561,7 +557,7 @@ function ProductTabs({ description }: { description: string }) {
   );
 }
 
-function ProductGalery({ product, objGalery, media }: { product: any, objGalery: any, media: ProductFragment['media'] }) {
+function ProductGalery({ selectedVariantId, product, objGalery, media }: { selectedVariantId: any, product: any, objGalery: any, media: ProductFragment['media'] }) {
   const {
     selectedIndex,
     setSelectedIndex,
@@ -578,39 +574,30 @@ function ProductGalery({ product, objGalery, media }: { product: any, objGalery:
     if (!api) return;
     api.on('select', onSelect);
   }, [api, onSelect]);
-  const navigate = useNavigate()
 
   const [productWithLike, setProductWithLike] = useState({ ...product, isLiked: false })
+  const [isLike, setIsLike] = useState(false)
   const {
-    likedCart,
-    removeLikeCart,
-    addLikedCart
+    likedCardId,
+    handleLikeToggle,
   } = useContext(HeaderBasketContext) as HeaderContextInterface;
 
-
-
+  console.log(isLike, likedCardId)
   useEffect(() => {
-    setProductWithLike({ ...product, isLiked: false })
-  }, [product?.selectedVariant?.id])
-  useEffect(() => {
-    const productIndex = likedCart.findIndex((item: any) => item?.selectedVariant?.id === productWithLike?.selectedVariant?.id);
+    const productIndex = likedCardId.findIndex((item: any) => item === product?.selectedVariant?.id);
     if (productIndex === -1) {
-      setProductWithLike({ ...product, sizeVariants: product?.variants?.nodes, isLiked: false });
+      setIsLike(false)
+    } else {
+      setIsLike(true)
+
     }
-    likedCart.map((element: any, index: number) => {
-      if (element?.selectedVariant?.id == productWithLike?.selectedVariant?.id) {
-        setProductWithLike({ ...element, isLiked: true })
-      }
-    })
-  }, [likedCart, productWithLike?.selectedVariant?.id])
+  }, [likedCardId, product])
 
   const toggleLike = () => {
-    if (productWithLike?.isLiked) {
-      setProductWithLike({ ...productWithLike, isLiked: false })
-      removeLikeCart(productWithLike)
+    if (isLike) {
+      handleLikeToggle(selectedVariantId, "delete")
     } else {
-      addLikedCart(productWithLike)
-      setProductWithLike({ ...productWithLike, isLiked: true })
+      handleLikeToggle(selectedVariantId, "add")
     }
   }
 
@@ -674,12 +661,12 @@ function ProductGalery({ product, objGalery, media }: { product: any, objGalery:
                 className="rounded-[20px] aspect-1 image-product-aspect "
               />
               <button
-                onClick={toggleLike} // Функція для додавання/видалення зі списку бажань
+                onClick={toggleLike}
                 className=" absolute p-2 rounded-full bg-white shadow-lg  top-[1.35rem] right-3 p-2"
                 style={{ zIndex: 32 }}
                 aria-label="Add to wishlist"
               >
-                <HeartIcon isFavorited={productWithLike?.isLiked} />
+                <HeartIcon isFavorited={isLike} />
               </button>
             </CarouselItem>
           ))}

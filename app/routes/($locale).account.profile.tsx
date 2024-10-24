@@ -9,17 +9,16 @@ import {
 import {
   Form,
   useActionData,
-  useLoaderData,
   useNavigation,
   useOutletContext,
+  useRevalidator,
   type MetaFunction,
 } from '@remix-run/react';
 import { Button } from '~/components/ui/button';
 import { Input } from '~/components/ui/input';
 import { CUSTOMER_UPDATE_MUTATION } from '~/graphql/mutations';
-import { USER_CART_ID_QUERY, USER_ID_BY_ACCESS_TOKEN_QUERY } from '~/graphql/queries';
 import { getUserCartId } from '~/utils';
-import { syncUserCart } from '~/utils/syncUserCart';
+import { useEffect } from 'react';
 
 export const handle = {
   breadcrumb: 'profile',
@@ -45,8 +44,12 @@ export default function AccountProfile() {
   const { state } = useNavigation();
   const action = useActionData<ActionResponse>();
   const customer = action?.customer ?? account?.customer;
-  const loaderData = useLoaderData()
-  console.log(loaderData)
+
+  ///функція для обновлення данних які приходять з root.tsx loader
+  const { revalidate } = useRevalidator()
+  useEffect(() => {
+    revalidate()
+  }, [])
 
   return (
     <div className="contaier grid md:grid-cols-2 grid-cols-1 gap-y-10 gap-x-10 my-10 w-full mt-0">
@@ -260,17 +263,22 @@ export default function AccountProfile() {
 
 
 
-export async function loader({ context }: LoaderFunctionArgs) {
-  const { cart } = context;
+export async function loader({ context, request }: LoaderFunctionArgs) {
+  const { cart, storefront, session } = context;
   const customerAccessToken = await context.session.get('customerAccessToken');
   if (!customerAccessToken) {
     return redirect('/account/login');
   }
   const userCartId = await getUserCartId(customerAccessToken.accessToken, context)
+
+  const cartHeaders = cart.setCartId(userCartId)
+
+  const headers = new Headers(cartHeaders);
+
   if (userCartId) {
-    const headers = cart.setCartId(userCartId)
     return json({}, { headers });
-  } 
+  }
+
   return json({});
 
 }

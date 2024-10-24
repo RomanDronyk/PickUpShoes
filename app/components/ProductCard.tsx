@@ -27,31 +27,27 @@ export function ProductCard({
   label?: Label;
 }) {
   const firstVariant: ProductVariant = product.variants.nodes.find((variant: ProductVariant) => variant.availableForSale) || product.variants.nodes[0];
-  const [ignored, forceUpdate] = useReducer((x) => x + 1, 0);
   const optionsRef = useRef<HTMLDivElement>(null);
   const imageRef = useRef<HTMLDivElement>(null);
   const linkRef = useRef<HTMLAnchorElement>(null);
   const variant = product.variants.nodes[0];
-  const variantUrl = useVariantUrl(product.handle, variant.selectedOptions);
   const isMobile = useMedia('(max-width: 767px)', false);
-  const navigate = useNavigate()
-  const [dataForLike, setDataForLike] = useState({
-    variants: {
-      nodes: [...product.variants.nodes]
-    },
-    handle: product.handle,
-    id: product.id,
-    selectedVariant: { selectedOptions: [...firstVariant.selectedOptions], id: firstVariant.id, image: { ...product.featuredImage } },
-    title: product.title,
-    isLiked: false,
-  });
+  const [isLike, setIsLike] = useState(false)
+
 
   const {
-    likedCart,
-    removeLikeCart,
-    addLikedCart
+    handleLikeToggle,
+    likedCardId,
   } = useContext(HeaderBasketContext) as HeaderContextInterface;
 
+  useEffect(() => {
+    const productIndex = likedCardId.findIndex((item: any) => item === firstVariant?.id);
+    if (productIndex === -1) {
+      setIsLike(false)
+    } else {
+      setIsLike(true)
+    }
+  }, [likedCardId, product])
 
   const percentageAmount = variant.compareAtPrice
     ? (
@@ -69,30 +65,13 @@ export function ProductCard({
 
 
   const toggleLike = () => {
-    if (dataForLike.isLiked) {
-      setDataForLike({ ...dataForLike, isLiked: false })
-      removeLikeCart(dataForLike)
+    if (isLike) {
+      handleLikeToggle(firstVariant.id, "delete")
     } else {
-      addLikedCart(dataForLike)
-      setDataForLike({ ...dataForLike, isLiked: true })
+      handleLikeToggle(firstVariant.id, "add")
     }
   }
 
-  useEffect(() => {
-    forceUpdate();
-  }, []);
-
-  useEffect(() => {
-    const productIndex = likedCart.findIndex((item: any) => item.id === dataForLike.id);
-    if (productIndex === -1) {
-      setDataForLike({ ...dataForLike, isLiked: false });
-    }
-    likedCart.map((element: any, index: number) => {
-      if (element.id == dataForLike.id) {
-        setDataForLike({ ...element, isLiked: true })
-      }
-    })
-  }, [likedCart])
 
   return (
     <div className="group/card">
@@ -111,7 +90,7 @@ export function ProductCard({
           style={{ zIndex: 32 }}
           aria-label="Add to wishlist"
         >
-          <HeartIcon isFavorited={dataForLike.isLiked} />
+          <HeartIcon isFavorited={isLike} />
         </button>
         {product.featuredImage && (
           <Link

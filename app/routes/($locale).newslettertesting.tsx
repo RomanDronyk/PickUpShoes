@@ -29,7 +29,7 @@ type CustomerMutationError = {
 type CustomerMutation = CustomerMutationSuccess | CustomerMutationError;
 
 export async function action({ context, request }: ActionArgs) {
-  const { session, storefront, cart,headers } = context;
+  const { session, storefront, cart, headers } = context;
   const cartData = await cart.get();
   const formData = await request.formData();
   const action = formData.get("action") as string;
@@ -114,7 +114,7 @@ export default function newslettertesting() {
         <Form method='POST'>
           <input type='hidden' name='action' value="get headers" />
           <Button variant="outline" size={"lg"} className="bg-black text-white font-medium text-[18px] w-full rounded-[62px] py-[15px] cursor-pointer">
-          get headers
+            get headers
           </Button>
         </Form>
         <Form method='POST'>
@@ -414,7 +414,7 @@ const CART_QUERY_FRAGMENT = `#graphql
 const GET_ALL_CUSTOMER_FIELDS = `#graphql 
 query getCustomerAllField($id: ID!) {
     customer(id:$id) {
-      metafield(key: "nickname", namespace: "cartId") {
+      metafield(key: "nickname", namespace: "likedCart") {
         description
         id
         namespace

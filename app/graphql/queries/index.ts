@@ -15,6 +15,7 @@ import { PREDICTIVE_PRODUCT_SEARCH_QUERY } from "./predictiveProductSearchQuery.
 import { CUSTOMER_DATA_BY_ACCESS_TOKEN_QUERY, CUSTOMER_ORDERS_QUERY, CUSTOMER_ORDER_QUERY, CUSTOMER_QUERY, USER_CART_ID_QUERY, USER_ID_BY_ACCESS_TOKEN_QUERY } from "./customerQuery.graphql";
 import { PAYMENT_TERMS_TEMPLATE } from "./paymentTemrmsTemplateQuery.mutation";
 import { GET_CART_DATA_BY_ID } from "./cartQuery.graphql";
+import { LIKED_PRODUCT_QUERY } from "./likedProductQuery.graphql";
 
 export {
   PRODUCT_QUERY,
@@ -40,5 +41,6 @@ export {
   USER_CART_ID_QUERY,
   GET_CART_DATA_BY_ID,
   CUSTOMER_DATA_BY_ACCESS_TOKEN_QUERY,
+  LIKED_PRODUCT_QUERY,
 
 }

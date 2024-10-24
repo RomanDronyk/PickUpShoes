@@ -4,11 +4,11 @@ import {
   type ActionFunctionArgs,
   type LoaderFunctionArgs,
 } from '@shopify/remix-oxygen';
-import {Form, Link, useActionData, type MetaFunction} from '@remix-run/react';
-import {Input} from '~/components/ui/input';
-import {Button} from '~/components/ui/button';
+import { Form, Link, useActionData, type MetaFunction } from '@remix-run/react';
+import { Input } from '~/components/ui/input';
+import { Button } from '~/components/ui/button';
 import { CUSTOMER_CREATE_MUTATION, LOGIN_MUTATION, REGISTER_LOGIN_MUTATION } from '~/graphql/mutations';
-import { USER_CART_ID_QUERY, USER_ID_BY_ACCESS_TOKEN_QUERY } from '~/graphql/queries';
+import { likedProductsCookie } from '~/cookies.server';
 
 enum FormNames {
   LOGIN_FORM = 'loginForm',
@@ -24,7 +24,7 @@ type ActionResponse = {
 
 export const meta: MetaFunction = () => {
   return [
-    {title: 'Особистий кабінет'},
+    { title: 'Особистий кабінет' },
     {
       name: 'description',
       content: 'Сторінка входу та реєстрації',
@@ -32,7 +32,7 @@ export const meta: MetaFunction = () => {
   ];
 };
 
-export async function loader({context}: LoaderFunctionArgs) {
+export async function loader({ context }: LoaderFunctionArgs) {
   if (await context.session.get('customerAccessToken')) {
     return redirect('/account/profile');
   }
@@ -41,11 +41,11 @@ export async function loader({context}: LoaderFunctionArgs) {
 
 
 
-export async function action({request, context}: ActionFunctionArgs) {
-  const {session, storefront,cart} = context;
+export async function action({ request, context }: ActionFunctionArgs) {
+  const { session, storefront, cart } = context;
 
   if (request.method !== 'POST') {
-    return json({error: 'Method not allowed'}, {status: 405});
+    return json({ error: 'Method not allowed' }, { status: 405 });
   }
   const form = await request.formData();
   const formName = form.get('formName');
@@ -62,11 +62,11 @@ export async function action({request, context}: ActionFunctionArgs) {
           throw new Error('Будь ласка введіть email та пароль.');
         }
 
-        const {customerAccessTokenCreate} = await storefront.mutate(
+        const { customerAccessTokenCreate } = await storefront.mutate(
           LOGIN_MUTATION,
           {
             variables: {
-              input: {email, password},
+              input: { email, password },
             },
           },
         );
@@ -77,10 +77,10 @@ export async function action({request, context}: ActionFunctionArgs) {
           );
         }
 
-        const {customerAccessToken} = customerAccessTokenCreate;
+        const { customerAccessToken } = customerAccessTokenCreate;
         session.set('customerAccessToken', customerAccessToken);
 
-
+ 
         return redirect('/account/profile', {
           headers: {
             'Set-Cookie': await session.commit(),
@@ -88,9 +88,9 @@ export async function action({request, context}: ActionFunctionArgs) {
         });
       } catch (error: unknown) {
         if (error instanceof Error) {
-          return json({loginError: error.message}, {status: 400});
+          return json({ loginError: error.message }, { status: 400 });
         }
-        return json({loginError: error}, {status: 400});
+        return json({ loginError: error }, { status: 400 });
       }
     }
     case FormNames.REGISTER_FORM: {
@@ -115,11 +115,11 @@ export async function action({request, context}: ActionFunctionArgs) {
           throw new Error('Будь ласка введіть email та пароль.');
         }
 
-        const {customerCreate} = await storefront.mutate(
+        const { customerCreate } = await storefront.mutate(
           CUSTOMER_CREATE_MUTATION,
           {
             variables: {
-              input: {email, password},
+              input: { email, password },
             },
           },
         );
@@ -134,7 +134,7 @@ export async function action({request, context}: ActionFunctionArgs) {
         }
 
         // get an access token for the new customer
-        const {customerAccessTokenCreate} = await storefront.mutate(
+        const { customerAccessTokenCreate } = await storefront.mutate(
           REGISTER_LOGIN_MUTATION,
           {
             variables: {
@@ -155,7 +155,7 @@ export async function action({request, context}: ActionFunctionArgs) {
         );
 
         return json(
-          {error: null, newCustomer},
+          { error: null, newCustomer },
           {
             status: 302,
             headers: {
@@ -166,9 +166,9 @@ export async function action({request, context}: ActionFunctionArgs) {
         );
       } catch (error: unknown) {
         if (error instanceof Error) {
-          return json({error: error.message}, {status: 400});
+          return json({ error: error.message }, { status: 400 });
         }
-        return json({error}, {status: 400});
+        return json({ error }, { status: 400 });
       }
     }
   }
@@ -224,7 +224,7 @@ export default function Login() {
           {error ? (
             <p>
               <mark>
-                <small>{(error ==="We have sent an email to ivan.kalunuch12@gmail.com, please click the link included to verify your email address"? "Ми надіслали вам повідомлення на пошту": error)}</small>
+                <small>{(error === "We have sent an email to ivan.kalunuch12@gmail.com, please click the link included to verify your email address" ? "Ми надіслали вам повідомлення на пошту" : error)}</small>
               </mark>
             </p>
           ) : (

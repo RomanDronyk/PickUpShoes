@@ -190,6 +190,7 @@ const CART_QUERY_FRAGMENT = `#graphql
   fragment CartLine on CartLine {
     id
     quantity
+    
     attributes {
       key
       value
@@ -209,6 +210,8 @@ const CART_QUERY_FRAGMENT = `#graphql
       ... on ProductVariant {
         id
         availableForSale
+        quantityAvailable
+        
         sku
         compareAtPrice {
           ...Money
