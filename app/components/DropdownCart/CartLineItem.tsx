@@ -4,7 +4,6 @@ import React, { useState, useEffect, useContext } from 'react';
 import { Image } from '@shopify/hydrogen';
 import { Link, } from '@remix-run/react';
 import { useVariantUrl } from '~/utils';
-import type { CartApiQueryFragment } from 'storefrontapi.generated';
 import type { CartLine } from '@shopify/hydrogen/storefront-api-types';
 import { HeaderBasketContext, HeaderContextInterface } from '~/context/HeaderCarts';
 import CartLineQuantity from './CartLineQuantity';

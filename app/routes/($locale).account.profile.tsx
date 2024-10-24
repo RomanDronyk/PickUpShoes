@@ -39,12 +39,199 @@ export const meta: MetaFunction = () => {
 };
 
 
+export async function loader({ context, request }: LoaderFunctionArgs) {
+  const { cart, storefront, session } = context;
+  const customerAccessToken = await context.session.get('customerAccessToken');
+  if (!customerAccessToken) {
+    return redirect('/account/login');
+  }
+  const userCartId = await getUserCartId(customerAccessToken.accessToken, context)
+
+  if (userCartId) {
+    console.log('ldskjf', userCartId)
+    const headers = cart.setCartId(userCartId)
+    return json({}, { headers });
+  }
+
+
+
+  return json({});
+
+}
+
+export const CUSTOMER_UPDATE_MUTATION_NEW = `#graphql
+  # https://shopify.dev/docs/api/customer/latest/mutations/customerUpdate
+  mutation customerUpdate($customer: CustomerUpdateInput!, $customerAccessToken:String!) {
+    customerUpdate(customer: $customer,customerAccessToken: $customerAccessToken) {
+      customer {
+        firstName
+        lastName
+        email
+        phone	
+        acceptsMarketing
+      }
+      userErrors {
+        field
+        message
+      }
+    }
+  }
+` as const;
+
+
+export async function action({ request, context }: ActionFunctionArgs) {
+  const { session, storefront } = context;
+
+  if (request.method !== 'PUT') {
+    return json({ error: 'Method not allowed' }, { status: 405 });
+  }
+
+  const form = await request.formData();
+  const formName = form.get('formName');
+  const customerAccessToken = await session.get('customerAccessToken');
+  if (!customerAccessToken) {
+    return json({ error: 'Unauthorized' }, { status: 401 });
+  }
+  const action = form.get('action');
+  if (action == "update profile") {
+    const acceptsMarketing = form.get('acceptsMarketing');
+    const customer: CustomerUpdateInput = {};
+
+
+    for (const [key, value] of form.entries()) {
+      const validInputKeys = [
+        'firstName',
+        'lastName',
+        'email',
+        'phone',
+      ] as const;
+
+      if (!validInputKeys.includes(key as any)) {
+        continue;
+      }
+      if (key === 'acceptsMarketing') {
+        continue;
+      }
+      if (typeof value === 'string' && value.length) {
+        customer[key as (typeof validInputKeys)[number]] = value;
+      }
+    }
+    customer.acceptsMarketing = acceptsMarketing === 'on' ? true : false;
+
+    const { customerUpdate } = await storefront.mutate(
+      CUSTOMER_UPDATE_MUTATION_NEW,
+      {
+        variables: {
+          customerAccessToken: customerAccessToken?.accessToken,
+          customer,
+        },
+      },
+    );
+    const { userErrors } = customerUpdate;
+    if (userErrors?.length) {
+      return json(
+        { error: userErrors[0].message },
+        { status: 400 },
+      );
+    }
+
+    if (!customerUpdate?.customer) {
+      return json(
+        { error: "Customer profile update failed.", userErrors: userErrors ? userErrors : [], customerUpdate: customerUpdate ? customerUpdate : [] },
+        { status: 400 },
+      );
+    }
+
+    return json({
+      error: null,
+      customer: customerUpdate?.customer,
+    });
+
+
+
+  }
+  if (action == "update password") {
+    try {
+      const password = getPassword(form);
+      const customer: CustomerUpdateInput = {};
+      const validInputKeys = [
+        'firstName',
+        'lastName',
+        'email',
+        'password',
+        'phone',
+      ] as const;
+      for (const [key, value] of form.entries()) {
+        if (!validInputKeys.includes(key as any)) {
+          continue;
+        }
+        if (key === 'acceptsMarketing') {
+          customer.acceptsMarketing = value === 'on';
+          continue;
+        }
+        if (typeof value === 'string' && value.length) {
+          customer[key as (typeof validInputKeys)[number]] = value;
+        }
+      }
+
+      if (password && FormNames.PASS_FROM) {
+        customer.password = password;
+      }
+
+      // update customer and possibly password
+      const updated = await storefront.mutate(CUSTOMER_UPDATE_MUTATION, {
+        variables: {
+          customerAccessToken: customerAccessToken?.accessToken,
+          customer,
+        },
+      });
+
+      // check for mutation errors
+      if (updated.customerUpdate?.customerUserErrors?.length) {
+        return json(
+          { error: updated.customerUpdate?.customerUserErrors[0] },
+          { status: 400 },
+        );
+      }
+
+      // update session with the updated access token
+      if (updated.customerUpdate?.customerAccessToken?.accessToken) {
+        session.set(
+          'customerAccessToken',
+          updated.customerUpdate?.customerAccessToken,
+        );
+      }
+
+      return json(
+        { error: null, customer: updated.customerUpdate?.customer },
+        {
+          headers: {
+            'Set-Cookie': await session.commit(),
+          },
+        },
+      );
+    } catch (error: any) {
+      return json({ error: error.message, customer: null }, { status: 400 });
+    }
+  } else {
+    return json({ error: "Не правильний action", customer: null }, { status: 400 });
+
+  }
+
+
+
+
+}
+
+
+
 export default function AccountProfile() {
   const account = useOutletContext<{ customer: CustomerFragment }>();
   const { state } = useNavigation();
   const action = useActionData<ActionResponse>();
   const customer = action?.customer ?? account?.customer;
 
+  console.log(action)
   ///функція для обновлення данних які приходять з root.tsx loader
   const { revalidate } = useRevalidator()
   useEffect(() => {
@@ -65,6 +252,7 @@ export default function AccountProfile() {
             >
               Ім`я
             </label>
+            <input type='hidden' name='action' value="update profile" />
             <Input
               id="firstName"
               name="firstName"
@@ -142,10 +330,9 @@ export default function AccountProfile() {
           </fieldset>
 
           {action?.error ? (
-            <p>
-              <mark>
-                <small>{action.error}</small>
-              </mark>
+            <p className='text-red py-5 pxy-5'>
+              <small >{action.error}</small>
+
             </p>
           ) : (
             <br />
@@ -189,6 +376,8 @@ export default function AccountProfile() {
             >
               Поточний пароль
             </label>
+            <input type='hidden' name='action' value="update password" />
+
             <Input
               id="currentPassword"
               name="currentPassword"
@@ -262,103 +451,6 @@ export default function AccountProfile() {
 }
 
 
-
-export async function loader({ context, request }: LoaderFunctionArgs) {
-  const { cart, storefront, session } = context;
-  const customerAccessToken = await context.session.get('customerAccessToken');
-  if (!customerAccessToken) {
-    return redirect('/account/login');
-  }
-  const userCartId = await getUserCartId(customerAccessToken.accessToken, context)
-
-  if (userCartId) {
-    console.log('ldskjf',userCartId)
-    const headers = cart.setCartId(userCartId)
-    return json({}, { headers });
-  }
-
-
-
-  return json({});
-
-}
-
-export async function action({ request, context }: ActionFunctionArgs) {
-  const { session, storefront } = context;
-
-  if (request.method !== 'PUT') {
-    return json({ error: 'Method not allowed' }, { status: 405 });
-  }
-
-  const form = await request.formData();
-  const formName = form.get('formName');
-  const customerAccessToken = await session.get('customerAccessToken');
-  if (!customerAccessToken) {
-    return json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
-  try {
-    const password = getPassword(form);
-    const customer: CustomerUpdateInput = {};
-    const validInputKeys = [
-      'firstName',
-      'lastName',
-      'email',
-      'password',
-      'phone',
-    ] as const;
-    for (const [key, value] of form.entries()) {
-      if (!validInputKeys.includes(key as any)) {
-        continue;
-      }
-      if (key === 'acceptsMarketing') {
-        customer.acceptsMarketing = value === 'on';
-      }
-      if (typeof value === 'string' && value.length) {
-        customer[key as (typeof validInputKeys)[number]] = value;
-      }
-    }
-
-    if (password && FormNames.PASS_FROM) {
-      customer.password = password;
-    }
-
-    // update customer and possibly password
-    const updated = await storefront.mutate(CUSTOMER_UPDATE_MUTATION, {
-      variables: {
-        customerAccessToken: customerAccessToken.accessToken,
-        customer,
-      },
-    });
-
-    // check for mutation errors
-    if (updated.customerUpdate?.customerUserErrors?.length) {
-      return json(
-        { error: updated.customerUpdate?.customerUserErrors[0] },
-        { status: 400 },
-      );
-    }
-
-    // update session with the updated access token
-    if (updated.customerUpdate?.customerAccessToken?.accessToken) {
-      session.set(
-        'customerAccessToken',
-        updated.customerUpdate?.customerAccessToken,
-      );
-    }
-
-    return json(
-      { error: null, customer: updated.customerUpdate?.customer },
-      {
-        headers: {
-          'Set-Cookie': await session.commit(),
-        },
-      },
-    );
-  } catch (error: any) {
-    return json({ error: error.message, customer: null }, { status: 400 });
-  }
-}
 
 
 function getPassword(form: FormData): string | undefined {

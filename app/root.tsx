@@ -88,13 +88,10 @@ export async function loader({ context, request }: any) {
     likedCookes = (await likedProductsCookie.parse(cookieHeader)) || [];
   }
   
-  const userCartId = await getUserCartId(customerAccessToken.accessToken, context)
-  const getDefaultCartId =  cart.getCartId()
+
 
   // let cartPromise = await getUserCart(customerAccessToken?.accessToken, isLoggedIn, context);
   let cartPromise = cart.get()
-  console.log(userCartId,"sdf",
-    getDefaultCartId )
 
   // defer the footer query (below the fold)
   const footerPromise = await storefront.query(FOOTER_QUERY, {
