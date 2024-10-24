@@ -1,5 +1,5 @@
 import { FormProps, useParams } from "@remix-run/react";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useFetcher } from "react-router-dom";
 import { SearchIcon } from "../SearchIcon";
 import { PredictiveSearchResults } from "./PredictiveSearchResults";
@@ -33,6 +33,10 @@ export function PredictiveSearchForm({
   const [focusForm, setFocusForm] = useState<boolean>(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [inputValue, setInputValue] = useState("")
+
+  useEffect(()=>{
+    console.log(mobileOpen, "sdlkfjs")
+  },[mobileOpen])
 
   function fetchResults(event: React.ChangeEvent<HTMLInputElement>) {
     const searchAction = action ?? '/api/predictive-search';
@@ -166,7 +170,7 @@ export function PredictiveSearchForm({
               </fetcher.Form>
             </div>
           </DrawerHeader>
-          <PredictiveSearchResults />
+          <PredictiveSearchResults setInputValue={setInputValue} setMobileOpen={setMobileOpen} />
         </DrawerContent>
       </Drawer>
     );

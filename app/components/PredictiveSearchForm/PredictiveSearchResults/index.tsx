@@ -1,21 +1,24 @@
 import { Link, useFetchers } from "@remix-run/react";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useMedia } from "react-use";
 import { PredictiveSearchResult } from "../PredictiveSearchResult";
 import { motion } from 'framer-motion';
 import { NoPredictiveSearchResults } from "../NoPredictiveSearchResults";
 import { NO_PREDICTIVE_SEARCH_RESULTS, NormalizedPredictiveSearch } from "~/components/Search";
 
-export function PredictiveSearchResults() {
+export function PredictiveSearchResults({ setInputValue, setMobileOpen }: any) {
   const { results, totalResults, searchInputRef, searchTerm } = usePredictiveSearch();
 
+  const [isOpen, setIsOpen] = useState(true)
   const isMobile = useMedia('(max-width: 767px)', false);
 
   function goToSearchResult(event: React.MouseEvent<HTMLAnchorElement>) {
     if (!searchInputRef.current) return;
-    searchInputRef.current.blur();
-    searchInputRef.current.value = '';
-    window.location.href = event.currentTarget.href;
+    setInputValue("")
+    setMobileOpen((prev: boolean) => !prev)
+    // searchInputRef.current.blur();
+    // searchInputRef.current.value = '';
+    // window.location.href = event.currentTarget.href;
   }
 
   if (!totalResults) {
@@ -28,9 +31,9 @@ export function PredictiveSearchResults() {
   if (!isMobile) {
     return (
       <motion.div
-        initial={false}
+        initial={true}
         variants={variants}
-        animate={totalResults ? 'open' : 'closed'}
+        animate={isOpen ? 'open' : 'closed'}
         transition={{ duration: 1 }}
         className="absolute left-0 z-20 bg-lightGray w-full rounded-b-[21px]"
       >
@@ -63,9 +66,9 @@ export function PredictiveSearchResults() {
   }
   return (
     <motion.div
-      initial={false}
+      initial={true}
       variants={variants}
-      animate={totalResults ? 'open' : 'closed'}
+      animate={isOpen ? 'open' : 'closed'}
       transition={{ duration: 1 }}
       className="overflow-y-auto overflow-x-hidden"
     >
