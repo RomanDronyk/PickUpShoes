@@ -83,18 +83,21 @@ export async function loader({ context, request }: any) {
 
   if (isLoggedIn && customerAccessToken?.accessToken) {
     likedCookes = await getUserLikedCartIds(customerAccessToken.accessToken, context)
-    const userCartId = await getUserCartId(customerAccessToken.accessToken, context)
-    const cartHeaders = cart.setCartId(userCartId)
+
   } else {
     likedCookes = (await likedProductsCookie.parse(cookieHeader)) || [];
   }
+  
+  const userCartId = await getUserCartId(customerAccessToken.accessToken, context)
+  const getDefaultCartId =  cart.getCartId()
 
   // let cartPromise = await getUserCart(customerAccessToken?.accessToken, isLoggedIn, context);
   let cartPromise = cart.get()
+  console.log(userCartId,"sdf",
+    getDefaultCartId )
 
   // defer the footer query (below the fold)
   const footerPromise = await storefront.query(FOOTER_QUERY, {
-    cache: storefront.CacheLong(),
     variables: {
       footerMenuHandle: 'footer', // Adjust to your footer menu handle
       secondMenuHandle: 'footer-info',
@@ -103,7 +106,6 @@ export async function loader({ context, request }: any) {
 
   // await the header query (above the fold)
   const headerPromise = await storefront.query(HEADER_QUERY, {
-    cache: storefront.CacheLong(),
     variables: {
       headerMenuHandle: 'main-menu', // Adjust to your header menu handle
     },

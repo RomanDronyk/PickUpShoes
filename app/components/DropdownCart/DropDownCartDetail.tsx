@@ -1,5 +1,5 @@
 
-import React, {  useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Money } from '@shopify/hydrogen';
 import { Link, } from '@remix-run/react';
 import { Button } from '../ui/button';
@@ -21,7 +21,7 @@ const DropDownCartDetail = React.memo(({ cart }: { cart: CartApiQueryFragment | 
   //     const formData = new FormData();
   //     formData.append('action', 'create url');
   //     formData.append('lineItems', JSON.stringify(lineItems)); // Передавайте об'єкти як рядок JSON
-      
+
   //     fetch('/checkout-api', {
   //       method: 'POST',
   //       body: formData
@@ -37,21 +37,31 @@ const DropDownCartDetail = React.memo(({ cart }: { cart: CartApiQueryFragment | 
   return (
     <div className="dropdown-detail">
       <div className="dropdown-table">
-        <div className="dropdown-header grid grid-cols-12">
-          <div className="dropdown-title  2xl:col-span-9 lg:col-span-4">
+        <div className="dropdown-header pb-4
+        "
+        style={{display: "flex",alignItems: "center", justifyContent: "space-between"}}
+        >
+          {/* //  grid grid-cols-12 */}
+
+          <div className="dropdown-title sm:col-span-8 2xl:col-span-9 lg:col-span-9">
             <span className="font-semibold text-[26px] col-span-6">
               Корзина
             </span>
           </div>
-          <div className="text-xl text-center w-[130px] xl:block hidden">
-            Кількість
-          </div>
-          <div className="text-xl text-center w-[130px] xl:block hidden">
-            Вартість
+          <div className='xl:pr-[7vw] xl-gap-[50px] gap-[20px] md:pr-[3vw]'
+        style={{display: "flex", alignItems: "center", justifyContent: "space-between"}}
+
+          >
+            <div className="text-xl text-center w-auto sm:block hidden">
+              Кількість
+            </div>
+            <div className="text-xl text-center w-auto sm:block hidden">
+              Вартість
+            </div>
           </div>
         </div>
         <ul className="flex flex-col gap-4">
-          {cart?.lines?.nodes.map((line:any) => (
+          {cart?.lines?.nodes.map((line: any) => (
             <CartLineItem key={line.id} line={line} />
           ))}
         </ul>
@@ -63,14 +73,14 @@ const DropDownCartDetail = React.memo(({ cart }: { cart: CartApiQueryFragment | 
             as="span"
             withoutCurrency
             withoutTrailingZeros
-            data={cost?.totalAmount||{currencyCode: "UAH", amount: "0"}}
+            data={cost?.totalAmount || { currencyCode: "UAH", amount: "0" }}
           />
           &nbsp;грн
         </div>
         <div className="dropdown-checkout flex items-center justify-end">
-            <Link to={`/checkout`|| ""}  onClick={()=>console.log(cart?.checkoutUrl)} className="flex gap-5">
-          <Button className="rounded-[60px] px-[55px]">
-              <span className="font-medium text-2xl">Оформити замовлення</span>
+          <Link to={`/checkout` || ""} onClick={() => console.log(cart?.checkoutUrl)} className="flex gap-5">
+            <Button className="rounded-[60px] px-[55px]">
+              <span className="font-medium text-2xl pr-2">Оформити замовлення</span>
               <svg
                 width="23"
                 height="23"
@@ -83,8 +93,8 @@ const DropDownCartDetail = React.memo(({ cart }: { cart: CartApiQueryFragment | 
                   fill="white"
                 />
               </svg>
-          </Button>
-            </Link>
+            </Button>
+          </Link>
         </div>
       </div>
     </div>

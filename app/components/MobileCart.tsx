@@ -6,16 +6,17 @@ import {
   DrawerTrigger,
   DrawerFooter,
 } from './ui/drawer';
-import type {CartApiQueryFragment} from 'storefrontapi.generated';
-import type {CartLineUpdateInput} from '@shopify/hydrogen/storefront-api-types';
-import {Link} from '@remix-run/react';
-import {Button} from './ui/button';
-import {ArrowRight, Minus, Plus, X} from 'lucide-react';
-import {CartForm, Image, Money} from '@shopify/hydrogen';
-import {useContext, useEffect, useState} from 'react';
-import {useVariantUrl} from '~/utils';
+import type { CartApiQueryFragment } from 'storefrontapi.generated';
+import type { CartLineUpdateInput } from '@shopify/hydrogen/storefront-api-types';
+import { Link } from '@remix-run/react';
+import { Button } from './ui/button';
+import { ArrowRight, Minus, Plus, X } from 'lucide-react';
+import { CartForm, Image, Money } from '@shopify/hydrogen';
+import { useContext, useEffect, useState } from 'react';
+import { useVariantUrl } from '~/utils';
 import EmptyCart from './ui/emptyCart';
 import { HeaderBasketContext, HeaderContextInterface } from '~/context/HeaderCarts';
+import OptionList from './common/optionList';
 
 type DropDownCartLine = CartApiQueryFragment['lines']['nodes'][0];
 
@@ -25,15 +26,15 @@ export function MobileCart({
   cart,
 
 }: {
-  cart: CartApiQueryFragment | null |any;
+  cart: CartApiQueryFragment | null | any;
 
 }) {
   const {
-    cartShowMobile:open,
-    setCartShowMobile:setOpen
+    cartShowMobile: open,
+    setCartShowMobile: setOpen
   } = useContext(HeaderBasketContext) as HeaderContextInterface
   // const [open, setOpen] = useState(false);
-  
+
   return (
     <Drawer open={open} onOpenChange={setOpen} direction="right">
       <DrawerTrigger asChild>
@@ -82,14 +83,14 @@ export function MobileCart({
       </DrawerTrigger>
       <DrawerContent className="h-[90%] px-5">
         <div className="overflow-y-auto overflow-x-hidden">
-          {cart?.lines?.nodes?.length > 0 ? <MobileCartDetail setOpen = {setOpen} cart={cart} /> :<EmptyCart  setOpen = {setOpen} /> }
+          {cart?.lines?.nodes?.length > 0 ? <MobileCartDetail setOpen={setOpen} cart={cart} /> : <EmptyCart setOpen={setOpen} />}
         </div>
       </DrawerContent>
     </Drawer>
   );
 }
 
-function MobileCartDetail({cart,setOpen}: {setOpen?:any; cart: CartApiQueryFragment | null}) {
+function MobileCartDetail({ cart, setOpen }: { setOpen?: any; cart: CartApiQueryFragment | null }) {
   const cost = cart?.cost;
   return (
     <>
@@ -103,7 +104,7 @@ function MobileCartDetail({cart,setOpen}: {setOpen?:any; cart: CartApiQueryFragm
       </DrawerHeader>
       <div className="flex flex-col gap-y-5">
         {cart?.lines?.nodes?.map((line: CartLine) => (
-          <MobileCartLine  setOpen= {setOpen} key={line.id} line={line} />
+          <MobileCartLine setOpen={setOpen} key={line.id} line={line} />
         ))}
       </div>
       <DrawerFooter className="px-0">
@@ -118,8 +119,8 @@ function MobileCartDetail({cart,setOpen}: {setOpen?:any; cart: CartApiQueryFragm
           &nbsp;грн
         </div>
         <Button asChild className="rounded-[60px] px-[55px]">
-          <Link onClick={()=>setOpen(false)} to={"/checkout" ||""} className="flex gap-5">
-            <span className="font-medium text-2xl">Оформити замовлення</span>
+          <Link onClick={() => setOpen(false)} to={"/checkout" || ""} className="flex gap-5">
+            <span className="font-medium text-2xl pr-2">Оформити замовлення</span>
             <svg
               width="23"
               height="23"
@@ -139,9 +140,9 @@ function MobileCartDetail({cart,setOpen}: {setOpen?:any; cart: CartApiQueryFragm
   );
 }
 
-function MobileCartLine({line ,setOpen}: {setOpen: any; line: DropDownCartLine}) {
-  const {id, merchandise} = line;
-  const {product, title, image, selectedOptions} = merchandise;
+function MobileCartLine({ line, setOpen }: { setOpen: any; line: DropDownCartLine }) {
+  const { id, merchandise } = line;
+  const { product, title, image, selectedOptions, quantityAvailable, sku } = merchandise;
   const lineItemUrl = useVariantUrl(product.handle, selectedOptions);
   const priceType = line.cost.compareAtAmountPerQuantity
     ? 'compareAt'
@@ -161,24 +162,24 @@ function MobileCartLine({line ,setOpen}: {setOpen: any; line: DropDownCartLine})
               className="rounded-[15px] mr-[14px]"
             />
           )}
-          <Link onClick={()=>setOpen(false)} prefetch="intent" to={lineItemUrl}>
+          <Link onClick={() => setOpen(false)} prefetch="intent" to={lineItemUrl}>
             <span className="font-semibold min-[385px]:text-[20px] text-base">
               {product.title}
             </span>
           </Link>
+
         </div>
         <CartLineRemoveButton lineIds={[line.id]} />
+
       </div>
       <div>
         <div className="text-base">
-          <ul>
-            {selectedOptions.map((option) => (
-              <li key={option.name}>
-                <span>{option.name}: </span>
-                <span className="opacity-60">{option.value}</span>
-              </li>
-            ))}
-          </ul>
+          <OptionList sku={sku || ""} options={selectedOptions} />
+          {quantityAvailable === 1 && (
+            <span className="my-1 py-1 w-full inline-flex ">
+              - Останні в наявності
+            </span>
+          )}
         </div>
       </div>
       <div className="flex items-center justify-between max-[385px]:flex-col-reverse">
@@ -189,15 +190,15 @@ function MobileCartLine({line ,setOpen}: {setOpen: any; line: DropDownCartLine})
   );
 }
 
-function CartLineQuantity({line}: {line: CartLine}) {
+function CartLineQuantity({ line }: { line: CartLine }) {
   if (!line || typeof line?.quantity === 'undefined') return null;
-  const {id: lineId, quantity} = line;
+  const { id: lineId, quantity } = line;
   const prevQuantity = Number(Math.max(0, quantity - 1).toFixed(0));
   const nextQuantity = Number((quantity + 1).toFixed(0));
 
   return (
     <div className="flex self-center items-center justify-center gap-5 text-lg text-black bg-input rounded-[62px] px-5 py-2 max-[385px]:self-end max-[385px]:mb-3">
-      <CartLineUpdateButton lines={[{id: lineId, quantity: prevQuantity}]}>
+      <CartLineUpdateButton lines={[{ id: lineId, quantity: prevQuantity }]}>
         <button
           aria-label="Зменшити кількість"
           disabled={quantity <= 1}
@@ -209,7 +210,7 @@ function CartLineQuantity({line}: {line: CartLine}) {
         </button>
       </CartLineUpdateButton>
       <span className="text-sm">{quantity}</span>
-      <CartLineUpdateButton lines={[{id: lineId, quantity: nextQuantity}]}>
+      <CartLineUpdateButton lines={[{ id: lineId, quantity: nextQuantity }]}>
         <button
           className="flex flex-col items-center cursor-pointer"
           aria-label="Збільшити кількість"
@@ -252,7 +253,7 @@ function CartLinePrice({
   function percentageDiscount(line: CartLine) {
     const {
       quantity,
-      cost: {amountPerQuantity, totalAmount, compareAtAmountPerQuantity},
+      cost: { amountPerQuantity, totalAmount, compareAtAmountPerQuantity },
     } = line;
 
     if (compareAtAmountPerQuantity) {
@@ -307,18 +308,18 @@ function CartLineUpdateButton({
     <CartForm
       route="/cart"
       action={CartForm.ACTIONS.LinesUpdate}
-      inputs={{lines}}
+      inputs={{ lines }}
     >
       {children}
     </CartForm>
   );
 }
-function CartLineRemoveButton({lineIds}: {lineIds: string[]}) {
+function CartLineRemoveButton({ lineIds }: { lineIds: string[] }) {
   return (
     <CartForm
       route="/cart"
       action={CartForm.ACTIONS.LinesRemove}
-      inputs={{lineIds}}
+      inputs={{ lineIds }}
     >
       <Button
         type="submit"

@@ -29,7 +29,7 @@ import {
   SheetContent,
 } from './ui/sheet';
 import { Button } from './ui/button';
-import { Command, CommandGroup, CommandItem } from './ui/command';
+import { Command, CommandGroup, CommandItem, CommandList } from './ui/command';
 import { Input } from './ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
 import { Slider } from './ui/slider';
@@ -152,7 +152,7 @@ function FilterDraw({
   return (
     <div className="flex flex-col">
       <div className="md:flex flex-col hidden">
-        {menu && menu?.items.map((item:any) => {
+        {menu && menu?.items.map((item: any) => {
           return (
             <Accordion key={item.id} type="single" collapsible className="w-full">
               <AccordionItem value="sizes" >
@@ -623,18 +623,20 @@ export function SortProducts() {
       </PopoverTrigger>
       <PopoverContent className="p-2">
         <Command>
-          <CommandGroup>
-            {sortMenu.map((item) => (
-              <CommandItem
-                className="font-semibold"
-                key={item.value}
-                value={item.value}
-                onSelect={handleSort}
-              >
-                {item.label}
-              </CommandItem>
-            ))}
-          </CommandGroup>
+          <CommandList>
+            <CommandGroup>
+              {sortMenu.map((item) => (
+                <CommandItem
+                  className="font-semibold"
+                  key={item.value}
+                  value={item.value}
+                  onSelect={handleSort}
+                >
+                  {item.label}
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          </CommandList>
         </Command>
       </PopoverContent>
     </Popover>

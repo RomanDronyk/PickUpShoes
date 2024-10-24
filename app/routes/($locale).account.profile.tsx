@@ -271,13 +271,13 @@ export async function loader({ context, request }: LoaderFunctionArgs) {
   }
   const userCartId = await getUserCartId(customerAccessToken.accessToken, context)
 
-  const cartHeaders = cart.setCartId(userCartId)
-
-  const headers = new Headers(cartHeaders);
-
   if (userCartId) {
+    console.log('ldskjf',userCartId)
+    const headers = cart.setCartId(userCartId)
     return json({}, { headers });
   }
+
+
 
   return json({});
 
