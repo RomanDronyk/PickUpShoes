@@ -1,8 +1,7 @@
 import { useLoaderData, json, MetaFunction, useActionData, useNavigate } from '@remix-run/react';
 import { ActionFunction } from '@remix-run/node';
-import { CREATE_CHEKOUT_URL } from '~/graphql/mutations';
 import { generageMonoUrl, generateOrderInShopifyAdmin, getRecommendationsById } from '~/utils';
-import { AppLoadContext } from '@shopify/remix-oxygen';
+import { AppLoadContext, redirect } from '@shopify/remix-oxygen';
 import CheckoutScreen, { IInputState } from '~/screens/CheckoutScreen';
 import { ICheckoutInputErrors, checkoutInputErrors } from '~/mockMessages';
 
@@ -27,7 +26,7 @@ export const loader = async ({ context }: { context: AppLoadContext }) => {
     const cartNodes: any = cartData?.lines?.nodes;
 
     if (cartNodes?.length == 0 || !cartNodes?.length) {
-        throw new Response("Кошик порожній", { status: 302, headers: { Location: "/" } })
+        return redirect("/", 302)
     }
     const productIds = cartNodes?.map((product: any) => product?.merchandise?.product?.id);
 
@@ -104,7 +103,7 @@ export default function Checkout() {
     const { recommendedCarts, cartData } = useLoaderData<typeof loader>();
     const response: any = useActionData<typeof action>();
 
-    const cartsFromCart = cartData?.lines?.nodes.map((element: any) => element) || [];
+    const cartsFromCart = cartData?.lines?.nodes?.map((element: any) => element) || [];
     const amount = cartData?.cost?.subtotalAmount?.amount || "0"
 
     const urlFromAction = response?.pageUrl;

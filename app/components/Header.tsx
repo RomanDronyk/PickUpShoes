@@ -43,9 +43,9 @@ export function Header({ header, isLoggedIn, cart }: HeaderProps) {
 
   // Додай ефект, який активує анімацію при зміні count
   useEffect(() => {
-      setAnimate(true);
-      const timer = setTimeout(() => setAnimate(false), 1000); // знімає анімацію після 1 секунди
-      return () => clearTimeout(timer); // очищає таймер при unmount
+    setAnimate(true);
+    const timer = setTimeout(() => setAnimate(false), 1000); // знімає анімацію після 1 секунди
+    return () => clearTimeout(timer); // очищає таймер при unmount
   }, [count]);
 
   return (
@@ -245,7 +245,7 @@ export function HeaderMenu({
 
     <NavigationMenu className="md:flex hidden">
       <NavigationMenuList>
-        {menu?.items.map((item) => {
+        {menu?.items?.map((item) => {
           if (!item.url) return null;
           // if the url is internal, we strip the domain
           const url =

@@ -22,7 +22,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
   const { action, inputs } = CartForm.getFormInput(formData);
 
   if (!action) {
-    throw new Error('No action provided');
+    return json({ error: "No action provided" })
   }
 
   let status = 200;
@@ -59,7 +59,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
       break;
     }
     default:
-      throw new Error(`${action} cart action is not defined`);
+      return json({ error: `${action} cart action is not defined` })
   }
 
   const resultCartId = result.cart.id;
@@ -93,7 +93,6 @@ export default function Cart() {
   const rootData = useRootLoaderData();
   const cartPromise = rootData.cart;
 
-
   return (
     <div className="cart">
       <h1>Cart</h1>
@@ -111,11 +110,11 @@ export default function Cart() {
       <div >
         <CartForm
           route="/cart"
-          inputs={{
-            buyerIdentity: {
-              email: "ivan.kalunuch12@gmail.com",
-            }
-          }}
+          // inputs={{
+          //   buyerIdentity: {
+          //     email: "ivan.kalunuch12@gmail.com",
+          //   }
+          // }}
           action={CartForm.ACTIONS.BuyerIdentityUpdate}
         >
           {(fetcher: FetcherWithComponents<any>) => (

@@ -10,6 +10,7 @@ const CheckoutCartMobile = ({ cartsFromCart }: any) => {
     const updateQuantity = (value: any) => {
         setLoading(true)
     }
+    console.log(cartsFromCart,)
     const variantUrl = useVariantUrl(cartsFromCart.merchandise.product.handle, cartsFromCart.merchandise.selectedOptions);
 
     return (
@@ -57,7 +58,7 @@ const CheckoutCartMobile = ({ cartsFromCart }: any) => {
                     </div>
                 </div>
                 <div style={{ display: "flex", alignItems: "center", gap: "20px", width: "100%" }}>
-                    <CartLineRemoveButton lineIds={cartsFromCart.id} />
+                    <CartLineRemoveButton lineIds={[cartsFromCart.id]} />
                 </div>
             </div>
         </div>
