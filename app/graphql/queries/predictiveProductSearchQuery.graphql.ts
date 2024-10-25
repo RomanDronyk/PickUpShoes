@@ -46,6 +46,7 @@ export const PREDICTIVE_PRODUCT_SEARCH_QUERY = `#graphql
       searchableFields: [VARIANTS_SKU, TITLE],
       query: $searchTerm,
       types: $types,
+      unavailableProducts:HIDE,
     ) {
       products {
         ...PredictiveProduct

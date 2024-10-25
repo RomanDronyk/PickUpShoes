@@ -662,10 +662,8 @@ function ProductGalery({ selectedVariantId, product, objGalery, media }: { selec
                   data={item}
                   className="rounded-[20px] aspect-1 image-product-aspect "
                 />
-
               </CarouselItem>
             ))}
-
           </CarouselContent>
         </Carousel>
         <button

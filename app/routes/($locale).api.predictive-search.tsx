@@ -11,7 +11,6 @@ import type {
   PredictiveSearchQuery,
 } from 'storefrontapi.generated';
 import { PREDICTIVE_PRODUCT_SEARCH_QUERY } from '~/graphql/queries';
-import { PresenceContext } from 'framer-motion';
 
 type PredictiveSearchResultItem = PredictiveProductFragment;
 
