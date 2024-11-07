@@ -28,11 +28,12 @@ type SizeGrid = {
   };
 };
 
-export const SizeGrid = ({ vendor }: { vendor: string }) => {
+export const SizeGrid = ({ product, vendor }: { product: any, vendor: string }) => {
   const [sizeChart, setSizeChart] = useState<SizeGrid>();
   const [gridView, setGridView] = useState(false);
 
   useEffect(() => {
+    console.log(product, "product")
     const fetchData = async () => {
       try {
         const data = await loadJSON(vendor);

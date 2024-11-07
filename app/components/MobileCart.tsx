@@ -8,7 +8,7 @@ import {
 } from './ui/drawer';
 import type { CartApiQueryFragment } from 'storefrontapi.generated';
 import type { CartLineUpdateInput } from '@shopify/hydrogen/storefront-api-types';
-import { Link } from '@remix-run/react';
+import { FetcherWithComponents, Link } from '@remix-run/react';
 import { Button } from './ui/button';
 import { ArrowRight, Minus, Plus, X } from 'lucide-react';
 import { CartForm, Image, Money } from '@shopify/hydrogen';
@@ -17,6 +17,7 @@ import { useVariantUrl } from '~/utils';
 import EmptyCart from './ui/emptyCart';
 import { HeaderBasketContext, HeaderContextInterface } from '~/context/HeaderCarts';
 import OptionList from './common/optionList';
+import LoaderNew from './LoaderNew';
 
 type DropDownCartLine = CartApiQueryFragment['lines']['nodes'][0];
 
@@ -114,7 +115,7 @@ function MobileCartDetail({ cart, setOpen }: { setOpen?: any; cart: CartApiQuery
             as="span"
             withoutCurrency
             withoutTrailingZeros
-            data={cost?.totalAmount}
+            data={cost?.totalAmount || 0}
           />
           &nbsp;грн
         </div>
@@ -310,7 +311,11 @@ function CartLineUpdateButton({
       action={CartForm.ACTIONS.LinesUpdate}
       inputs={{ lines }}
     >
-      {children}
+      {(fetcher: FetcherWithComponents<any>) => (
+        <>
+          {fetcher.state == 'idle' ? children : <div className="h-[16px]"><LoaderNew /></div>}
+        </>
+      )}
     </CartForm>
   );
 }
@@ -321,12 +326,17 @@ function CartLineRemoveButton({ lineIds }: { lineIds: string[] }) {
       action={CartForm.ACTIONS.LinesRemove}
       inputs={{ lineIds }}
     >
-      <Button
-        type="submit"
-        className="bg-[#B3B3B3] self-center w-[25px] h-[25px] p-[6px] rounded-full"
-      >
-        <X size={16} />
-      </Button>
+      {(fetcher: FetcherWithComponents<any>) => (
+        <>
+          <Button
+            type="submit"
+            className="bg-[#B3B3B3] self-center w-[25px] h-[25px] p-[6px] rounded-full"
+          >
+            {fetcher.state == 'idle' ? <X size={16} /> : <div className="h-[16px]"><LoaderNew /></div>}
+          </Button>
+        </>
+      )}
+
     </CartForm>
   );
 }

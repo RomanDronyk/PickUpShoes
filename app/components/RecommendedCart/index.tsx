@@ -1,9 +1,10 @@
 import { FetcherWithComponents, Link } from "@remix-run/react";
 import { CartForm, Image } from "@shopify/hydrogen";
-import { FC, useState } from "react";
+import { FC, useEffect, useState } from "react";
 import { cn } from "~/lib/utils";
 import { useVariantUrl } from "~/utils";
 import OptionList from "../common/optionList";
+import LoaderNew from "../LoaderNew";
 
 interface IImage {
   altText: string,
@@ -46,7 +47,9 @@ export interface IProduct {
     minVariantPrice: IPrice,
   },
   title: string,
-  variants: IVariant[]
+  variants: {
+    nodes: IVariant[]
+  }
 }
 interface IRecommendedCart {
   product: IProduct,
@@ -54,8 +57,9 @@ interface IRecommendedCart {
 
 
 const RecommendedCart: FC<IRecommendedCart> = ({ product }) => {
-  const [selectedVariant, setSelectedVarian] = useState<IVariant>(product.variants[0])
-  const variantUrl = useVariantUrl(product.handle, selectedVariant.selectedOptions);
+  const [selectedVariant, setSelectedVarian] = useState<IVariant>(product?.variants.nodes[0])
+  const variantUrl = useVariantUrl(product?.handle, selectedVariant?.selectedOptions);
+
   return (
     <div className='flex flex-col min-h-[100px] relative  justify-center  register   py-[24px] mb-[30px] lg:mb-0'>
       <div className='grid' style={{ minWidth: "100%", gridTemplateColumns: "1fr", position: "relative", justifyContent: 'space-between', alignItems: "center", gap: 10, }}>
@@ -84,11 +88,11 @@ const RecommendedCart: FC<IRecommendedCart> = ({ product }) => {
               </h4>
             </div>
             <div>
-              <OptionList sku={selectedVariant.sku} options={selectedVariant?.selectedOptions} />
+              <OptionList sku={selectedVariant?.sku} options={selectedVariant?.selectedOptions} />
             </div>
             <div>
               <h4 className="md:text-xl text-lg font-semibold line-clamp-1 pr-[10px] mb-[7px]">
-                {selectedVariant.price?.amount} грн
+                {selectedVariant?.price?.amount} грн
               </h4>
             </div>
           </div>
@@ -101,7 +105,7 @@ const RecommendedCart: FC<IRecommendedCart> = ({ product }) => {
                 {
                   lines: [
                     {
-                      merchandiseId: selectedVariant.id,
+                      merchandiseId: selectedVariant?.id,
                       quantity: 1
                     }
                   ]
@@ -124,7 +128,7 @@ const RecommendedCart: FC<IRecommendedCart> = ({ product }) => {
                       false && 'bg-white text-black border border-black',
                     )}
                   >
-                    {fetcher.state == 'idle' ? "Додати" : "Загрузка"}
+                    {fetcher.state == 'idle' ? "Додати" : <div className="h-[14px]"><LoaderNew /></div>}
                   </button>
                 </>
               )}
@@ -138,7 +142,7 @@ const RecommendedCart: FC<IRecommendedCart> = ({ product }) => {
 }
 
 export const RecommendedCartMobile: FC<IRecommendedCart> = ({ product }) => {
-  const [selectedVariant, setSelectedVarian] = useState<IVariant>(product.variants[0])
+  const [selectedVariant, setSelectedVarian] = useState<IVariant>(product.variants.nodes[0])
   const variantUrl = useVariantUrl(product.handle, selectedVariant.selectedOptions);
   return (
     <div className='flex flex-col  relative  justify-center  register max-h-[250px] overflow-hidden   pt-[24px] mb-[30px] lg:mb-0'>
@@ -210,7 +214,7 @@ export const RecommendedCartMobile: FC<IRecommendedCart> = ({ product }) => {
                     false && 'bg-white text-black border border-black',
                   )}
                 >
-                  {fetcher.state == 'idle' ? "Додати" : "Загрузка"}
+                  {fetcher.state == 'idle' ? "Додати" : <div className="h-[14px]"><LoaderNew /></div>}
                 </button>
               </>
             )}

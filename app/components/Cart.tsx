@@ -1,8 +1,8 @@
-import {CartForm, Image, Money} from '@shopify/hydrogen';
-import type {CartLineUpdateInput} from '@shopify/hydrogen/storefront-api-types';
-import {Link} from '@remix-run/react';
-import type {CartApiQueryFragment} from 'storefrontapi.generated';
-import {useVariantUrl} from '~/utils';
+import { CartForm, Image, Money } from '@shopify/hydrogen';
+import type { CartLineUpdateInput } from '@shopify/hydrogen/storefront-api-types';
+import { FetcherWithComponents, Link } from '@remix-run/react';
+import type { CartApiQueryFragment } from 'storefrontapi.generated';
+import { useVariantUrl } from '~/utils';
 
 type CartLine = CartApiQueryFragment['lines']['nodes'][0];
 
@@ -11,7 +11,7 @@ type CartMainProps = {
   layout: 'page' | 'aside';
 };
 
-export function CartMain({layout, cart}: CartMainProps) {
+export function CartMain({ layout, cart }: CartMainProps) {
   const linesCount = Boolean(cart?.lines?.nodes?.length || 0);
   const withDiscount =
     cart &&
@@ -26,7 +26,7 @@ export function CartMain({layout, cart}: CartMainProps) {
   );
 }
 
-function CartDetails({layout, cart}: CartMainProps) {
+function CartDetails({ layout, cart }: CartMainProps) {
   const cartHasItems = !!cart && cart.totalQuantity > 0;
 
   return (
@@ -69,8 +69,8 @@ function CartLineItem({
   layout: CartMainProps['layout'];
   line: CartLine;
 }) {
-  const {id, merchandise} = line;
-  const {product, title, image, selectedOptions} = merchandise;
+  const { id, merchandise } = line;
+  const { product, title, image, selectedOptions } = merchandise;
   const lineItemUrl = useVariantUrl(product.handle, selectedOptions);
   return (
     <li key={id} className="cart-line">
@@ -117,7 +117,7 @@ function CartLineItem({
   );
 }
 
-function CartCheckoutActions({checkoutUrl}: {checkoutUrl: string}) {
+function CartCheckoutActions({ checkoutUrl }: { checkoutUrl: string }) {
   if (!checkoutUrl) return null;
 
   return (
@@ -160,28 +160,28 @@ export function CartSummary({
   );
 }
 
-function CartLineRemoveButton({lineIds}: {lineIds: string[]}) {
+function CartLineRemoveButton({ lineIds }: { lineIds: string[] }) {
   return (
     <CartForm
       route="/cart"
       action={CartForm.ACTIONS.LinesRemove}
-      inputs={{lineIds}}
+      inputs={{ lineIds }}
     >
       <button type="submit">Remove</button>
     </CartForm>
   );
 }
 
-function CartLineQuantity({line}: {line: CartLine}) {
+function CartLineQuantity({ line }: { line: CartLine }) {
   if (!line || typeof line?.quantity === 'undefined') return null;
-  const {id: lineId, quantity} = line;
+  const { id: lineId, quantity } = line;
   const prevQuantity = Number(Math.max(0, quantity - 1).toFixed(0));
   const nextQuantity = Number((quantity + 1).toFixed(0));
 
   return (
     <div className="cart-line-quantiy">
       <small>Quantity: {quantity} &nbsp;&nbsp;</small>
-      <CartLineUpdateButton lines={[{id: lineId, quantity: prevQuantity}]}>
+      <CartLineUpdateButton lines={[{ id: lineId, quantity: prevQuantity }]}>
         <button
           aria-label="Decrease quantity"
           disabled={quantity <= 1}
@@ -192,7 +192,7 @@ function CartLineQuantity({line}: {line: CartLine}) {
         </button>
       </CartLineUpdateButton>
       &nbsp;
-      <CartLineUpdateButton lines={[{id: lineId, quantity: nextQuantity}]}>
+      <CartLineUpdateButton lines={[{ id: lineId, quantity: nextQuantity }]}>
         <button
           aria-label="Increase quantity"
           name="increase-quantity"
@@ -271,7 +271,7 @@ function CartDiscounts({
   const codes: string[] =
     discountCodes
       ?.filter((discount) => discount.applicable)
-      ?.map(({code}) => code) || [];
+      ?.map(({ code }) => code) || [];
 
   return (
     <div>
@@ -332,7 +332,7 @@ function CartLineUpdateButton({
     <CartForm
       route="/cart"
       action={CartForm.ACTIONS.LinesUpdate}
-      inputs={{lines}}
+      inputs={{ lines }}
     >
       {children}
     </CartForm>

@@ -11,6 +11,7 @@ import { FC, useEffect, useState } from "react"
 import ua from 'react-phone-number-input/locale/ua'
 import { emailValidation } from "~/utils"
 import { ICheckoutInputErrors, checkoutInputErrors } from "~/mockMessages"
+import LoaderNew from "~/components/LoaderNew"
 
 const CheckoutScreen: FC<ICheckoutScreen> = ({ actionErrorMessage, cartsFromCart, recommendedCarts, amount }) => {
   const [inputState, setInputState] = useState<IInputState>({
@@ -104,6 +105,7 @@ const CheckoutScreen: FC<ICheckoutScreen> = ({ actionErrorMessage, cartsFromCart
     <div className="overflow-hidden max-w-full flex flex-col-reverse contaier gap-[20px] md:gap-[40px] md:grid md:grid-cols-2 lg:grid-cols-[1fr_1fr] md:grid-cols-2 md:gap-y-10 md:gap-x-10 lg:px-24 px-[10px] my-10 w-full mt-[1rem]">
       <Form action="/checkout" method="POST" className='grid gap-[35px] max-w-full overflow-hidden'>
         <div style={{ position: "absolute", zIndex: -10, opacity: 0 }}>
+          <input style={{ width: "0% !important" }} type="hidden" name="note" value={inputState.contactType.value} />
           <input style={{ width: "0% !important" }} type="hidden" name="inputState" value={JSON.stringify(inputState)} />
           <input style={{ width: "0% !important" }} type="hidden" name="products" value={JSON.stringify(cartsFromCart)} />
           <input style={{ width: "0% !important" }} type="hidden" name="shipping_address_city" value={inputState.novaDepartment?.CityDescription} />
@@ -298,12 +300,15 @@ const CheckoutScreen: FC<ICheckoutScreen> = ({ actionErrorMessage, cartsFromCart
               </div>
             )}
             <Button disabled={navigation.state === "idle" ? false : true} className='rounded-[64px] w-[100%] text-semibold text-[18px] text-white py-[16px]'>
-              {navigation.state === "idle" ? "Замовити" : "Загрузка"}
-              <span style={{ marginLeft: 15 }}>
-                <svg width="16" height="16" viewBox="0 0 20 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M12.2959 0.454104L19.0459 7.2041C19.1508 7.30862 19.234 7.43281 19.2908 7.56956C19.3476 7.7063 19.3768 7.85291 19.3768 8.00098C19.3768 8.14904 19.3476 8.29565 19.2908 8.4324C19.234 8.56915 19.1508 8.69334 19.0459 8.79785L12.2959 15.5479C12.0846 15.7592 11.7979 15.8779 11.4991 15.8779C11.2002 15.8779 10.9135 15.7592 10.7022 15.5479C10.4908 15.3365 10.3721 15.0499 10.3721 14.751C10.3721 14.4521 10.4908 14.1654 10.7022 13.9541L15.5313 9.12504L1.75 9.12504C1.45163 9.12504 1.16548 9.00651 0.954505 8.79554C0.743527 8.58456 0.625 8.29841 0.625 8.00004C0.625 7.70167 0.743527 7.41552 0.954505 7.20455C1.16548 6.99357 1.45163 6.87504 1.75 6.87504L15.5313 6.87504L10.7013 2.04598C10.4899 1.83463 10.3712 1.54799 10.3712 1.2491C10.3712 0.950218 10.4899 0.663574 10.7013 0.45223C10.9126 0.240885 11.1992 0.122151 11.4981 0.122151C11.797 0.122151 12.0837 0.240885 12.295 0.45223L12.2959 0.454104Z" fill="white" />
-                </svg>
-              </span>
+              {navigation.state == "idle" ? <>
+                Замовити
+                <span style={{ marginLeft: 15 }}>
+                  <svg width="16" height="16" viewBox="0 0 20 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12.2959 0.454104L19.0459 7.2041C19.1508 7.30862 19.234 7.43281 19.2908 7.56956C19.3476 7.7063 19.3768 7.85291 19.3768 8.00098C19.3768 8.14904 19.3476 8.29565 19.2908 8.4324C19.234 8.56915 19.1508 8.69334 19.0459 8.79785L12.2959 15.5479C12.0846 15.7592 11.7979 15.8779 11.4991 15.8779C11.2002 15.8779 10.9135 15.7592 10.7022 15.5479C10.4908 15.3365 10.3721 15.0499 10.3721 14.751C10.3721 14.4521 10.4908 14.1654 10.7022 13.9541L15.5313 9.12504L1.75 9.12504C1.45163 9.12504 1.16548 9.00651 0.954505 8.79554C0.743527 8.58456 0.625 8.29841 0.625 8.00004C0.625 7.70167 0.743527 7.41552 0.954505 7.20455C1.16548 6.99357 1.45163 6.87504 1.75 6.87504L15.5313 6.87504L10.7013 2.04598C10.4899 1.83463 10.3712 1.54799 10.3712 1.2491C10.3712 0.950218 10.4899 0.663574 10.7013 0.45223C10.9126 0.240885 11.1992 0.122151 11.4981 0.122151C11.797 0.122151 12.0837 0.240885 12.295 0.45223L12.2959 0.454104Z" fill="white" />
+                  </svg>
+                </span>
+              </> : <div className="h-[18px]"><LoaderNew fullHeight={false} /></div>}
+
             </Button>
           </div>
         </div>
@@ -313,12 +318,13 @@ const CheckoutScreen: FC<ICheckoutScreen> = ({ actionErrorMessage, cartsFromCart
         <div className="register rounded-[20px] border border-black/10 p-[0px_24px] ">
           <CheckoutCartList carts={cartsFromCart} />
         </div>
-        <div>
+        {recommendedCarts.length > 0 && <div>
           <h1 className="xl:text-[32px] mt-[20px] text-[24px] text-left  font-medium mb-[20px]">Також рекомендуєм:</h1>
           <div className="register rounded-[20px] border border-black/10 p-[0px_24px] ">
             <CheckoutRecommendationList carts={recommendedCarts} />
           </div>
         </div>
+        }
       </div>
     </div>
   )

@@ -10,6 +10,7 @@ import { cn } from '~/lib/utils';
 import { HeaderBasketContext, HeaderContextInterface } from '~/context/HeaderCarts';
 import { useMedia } from 'react-use';
 import OptionList from '../common/optionList';
+import LoaderNew from '../LoaderNew';
 
 export interface IProductVariantPrice {
     amount: string,
@@ -162,7 +163,7 @@ export function LikedCart({ product }: ILikedCart) {
 
                                         }}
                                     >
-                                        {fetcher.state == 'idle' ? "Додати в корзину" : "Загрузка"}
+                                        {fetcher.state == 'idle' ? "Додати в корзину" : <div className="h-[18px]"><LoaderNew /></div>}
                                     </button>
                                 </>
                             )}
@@ -258,7 +259,7 @@ export function LikedCart({ product }: ILikedCart) {
 
                                 }}
                             >
-                                {fetcher.state == 'idle' ? "Додати в корзину" : "Загрузка"}
+                                {fetcher.state == 'idle' ? "Додати в корзину" : <div className="h-[20px]"><LoaderNew /></div>}
 
                             </button>
                         </>

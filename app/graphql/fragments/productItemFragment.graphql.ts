@@ -80,6 +80,7 @@ export const PRODUCT_ITEM_FRAGMENT_WITHOUT_VARIANT_FRAGMENT = `#graphql
         }
         availableForSale
         id
+        sku
         price {
           amount
           currencyCode

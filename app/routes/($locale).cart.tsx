@@ -110,11 +110,6 @@ export default function Cart() {
       <div >
         <CartForm
           route="/cart"
-          // inputs={{
-          //   buyerIdentity: {
-          //     email: "ivan.kalunuch12@gmail.com",
-          //   }
-          // }}
           action={CartForm.ACTIONS.BuyerIdentityUpdate}
         >
           {(fetcher: FetcherWithComponents<any>) => (

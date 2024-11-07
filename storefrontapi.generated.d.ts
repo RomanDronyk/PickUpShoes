@@ -1190,6 +1190,7 @@ export type ProductFragment = Pick<
   | 'descriptionHtml'
   | 'description'
   | 'tags'
+  | "productType"
 > & {
   options: Array<Pick<StorefrontAPI.ProductOption, 'name' | 'values'>>;
   selectedVariant?: StorefrontAPI.Maybe<

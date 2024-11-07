@@ -1,6 +1,7 @@
 import { Money } from "@shopify/hydrogen";
 import { CartLine } from "@shopify/hydrogen/storefront-api-types";
 import React from "react";
+import LoaderNew from "../LoaderNew";
 
 const CartLinePrice = React.memo(({
   isLoading,
@@ -19,7 +20,7 @@ const CartLinePrice = React.memo(({
 
   return (
     <div className="self-center text-center font-semibold lg:text-[22px] text-lg">
-      {isLoading? "Загрузка": <><Money
+      {isLoading? <div className='lg:h-[22px] h-lg'> <LoaderNew /></div>: <><Money
         withoutTrailingZeros
         withoutCurrency
         {...passthroughProps}

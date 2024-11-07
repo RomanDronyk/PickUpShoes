@@ -63,7 +63,7 @@ export async function loader({ context }: LoaderFunctionArgs) {
     {
       variables: {
         id:  "gid://shopify/Product/9138246943028",
-        intent:"complementary",
+        intent:"COMPLEMENTARY",
       },
     },
   );

@@ -11,6 +11,7 @@ const CartLineQuantity = React.memo(({isAbsolute, setNewQuantity, line }: {isAbs
   return (
     <div className={isAbsolute?"flex self-center absolute bottom-0 right-0 items-center justify-center lg:gap-5 gap-3 text-lg text-black bg-input rounded-[62px] lg:px-5 px-2 py-1":"flex self-center items-center justify-center lg:gap-5 gap-3 text-lg text-black bg-input rounded-[62px] lg:px-5 px-2 py-1"} >
       <CartLineUpdateButton lines={[{ id: lineId, quantity: prevQuantity }]}>
+        
         <button
           onClick={()=>setNewQuantity()}
           aria-label="Зменшити кількість"

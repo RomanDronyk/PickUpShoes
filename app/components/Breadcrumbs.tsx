@@ -46,21 +46,21 @@ export function Breadcrumbs() {
         const collection = deepsRoute?.data?.product?.collections?.nodes.at(0);
 
         pages.push({
-          href: `/collections/${collection.handle}`,
-          name: `${collection.title}`,
+          href: `/collections/${collection?.handle || ""}`,
+          name: `${collection?.title || ""}`,
         });
 
         pages.push({
-          href: `/products/${deepsRoute.data.product.handle}`,
-          name: `${deepsRoute.data.product.title}`,
+          href: `/products/${deepsRoute?.data?.product?.handle || ""}`,
+          name: `${deepsRoute?.data?.product?.title || ""}`,
         });
 
         break;
       case 'policies':
-        if (deepsRoute?.params.handle !== 'contact-information') {
+        if (deepsRoute?.params?.handle !== 'contact-information') {
           pages.push({
-            href: `/policies/${deepsRoute.data.policy.handle}`,
-            name: `${PoliciesTitle[deepsRoute.data.policy.handle]}`,
+            href: `/policies/${deepsRoute?.data?.policy?.handle}`,
+            name: `${PoliciesTitle[deepsRoute?.data?.policy?.handle]}`,
           });
         } else {
           pages.push({

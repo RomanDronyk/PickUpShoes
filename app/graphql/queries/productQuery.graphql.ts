@@ -5,6 +5,7 @@ export const PRODUCT_QUERY = `#graphql
     $country: CountryCode
     $handle: String!
     $language: LanguageCode
+    $identifiers: [HasMetafieldsIdentifier!]!,
     $selectedOptions: [SelectedOptionInput!]!
   ) @inContext(country: $country, language: $language) {
     product(handle: $handle) {

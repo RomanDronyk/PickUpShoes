@@ -6,8 +6,16 @@ export const PRODUCT_FRAGMENT = `#graphql
     title
     vendor
     handle
+    productType
     descriptionHtml
     description
+    metafields(identifiers: $identifiers) {
+      namespace
+      id
+      value
+      description
+      key
+    }
     options {
       name
       values

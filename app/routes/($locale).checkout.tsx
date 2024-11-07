@@ -4,6 +4,10 @@ import { generageMonoUrl, generateOrderInShopifyAdmin, getRecommendationsById } 
 import { AppLoadContext, redirect } from '@shopify/remix-oxygen';
 import CheckoutScreen, { IInputState } from '~/screens/CheckoutScreen';
 import { ICheckoutInputErrors, checkoutInputErrors } from '~/mockMessages';
+import { useEffect, useState } from 'react';
+import { COLLECTION_QUERY } from '~/graphql/queries';
+import { CollectionQuery } from 'storefrontapi.generated';
+import { getPaginationVariables } from '@shopify/hydrogen';
 
 
 export const handle: { breadcrumb: string } = {
@@ -20,8 +24,8 @@ export const meta: MetaFunction = () => {
 };
 
 
-export const loader = async ({ context }: { context: AppLoadContext }) => {
-    const { cart } = context;
+export const loader = async ({ context, request }: { context: AppLoadContext, request: Request }) => {
+    const { cart, storefront } = context;
     const cartData = await cart.get();
     const cartNodes: any = cartData?.lines?.nodes;
 
@@ -31,25 +35,32 @@ export const loader = async ({ context }: { context: AppLoadContext }) => {
     const productIds = cartNodes?.map((product: any) => product?.merchandise?.product?.id);
 
     const cache = new Map();
+    const paginationVariables = getPaginationVariables(request, {
+        pageBy: 8,
+    });
+    const { collection } = await storefront.query<CollectionQuery>(
+        COLLECTION_QUERY,
+        {
+            variables: {
+                ...paginationVariables,
+                handle: "upsalecheckout",
+                filters: [],
+                sortKey: "BEST_SELLING",
+                reverse: false,
+            },
+        },
+    );
+    const recommendedProduct = collection?.products.nodes
+    const getRandomProducts = (products: any, count: number) => {
+        const shuffled = products.sort(() => 0.5 - Math.random());
+        return shuffled.slice(0, count);
+    };
 
-    const recommendedProductPromises = productIds.map((id: any) => getRecommendationsById(id, cache, context));
-    const recommendedProductResponce = await Promise.all(recommendedProductPromises)
 
-    const recommendedCarts = recommendedProductResponce.map((responce: any) => {
-        const recommendedProduct = responce.productRecommendations;
-        const filteredProducts = recommendedProduct.map((product: any) => ({
-            ...product,
-            variants: product.variants.nodes.filter((variant: any) => variant.availableForSale && variant.quantityAvailable > 0)
-        }));
+    return json({ recommendedCarts: getRandomProducts(recommendedProduct, productIds.length), cartData, collection, recommendedProduct });
 
-        if (filteredProducts.length > 0) {
-            const randomIndex = Math.floor(Math.random() * filteredProducts.length);
-            return filteredProducts[randomIndex];
 
-        }
-    })
 
-    return json({ recommendedCarts: recommendedCarts, cartData });
 };
 
 
@@ -100,10 +111,11 @@ export const action: ActionFunction = async ({ request, context }) => {
 
 // Checkout component
 export default function Checkout() {
-    const { recommendedCarts, cartData } = useLoaderData<typeof loader>();
+    const { recommendedCarts, cartData, collection } = useLoaderData<typeof loader>();
     const response: any = useActionData<typeof action>();
+    console.log(collection)
+    const [cartsFromCart, setCartsFromCart] = useState<any>([])
 
-    const cartsFromCart = cartData?.lines?.nodes?.map((element: any) => element) || [];
     const amount = cartData?.cost?.subtotalAmount?.amount || "0"
 
     const urlFromAction = response?.pageUrl;
@@ -114,6 +126,10 @@ export default function Checkout() {
     } else if (urlFromAction !== null && urlFromAction) {
         window.location.href = urlFromAction;
     }
+    useEffect(() => {
+        const carts = cartData?.lines?.nodes?.map((element: any) => element) || [];
+        setCartsFromCart(carts)
+    }, [cartData?.lines?.nodes])
 
     return (
         <>

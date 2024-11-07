@@ -8,6 +8,7 @@ import {
 
 import {
   CartForm,
+  Image,
   MediaFile,
   VariantSelector,
   getSelectedProductOptions,
@@ -42,11 +43,13 @@ import { ScrollArea, ScrollBar } from '~/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/ui/tabs';
 import { viewedProductsCookie } from '~/cookies.server';
 import { cn } from '~/lib/utils';
-import { filterAvailablesProductOptions, getVariantUrl } from '~/utils';
+import { filterAvailablesProductOptions, getVariantUrl, useVariantUrl } from '~/utils';
 import monoLogo from '../assets/images/mono.svg';
 import { HeaderBasketContext, HeaderContextInterface } from '~/context/HeaderCarts';
-import { PRODUCT_QUERY, RECOMENDED_PRODUCT_QUERY, RECOMMENDED_PRODUCTS_QUERY, VARIANTS_QUERY, VIEWED_PRODUCT_QUERY } from '~/graphql/queries';
+import { PRODUCT_QUERY, RECOMENDED_PRODUCT_QUERY, VARIANTS_QUERY, VIEWED_PRODUCT_QUERY } from '~/graphql/queries';
 import HeartIcon from '~/components/ui/heartIcon';
+import LoaderNew from '~/components/LoaderNew';
+import { Metafield, Product as ProductType } from '@shopify/hydrogen-react/storefront-api-types';
 
 
 
@@ -86,40 +89,67 @@ async function loadCriticalData({
 }: LoaderFunctionArgs) {
   const { handle } = params;
   const { storefront } = context;
-
   const url = new URL(request.url);
-  const variant = url.searchParams.get("variant");
-
   if (!handle) {
     throw new Error('Expected product handle to be defined');
   }
-
+  const selectedOptions = getSelectedProductOptions(request)
   const [{ product }] = await Promise.all([
     storefront.query(PRODUCT_QUERY, {
       variables: {
         handle,
         language: 'UK',
         country: 'UA',
-        selectedOptions: getSelectedProductOptions(request)
+        selectedOptions: selectedOptions,
+        identifiers: [
+          {
+            "namespace": "shopify--discovery--product_recommendation",
+            "key": "related_products"
+          }
+        ],
       },
     }),
   ]);
 
 
+  const metafields = product.metafields;
+  let relatedProducts = [];
+  if (metafields.length !== 0 && metafields[0]) {
+    const findRelatedProducts = metafields.find((element: Metafield) => element?.key == "related_products") || { value: "" }
+    const parseMetaValue: any = JSON.parse(findRelatedProducts?.value) || []
+    relatedProducts = await Promise.all(parseMetaValue.map((id: string) => {
+      return storefront.query(QUERY_RELATED_PRODUCT_BY_ID, {
+        variables: {
+          id
+        }
+      })
+    }))
+  }
+
+  ///відображенн availableForSale прикріпленого продукту, відповідно до розміру який вибраний
+  relatedProducts = relatedProducts.map(element => {
+    if (!element.product.availableForSale) return element;
+    const selectedVariantSize = selectedOptions.find(element => element.name === 'Size' || element.name === 'Розмір')?.value
+    if (!selectedVariantSize) return element
+    const productVariants = element.product.variants.edges;
+    const filteredVariants = productVariants.find(({ node }: any) => {
+      return node.selectedOptions.some((selectedOption: any) =>
+        selectedOption.value === selectedVariantSize
+      )
+    });
+    return {
+      product: {
+        ...element.product,
+        availableForSale: typeof (filteredVariants?.node?.availableForSale) == "boolean" ? filteredVariants?.node?.availableForSale : element.product.availableForSale
+
+      }
+    }
+  })
 
   if (!product?.id) {
     throw new Response(null, { status: 404 });
   }
 
-  const [{ productRecommendations }] = await Promise.all([
-    storefront.query(
-      RECOMENDED_PRODUCT_QUERY,
-      {
-        variables: {
-          id: product?.id || "0"
-        },
-      })],
-  );
 
   const cookieHeader = request.headers.get('Cookie');
   const cookie = (await viewedProductsCookie.parse(cookieHeader)) || [];
@@ -133,6 +163,17 @@ async function loadCriticalData({
       ids: cookie,
     },
   });
+
+  const [{ productRecommendations }] = await Promise.all([
+    storefront.query(
+      RECOMENDED_PRODUCT_QUERY,
+      {
+        variables: {
+          id: product?.id || "0"
+        },
+      })],
+  );
+
 
   const firstVariant = product.variants.nodes[0];
   const firstVariantIsDefault = Boolean(
@@ -153,6 +194,8 @@ async function loadCriticalData({
   }
 
   return {
+    handle: product.handle,
+    relatedProducts,
     cookie,
     product,
     viewedProducts: filterAvailablesProductOptions(viewed.nodes) || [],
@@ -169,13 +212,13 @@ function redirectToFirstVariant({
 }) {
   const url = new URL(request.url);
   const firstVariant = product.variants.nodes.filter(element => element.availableForSale)[0];
+  let selectedOptions = firstVariant?.selectedOptions || product.variants.nodes[0].selectedOptions
 
   return redirect(
-
     getVariantUrl({
       pathname: url.pathname,
       handle: product.handle,
-      selectedOptions: firstVariant.selectedOptions,
+      selectedOptions,
       searchParams: new URLSearchParams(url.search),
     }),
     {
@@ -207,9 +250,7 @@ export async function loader(args: LoaderFunctionArgs) {
 
 
 export default function Product() {
-  const { product, variants, viewedProducts, recommendations }: any =
-    useLoaderData<typeof loader>();
-  console.log(filterAvailablesProductOptions(recommendations), viewedProducts)
+  const { product, variants, viewedProducts, handle, recommendations, relatedProducts }: any = useLoaderData<typeof loader>();
   const { selectedVariant, descriptionHtml } = product;
 
   const [selectedIndex, setSelectedIndex] = useState<number | undefined>(0);
@@ -252,10 +293,12 @@ export default function Product() {
       <div className="sm:grid sm:grid-cols-2 flex flex-col gap-y-5 gap-x-10">
         <ProductGalery selectedVariantId={selectedVariant.id} product={product} objGalery={objGalery} media={product?.media} />
         <ProductMain
+          handle={handle}
           objGalery={objGalery}
           selectedVariant={selectedVariant}
           product={product}
           variants={variants}
+          relatedProducts={relatedProducts}
         />
       </div>
       <ProductTabs description={descriptionHtml} />
@@ -581,7 +624,6 @@ function ProductGalery({ selectedVariantId, product, objGalery, media }: { selec
     handleLikeToggle,
   } = useContext(HeaderBasketContext) as HeaderContextInterface;
 
-  console.log(isLike, likedCardId)
   useEffect(() => {
     const productIndex = likedCardId.findIndex((item: any) => item === product?.selectedVariant?.id);
     if (productIndex === -1) {
@@ -601,9 +643,7 @@ function ProductGalery({ selectedVariantId, product, objGalery, media }: { selec
   }
 
   return (
-    // xl:grid xl:grid-cols-[minmax(70px,_152px)_minmax(70%,_1fr)] 
-    <div className=" xl:relative 
-    flex flex-col-reverse gap-y-5 gap-x-[14px]">
+    <div className=" xl:relative flex flex-col-reverse gap-y-5 gap-x-[14px]">
       <Carousel
         setApi={setThumbApi}
         opts={{
@@ -687,11 +727,15 @@ function ProductMain({
   selectedVariant,
   product,
   variants,
+  handle,
+  relatedProducts,
 }: {
   objGalery: any
   product: ProductFragment;
+  handle: string,
   selectedVariant: any;
   variants: ProductVariantsQuery;
+  relatedProducts: { product: ProductType }[]
 }) {
   const { title, descriptionHtml, vendor, collections } = product || { title: "", descriptionHtml: "", vendor: "", collections: [] };
   return (
@@ -715,6 +759,8 @@ function ProductMain({
       <Suspense
         fallback={
           <ProductForm
+            relatedProducts={relatedProducts}
+            handle={handle}
             product={product}
             selectedVariant={selectedVariant}
             variants={[]}
@@ -728,6 +774,8 @@ function ProductMain({
         >
           {(data) => (
             <ProductForm
+              handle={handle}
+              relatedProducts={relatedProducts}
               objGalery={objGalery}
               product={product}
               selectedVariant={selectedVariant}
@@ -778,12 +826,17 @@ function ProductForm({
   product,
   selectedVariant,
   variants,
-  objGalery
+  objGalery,
+  relatedProducts,
+  handle,
 }: {
   objGalery: any;
   product: ProductFragment;
   selectedVariant: ProductFragment['selectedVariant'];
   variants: Array<ProductVariantFragment>;
+  handle: string,
+  relatedProducts: { product: ProductType }[]
+
 }) {
   const { setCartShow, setCartShowMobile } = useContext(HeaderBasketContext) as HeaderContextInterface;
   const isMobile = useMedia('(max-width: 767px)', false);
@@ -808,7 +861,41 @@ function ProductForm({
   return (
     <div className=" product-form pt-6">
       <div className="grid gap-[20px] justify-between flex-wrap-reverse lg:grid-cols-[1fr_0.3fr]">
+
         <div>
+          {relatedProducts.length !== 0 &&
+            <div className="product-options max-w-[370px]" >
+              <h5 className="text-[16px] text-black/60 mb-4">Кольори</h5>
+              <div className="product-options-grid grid grid-cols-5 gap-y-[10px] gap-x-[10px] items-start">
+                {relatedProducts.map(element => (
+
+                  <Link
+                    prefetch="intent"
+                    preventScrollReset
+                    replace
+                    to={useVariantUrl(element.product.handle, [])}
+                    className={cn(
+                      'text-black text-[16px] px-[2px] py-[2px] rounded-[22px] relative flex max-w-[76px] justify-center self-start bg-[#F0F0F0]',
+                      handle === element.product.handle && 'text-white bg-black',
+                    )}
+                  >
+                    <Image
+                      alt={element?.product?.featuredImage?.altText || ""}
+                      aspectRatio="1/1"
+                      data={element?.product?.featuredImage || undefined}
+                      height={100}
+                      loading="lazy"
+                      width={100}
+                      className="w-full rounded-[20px]"
+                    />
+                    {!element.product.availableForSale &&
+                      <span className="transition-opacity duration-[0.3s] ease-[ease-in-out] will-change-[opacity] w-[96%] h-[7px] absolute -translate-y-2/4 -rotate-45 mx-auto top-2/4 inset-x-0;"> <svg width="100%" height="100%" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ top: 0, position: "absolute" }}><rect x="0" y="2" width="100%" transform="" fill="black" stroke="#ECEFF1" stroke-width="2" height="3"></rect></svg></span>
+                    }
+                  </Link>
+                ))}
+              </div>
+            </div>
+          }
           <VariantSelector
             handle={product.handle}
             options={product.options}
@@ -817,9 +904,12 @@ function ProductForm({
             {({ option }) => <ProductOptions objGalery={objGalery} product={product} key={option.name} option={option} />}
           </VariantSelector>
         </div>
-        <div className="w-[300x] text-2xl">
-          <SizeGrid vendor={product.vendor} />
-        </div>
+        {product?.productType == "Кросівки" &&
+          <div className="w-[300x] text-2xl">
+            <SizeGrid product={product} vendor={product.vendor} />
+          </div>
+        }
+
       </div>
       {selectedVariant?.quantityAvailable === 1 && (
         <span className="my-5 py-5 w-full inline-flex border-b border-b-black/10">
@@ -875,39 +965,7 @@ function ProductOptions({ objGalery, product, option }: { objGalery: any, produc
 
   if ((option.name === "Колір" || option.name === "Color") && option.values.length > 1) {
     return (
-      <div className="product-options max-w-[370px]" key={option.name}>
-        <h5 className="text-[16px] text-black/60 mb-4">{option.name}</h5>
-        <div className="product-options-grid grid grid-cols-5 gap-y-[10px] gap-x-[10px] items-start">
-          {option.values.map(({ value, isAvailable, isActive, to }, index) => {
-            return <Link
-              key={option.name + value}
-              prefetch="intent"
-              onClick={() => handleThumbClick(index)}
-
-              preventScrollReset
-              replace
-              to={to}
-              className={cn(
-                'text-black text-[16px] px-[2px] py-[2px] rounded-[22px] flex max-w-[76px] justify-center self-start bg-[#F0F0F0]',
-                isActive && 'text-white bg-black',
-              )}
-            >
-              <MediaFile
-
-                mediaOptions={{
-                  image: {
-                    aspectRatio: '1/1',
-                    crop: 'center',
-                  },
-                }}
-                data={product.media.nodes[index] ? product.media.nodes[index] : product.media.nodes[0]}
-                className="w-full rounded-[20px]"
-              />
-
-            </Link>
-          })}
-        </div>
-      </div>
+      null
     )
   }
 
@@ -975,7 +1033,7 @@ export function AddToCartButton({
             >
               {fetcher.state == 'idle' ?
                 children
-                : "Загрузка"}
+                : <div className='h-[18px]'> <LoaderNew /></div>}
             </button>
           </>
         )}
@@ -983,3 +1041,42 @@ export function AddToCartButton({
     </div>
   );
 }
+
+
+
+
+export const QUERY_RELATED_PRODUCT_BY_ID = `#graphql 
+query getProductById($id: ID!) {
+  product(id: $id) {
+    title
+    createdAt
+    id
+    handle
+    availableForSale
+    variants(first: 100) {
+      edges {
+        node {
+          id
+          title
+          priceV2 {
+            amount
+            currencyCode
+          }
+          selectedOptions {
+            name
+            value
+          }
+          availableForSale
+        }
+      }
+    }
+    featuredImage {
+      id
+      url
+      altText
+      width
+      height
+    }
+  }
+}
+`

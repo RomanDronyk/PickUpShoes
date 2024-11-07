@@ -2,10 +2,6 @@ import { json, MetaFunction } from '@remix-run/react';
 import { ActionFunction } from '@remix-run/node';
 import { CREATE_CHEKOUT_URL } from '~/graphql/mutations';
 
-// GraphQL запит для отримання даних чекауту
-
-
-
 // // Loader function to get checkout data
 export const loader = async ({ context, request }: { context: any, request: Request }) => {
     const { storefront } = context;
@@ -95,7 +91,7 @@ const fetchCity = async (cityName: string) => {
         method: "POST",
         body: JSON.stringify({
             apiKey: API_POSHTA_KEY,
-            modelName: "Address",
+            modelName: "AddressGeneral",
             calledMethod: "getWarehouses",
             methodProperties: {
                 CityName: "",
@@ -130,14 +126,14 @@ const fetchDepartment = async (inputCity: string, department: string) => {
         method: "POST",
         body: JSON.stringify({
             apiKey: API_POSHTA_KEY,
-            modelName: "Address",
+            modelName: "AddressGeneral",
             calledMethod: "getWarehouses",
             methodProperties: {
                 CityName: inputCity,
                 Page: "1",
                 Limit: "10",
                 Language: "UA",
-                WarehouseId: department,
+                FindByString: department,
             },
         }),
     });
@@ -151,4 +147,4 @@ const fetchDepartment = async (inputCity: string, department: string) => {
 
 
 const API_POSHTA_URL = "https://api.novaposhta.ua/v2.0/json/"
-const API_POSHTA_KEY = "fac23a4d2d34c603535680b0e25fac94"
+const API_POSHTA_KEY = "25e0eca0476120f2111456aeef3bfa3f"
