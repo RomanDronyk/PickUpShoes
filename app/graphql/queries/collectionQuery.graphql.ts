@@ -26,7 +26,8 @@ export const COLLECTION_QUERY = `#graphql
         after: $endCursor,
         filters: $filters,
         sortKey: $sortKey,
-        reverse: $reverse
+        reverse: $reverse,
+        
       ) {
         filters {
           id

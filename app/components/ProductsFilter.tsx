@@ -14,7 +14,7 @@ import type {
 import { ChevronDown } from 'lucide-react';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useDebounce } from 'react-use';
-import type { SortParam, loader } from '~/routes/($locale).collections.$handle';
+import type { SortParam } from '~/routes/($locale).collections.$handle';
 import {
   Accordion,
   AccordionContent,
@@ -35,7 +35,6 @@ import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
 import { Slider } from './ui/slider';
 import { ToggleGroup, ToggleGroupItem } from './ui/toggle-group';
 import { cn } from '~/lib/utils';
-import { NavigationMenu, NavigationMenuContent, NavigationMenuItem, NavigationMenuLink, NavigationMenuList, NavigationMenuTrigger } from '@radix-ui/react-navigation-menu';
 import { useRootLoaderData } from '~/root';
 
 export const FILTER_URL_PREFIX = 'filter.';
@@ -57,8 +56,6 @@ export const ProductsFilter = React.memo(function ProductsFilter({
   appliedFilters?: AppliedFilter[] | any;
   headerPromise?: any
 }) {
-  console.log("ProductFilter");
-
 
   return (
     <div className="flex flex-col gap-6 border border-black/10 rounded-[20px] py-5 px-6 ">
@@ -185,10 +182,12 @@ function FilterDraw({
                                 'data-[state=on]:bg-none hover:bg-[transparent] hover:text-black/80  grid justify-start  w-full data-[state=on]:bg-[transparent] data-[state=on]:text-black text-black/60',
                               )}
                             >
-                              <div
+                              <Link
+                              to={url}
+
                               >
                                 {menuItem.title}
-                              </div>
+                              </Link>
                             </ToggleGroupItem>
                           </li>
                         );
@@ -234,12 +233,30 @@ function PriceFilter({
       setPriceRange(initialRangeValue);
     }
   }, [location.search, setPriceRange]);
-  useDebounce(
-    () => {
+
+  function debounce(func: (...args: any[]) => void, delay: number) {
+    let timeoutId: NodeJS.Timeout;
+
+    return function (...args: any[]) {
+      if (timeoutId) {
+        clearTimeout(timeoutId); // Очищуємо попередній таймер
+      }
+
+      timeoutId = setTimeout(() => {
+        func(...args); // Викликаємо функцію через затримку
+      }, delay);
+    };
+  }
+
+  const priceChangeFunc = (value: any) => {
+    setPriceRange(value); // Зміна діапазону цін без затримки
+
+    // Використовуємо власну debounce-функцію
+    const debouncedNavigate = debounce(() => {
       if (priceRange[0] === min && priceRange[1] === max) {
         params.delete(`${FILTER_URL_PREFIX}price`);
-        console.log(`${location.pathname}?${params.toString()}`)
-        // navigate(`${location.pathname}?${params.toString()}`);
+
+        navigate(`${location.pathname}?${params.toString()}`);
         return;
       }
       const price = {
@@ -248,10 +265,12 @@ function PriceFilter({
       };
       const newParams = filterInputToParams({ price }, params);
       navigate(`${location.pathname}?${newParams.toString()}`);
-    },
-    500,
-    [priceRange],
-  );
+    }, 500);
+
+    // Викликаємо дебаунс-функцію з поточним значенням
+    debouncedNavigate();
+  };
+
   return (
     <div className="flex flex-col gap-[10px] pb-12 md:pb-6 border-b border-b-black/10">
       <div className="font-semibold text-xl mb-[10px] mt-[0px]">
@@ -276,7 +295,7 @@ function PriceFilter({
         </div>
       </div>
       <Slider
-        onValueChange={setPriceRange}
+        onValueChange={priceChangeFunc}
         minStepsBetweenThumbs={10}
         defaultValue={priceRange}
         value={priceRange}
@@ -383,14 +402,14 @@ const ListFilter: React.FC<ListFilterProps> = ({ filter: newFilter, appliedFilte
     () => {
       if (value.length === 0) {
         params.delete(`${FILTER_URL_PREFIX}${filterKey}`);
-        // navigate(`${location.pathname}?${params.toString()}`);
+        navigate(`${location.pathname}?${params.toString()}`);
         return;
       } else {
         const selectedItems: any = filter.values.filter((item) =>
           value.includes(item.id),
         );
         const link = getFilterLink(selectedItems, params, location);
-        // navigate(`${link}`);
+        navigate(`${link}`);
       }
 
     },
@@ -403,7 +422,6 @@ const ListFilter: React.FC<ListFilterProps> = ({ filter: newFilter, appliedFilte
     const newValue = new Set(value.concat(appliedValues));
     setValue([...newValue]);
     setFilterValues(filter.values)
-
   }, []);
 
   return (
