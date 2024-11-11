@@ -11,9 +11,11 @@ async function sendReviewImages(reviewId: string, formData: any) {
     headers: {
       "accept": "*/*",
       "accept-language": "uk-UA,uk;q=0.9,en-US;q=0.8,en;q=0.7,ru;q=0.6",
-      "content-type": "multipart/form-data",
+      // "content-type": "multipart/form-data",
       "referrer-policy": "strict-origin-when-cross-origin",
     },
+    credentials: "include",
+    referrer: "https://73dd57-2.myshopify.com/products/adidas-rivalry-low-white",
     body: formData,
   });
 

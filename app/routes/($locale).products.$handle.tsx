@@ -75,6 +75,7 @@ export const action: ActionFunction = async ({ context, request, params }) => {
           if (file instanceof File) {
             imageData.append("media_files", file)
           }
+
         })
         const sendImages = await sendReviewImages(`${result?.review_id}` || "", formData)
       }
@@ -162,7 +163,8 @@ export async function loader(args: LoaderFunctionArgs) {
 
 export default function Product() {
   const { product, customerAccessToken, variants, viewedProducts, handle, recommendations, relatedProducts, reviews }: any = useLoaderData<typeof loader>();
-  console.log(product)
+
+
   return (
     <div className="pt-[16px] product lg:px-24 md:px-10 px-[10px] w-full ">
       <ProductPageTopView handle={handle}
@@ -172,6 +174,20 @@ export default function Product() {
         customerAccessToken={customerAccessToken}
         reviews={reviews}
       />
+      <Form onSubmit={async (e) => {
+        e.preventDefault()
+        const formData = new FormData();
+        const fileInput = e.currentTarget.elements.media_files.files
+        console.log(fileInput)
+        for (let i = 0; i < fileInput.length; i++) {
+          formData.append('media_files', fileInput[i]);
+        }
+        await sendReviewImages('170444', formData)
+
+      }}>
+        <input type="file" multiple name='media_files' />
+        <Button type='submit' ></Button>
+      </Form>
       <div className="flex flex-col my-4 pt-[50px] border-t border-r-black/10 mt-[50px]">
         <ViewedProducts products={viewedProducts} />
         <RecommendationProducts recommended={recommendations} />
