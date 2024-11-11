@@ -1,16 +1,16 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, FC } from 'react';
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from './ui/dialog';
-import { ScrollArea, ScrollBar } from './ui/scroll-area';
-import { Switch } from './ui/switch';
-import { Button } from './ui/button';
+} from '~/components/ui/dialog';
+import { ScrollArea, ScrollBar } from '~/components/ui/scroll-area';
+import { Switch } from '~/components/ui/switch';
+import { Button } from '~/components/ui/button';
 
-type SizeGrid = {
+type ISizeGrid = {
   name: string;
   type: 'shoes' | 'clothes';
   mens: {
@@ -27,8 +27,9 @@ type SizeGrid = {
   };
 };
 
-export const SizeGrid = ({ vendor }: { vendor: string }) => {
-  const [sizeChart, setSizeChart] = useState<SizeGrid>();
+
+const SizeGrid = ({ vendor }: { vendor: string }) => {
+  const [sizeChart, setSizeChart] = useState<ISizeGrid>();
   const [gridView, setGridView] = useState(false);
 
   useEffect(() => {
@@ -44,7 +45,7 @@ export const SizeGrid = ({ vendor }: { vendor: string }) => {
   }, [vendor]);
   if (!sizeChart) return null
   return (
-    <div className="w-[300x] text-2xl">
+    <div className="w-[180px] text-2xl">
       <Dialog >
         <div style={{ overflow: "hidden" }}>
           <DialogTrigger className='overflow-hidden' asChild>
@@ -102,11 +103,13 @@ export const SizeGrid = ({ vendor }: { vendor: string }) => {
   );
 };
 
-function GridRow({
-  data,
-}: {
+interface IGridRow {
   data: { UK: number[]; US: number[]; EU: number[]; SM: number[] };
-}) {
+}
+
+const GridRow: FC<IGridRow> = ({
+  data,
+}) => {
   const { UK, US, EU, SM } = data;
   const [sizesArray, setSizesArray] = useState<any[][]>();
   useEffect(() => {
@@ -161,6 +164,7 @@ function GridRow({
 async function loadJSON(vendorName: string) {
   const url = `/size-charts/${vendorName}.json`;
   const response = await fetch(url);
-  const data = (await response.json()) as SizeGrid;
+  const data = (await response.json()) as ISizeGrid;
   return data;
 }
+export default SizeGrid;

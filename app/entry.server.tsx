@@ -18,7 +18,10 @@ export default async function handleRequest(
     shop: {
       checkoutDomain: context.env.PUBLIC_CHECKOUT_DOMAIN,
       storeDomain: context.env.PUBLIC_STORE_DOMAIN,
-    }
+    },
+    imgSrc: [
+      "'self'", "https://imagedelivery.net", "https://cdn.shopify.com","https://pick-up-shoes.com.ua/", "http://localhost:3100", "data:", "blob:"
+  ]
   });
 
   const body = await renderToReadableStream(

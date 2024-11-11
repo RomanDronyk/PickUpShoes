@@ -138,13 +138,12 @@ function FilterDraw({
   const handleChange = (value: string[]) => {
     setValue(value);
   };
+
   const location = useLocation();
   useEffect(() => {
-    setValue(location.pathname);
-  }, [location.pathname]);
-  useEffect(() => {
-    // navigate(value);
-  }, [value, location.pathname]);
+    const newValue = location?.pathname || ""
+    setValue([newValue]);
+  }, [location?.pathname]);
 
   return (
     <div className="flex flex-col">
@@ -183,7 +182,7 @@ function FilterDraw({
                               )}
                             >
                               <Link
-                              to={url}
+                                to={url}
 
                               >
                                 {menuItem.title}

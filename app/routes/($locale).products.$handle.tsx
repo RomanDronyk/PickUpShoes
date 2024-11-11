@@ -1,242 +1,153 @@
 import {
-  Await,
+  Form,
   Link,
+  useActionData,
   useLoaderData,
-  type FetcherWithComponents,
+  useNavigation,
   type MetaFunction,
 } from '@remix-run/react';
-
-import {
-  CartForm,
-  Image,
-  MediaFile,
-  VariantSelector,
-  getSelectedProductOptions,
-  type VariantOption,
-} from '@shopify/hydrogen';
-
-
-import type {
-  CartLineInput,
-  SelectedOption,
-} from '@shopify/hydrogen/storefront-api-types';
-
-import { defer, redirect, type LoaderFunctionArgs } from '@shopify/remix-oxygen';
-import { Suspense, useCallback, useContext, useEffect, useState } from 'react';
-import { useMedia } from 'react-use';
-
-import type {
-  ProductFragment,
-  ProductVariantFragment,
-  ProductVariantsQuery,
-} from 'storefrontapi.generated';
+import { CustomerAccessToken } from '@shopify/hydrogen-react/storefront-api-types';
+import { ActionFunction, defer, json, type LoaderFunctionArgs } from '@shopify/remix-oxygen';
+import { FC, useCallback, useState } from 'react';
 import RecommendationProducts from '~/components/RecommendationProducts';
-import { SizeGrid } from '~/components/SizeGrid';
 import ViewedProducts from '~/components/ViewedProducts';
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  type CarouselApi,
-} from '~/components/ui/carousel';
-import { ScrollArea, ScrollBar } from '~/components/ui/scroll-area';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/ui/tabs';
+import { Button } from '~/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '~/components/ui/dialog';
+import { Radio, RadioItem } from '~/components/ui/radio';
 import { viewedProductsCookie } from '~/cookies.server';
-import { cn } from '~/lib/utils';
-import { filterAvailablesProductOptions, getVariantUrl, useVariantUrl } from '~/utils';
-import monoLogo from '../assets/images/mono.svg';
-import { HeaderBasketContext, HeaderContextInterface } from '~/context/HeaderCarts';
-import { PRODUCT_QUERY, RECOMENDED_PRODUCT_QUERY, VARIANTS_QUERY, VIEWED_PRODUCT_QUERY } from '~/graphql/queries';
-import HeartIcon from '~/components/ui/heartIcon';
-import LoaderNew from '~/components/LoaderNew';
-import { Metafield, Product as ProductType } from '@shopify/hydrogen-react/storefront-api-types';
-
-
+import { ProductPageTopView, loadCriticalData, loadDeferredData } from '~/module/ProductPageTopView';
+import fetchProductReviewsEasy from '~/module/Reviews/api/fetchProductReviewsEasy';
+import formatDateFromMilliseconds from '~/module/Reviews/helpers/formatDateFromMilliseconds';
+import { FileWithPath, useDropzone } from 'react-dropzone'
+import { Storefront } from '@shopify/hydrogen';
+import sendReview from '~/module/Reviews/api/sendReview';
+import sendReviewImages from '~/module/Reviews/api/sendReviewImages';
 
 export const meta: MetaFunction<typeof loader> = ({ data }: any) => {
-  return [{ title: `PickUpShoes | ${data?.product?.title ?? ''}` }];
+  return [
+    {
+      title: `PickUpShoes | ${data?.product?.title ?? ''}`,
+      'Content-Security-Policy': "default-src 'self' https://cdn.shopify.com https://shopify.com http://localhost:*; img-src 'self' https://imagedelivery.net https://cdn.shopify.com https://shopify.com data: blob:; style-src 'self' 'unsafe-inline'; media-src *; script-src 'self' 'unsafe-eval';",
+    },
+  ];
 };
 
 export const handle = {
   breadcrumb: 'product',
 };
 
-function loadDeferredData({ context, params }: LoaderFunctionArgs) {
-  // In order to show which variants are available in the UI, we need to query
-  // all of them. But there might be a *lot*, so instead separate the variants
-  // into it's own separate query that is deferred. So there's a brief moment
-  // where variant options might show as available when they're not, but after
-  // this deffered query resolves, the UI will update.
-  const variants = context.storefront
-    .query(VARIANTS_QUERY, {
-      variables: { handle: params.handle! },
-    })
-    .catch((error) => {
-      console.error(error);
-      return null;
-    });
-
-  return {
-    variants,
+export const action: ActionFunction = async ({ context, request, params }) => {
+  const errors: any = {
   };
-}
-
-
-async function loadCriticalData({
-  context,
-  params,
-  request,
-}: LoaderFunctionArgs) {
-  const { handle } = params;
-  const { storefront } = context;
-  const url = new URL(request.url);
-  if (!handle) {
-    throw new Error('Expected product handle to be defined');
-  }
-  const selectedOptions = getSelectedProductOptions(request)
-  const [{ product }] = await Promise.all([
-    storefront.query(PRODUCT_QUERY, {
-      variables: {
-        handle,
-        language: 'UK',
-        country: 'UA',
-        selectedOptions: selectedOptions,
-        identifiers: [
-          {
-            "namespace": "shopify--discovery--product_recommendation",
-            "key": "related_products"
-          }
-        ],
-      },
-    }),
-  ]);
-
-
-  const metafields = product.metafields;
-  let relatedProducts = [];
-  if (metafields.length !== 0 && metafields[0]) {
-    const findRelatedProducts = metafields.find((element: Metafield) => element?.key == "related_products") || { value: "" }
-    const parseMetaValue: any = JSON.parse(findRelatedProducts?.value) || []
-    relatedProducts = await Promise.all(parseMetaValue.map((id: string) => {
-      return storefront.query(QUERY_RELATED_PRODUCT_BY_ID, {
-        variables: {
-          id
-        }
-      })
-    }))
-  }
-
-  ///відображенн availableForSale прикріпленого продукту, відповідно до розміру який вибраний
-  relatedProducts = relatedProducts.map(element => {
-    if (!element.product.availableForSale) return element;
-    const selectedVariantSize = selectedOptions.find(element => element.name === 'Size' || element.name === 'Розмір')?.value
-    if (!selectedVariantSize) return element
-    const productVariants = element.product.variants.edges;
-    const filteredVariants = productVariants.find(({ node }: any) => {
-      return node.selectedOptions.some((selectedOption: any) =>
-        selectedOption.value === selectedVariantSize
-      )
-    });
-    return {
-      product: {
-        ...element.product,
-        availableForSale: typeof (filteredVariants?.node?.availableForSale) == "boolean" ? filteredVariants?.node?.availableForSale : element.product.availableForSale
-
-      }
+  const formData = await request.formData();
+  const content = String(formData.get("content"))
+  const objects = Object.fromEntries(formData)
+  const customerAccessToken = context.session.get('customerAccessToken');
+  ["Комфорт", "Якість", "Дизайн"].forEach((element) => {
+    if (!formData.get(element)) {
+      errors.stars = errors.stars || [];
+      errors.stars.push(element);
     }
   })
-
-  if (!product?.id) {
-    throw new Response(null, { status: 404 });
+  if (content.length < 5) {
+    errors.content =
+      "Відгук має бути не менше 5 букв";
+  } else if (!content) {
+    errors.content =
+      "Вкажіть текст";
   }
 
-
-  const cookieHeader = request.headers.get('Cookie');
-  const cookie = (await viewedProductsCookie.parse(cookieHeader)) || [];
-
-  if (!cookie.includes(product.id)) {
-    cookie.push(product.id);
+  console.log(JSON.stringify(errors, null, 2), "errrors")
+  if (Object.keys(errors).length > 0) {
+    return json({ errors });
   }
 
-  const viewed = await storefront.query(VIEWED_PRODUCT_QUERY, {
-    variables: {
-      ids: cookie,
-    },
-  });
+  const getUser = await getUserData(context.storefront, customerAccessToken?.accessToken || "")
 
-  const [{ productRecommendations }] = await Promise.all([
-    storefront.query(
-      RECOMENDED_PRODUCT_QUERY,
-      {
-        variables: {
-          id: product?.id || "0"
-        },
-      })],
-  );
-
-
-  const firstVariant = product.variants.nodes[0];
-  const firstVariantIsDefault = Boolean(
-    firstVariant.selectedOptions.find(
-      (option: SelectedOption) =>
-        option.name === 'Title' && option.value === 'Default Title',
-    ),
-  );
-
-  if (firstVariantIsDefault) {
-    product.selectedVariant = firstVariant;
-  } else {
-    // if no selected variant was returned from the selected options,
-    // we redirect to the first variant's url with it's selected options applied
-    if (!product.selectedVariant) {
-      throw redirectToFirstVariant({ product, request });
+  try {
+    // Виклик функції для відправки відгуку
+    const result: any = await sendReview(objects, getUser, params?.handle || '');
+    if (result.status === "success") {
+      const mediaFiles = formData.getAll("media_files")
+      if (mediaFiles && mediaFiles.length > 0 && mediaFiles[0] instanceof File) {
+        const imageData = new FormData()
+        mediaFiles.forEach((file, index) => {
+          if (file instanceof File) {
+            imageData.append("media_files", file)
+          }
+        })
+        const sendImages = await sendReviewImages(`${result?.review_id}` || "", formData)
+      }
     }
+    return json({ message: "success" });
+  } catch (error) {
+    console.error(error);
+    return json({ error: 'Помилка при створенні відгуку' }, { status: 500 });
   }
+};
 
-  return {
-    handle: product.handle,
-    relatedProducts,
-    cookie,
-    product,
-    viewedProducts: filterAvailablesProductOptions(viewed.nodes) || [],
-    recommendations: filterAvailablesProductOptions(productRecommendations) || [],
-  };
+function transformReviewsData(data: any): IReviewsList {
+  return data?.reviews?.data.map((review: any) => ({
+    rating_percentage: review.rating_percentage,
+    reviewer_name: review.reviewer.name,
+    review_ratings: review.review_ratings.map((rating: any) => ({
+      reviews_id: String(rating.reviews_id),
+      rating_title: rating.rating_title,
+      rating_value: String(rating.rating_value),
+    })),
+    content: review.review_content,
+    review_medias: review.review_medias.map((media: any) => ({
+      media_path: media.media_path,
+    })),
+    reviewed_at: new Date(review.created_dt).getTime(),
+  }))
 }
 
-function redirectToFirstVariant({
-  product,
-  request,
-}: {
-  product: ProductFragment;
-  request: Request;
-}) {
-  const url = new URL(request.url);
-  const firstVariant = product.variants.nodes.filter(element => element.availableForSale)[0];
-  let selectedOptions = firstVariant?.selectedOptions || product.variants.nodes[0].selectedOptions
+const getProductReviews = async (id: string) => {
+  const easyReviews = await fetchProductReviewsEasy(id)
+  return { easyReviews }
+}
+export const CUSTOMER_DATA_BY_ACCESS_TOKEN_QUERY = `#graphql
+query customerGetId (
+  $customerAccessToken: String!
+) {
+  customer(customerAccessToken: $customerAccessToken) {
+    id
+    firstName
+    lastName
+    email
+  }
+}`;
 
-  return redirect(
-    getVariantUrl({
-      pathname: url.pathname,
-      handle: product.handle,
-      selectedOptions,
-      searchParams: new URLSearchParams(url.search),
-    }),
-    {
-      status: 302,
-    },
+
+const getUserData = async (storefront: Storefront, customerAccessToken: string) => {
+  if (customerAccessToken === "" || typeof (customerAccessToken) !== "string" || customerAccessToken.length == 0) {
+    throw new Error(`Введіть коректний customerAccessToken`);
+  }
+  return await storefront.query(CUSTOMER_DATA_BY_ACCESS_TOKEN_QUERY, {
+    variables: {
+      customerAccessToken: customerAccessToken
+    }
+  },
   );
 }
-
-
 
 export async function loader(args: LoaderFunctionArgs) {
 
-  // Start fetching non-critical data without blocking time to first byte
+  const customerAccessToken = args.context.session.get('customerAccessToken');
+
   const deferredData = loadDeferredData(args);
   const criticalData = await loadCriticalData(args);
+  const getProductId = criticalData.product.id.split("/");
+  const getReviews = await getProductReviews(getProductId[getProductId.length - 1])
+
+  const reviews = transformReviewsData(getReviews.easyReviews)
+
   const { cookie } = criticalData;
   return defer(
     {
+      customerAccessToken: customerAccessToken || { accessToken: null },
+      reviews: reviews,
       ...deferredData,
       ...criticalData,
     },
@@ -250,58 +161,17 @@ export async function loader(args: LoaderFunctionArgs) {
 
 
 export default function Product() {
-  const { product, variants, viewedProducts, handle, recommendations, relatedProducts }: any = useLoaderData<typeof loader>();
-  const { selectedVariant, descriptionHtml } = product;
-
-  const [selectedIndex, setSelectedIndex] = useState<number | undefined>(0);
-  const [api, setApi] = useState<CarouselApi>();
-  const [thumbApi, setThumbApi] = useState<CarouselApi>();
-
-  const isWide = useMedia('(min-width:1280px)', false);
-
-  const handleThumbClick = useCallback(
-    (index: number) => {
-      if (!api) return;
-      api?.scrollTo(index);
-    },
-    [api],
-  );
-
-
-  const onSelect = useCallback(() => {
-    if (!api) return;
-    setSelectedIndex(api.selectedScrollSnap());
-    thumbApi?.scrollTo(api.selectedScrollSnap());
-  }, [api, thumbApi, setSelectedIndex]);
-
-  const objGalery = {
-    selectedIndex,
-    setSelectedIndex,
-    api,
-    setApi,
-    thumbApi,
-    setThumbApi,
-    isWide,
-    handleThumbClick,
-    onSelect,
-  }
-
-
-
+  const { product, customerAccessToken, variants, viewedProducts, handle, recommendations, relatedProducts, reviews }: any = useLoaderData<typeof loader>();
+  console.log(product)
   return (
     <div className="pt-[16px] product lg:px-24 md:px-10 px-[10px] w-full ">
-      <div className="sm:grid sm:grid-cols-2 flex flex-col gap-y-5 gap-x-10">
-        <ProductGalery selectedVariantId={selectedVariant.id} product={product} objGalery={objGalery} media={product?.media} />
-        <ProductMain
-          handle={handle}
-          objGalery={objGalery}
-          selectedVariant={selectedVariant}
-          product={product}
-          variants={variants}
-          relatedProducts={relatedProducts}
-        />
-      </div>
-      <ProductTabs description={descriptionHtml} />
+      <ProductPageTopView handle={handle}
+        variants={variants}
+        relatedProducts={relatedProducts}
+        product={product}
+        customerAccessToken={customerAccessToken}
+        reviews={reviews}
+      />
       <div className="flex flex-col my-4 pt-[50px] border-t border-r-black/10 mt-[50px]">
         <ViewedProducts products={viewedProducts} />
         <RecommendationProducts recommended={recommendations} />
@@ -309,741 +179,286 @@ export default function Product() {
     </div>
   );
 }
+interface IReviewsModal {
+  customerAccessToken: CustomerAccessToken,
+}
+export const ReviewsModal: FC<IReviewsModal> = ({ customerAccessToken }) => {
+  const actionData = useActionData<typeof action>();
 
-function ProductTabs({ description }: { description: string }) {
   return (
-    <div className="product-info my-6">
-      <Tabs defaultValue="product-info">
-        <ScrollArea className="scrollbar-none " aria-orientation="horizontal">
-          <TabsList className="w-full bg-none justify-between gap-3 py-0 sm:gap-0 bg-[#fff] overflow-x-auto  rounded-none h-[89px]">
-            <TabsTrigger
-              value="product-info"
-              className="w-full text-[20px] text-black py-[19px] data-[state=active]:rounded-none data-[state=active]:border-b-[2px] data-[state=active]:border-b-black"
-            >
-              Опис
-            </TabsTrigger>
-            <TabsTrigger
-              value="product-payment"
-              className="w-full text-[20px] text-black py-[19px] data-[state=active]:rounded-none data-[state=active]:border-b-[2px] data-[state=active]:border-b-black"
-            >
-              Оплата і доставка
-            </TabsTrigger>
-            <TabsTrigger
-              value="product-delivery"
-              className="w-full text-[20px] text-black py-[19px] data-[state=active]:rounded-none data-[state=active]:border-b-[2px] data-[state=active]:border-b-black"
-            >
-              Обмін та повернення
-            </TabsTrigger>
-          </TabsList>
-          <ScrollBar orientation="horizontal" className="scrollbar-none" />
-        </ScrollArea>
-        <TabsContent
-          value="product-info"
-          className="flex items-center mt-[25px]"
+    <Dialog >
+      <DialogTrigger className='overflow-hidden' asChild>
+        <Button
+          type="submit"
+          variant="outline"
+          className="max-w-[166px] h-[50px] bg-black text-white font-medium text-[18px] px-[23px] w-full rounded-[62px] py-[15px] cursor-pointer"
         >
-          <div>
-            <h3 className='sm:text-[24px] text-[18px] font-semibold  mb-[20px]'
-            >
-              Опис товару
-            </h3>
-            <div
-              className=" border border-black/10 rounded-[20px] px-[25px] py-[30px] [&>div]:flex [&>div]:flex-col [&>*:nth-child(even)]:font-medium lg:text-2xl text-base"
-              dangerouslySetInnerHTML={{ __html: description }}
-            />
+          Написати відгук
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="sm:rounded-[30px] rounded-[30px] overflow-y-scroll overflow-x-scroll xl:overflow-visible max-h-[90vh]">
+        {actionData?.message == "success" ?
+          <ReviewThanks /> :
+          <>
+            {customerAccessToken?.accessToken &&
+              <ReviewInputs />
+            }
+            {!customerAccessToken?.accessToken &&
+              <ReviewLogin />
+            }
+          </>
+        }
+
+
+      </DialogContent>
+    </Dialog>
+  )
+}
+
+export const ReviewInputs = () => {
+  const [files, setFiles] = useState<FileWithPath[]>([]);
+  const review_contents = ["Комфорт", "Якість", "Дизайн"];
+
+  const onDrop = useCallback((acceptedFiles: FileWithPath[]) => {
+    setFiles(prevFiles => [...prevFiles, ...acceptedFiles]);
+  }, []);
+
+  const onRemoveFile = (fileToRemove: FileWithPath) => {
+    setFiles(prevFiles => prevFiles.filter(file => file !== fileToRemove));
+  };
+  const actionData = useActionData<typeof action>();
+  const navigation = useNavigation();
+  const isSubmitting = navigation.state === 'submitting';
+
+  const imageMimeTypes = {
+    "image/jpeg": [".jpg", ".jpeg"],
+    "image/png": [".png"],
+    "image/gif": [".gif"],
+    "image/webp": [".webp"],
+    "image/bmp": [".bmp"],
+    "image/tiff": [".tiff"],
+    "image/svg+xml": [".svg"],
+    "image/heic": [".heic"] // Додав підтримку HEIC
+  };
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop,
+    accept: imageMimeTypes,
+    maxSize: 5 * 1024 * 1024, // Максимальний розмір 5MB
+  });
+
+  return (
+    <Form method="post" className="block" encType="multipart/form-data">
+      <DialogHeader className="block overflow-hidden flex items-center justify-start ">
+        <DialogTitle className='font-bold text-[26px] text-left'>Написати відгук</DialogTitle>
+      </DialogHeader>
+      <div className="size-grid">
+        <div className="w-full flex items-center justify-between mt-10">
+          <div className="grid gap-[15px] w-full">
+            {review_contents.map((name, index) => {
+              return (
+                <div key={name + index} className="flex justify-between gap-[25px] ">
+                  <Button
+                    className="bg-black text-white font-medium rounded-[30px] text-[15px] px-[15px] py-[7px] cursor-pointer"
+                    type="button"
+                    variant="outline"
+                  >
+                    {name}
+                  </Button>
+                  <Radio name={name} className="w-full flex overflow-hidden justify-between bg-gray-100 rounded-full" defaultValue="10">
+                    {Array.from({ length: 5 }, (_, i) => (
+                      <RadioItem key={i + 1} value={(i + 1).toString()}>
+                        {i + 1}
+                      </RadioItem>
+                    ))}
+                  </Radio>
+                </div>
+              );
+            })}
           </div>
-        </TabsContent>
-        <TabsContent value="product-payment">
-          <h2 className='sm:text-[24px] text-[18px] font-semibold  mb-[20px]'
-          >Оплата і доставка</h2>
-          <div className="p-3 sm:p-6 border border-black/10 rounded-[20px] w-full">
-            <div className="grid md:grid-cols-[1fr,_minmax(40%,_585px)] gap-x-5">
-              <div className="flex flex-col gap-5">
-                <div className="bg-[#FAFAFA] rounded-[15px] p-5 md:text-xl text-base">
-                  <span className="font-medium">Оплата</span>
-                  <div className="grid grid-cols-[40px,_1fr] gap-x-8 items-center">
-                    <img src={monoLogo} alt="MonoPay" />
-                    <div>
-                      <ul className="list-disc pl-5">
-                        <li>Онлайн оплата MonoPay</li>
-                        <li> Оплата накладеним платежем</li>
-                      </ul>
-                      <span>0% комісії при сплаті кредитними коштамиі</span>
+        </div>
+        {actionData?.errors?.stars ? (
+          <em className='text-red'>Ви не вибрали {
+            actionData?.errors?.stars.map((error) => {
+              return error + ". "
+            })
+          }
+          </em>
+        ) : null}
+        <div className="grid gap-[8px]">
+          <div className="mt-4">
+            {files.length !== 0 && (
+              <>
+                <h4 className="text-[18px] font-medium mb-[8px]">Прикріплені файли:</h4>
+                <div className="flex gap-4 flex-wrap">
+                  {files.map((file, index) => (
+                    <div key={index} className="relative">
+                      <img
+                        src={URL.createObjectURL(file)}
+                        alt={`uploaded-image-${index}`}
+                        className="w-[100px] h-[100px] object-cover rounded-[10px]"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => onRemoveFile(file)}
+                        className="absolute top-0 right-0 bg-red-500 text-white rounded-full p-[5px] text-xs"
+                      >
+                        X
+                      </button>
                     </div>
-                  </div>
+                  ))}
                 </div>
-                <div className="bg-[#FAFAFA] rounded-[15px] p-5 md:text-xl text-base">
-                  <div className="flex items-center gap-3 font-medium">
-                    <span>Доставка Новою Поштою по всій Україні </span>
-                    <svg
-                      width="32"
-                      height="32"
-                      viewBox="0 0 32 32"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        d="M3 15.5L8.46422 10.0358V20.9642L3 15.5ZM30 15.5L24.5358 10.0358V20.9642L30 15.5ZM13.9284 18.0716H19.0716V23.5358H21.9642L16.5 29L11.0358 23.5358H13.9284V18.0716ZM13.9284 12.9284H19.0716V7.46422H21.9642L16.5 2L11.0358 7.46422H13.9284V12.9284Z"
-                        fill="#B80000"
-                      />
-                    </svg>
-                  </div>
-                  <div className="flex self-start w-fit mt-4 bg-white rounded-[15px] px-[15px] py-[10px] ">
-                    Терміни - 1/3 дні
-                  </div>
-                  <p>
-                    *відправка відбувається в день замовлення якщо воно
-                    оформлене було до 13:00 якщо пізніше тоді відправимо
-                    наступного дня.
-                  </p>
-                  <br />
-                  <p>
-                    *якщо вам якнайшвидше необхідно отримати своє
-                    <br /> замовлення, після оформлення
-                    <span className="font-medium">
-                      звʼяжіться з нашими <br /> менеджерами
-                    </span>
-                    для пришвидшення доставки
-                  </p>
-                </div>
-              </div>
-              <div className="bg-[#FAFAFA] rounded-[15px] p-5 md:text-xl text-base">
-                <div>
-                  <h4 className=" font-medium">
-                    Ціна доставки залежить від вашого замовлення
-                  </h4>
-                  <br />
-                  <ul className="list-disc pl-5">
-                    <li>Доставка 1/2 пари кросівок від 130 до 200грн</li>
-                    <li>Доставка 1/3 пари кросівок від 200 до 250грн</li>
-                  </ul>
-                  <br />
-                  <div className="bg-white rounded-[15px] py-[10px] px-[15px]">
-                    Приклад вирахування вартості доставки:
-                  </div>
-                  <br />
-                  <ul className="list-disc pl-5">
-                    <li>
-                      <span className="font-medium">Онлайн оплата - </span>
-                      <p>
-                        Доставка +- 80грн + пакування 0 грн (ми пакуємо самі) +
-                        страхування посилки 30/50грн ={' '}
-                        <span className="inline-flex text-white px-[10px] py-[5px] rounded-[15px] bg-[#2D2D2D] md:text-xl text-base">
-                          110/130грн
-                        </span>
-                      </p>
-                    </li>
-                    <br />
-                    <li>
-                      <span className="font-semibold">
-                        Мінімальна передоплата -{' '}
-                      </span>
-                      <p>
-                        Доставка +- 80 грн + пакування 0 грн (ми пакуємо самі) +
-                        страухвання посилки 30/50 грн+ комісія за переказ коштів
-                        45/60грн ={' '}
-                        <span className="inline-flex text-white px-[10px] py-[5px] rounded-[15px] bg-[#2D2D2D] md:text-xl text-base">
-                          145/190грн
-                        </span>
-                      </p>
-                    </li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-            <div className="grid md:grid-cols-[40%,_60%] grid-cols-1 gap-y-5 mt-5 gap-x-5">
-              <div className="bg-[#FAFAFA] rounded-[15px] p-5 md:text-xl text-base">
-                <div className="flex gap-[34px] w-full justify-between">
-                  <p>
-                    <span className="font-medium">
-                      Доставка в іншу країну - <br />
-                    </span>
-                    По домовленості{' '}
-                    <span className="font-medium">(звʼязатись з нами)</span>
-                  </p>
-                  <svg
-                    width="83"
-                    height="83"
-                    viewBox="0 0 83 83"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <g opacity="0.3">
-                      <path
-                        d="M67.1764 15.8446C63.8106 12.4454 59.8062 9.74477 55.3935 7.89784C50.9808 6.05091 46.2466 5.09407 41.4629 5.08229C36.6793 5.07052 31.9404 6.00404 27.5186 7.82923C23.0969 9.65442 19.0793 12.3353 15.6967 15.7179C12.3142 19.1004 9.63327 23.118 7.80808 27.5398C5.98289 31.9616 5.04937 36.7004 5.06115 41.4841C5.07292 46.2677 6.02976 51.0019 7.87669 55.4146C9.72363 59.8274 12.4243 63.8317 15.8234 67.1976C19.1893 70.5968 23.1936 73.2974 27.6064 75.1443C32.0191 76.9912 36.7533 77.9481 41.5369 77.9599C46.3206 77.9716 51.0594 77.0381 55.4812 75.2129C59.903 73.3877 63.9206 70.7068 67.3031 67.3243C70.6857 63.9417 73.3666 59.9241 75.1918 55.5024C77.017 51.0806 77.9505 46.3417 77.9387 41.5581C77.9269 36.7744 76.9701 32.0403 75.1232 27.6275C73.2762 23.2148 70.5756 19.2104 67.1764 15.8446ZM10.3749 41.5211C10.3738 38.7664 10.739 36.0237 11.4611 33.3654C12.6509 35.9267 14.379 38.1395 15.5543 40.7673C17.0733 44.1456 21.152 43.2086 22.953 46.1688C24.5514 48.7965 22.8444 52.1198 24.0407 54.8692C24.9097 56.8647 26.9587 57.3008 28.3723 58.7598C29.8167 60.2317 29.7859 62.2484 30.0064 64.1678C30.2552 66.4229 30.6587 68.6582 31.2141 70.858C31.2141 70.8742 31.2141 70.8921 31.2271 70.9083C19.0964 66.648 10.3749 55.0848 10.3749 41.5211ZM41.4999 72.6461C39.7617 72.6455 38.0265 72.5002 36.3124 72.2116C36.3303 71.7723 36.3384 71.3622 36.3821 71.0769C36.7761 68.4993 38.0665 65.9785 39.8075 64.0494C41.5275 62.1463 43.8846 60.8591 45.3371 58.6998C46.7604 56.5924 47.1867 53.7555 46.5999 51.293C45.7358 47.6553 40.7931 46.4411 38.1281 44.4682C36.5961 43.3335 35.2328 41.5794 33.221 41.4368C32.2937 41.3719 31.5172 41.5713 30.5981 41.3346C29.7551 41.1158 29.0937 40.6619 28.1956 40.7802C26.5178 41.0007 25.4592 42.7936 23.6565 42.5505C21.9463 42.3219 20.1842 40.3198 19.7951 38.6906C19.2958 36.5962 20.9526 35.917 22.7277 35.7305C23.4685 35.6527 24.3001 35.5684 25.0118 35.8408C25.9488 36.1877 26.3913 37.1052 27.2327 37.5689C28.81 38.4345 29.1294 37.0517 28.8878 35.6511C28.5263 33.5534 28.1048 32.6991 29.9756 31.2547C31.2724 30.2593 32.3813 29.5396 32.1738 27.7515C32.0506 26.701 31.4751 26.2261 32.0117 25.1805C32.4186 24.3845 33.5355 23.6664 34.2634 23.1914C36.1422 21.9658 42.3121 22.0566 39.7913 18.6264C39.0505 17.6197 37.6839 15.8203 36.387 15.5739C34.7659 15.2675 34.0461 17.0766 32.9162 17.8742C31.7491 18.6993 29.4763 19.6363 28.3075 18.3605C26.735 16.6438 29.3498 16.0813 29.9286 14.8816C30.196 14.3224 29.9286 13.5459 29.4779 12.8147C30.0626 12.5683 30.657 12.3398 31.2611 12.129C31.6397 12.4087 32.0888 12.5771 32.558 12.6154C33.6425 12.6867 34.6654 12.0998 35.6121 12.8391C36.6626 13.6496 37.4196 14.6741 38.8138 14.927C40.1625 15.1718 41.5907 14.3856 41.9247 13.0044C42.1273 12.1647 41.9247 11.278 41.7301 10.4107C47.793 10.4456 53.7121 12.2613 58.7516 15.6322C58.4274 15.509 58.0399 15.5236 57.5617 15.7457C56.5777 16.2028 55.1836 17.3668 55.0685 18.521C54.9372 19.8308 56.8695 20.0156 57.7871 20.0156C59.165 20.0156 60.5607 19.3996 60.1166 17.8077C59.9237 17.1171 59.661 16.399 59.2379 15.9645C60.255 16.6703 61.2294 17.4357 62.1559 18.2568C62.1413 18.2714 62.1267 18.2843 62.1121 18.3005C61.1784 19.2732 60.0939 20.0432 59.4552 21.2266C59.0045 22.0598 58.4971 22.4554 57.5844 22.671C57.0819 22.7893 56.508 22.8331 56.0865 23.1703C54.9129 24.0943 55.5807 26.3152 56.6928 26.9815C58.0983 27.8228 60.183 27.4273 61.2432 26.2261C62.0716 25.2858 62.5596 23.6534 64.0493 23.655C64.7052 23.6536 65.3353 23.9104 65.8034 24.3699C66.4194 25.0086 66.2978 25.6052 66.4291 26.4028C66.6609 27.8196 67.9108 27.0512 68.6711 26.3363C69.2253 27.3226 69.7253 28.3384 70.169 29.3791C69.3325 30.5836 68.6678 31.8966 66.6561 30.4928C65.4516 29.6514 64.7108 28.4307 63.1983 28.0514C61.8771 27.7272 60.5235 28.0644 59.2185 28.2897C57.7352 28.5475 55.9763 28.6609 54.8513 29.7844C53.7635 30.8672 53.188 32.3165 52.0306 33.4043C49.7918 35.5117 48.8467 37.812 50.296 40.7916C51.6901 43.6561 54.6065 45.2107 57.753 45.0064C60.8444 44.8005 64.0558 43.0076 63.9667 47.4997C63.9342 49.09 64.2666 50.1907 64.7545 51.6675C65.2068 53.0292 65.176 54.3488 65.2798 55.7543C65.3784 57.4001 65.6357 59.0326 66.0482 60.6289C63.1425 64.37 59.4202 67.3976 55.1657 69.4803C50.9112 71.563 46.2369 72.6459 41.4999 72.6461Z"
-                        fill="#010101"
-                      />
-                    </g>
-                  </svg>
-                </div>
-              </div>
-              <div className="bg-[#FAFAFA] rounded-[15px] p-5 md:text-xl text-base">
-                <div className="flex gap-[34px] w-full justify-between">
-                  <p>
-                    <span className="font-medium">Самовивіз -</span>
-                    <br />
-                    Ви залюбки можете оплатити і забрати своє замовлення в
-                    нашому магазині в м.Коломия
-                  </p>
-                  <div className="bg-smallLogoIcon bg-no-repeat bg-center bg-cover min-w-[63px] h-[63px] md:min-w-[83px] md:h-[83px]"></div>
-                </div>
-              </div>
-            </div>
+              </>
+            )}
           </div>
-        </TabsContent>
-        <TabsContent value="product-delivery">
-          <h2 className='sm:text-[24px] text-[18px] font-semibold  mb-[20px]'
-          >Обмін та повернення</h2>
-          <div className="p-3 sm:p-6 border border-black/10 rounded-[20px] w-full">
-
-            <div className="grid md:grid-cols-[4fr_5fr] grid-cols-1 gap-y-5 md:gap-y-0 md:gap-x-5">
-              <div className="bg-[#FAFAFA] rounded-[15px] p-5 md:text-xl text-base">
-                <div className="flex items-center text-[21px] sm:text-2xl font-semibold mb-[10px] md:gap-[13px] gap-[8px]">
-                  <h4>Повернення</h4>
-                  <svg
-                    width="30"
-                    height="30"
-                    viewBox="0 0 30 30"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      d="M13.7499 21.875C13.7475 20.3244 14.1909 18.8057 15.0274 17.5H5.31488C4.56973 17.5003 3.85518 17.7965 3.32828 18.3234C2.80137 18.8503 2.50521 19.5648 2.50488 20.31V21.46C2.50488 22.175 2.72738 22.8725 3.14238 23.455C5.06988 26.16 8.22488 27.5 12.4999 27.5C13.6636 27.5 14.7449 27.4013 15.7399 27.2025C14.454 25.7259 13.7469 23.8331 13.7499 21.875ZM12.4999 2.505C14.1575 2.505 15.7472 3.16349 16.9193 4.33559C18.0914 5.50769 18.7499 7.0974 18.7499 8.755C18.7499 10.4126 18.0914 12.0023 16.9193 13.1744C15.7472 14.3465 14.1575 15.005 12.4999 15.005C10.8423 15.005 9.25257 14.3465 8.08047 13.1744C6.90836 12.0023 6.24988 10.4126 6.24988 8.755C6.24988 7.0974 6.90836 5.50769 8.08047 4.33559C9.25257 3.16349 10.8423 2.505 12.4999 2.505ZM28.7499 21.875C28.7499 23.6984 28.0256 25.4471 26.7362 26.7364C25.4469 28.0257 23.6982 28.75 21.8749 28.75C20.0515 28.75 18.3028 28.0257 17.0135 26.7364C15.7242 25.4471 14.9999 23.6984 14.9999 21.875C14.9999 20.0516 15.7242 18.303 17.0135 17.0136C18.3028 15.7243 20.0515 15 21.8749 15C23.6982 15 25.4469 15.7243 26.7362 17.0136C28.0256 18.303 28.7499 20.0516 28.7499 21.875ZM20.4424 19.1925C20.5597 19.0751 20.6257 18.916 20.6257 18.75C20.6257 18.584 20.5597 18.4249 20.4424 18.3075C20.325 18.1901 20.1659 18.1242 19.9999 18.1242C19.8339 18.1242 19.6747 18.1901 19.5574 18.3075L17.6824 20.1825C17.6242 20.2406 17.578 20.3095 17.5465 20.3855C17.515 20.4614 17.4988 20.5428 17.4988 20.625C17.4988 20.7072 17.515 20.7886 17.5465 20.8645C17.578 20.9405 17.6242 21.0094 17.6824 21.0675L19.5574 22.9425C19.6747 23.0599 19.8339 23.1258 19.9999 23.1258C20.1659 23.1258 20.325 23.0599 20.4424 22.9425C20.5597 22.8251 20.6257 22.666 20.6257 22.5C20.6257 22.334 20.5597 22.1749 20.4424 22.0575L19.6336 21.25H22.1874C22.5567 21.25 22.9225 21.3228 23.2637 21.4641C23.6049 21.6054 23.915 21.8126 24.1761 22.0738C24.4373 22.3349 24.6445 22.645 24.7858 22.9862C24.9271 23.3274 24.9999 23.6932 24.9999 24.0625V24.375C24.9999 24.5408 25.0657 24.6997 25.1829 24.8169C25.3002 24.9342 25.4591 25 25.6249 25C25.7906 25 25.9496 24.9342 26.0668 24.8169C26.184 24.6997 26.2499 24.5408 26.2499 24.375V24.0625C26.2499 22.9851 25.8219 21.9517 25.06 21.1899C24.2981 20.428 23.2648 20 22.1874 20H19.6336L20.4424 19.1925Z"
-                      fill="black"
-                    />
-                  </svg>
-                </div>
-                <div className="text-[14px] sm:text-[20px]">
-                  <p>
-                    Повернення товару доступно на протязі 14 дінв (з дня
-                    отримання товару на Пошті або в Магазині)
-                  </p>
-                  <br />
-                  <p>
-                    Поверненню підлягає лише новий та неушкоджений товар, такий
-                    як ви отримали на пошті (якщо це кросівки тоді коробка
-                    обовʼязково має бути присутня, і бірки якщо вони були)
-                  </p>
-
-                  <br />
-                  <p className="text-[14px] sm:text-[20px] leading-[130%]">
-                    Якщо до прикладу в кросівках ви ходили тільки вдома декілька
-                    хвилин і зрозуміли що вам вони некомфортні тоді ми залюбки
-                    оформимо для вас повекрнення, звичайно якщо вони
-                    відповідають умовам що написані вище.
-                  </p>
-                </div>
-
-                <br />
-                <div className="bg-white px-[15px] py-[10px] rounded-[15px] w-fit text-center sm:text-start text-[13px] sm:text-[20px]">
-                  <span>Повернення відбувається за рахунок клієнта</span>
-                  <br />
-                  <span className="font-medium">
-                    *крім випадків коли була наша помилка
-                  </span>
-                </div>
-              </div>
-              <div className="bg-[#FAFAFA] rounded-[15px] p-5 md:text-xl text-base">
-                <div className="flex items-center text-[21px] sm:text-2xl font-semibold mb-[10px] md:gap-[13px] gap-[8px]">
-                  <h4>Обмін</h4>
-                  <svg
-                    width="31"
-                    height="31"
-                    fill="none"
-                    viewBox="0 0 31 31"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      d="M17.3789 1.21094C15.0095 1.24 12.5515 2.13713 10.2949 3.99234H15.1671V6.60724C18.3616 4.80597 22.1053 4.69469 25.0931 6.60906L23.9918 7.19757L27.9085 10.2685L27.6814 5.22411L26.0826 6.07939C23.9761 2.9542 20.8911 1.24993 17.6136 1.21094C17.5354 1.21 17.4572 1.21 17.379 1.21094H17.3789ZM1.15234 5.12378V18.0051H14.0356V5.12378H1.15246H1.15234ZM4.19676 6.69982H12.4595V15.1121H11.3262V7.83138H4.19682V6.69988L4.19676 6.69982ZM4.39923 9.00823L9.85414 14.5692L9.0462 15.362L3.59129 9.80103L4.39923 9.00823ZM16.9116 12.747V25.6303H29.793V12.7471H16.9116V12.747ZM19.9541 14.3251H28.2169V22.7354H27.0855V15.4564H19.9543L19.9541 14.325L19.9541 14.3251ZM20.1566 16.6316L25.6133 22.1943L24.8055 22.9852L19.3487 17.4243L20.1566 16.6316L20.1566 16.6316ZM3.29243 20.4857L3.51948 25.53L4.93095 24.775C8.61989 30.1417 15.2233 31.2223 20.6504 26.7618H15.7801V24.1469C12.6268 25.9257 8.93831 26.0568 5.9697 24.2188L7.20703 23.5566L3.29243 20.4857Z"
-                      fill="black"
-                    />
-                  </svg>
-                </div>
-                <div className="text-[14px] sm:text-[20px]">
-                  <p className="text-[14px] sm:text-[20px] leading-[130%]">
-                    Обмін присутній в нас на протязі 14 днів (з дня отриманя
-                    товарну на Пошті або в Магазині)
-                    <span className="flex font-medium">
-                      *можливі вийнятки по домовленності
-                    </span>
-                  </p>
-                  <br />
-                  <p className="text-[14px] sm:text-[20px] leading-[130%]">
-                    Обміну підлягає лише новий та неушкоджений товар, такий який
-                    ви отримали на пошті (якщо це кросівки тоді коробка
-                    обовʼязково має бути присутня, і бірки якщо вони були)
-                  </p>
-                  <br />
-                  <p className="text-[14px] sm:text-[20px] leading-[130%]">
-                    Також ми дорожимо нашими клієнтами і стараємося щоб вам було
-                    максимально комфортно.
-                  </p>
-                </div>
-                <br />
-                <div className="bg-white px-[15px] py-[10px] rounded-[15px] w-fit text-[14px] sm:text-[20px] ">
-                  <p className="font-medium">
-                    При обміні товару доставка в одну сторону
-                    <br /> буде за наш рахунок :)
-                  </p>
-                </div>
-              </div>
-            </div>
-            <div className="mt-[20px] bg-[#2D2D2D] rounded-[15px] py-2 sm:py-5 flex items-center justify-center">
-              <span className="text-white font-semibold text-[14px] text-center px-[10px] sm:text-2xl">
-                Вживане взуття поверненню та обміну не підлягає!!!
-              </span>
-            </div>
+          <div
+            {...getRootProps()}
+            className="dropzone w-full p-6 border-dashed border-2 border-gray-300 bg-gray-100 rounded-lg"
+          >
+            <input type="file" name='media_files' {...getInputProps()} />
+            <p className="text-center text-gray-600">
+              {isDragActive ? "Перетягніть файли сюди..." : "Перетягніть або виберіть файли для завантаження"}
+            </p>
           </div>
-        </TabsContent>
-      </Tabs>
-    </div>
-  );
-}
+        </div>
+        <h3 className="text-[24px] font-medium mb-[10px] mt-[40px]">Залиш коментар</h3>
+        <textarea name='content' placeholder='Коментар... ' className="w-full rounded-[25px] bg-[#f0f0f0] ring-offset-background p-[18px] min-h-[128px] placeholder:text-placeholder  disabled:cursor-not-allowed disabled:opacity-50 focus:outline-none placeholder:opacity-50" />
+        {actionData?.errors?.content ? (
+          <em className='text-red'>{actionData?.errors?.content}</em>
+        ) : null}
+        <Button variant={"outline"} className='text-white text-[20px] w-full bg-[#01AB31] rounded-[30px] '>Опублікувати відгук
+          <svg className='ml-[15px]' width="23" height="24" viewBox="0 0 23 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M0 12C0 14.2745 0.674463 16.4979 1.9381 18.3891C3.20174 20.2802 4.99779 21.7542 7.09914 22.6246C9.20049 23.495 11.5128 23.7228 13.7435 23.279C15.9743 22.8353 18.0234 21.74 19.6317 20.1317C21.24 18.5234 22.3353 16.4743 22.779 14.2435C23.2228 12.0128 22.995 9.70049 22.1246 7.59914C21.2542 5.49779 19.7802 3.70174 17.8891 2.4381C15.9979 1.17446 13.7745 0.5 11.5 0.5C8.45001 0.5 5.52494 1.7116 3.36827 3.86827C1.2116 6.02494 0 8.95001 0 12ZM4.92857 11.1786H14.9089L10.3254 6.57282L11.5 5.42857L18.0714 12L11.5 18.5714L10.3254 17.3992L14.9089 12.8214H4.92857V11.1786Z"
+              fill="currentColor"
+            />
+          </svg>
+        </Button>
 
-function ProductGalery({ selectedVariantId, product, objGalery, media }: { selectedVariantId: any, product: any, objGalery: any, media: ProductFragment['media'] }) {
-  const {
-    selectedIndex,
-    setSelectedIndex,
-    api,
-    setApi,
-    thumbApi,
-    setThumbApi,
-    isWide,
-    handleThumbClick,
-    onSelect,
-  } = objGalery;
-  useEffect(() => {
-    onSelect();
-    if (!api) return;
-    api.on('select', onSelect);
-  }, [api, onSelect]);
-
-  const [productWithLike, setProductWithLike] = useState({ ...product, isLiked: false })
-  const [isLike, setIsLike] = useState(false)
-  const {
-    likedCardId,
-    handleLikeToggle,
-  } = useContext(HeaderBasketContext) as HeaderContextInterface;
-
-  useEffect(() => {
-    const productIndex = likedCardId.findIndex((item: any) => item === product?.selectedVariant?.id);
-    if (productIndex === -1) {
-      setIsLike(false)
-    } else {
-      setIsLike(true)
-
-    }
-  }, [likedCardId, product])
-
-  const toggleLike = () => {
-    if (isLike) {
-      handleLikeToggle(selectedVariantId, "delete")
-    } else {
-      handleLikeToggle(selectedVariantId, "add")
-    }
-  }
-
-  return (
-    <div className=" xl:relative flex flex-col-reverse gap-y-5 gap-x-[14px]">
-      <Carousel
-        setApi={setThumbApi}
-        opts={{
-          containScroll: 'keepSnaps',
-          dragFree: true,
-          loop: true,
-          duration: 20,
-        }}
-        orientation={isWide ? 'vertical' : 'horizontal'}
-        className="xl:absolute xl:z-10 xl:top-[20px] xl:left-[20px] xl:rigth-[100px] xl:w-[100px]  w-full h-full"
-      >
-        <CarouselContent className="  gap-y-[14px] mt-0 xl:max-w-[100px] max-w-full">
-          {media.nodes.map((item, index) => (
-            <CarouselItem
-              key={item.id}
-              className={cn(
-                'xl:max-w-[152px] max-w-[100px] opacity-50 w-full rounded-[20px] pt-0 pl-0 ml-4 xl:ml-0',
-                index === selectedIndex && 'border opacity-100 border-black',
-              )}
-              onClick={() => handleThumbClick(index)}
-            >
-              <MediaFile
-                mediaOptions={{
-                  image: {
-                    aspectRatio: '1/1',
-                    crop: 'center',
-                  },
-                }}
-                data={item}
-                className="w-full rounded-[20px]"
-              />
-
-            </CarouselItem>
-          ))}
-        </CarouselContent>
-      </Carousel>
-      <div className='relative'>
-        <Carousel
-          setApi={setApi}
-          opts={{
-            containScroll: 'keepSnaps',
-            loop: true,
-            duration: 20,
-          }}
-        >
-          <CarouselContent>
-            {media.nodes.map((item, index) => (
-              <CarouselItem key={item.id}>
-                <MediaFile
-                  mediaOptions={{
-                    image: {
-                      aspectRatio: '1/1',
-                      crop: 'center',
-                    },
-                  }}
-                  data={item}
-                  className="rounded-[20px] aspect-1 image-product-aspect "
-                />
-              </CarouselItem>
-            ))}
-          </CarouselContent>
-        </Carousel>
-        <button
-          onClick={toggleLike}
-          className=" absolute p-2 rounded-full bg-white shadow-lg  top-[1.35rem] right-5 p-2"
-          style={{ zIndex: 32 }}
-          aria-label="Add to wishlist"
-        >
-          <HeartIcon isFavorited={isLike} />
-        </button>
       </div>
+    </Form>
 
-    </div>
   );
-}
+};
 
-
-
-function ProductMain({
-  objGalery,
-  selectedVariant,
-  product,
-  variants,
-  handle,
-  relatedProducts,
-}: {
-  objGalery: any
-  product: ProductFragment;
-  handle: string,
-  selectedVariant: any;
-  variants: ProductVariantsQuery;
-  relatedProducts: { product: ProductType }[]
-}) {
-  const { title, descriptionHtml, vendor, collections } = product || { title: "", descriptionHtml: "", vendor: "", collections: [] };
+export const ReviewThanks = () => {
   return (
-    <div className="product-main">
-      <div className="flex flex-col border-b pb-6 border-b-black/10">
-        <h1 className="font-bold lg:text-[40px] md:text-3xl text-2xl">
-          {title}
-        </h1>
-        <div className="flex items-center gap-x-[16px] mb-[30px]">
-          <span className="font-semibold text-[20px] text-black/50">
-            {product.selectedVariant?.sku ? product.selectedVariant?.sku : "Sku - не вказаний"}
-          </span>
-          <Link
-            to={`/collections/${collections?.nodes[0]?.handle}?filter.productVendor="${vendor}"`}
-            className="text-white text-[16px] flex items-center jusity-center px-[14px] py-[5px] bg-black rounded-3xl self-start">
-            {product.vendor}
+    <div style={{ display: "block" }}>
+      <DialogHeader className="block overflow-hidden flex items-center justify-center ">
+        <DialogTitle className='font-bold text-[26px] text-center'>Дякуємо!</DialogTitle>
+      </DialogHeader>
+      <div className="size-grid">
+        <h5>Ваші відгуки допомагають ставати нам кращими</h5>
+      </div>
+    </div>
+  )
+}
+export const ReviewLogin = () => {
+  return (
+    <div style={{ display: "block" }}>
+      <DialogHeader className="block overflow-hidden flex items-center justify-center ">
+        <DialogTitle className='font-bold text-[26px] text-center'>Для початку вам потрібно зареєструватись!</DialogTitle>
+      </DialogHeader>
+      <div className="size-grid">
+        <div className="w-full flex items-center justify-end mt-10">
+          <Link to="/account/login"
+            className="flex items-center justify-center whitespace-nowrap rounded-[15px] font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-[50px] bg-black text-white font-medium text-[18px] px-[23px] w-full rounded-[62px] py-[15px] cursor-pointer group "
+          >
+            В особистий кабінет
+            <svg
+              width="32"
+              height="32"
+              viewBox="0 0 32 32"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              className="group-hover:text-black"
+            >
+              <path
+                d="M24 27V24.3333C24 22.9188 23.5224 21.5623 22.6722 20.5621C21.8221 19.5619 20.669 19 19.4667 19H11.5333C10.331 19 9.17795 19.5619 8.32778 20.5621C7.47762 21.5623 7 22.9188 7 24.3333V27"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+              <path
+                d="M15.5 14C17.9853 14 20 11.9853 20 9.5C20 7.01472 17.9853 5 15.5 5C13.0147 5 11 7.01472 11 9.5C11 11.9853 13.0147 14 15.5 14Z"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
           </Link>
         </div>
-        <ProductPrice selectedVariant={selectedVariant} />
-      </div>
-      <Suspense
-        fallback={
-          <ProductForm
-            relatedProducts={relatedProducts}
-            handle={handle}
-            product={product}
-            selectedVariant={selectedVariant}
-            variants={[]}
-            objGalery={objGalery}
-          />
-        }
-      >
-        <Await
-          errorElement="Виникла помилка при завантажені варіантів товару"
-          resolve={variants}
-        >
-          {(data) => (
-            <ProductForm
-              handle={handle}
-              relatedProducts={relatedProducts}
-              objGalery={objGalery}
-              product={product}
-              selectedVariant={selectedVariant}
-              variants={data?.product?.variants.nodes || []}
-            />
-          )}
-        </Await>
-      </Suspense>
-    </div>
-  );
-}
-
-function ProductPrice({
-  selectedVariant,
-}: {
-  selectedVariant: ProductFragment['selectedVariant'];
-}) {
-  const percentageAmount = selectedVariant?.compareAtPrice
-    ? (
-      (1 -
-        parseInt(selectedVariant?.price?.amount) /
-        parseInt(selectedVariant?.compareAtPrice?.amount)) *
-      100
-    ).toFixed()
-    : null;
-  return (
-    <div className="product-price price flex gap-x-[10px] md:font-medium md:text-2xl text-lg">
-      <div className="price flex gap-x-[10px] md:font-medium md:text-[32px] text-lg">
-        <span className="font-extrabold text-[32px]">
-          {selectedVariant?.price?.amount} грн
-        </span>
-        {selectedVariant?.compareAtPrice && (
-          <>
-            <span className="line-through text-[#B3B3B3]">
-              {selectedVariant?.compareAtPrice?.amount}
-            </span>
-            <span className="flex self-center py-1 items-center justify-center rounded-xl px-3 bg-darkRed/10 font-medium text-[16px] text-destructive">
-              {percentageAmount}%
-            </span>
-          </>
-        )}
       </div>
     </div>
-  );
+  )
 }
 
-function ProductForm({
-  product,
-  selectedVariant,
-  variants,
-  objGalery,
-  relatedProducts,
-  handle,
-}: {
-  objGalery: any;
-  product: ProductFragment;
-  selectedVariant: ProductFragment['selectedVariant'];
-  variants: Array<ProductVariantFragment>;
-  handle: string,
-  relatedProducts: { product: ProductType }[]
-
-}) {
-  const { setCartShow, setCartShowMobile } = useContext(HeaderBasketContext) as HeaderContextInterface;
-  const isMobile = useMedia('(max-width: 767px)', false);
 
 
-  const checkAllVarians = () => {
-    const allUnavailable = variants.every(variant => variant.availableForSale === false);
+interface IReviewMedias {
+  media_path: string,
+}
+interface IReviewRatings {
+  reviews_id: string,
+  rating_title: string,
+  rating_value: string,
+}
+interface IReview {
+  rating_percentage: number,
+  reviewer_name: string,
+  review_ratings: IReviewRatings[],
+  content: string
+  review_medias: IReviewMedias[]
+  reviewed_at: number
+}
+interface IReviewsList {
+  reviews: IReview[],
+}
 
-    if (allUnavailable) {
-      return "Немає в наявності";
-    } else {
-      return null
-    }
-  }
-
-  const checkSelectedVariant = () => {
-    return selectedVariant?.availableForSale ? 'Додати в корзину' : 'Оберіть розмір'
-  }
-  const valueCheckedAllVarians = checkAllVarians()
-  const valueCheckedVarian = checkSelectedVariant()
-
+export const ReviewsList: FC<IReviewsList> = ({ reviews }) => {
   return (
-    <div className=" product-form pt-6">
-      <div className="grid gap-[20px] justify-between flex-wrap-reverse lg:grid-cols-[1fr_0.3fr]">
+    <>
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        {reviews.map((review: any) => {
+          return (
+            <div key={review.reviewed_at} className="border py-[28px] px-[32px] rounded-[20px] shadow-lg">
+              <div className="mb-[25px]">
+                <div style={{ unicodeBidi: "bidi-override" }} className="text-[#cccccc60] text-3xl h-[30px] w-auto relative leading-none inline-block before:content-['★★★★★']">
+                  <span style={{ width: `${review.rating_percentage}%` }} className='inline-block absolute overflow-hidden w-0 left-0 top-0 before:text-[color:#ffaa00] before:content-["★★★★★"]'></span>
+                </div>
+                <div>
+                  <span className="font-bold text-[20px] ">{review.reviewer_name}</span>
+                  <span className="ml-2 text-green-600">✔</span>
+                </div>
+              </div>
 
-        <div>
-          {relatedProducts.length !== 0 &&
-            <div className="product-options max-w-[370px]" >
-              <h5 className="text-[16px] text-black/60 mb-4">Кольори</h5>
-              <div className="product-options-grid grid grid-cols-5 gap-y-[10px] gap-x-[10px] items-start">
-                {relatedProducts.map(element => (
-
-                  <Link
-                    prefetch="intent"
-                    preventScrollReset
-                    replace
-                    to={useVariantUrl(element.product.handle, [])}
-                    className={cn(
-                      'text-black text-[16px] px-[2px] py-[2px] rounded-[22px] relative flex max-w-[76px] justify-center self-start bg-[#F0F0F0]',
-                      handle === element.product.handle && 'text-white bg-black',
-                    )}
-                  >
-                    <Image
-                      alt={element?.product?.featuredImage?.altText || ""}
-                      aspectRatio="1/1"
-                      data={element?.product?.featuredImage || undefined}
-                      height={100}
-                      loading="lazy"
-                      width={100}
-                      className="w-full rounded-[20px]"
-                    />
-                    {!element.product.availableForSale &&
-                      <span className="transition-opacity duration-[0.3s] ease-[ease-in-out] will-change-[opacity] w-[96%] h-[7px] absolute -translate-y-2/4 -rotate-45 mx-auto top-2/4 inset-x-0;"> <svg width="100%" height="100%" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ top: 0, position: "absolute" }}><rect x="0" y="2" width="100%" transform="" fill="black" stroke="#ECEFF1" stroke-width="2" height="3"></rect></svg></span>
-                    }
-                  </Link>
-                ))}
+              <div className="flex flex-wrap gap-2 mb-4">
+                {review.review_ratings.map((rating: IReviewRatings) => {
+                  return (
+                    <span key={rating.reviews_id + rating.rating_title} className="bg-gray-100 text-gray-800 py-1 px-3 rounded-full text-sm">{rating.rating_title} — {rating.rating_value}</span>
+                  )
+                })}
+              </div>
+              <p className="text-gray-700 mb-[15px]">
+                {review.content}
+              </p>
+              <div className="flex space-x-2 mb-[30px]">
+                {review.review_medias.map((image: IReviewMedias) => {
+                  return <div key={image.media_path} className="w-16 h-16 bg-gray-200 flex items-center justify-center rounded-md">
+                    <span className="text-gray-500"><img srcSet={`${image.media_path}/w=300,sharpen=1 2x, ${image.media_path}/w=450,sharpen=1 3x`} src={image.media_path + "/w=150,sharpen=1"} /></span>
+                  </div>
+                })}
+              </div>
+              <div className="text-gray-500 text-sm">
+                Опубліковано {formatDateFromMilliseconds(review.reviewed_at)}
               </div>
             </div>
-          }
-          <VariantSelector
-            handle={product.handle}
-            options={product.options}
-            variants={variants}
-          >
-            {({ option }) => <ProductOptions objGalery={objGalery} product={product} key={option.name} option={option} />}
-          </VariantSelector>
-        </div>
-        {product?.productType == "Кросівки" &&
-          <div className="w-[300x] text-2xl">
-            <SizeGrid product={product} vendor={product.vendor} />
-          </div>
-        }
-
-      </div>
-      {selectedVariant?.quantityAvailable === 1 && (
-        <span className="my-5 py-5 w-full inline-flex border-b border-b-black/10">
-          - Останні в наявності
-        </span>
-      )}
-      <br />
-      <div className="grid md:grid-cols-2 grid-cols-1">
-        <AddToCartButton
-          disabled={!selectedVariant || !selectedVariant.availableForSale}
-          onClick={() => {
-            isMobile ? setCartShowMobile(true) : setCartShow(true)
-            window.scrollTo({
-              top: 0,
-              left: 0,
-              behavior: "smooth"
-            })
-          }}
-          lines={
-            selectedVariant
-              ? [
-                {
-                  merchandiseId: selectedVariant.id,
-                  quantity: 1,
-                },
-              ]
-              : []
-          }
-        >
-          {(valueCheckedAllVarians !== null)
-            ? valueCheckedAllVarians :
-            valueCheckedVarian}
-
-        </AddToCartButton>
-      </div>
-    </div>
-  );
-}
-
-function ProductOptions({ objGalery, product, option }: { objGalery: any, product: any, option: VariantOption }) {
-  const {
-    selectedIndex,
-    setSelectedIndex,
-    api,
-    setApi,
-    thumbApi,
-    setThumbApi,
-    isWide,
-    handleThumbClick,
-    onSelect,
-  } = objGalery;
-
-
-  if ((option.name === "Колір" || option.name === "Color") && option.values.length > 1) {
-    return (
-      null
-    )
-  }
-
-  return (
-    <div className="product-options max-w-[370px]" key={option.name}>
-      <h5 className="text-[16px] text-black/60 mb-4">{option.name}</h5>
-      <div className="product-options-grid grid grid-cols-5 gap-y-[10px] gap-x-[10px] items-start">
-        {option.values.map(({ value, isAvailable, isActive, to }) => {
-          if (isAvailable) {
-            return <Link
-              key={option.name + value}
-              prefetch="intent"
-              preventScrollReset
-              replace
-              to={to}
-              className={cn(
-                'text-black text-[16px] px-[18px] py-[15px] rounded-[22px] flex max-w-[76px] justify-center self-start bg-[#F0F0F0]',
-                isActive && 'text-white bg-black',
-              )}
-            >
-              {value}
-            </Link>
-          }
+          )
         })}
       </div>
-    </div>
-  );
+    </>
+  )
 }
-
-export function AddToCartButton({
-  analytics,
-  children,
-  disabled,
-  lines,
-  onClick,
-}: {
-  analytics?: unknown;
-  children: React.ReactNode;
-  disabled?: boolean;
-  lines: CartLineInput[];
-  onClick?: () => void;
-}) {
-  return (
-    <div>
-      <CartForm
-        route="/cart"
-        inputs={{ lines }}
-        action={CartForm.ACTIONS.LinesAdd}
-      >
-        {(fetcher: FetcherWithComponents<any>) => (
-          <>
-            <input
-              name="analytics"
-              type="hidden"
-              value={JSON.stringify(analytics)}
-            />
-            <button
-              type="submit"
-              onClick={onClick}
-              disabled={disabled ?? fetcher.state !== 'idle'}
-              className={cn(
-                'bg-black text-white font-medium text-[18px] w-full rounded-[62px] py-[15px] cursor-pointer',
-                disabled && 'bg-white text-black border border-black',
-              )}
-            >
-              {fetcher.state == 'idle' ?
-                children
-                : <div className='h-[18px]'> <LoaderNew /></div>}
-            </button>
-          </>
-        )}
-      </CartForm>
-    </div>
-  );
-}
-
-
-
 
 export const QUERY_RELATED_PRODUCT_BY_ID = `#graphql 
 query getProductById($id: ID!) {
@@ -1080,3 +495,4 @@ query getProductById($id: ID!) {
   }
 }
 `
+
