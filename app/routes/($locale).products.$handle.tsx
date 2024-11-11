@@ -22,6 +22,7 @@ import { FileWithPath, useDropzone } from 'react-dropzone'
 import { Storefront } from '@shopify/hydrogen';
 import sendReview from '~/module/Reviews/api/sendReview';
 import sendReviewImages from '~/module/Reviews/api/sendReviewImages';
+import LoaderNew from '~/components/LoaderNew';
 
 export const meta: MetaFunction<typeof loader> = ({ data }: any) => {
   return [
@@ -73,11 +74,11 @@ export const action: ActionFunction = async ({ context, request, params }) => {
         const imageData = new FormData()
         mediaFiles.forEach((file, index) => {
           if (file instanceof File) {
-            imageData.append("media_files", file)
+            imageData.append("media_files[]", file)
           }
 
         })
-        const sendImages = await sendReviewImages(`${result?.review_id}` || "", formData)
+        const sendImages = await sendReviewImages(`${result?.review_id}` || "", imageData)
       }
     }
     return json({ message: "success" });
@@ -174,20 +175,6 @@ export default function Product() {
         customerAccessToken={customerAccessToken}
         reviews={reviews}
       />
-      <Form onSubmit={async (e) => {
-        e.preventDefault()
-        const formData = new FormData();
-        const fileInput = e.currentTarget.elements.media_files.files
-        console.log(fileInput)
-        for (let i = 0; i < fileInput.length; i++) {
-          formData.append('media_files', fileInput[i]);
-        }
-        await sendReviewImages('170444', formData)
-
-      }}>
-        <input type="file" multiple name='media_files' />
-        <Button type='submit' ></Button>
-      </Form>
       <div className="flex flex-col my-4 pt-[50px] border-t border-r-black/10 mt-[50px]">
         <ViewedProducts products={viewedProducts} />
         <RecommendationProducts recommended={recommendations} />
@@ -199,7 +186,7 @@ interface IReviewsModal {
   customerAccessToken: CustomerAccessToken,
 }
 export const ReviewsModal: FC<IReviewsModal> = ({ customerAccessToken }) => {
-  const actionData = useActionData<typeof action>();
+  const actionData: any = useActionData<any>();
 
   return (
     <Dialog >
@@ -242,7 +229,7 @@ export const ReviewInputs = () => {
   const onRemoveFile = (fileToRemove: FileWithPath) => {
     setFiles(prevFiles => prevFiles.filter(file => file !== fileToRemove));
   };
-  const actionData = useActionData<typeof action>();
+  const actionData: any = useActionData<any>();
   const navigation = useNavigation();
   const isSubmitting = navigation.state === 'submitting';
 
@@ -294,7 +281,7 @@ export const ReviewInputs = () => {
         </div>
         {actionData?.errors?.stars ? (
           <em className='text-red'>Ви не вибрали {
-            actionData?.errors?.stars.map((error) => {
+            actionData?.errors?.stars.map((error: string) => {
               return error + ". "
             })
           }
@@ -341,12 +328,18 @@ export const ReviewInputs = () => {
         {actionData?.errors?.content ? (
           <em className='text-red'>{actionData?.errors?.content}</em>
         ) : null}
-        <Button variant={"outline"} className='text-white text-[20px] w-full bg-[#01AB31] rounded-[30px] '>Опублікувати відгук
-          <svg className='ml-[15px]' width="23" height="24" viewBox="0 0 23 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M0 12C0 14.2745 0.674463 16.4979 1.9381 18.3891C3.20174 20.2802 4.99779 21.7542 7.09914 22.6246C9.20049 23.495 11.5128 23.7228 13.7435 23.279C15.9743 22.8353 18.0234 21.74 19.6317 20.1317C21.24 18.5234 22.3353 16.4743 22.779 14.2435C23.2228 12.0128 22.995 9.70049 22.1246 7.59914C21.2542 5.49779 19.7802 3.70174 17.8891 2.4381C15.9979 1.17446 13.7745 0.5 11.5 0.5C8.45001 0.5 5.52494 1.7116 3.36827 3.86827C1.2116 6.02494 0 8.95001 0 12ZM4.92857 11.1786H14.9089L10.3254 6.57282L11.5 5.42857L18.0714 12L11.5 18.5714L10.3254 17.3992L14.9089 12.8214H4.92857V11.1786Z"
-              fill="currentColor"
-            />
-          </svg>
+        <Button variant={"outline"} className='text-white text-[20px] w-full bg-[#01AB31] rounded-[30px] '>
+          {navigation.state == 'idle' ? <>
+            Опублікувати відгук
+            <svg className='ml-[15px]' width="23" height="24" viewBox="0 0 23 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M0 12C0 14.2745 0.674463 16.4979 1.9381 18.3891C3.20174 20.2802 4.99779 21.7542 7.09914 22.6246C9.20049 23.495 11.5128 23.7228 13.7435 23.279C15.9743 22.8353 18.0234 21.74 19.6317 20.1317C21.24 18.5234 22.3353 16.4743 22.779 14.2435C23.2228 12.0128 22.995 9.70049 22.1246 7.59914C21.2542 5.49779 19.7802 3.70174 17.8891 2.4381C15.9979 1.17446 13.7745 0.5 11.5 0.5C8.45001 0.5 5.52494 1.7116 3.36827 3.86827C1.2116 6.02494 0 8.95001 0 12ZM4.92857 11.1786H14.9089L10.3254 6.57282L11.5 5.42857L18.0714 12L11.5 18.5714L10.3254 17.3992L14.9089 12.8214H4.92857V11.1786Z"
+                fill="currentColor"
+              />
+            </svg>
+          </> : <div className="h-[16px]"><LoaderNew /></div>}
+
+
+
         </Button>
 
       </div>
@@ -357,12 +350,12 @@ export const ReviewInputs = () => {
 
 export const ReviewThanks = () => {
   return (
-    <div style={{ display: "block" }}>
+    <div className=' overflow-hidden block'>
       <DialogHeader className="block overflow-hidden flex items-center justify-center ">
         <DialogTitle className='font-bold text-[26px] text-center'>Дякуємо!</DialogTitle>
       </DialogHeader>
       <div className="size-grid">
-        <h5>Ваші відгуки допомагають ставати нам кращими</h5>
+        <h5 className='text-center text-[19px] px-0 py-5;'>Ваші відгуки допомагають ставати нам кращими</h5>
       </div>
     </div>
   )

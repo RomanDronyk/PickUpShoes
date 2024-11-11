@@ -12,7 +12,7 @@ const RadioItem = React.forwardRef<
     ref={ref}
     className={cn(
       "p-[7px] relative h-[48px] w-full flex items-center justify-center text-lg font-medium text-black border border-left-gray-300",
-      "hover:bg-gray-100 focus:ring-2 focus:ring-black",
+      "hover:bg-gray-100 ",
       className
     )}
     {...props}

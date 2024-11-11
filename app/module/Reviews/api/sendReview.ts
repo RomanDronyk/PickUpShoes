@@ -32,7 +32,6 @@ async function sendReview(objects: any, user: any, handle:string) {
       "accept": "*/*",
       "accept-language": "uk-UA,uk;q=0.9,en-US;q=0.8,en;q=0.7,ru;q=0.6",
     },
-    credentials: "include",
     body: formData,
   });
 
