@@ -47,36 +47,38 @@ export default function Homepage() {
 export async function loader({ context }: LoaderFunctionArgs) {
   const { storefront } = context;
 
-  const { collections } = await storefront.query(FEATURED_COLLECTION_QUERY);
+  const [FeaturedCollection, heroCollection, mainCollections, bestSellers, newProducts] = await Promise.all([
+    storefront.query(FEATURED_COLLECTION_QUERY),
+    storefront.query(HERO_QUERY),
+    storefront.query(MAIN_COOLLECTIONS, {
+      variables: {
+        country: context.storefront.i18n.country,
+        language: context.storefront.i18n.language,
+      },
+    }),
+    storefront.query(BEST_SELLERS, {
+      variables: {
+        country: context.storefront.i18n.country,
+        language: context.storefront.i18n.language,
+      },
+    }),
+    storefront.query(NEW_PRODUCTS, {
+      variables: {
+        country: context.storefront.i18n.country,
+        language: context.storefront.i18n.language,
+      },
+    })
+  ])
+  const { collections } = FeaturedCollection
+
   const featuredCollection = collections.nodes[0];
-
-  const heroCollection = await storefront.query(HERO_QUERY);
-  const mainCollections = await storefront.query(MAIN_COOLLECTIONS, {
-    variables: {
-      country: context.storefront.i18n.country,
-      language: context.storefront.i18n.language,
-    },
-  });
-
-  const bestSellers = await storefront.query(BEST_SELLERS, {
-    variables: {
-      country: context.storefront.i18n.country,
-      language: context.storefront.i18n.language,
-    },
-  });
-  const newProducts = await storefront.query(NEW_PRODUCTS, {
-    variables: {
-      country: context.storefront.i18n.country,
-      language: context.storefront.i18n.language,
-    },
-  });
 
   return defer({
     featuredCollection,
     heroCollection,
     mainCollections,
-    bestSellers: filterAvailablesProductOptions(bestSellers.collection.products.nodes)||[],
-    newProducts: filterAvailablesProductOptions(newProducts.collection.products.nodes)||[],
+    bestSellers: filterAvailablesProductOptions(bestSellers.collection.products.nodes) || [],
+    newProducts: filterAvailablesProductOptions(newProducts.collection.products.nodes) || [],
     storefront
   });
 }
