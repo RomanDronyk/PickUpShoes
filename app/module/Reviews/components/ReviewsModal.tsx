@@ -8,7 +8,6 @@ import ReviewInputs from "./reviewInputs";
 import ReviewLogin from "./reviewLogin";
 const ReviewsModal: FC<IReviewsModal> = ({ customerAccessToken }) => {
   const actionData: any = useActionData<any>();
-
   return (
     <Dialog >
       <DialogTrigger className='overflow-hidden' asChild>

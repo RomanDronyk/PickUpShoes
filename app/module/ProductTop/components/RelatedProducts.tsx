@@ -32,7 +32,7 @@ const RelatedProducts = ({ relatedProducts, handle }: { handle: string, relatedP
               className="w-full rounded-[20px]"
             />
             {!element.product.availableForSale &&
-              <span className="transition-opacity duration-[0.3s] ease-[ease-in-out] will-change-[opacity] w-[96%] h-[7px] absolute -translate-y-2/4 -rotate-45 mx-auto top-2/4 inset-x-0;"> <svg width="100%" height="100%" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ top: 0, position: "absolute" }}><rect x="0" y="2" width="100%" transform="" fill="black" stroke="#ECEFF1" strokeWidth="2" height="3"></rect></svg></span>
+              <span className="transition-opacity duration-\[0.3s\] ease-\[ease-in-out\] will-change-[opacity] w-[96%] h-[7px] absolute -translate-y-2/4 -rotate-45 mx-auto top-2/4 inset-x-0;"> <svg width="100%" height="100%" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ top: 0, position: "absolute" }}><rect x="0" y="2" width="100%" transform="" fill="black" stroke="#ECEFF1" strokeWidth="2" height="3"></rect></svg></span>
             }
           </Link>
         ))}

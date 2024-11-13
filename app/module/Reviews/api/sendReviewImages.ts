@@ -1,11 +1,9 @@
-// як тут встановити strict-origin-when-cross-origin 
 async function sendReviewImages(reviewId: string, formData: any) {
   if(reviewId==="" || typeof(reviewId)!=="string" || reviewId.length==0){
     throw new Error(`Введіть коректний reviewId`);
   }
   const url ="https://73dd57-2.myshopify.com/apps/easyreviews-proxy/online_store/reviews_image"
-  // Відправка даних
-  console.log(reviewId, "reviewId")
+
   const response = await fetch(`${url}/${reviewId}`, {
     method: "POST",
     headers: {
