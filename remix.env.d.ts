@@ -36,6 +36,7 @@ declare global {
     PUBLIC_CHECKOUT_DOMAIN: string;
     PRIVATE_ADMIN_API_TOKEN: string;
     PRIVATE_ADMIN_API_VERSION: string;
+    PUBLIC_SOCIAL_WIDGET_BASE_URL:string;
   }
 
   /**

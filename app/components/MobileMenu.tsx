@@ -1,4 +1,3 @@
-import { Drawer, DrawerClose, DrawerContent, DrawerTrigger } from './ui/drawer';
 import {
   Accordion,
   AccordionItem,
@@ -7,7 +6,6 @@ import {
 } from './ui/accordion';
 import {
   Sheet,
-  SheetClose,
   SheetHeader,
   SheetContent,
   SheetTrigger,
@@ -35,7 +33,6 @@ export function MobileMenu({
     <Sheet>
       <SheetTrigger asChild className="md:hidden">
         <Button variant="ghost" className="p-0">
-          {/* <Lottie style={style} animationData={burger} loop={true} /> */}
           <svg
             width="33"
             height="21"

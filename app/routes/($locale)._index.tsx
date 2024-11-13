@@ -14,8 +14,7 @@ import { Hero } from '~/components/Hero';
 import { MainCollections } from '~/components/MainCollections';
 import BestSellers from '~/components/BestSellers';
 import NewProducts from '~/components/NewProducts';
-import { RECOMENDED_PRODUCT_QUERY } from '~/graphql/queries';
-import RecommendationProducts from '~/components/RecommendationProducts';
+
 import { filterAvailablesProductOptions } from '~/utils';
 
 
@@ -24,23 +23,15 @@ export const handle: { breadcrumb: string } = {
   breadcrumb: 'home',
 };
 
-enum FormNames {
-  LOGIN_FORM = 'loginForm',
-  REGISTER_FORM = 'registerForm',
-}
-
 
 export const meta: MetaFunction = () => {
   return [{ title: 'PickupShoes | Головна' }];
 };
 
 
-
-
 export default function Homepage() {
-  const { heroCollection, mainCollections,recommendedProducts, bestSellers, newProducts, storefront } =
+  const { heroCollection, mainCollections, bestSellers, newProducts, storefront } =
     useLoaderData<typeof loader>();
-  const actionData = useActionData();
   return (
     <div className="home w-full flex flex-col items-center justify-center gap-y-[58px]">
       <Hero heroData={heroCollection} />
@@ -58,15 +49,6 @@ export async function loader({ context }: LoaderFunctionArgs) {
 
   const { collections } = await storefront.query(FEATURED_COLLECTION_QUERY);
   const featuredCollection = collections.nodes[0];
-  const { productRecommendations } = await storefront.query(
-    RECOMENDED_PRODUCT_QUERY,
-    {
-      variables: {
-        id:  "gid://shopify/Product/9138246943028",
-        intent:"COMPLEMENTARY",
-      },
-    },
-  );
 
   const heroCollection = await storefront.query(HERO_QUERY);
   const mainCollections = await storefront.query(MAIN_COOLLECTIONS, {
@@ -91,7 +73,6 @@ export async function loader({ context }: LoaderFunctionArgs) {
 
   return defer({
     featuredCollection,
-    recommendedProducts:productRecommendations,
     heroCollection,
     mainCollections,
     bestSellers: filterAvailablesProductOptions(bestSellers.collection.products.nodes)||[],

@@ -163,7 +163,6 @@ export default function Collection() {
   const memoizedInitialFilters = useMemo(() => filtersCollection?.products.filters, [filtersCollection?.products.filters]);
   const memoizedAppliedFilters = useMemo(() => appliedFilters, [appliedFilters]);
   const momoizedHeaderPromise = useMemo(() => headerPromise, [headerPromise]);
-
   const isMobile = useMedia('(max-width: 1024px)', false);
   const { ref, inView, entry } = useInView();
 

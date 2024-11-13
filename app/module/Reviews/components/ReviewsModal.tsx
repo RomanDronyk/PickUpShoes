@@ -1,14 +1,13 @@
 import { useActionData } from "@remix-run/react";
-import { CustomerAccessToken } from "@shopify/hydrogen-react/storefront-api-types";
 import { FC } from "react";
 import { Button } from "~/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '~/components/ui/dialog';
-
-interface IReviewsModal {
-  customerAccessToken: CustomerAccessToken,
-}
-export const ReviewsModal: FC<IReviewsModal> = ({ customerAccessToken }) => {
-  const actionData = useActionData<any>();
+import { Dialog, DialogContent, DialogTrigger } from '~/components/ui/dialog';
+import { IReviewsModal } from "../types/index.types";
+import ReviewThanks from "./reviewThanks";
+import ReviewInputs from "./reviewInputs";
+import ReviewLogin from "./reviewLogin";
+const ReviewsModal: FC<IReviewsModal> = ({ customerAccessToken }) => {
+  const actionData: any = useActionData<any>();
 
   return (
     <Dialog >
@@ -21,7 +20,7 @@ export const ReviewsModal: FC<IReviewsModal> = ({ customerAccessToken }) => {
           Написати відгук
         </Button>
       </DialogTrigger>
-      {/* <DialogContent className="sm:rounded-[30px] rounded-[30px] overflow-y-scroll overflow-x-scroll xl:overflow-visible max-h-[90vh]">
+      <DialogContent className="sm:rounded-[30px] rounded-[30px] overflow-y-scroll overflow-x-scroll xl:overflow-visible max-h-[90vh]">
         {actionData?.message == "success" ?
           <ReviewThanks /> :
           <>
@@ -33,9 +32,8 @@ export const ReviewsModal: FC<IReviewsModal> = ({ customerAccessToken }) => {
             }
           </>
         }
-
-
-      </DialogContent> */}
+      </DialogContent>
     </Dialog>
   )
 }
+export default ReviewsModal;

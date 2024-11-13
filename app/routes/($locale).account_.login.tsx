@@ -8,7 +8,7 @@ import { Form, Link, useActionData, type MetaFunction } from '@remix-run/react';
 import { Input } from '~/components/ui/input';
 import { Button } from '~/components/ui/button';
 import { CUSTOMER_CREATE_MUTATION, LOGIN_MUTATION, REGISTER_LOGIN_MUTATION } from '~/graphql/mutations';
-import { likedProductsCookie } from '~/cookies.server';
+import GoogleAuthButton from '~/components/GoogleAuthButton';
 
 enum FormNames {
   LOGIN_FORM = 'loginForm',
@@ -80,7 +80,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
         const { customerAccessToken } = customerAccessTokenCreate;
         session.set('customerAccessToken', customerAccessToken);
 
- 
+
         return redirect('/account/profile', {
           headers: {
             'Set-Cookie': await session.commit(),
@@ -251,6 +251,7 @@ export default function Login() {
               />
             </svg>
           </Button>
+          <GoogleAuthButton />
         </Form>
       </div>
       <div className="login rounded-[20px] border border-black/10 p-[1.2rem_1.6rem] ">
@@ -329,6 +330,8 @@ export default function Login() {
               />
             </svg>
           </Button>
+          <GoogleAuthButton />
+
         </Form>
       </div>
     </div>

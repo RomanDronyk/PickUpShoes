@@ -5,25 +5,19 @@ import {
   type CarouselApi
 } from '~/components/ui/carousel';
 import { useMedia } from "react-use";
-import ProductTabs from "./components/ProductTabs";
-import { CustomerAccessToken } from "@shopify/hydrogen-react/storefront-api-types";
 
 interface IProductPageTopView {
   handle: string,
   variants: any,
   relatedProducts: any,
   product: any,
-  customerAccessToken: CustomerAccessToken,
-  reviews: any
 }
 
-const ProductPageTopView: FC<IProductPageTopView> = ({
+const ProductTop: FC<IProductPageTopView> = ({
   handle,
   variants,
   relatedProducts,
   product,
-  customerAccessToken,
-  reviews,
 }) => {
   const { selectedVariant, descriptionHtml } = product;
 
@@ -62,7 +56,6 @@ const ProductPageTopView: FC<IProductPageTopView> = ({
     onSelect,
   }
 
-
   return (
     <>
       <div className="sm:grid sm:grid-cols-2 flex flex-col gap-y-5 gap-x-10">
@@ -75,12 +68,8 @@ const ProductPageTopView: FC<IProductPageTopView> = ({
           relatedProducts={relatedProducts}
         />
       </div>
-      <ProductTabs
-        customerAccessToken={customerAccessToken}
-        reviews={reviews}
-        description={descriptionHtml} />
     </>
 
   )
 }
-export default ProductPageTopView
+export default ProductTop

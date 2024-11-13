@@ -24,7 +24,6 @@ import { Button } from '~/components/ui/button';
 import { MoveDown, MoveUp } from 'lucide-react';
 import Loader from '~/components/Loader';
 import { COLLECTION_FILTER_QUERY, COLLECTION_QUERY } from '~/graphql/queries';
-import { Product } from '@shopify/hydrogen-react/storefront-api-types';
 
 export type SortParam =
   | 'price-low-high'

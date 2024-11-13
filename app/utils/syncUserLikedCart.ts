@@ -25,7 +25,7 @@ export const syncUserLikedCart = async (accessToken: string, cartIds: string[], 
             "value": JSON.stringify(cartIds)
           },
         ],
-        "id": customer.id
+        "id": customer?.id
       }
     }
   })

@@ -11,7 +11,7 @@ export const getUserCartId = async (accessToken: string, context: any) => {
     if (!customer) return "";
     const getCustomerWithCartId = await admin(USER_CART_ID_QUERY, {
       variables: {
-        id: customer.id
+        id: customer?.id
       }
     })
 

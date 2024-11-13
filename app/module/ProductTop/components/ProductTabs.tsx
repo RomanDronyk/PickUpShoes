@@ -1,7 +1,6 @@
 import { ScrollArea, ScrollBar } from '~/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/ui/tabs';
 import monoLogo from '~/assets/images/mono.svg';
-import { ReviewsList, ReviewsModal } from '~/routes/($locale).products.$handle';
 import { FC } from 'react';
 import { CustomerAccessToken } from '@shopify/hydrogen-react/storefront-api-types';
 
@@ -9,11 +8,13 @@ interface IProductTabs {
   description: string,
   customerAccessToken: CustomerAccessToken,
   reviews: any,
+  children:any
 }
 const ProductTabs: FC<IProductTabs> = ({
   description,
   customerAccessToken,
   reviews,
+  children,
 }) => {
   return (
     <div className="product-info my-6">
@@ -201,12 +202,7 @@ const ProductTabs: FC<IProductTabs> = ({
           </div>
         </TabsContent>
         <TabsContent value="product-review">
-          <div className='mb-[24px] flex justify-between'>
-            <h2 className='sm:text-[24px] text-[18px] font-semibold  mb-[20px]'>Відгуки покупців</h2>
-            <ReviewsModal customerAccessToken={customerAccessToken} />
-          </div>
-
-          <ReviewsList reviews={reviews} />
+            {children}
         </TabsContent>
         <TabsContent value="product-delivery">
           <h2 className='sm:text-[24px] text-[18px] font-semibold  mb-[20px]'

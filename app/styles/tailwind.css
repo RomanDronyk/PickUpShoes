@@ -283,6 +283,7 @@
   opacity: 1;
 }
 
+
 @media (min-width: 1200px) {
   .image-product-aspect {
     aspect-ratio: 1/1.2 !important;

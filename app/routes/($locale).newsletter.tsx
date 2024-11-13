@@ -1,5 +1,5 @@
 import invariant from 'tiny-invariant';
-import { json, redirect, type ActionArgs } from '@shopify/remix-oxygen';
+import { ActionFunctionArgs, json, redirect } from '@shopify/remix-oxygen';
 import { CUSTOMER_EMAIL_CONSENT_QUERY } from '~/graphql/queries';
 import { CREATE_SUBSCRIBER, UPDATE_CUSTOMER_MARKETING_CONSENT } from '~/graphql/mutations';
 
@@ -25,7 +25,7 @@ type CustomerMutationError = {
 
 type CustomerMutation = CustomerMutationSuccess | CustomerMutationError;
 
-export async function action({ context, request }: ActionArgs) {
+export async function action({ context, request }: ActionFunctionArgs) {
   const formData = await request.formData();
   const email = formData.get('email') as string;
 
@@ -68,7 +68,7 @@ export async function action({ context, request }: ActionArgs) {
     } else {
       // else, update existing
       const updated = await updateCustomerMarketingConsent({
-        customerId: existing.customer.id,
+        customerId: existing.customer?.id,
         context,
       });
 
@@ -103,7 +103,7 @@ async function returnSuccess({
   session,
 }: {
   subscriber: Subscriber;
-  session: ActionArgs['context']['session'];
+  session: ActionFunctionArgs['context']['session'];
 }) {
   // persist the marketing consent in a cookie so it can be read in the newsletter form
   // to show if a user is already subscribed without having to make an API call
@@ -136,7 +136,7 @@ async function getCustomerConsent({
   context,
 }: {
   email: string;
-  context: ActionArgs['context'];
+  context: ActionFunctionArgs['context'];
 }) {
 
 
@@ -163,7 +163,7 @@ async function updateCustomerMarketingConsent({
   context,
 }: {
   customerId: string;
-  context: ActionArgs['context'];
+  context: ActionFunctionArgs['context'];
 }): Promise<CustomerMutation> {
   const consentUpdatedAt = new Date(
     new Date().getTime() - new Date().getTimezoneOffset() * 60000,
@@ -204,7 +204,7 @@ async function createSubscriber({
   context,
 }: {
   email: string;
-  context: ActionArgs['context'];
+  context: ActionFunctionArgs['context'];
 }): Promise<CustomerMutation> {
 
   const consentUpdatedAt = new Date(

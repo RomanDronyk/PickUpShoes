@@ -39,8 +39,8 @@ export const meta: MetaFunction = () => {
 };
 
 
-export async function loader({ context, request }: LoaderFunctionArgs) {
-  const { cart, storefront, session } = context;
+export async function loader({ context }: LoaderFunctionArgs) {
+  const { cart } = context;
   const customerAccessToken = await context.session.get('customerAccessToken');
   if (!customerAccessToken) {
     return redirect('/account/login');

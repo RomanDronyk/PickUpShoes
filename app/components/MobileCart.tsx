@@ -10,9 +10,9 @@ import type { CartApiQueryFragment } from 'storefrontapi.generated';
 import type { CartLineUpdateInput } from '@shopify/hydrogen/storefront-api-types';
 import { FetcherWithComponents, Link } from '@remix-run/react';
 import { Button } from './ui/button';
-import { ArrowRight, Minus, Plus, X } from 'lucide-react';
+import {  Minus, Plus, X } from 'lucide-react';
 import { CartForm, Image, Money } from '@shopify/hydrogen';
-import { useContext, useEffect, useState } from 'react';
+import { useContext } from 'react';
 import { useVariantUrl } from '~/utils';
 import EmptyCart from './ui/emptyCart';
 import { HeaderBasketContext, HeaderContextInterface } from '~/context/HeaderCarts';
@@ -20,7 +20,6 @@ import OptionList from './common/optionList';
 import LoaderNew from './LoaderNew';
 
 type DropDownCartLine = CartApiQueryFragment['lines']['nodes'][0];
-
 type CartLine = CartApiQueryFragment['lines']['nodes'][0];
 
 export function MobileCart({
@@ -34,7 +33,6 @@ export function MobileCart({
     cartShowMobile: open,
     setCartShowMobile: setOpen
   } = useContext(HeaderBasketContext) as HeaderContextInterface
-  // const [open, setOpen] = useState(false);
 
   return (
     <Drawer open={open} onOpenChange={setOpen} direction="right">
@@ -336,7 +334,6 @@ function CartLineRemoveButton({ lineIds }: { lineIds: string[] }) {
           </Button>
         </>
       )}
-
     </CartForm>
   );
 }

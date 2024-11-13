@@ -82,7 +82,7 @@ export async function loader({ context, request }: any) {
   let likedCookes = (await likedProductsCookie.parse(cookieHeader)) || [];
 
   if (isLoggedIn && customerAccessToken?.accessToken) {
-    likedCookes = await getUserLikedCartIds(customerAccessToken.accessToken, context)
+    likedCookes = await getUserLikedCartIds(customerAccessToken?.accessToken, context)
 
   } else {
     likedCookes = (await likedProductsCookie.parse(cookieHeader)) || [];

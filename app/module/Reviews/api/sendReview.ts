@@ -3,10 +3,8 @@ async function sendReview(objects: any, user: any, handle:string) {
     throw new Error(`Введіть коректний handle`);
   }
 
-  // Створюємо об'єкт FormData
   const formData = new FormData();
 
-  // Додаємо дані до FormData
   formData.append("ezrv-widget_submit_input_rating_value_0", objects["Комфорт"]);
   formData.append("ezrv-widget_submit_input_rating_id_0", "0");
 

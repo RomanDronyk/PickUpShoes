@@ -74,7 +74,7 @@ export async function action({ context, request }: ActionArgs) {
     })
     const getCustomer = await context.admin(GET_ALL_CUSTOMER_FIELDS, {
       variables: {
-        id: customer.id
+        id: customer?.id
       }
     })
     return json(getCustomer)

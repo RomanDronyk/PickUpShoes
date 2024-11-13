@@ -148,7 +148,7 @@ function FilterDraw({
   return (
     <div className="flex flex-col">
       <div className="md:flex flex-col hidden">
-        {menu && menu?.items.map((item: any) => {
+        {/* {menu && menu?.items.map((item: any) => {
           return (
             <Accordion key={item.id} type="single" collapsible className="w-full">
               <AccordionItem value="sizes" >
@@ -199,7 +199,7 @@ function FilterDraw({
 
           )
         }
-        )}
+        )} */}
       </div>
       {filters.map((item, index) => markup(item))}
     </div>

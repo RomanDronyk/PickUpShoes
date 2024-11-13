@@ -23,7 +23,7 @@ export const syncUserCart = async (accessToken: string, cartId: string, context:
             "value": cartId
           },
         ],
-        "id": customer.id
+        "id": customer?.id
       }
     }
   })

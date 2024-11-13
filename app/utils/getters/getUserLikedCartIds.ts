@@ -5,9 +5,12 @@ export const getUserLikedCartIds = async (accessToken: string, context: any) => 
       customerAccessToken: accessToken,
     },
   })
+  if(!customer){
+    return []
+  }
   const getCustomer = await context.admin(GET_ALL_CUSTOMER_FIELDS, {
     variables: {
-      id: customer.id
+      id: customer?.id
     }
   })
   const customerLikedCart = getCustomer?.customer?.metafield?.value || "[]"
