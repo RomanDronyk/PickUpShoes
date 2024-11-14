@@ -1,6 +1,9 @@
 import { IReview } from "../types/index.types";
 
 const transformReviewsData = (data: any): IReview[] => {
+  if (!data?.reviews?.data) {
+    return []
+  }
   return data?.reviews?.data?.map((review: any) => ({
     rating_percentage: review.rating_percentage,
     reviewer_name: review.reviewer.name,
@@ -14,6 +17,6 @@ const transformReviewsData = (data: any): IReview[] => {
       media_path: media.media_path,
     })),
     reviewed_at: new Date(review.created_dt).getTime(),
-  }))
+  })) || []
 }
 export default transformReviewsData;
