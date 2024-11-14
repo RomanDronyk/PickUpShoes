@@ -95,6 +95,7 @@ export async function loader(args: LoaderFunctionArgs) {
 
   const getProductId = product.id.split("/");
   const getReviews = await fetchProductReviewsEasy(getProductId[getProductId.length - 1])
+  console.log(JSON.stringify(getReviews, null, 2))
   const reviews = transformReviewsData(getReviews)
   const newReviews = getReviews.reviews
   const reviewDataForPaginations = {

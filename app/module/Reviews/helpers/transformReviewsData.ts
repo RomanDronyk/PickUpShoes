@@ -1,7 +1,7 @@
 import { IReview } from "../types/index.types";
 
 const transformReviewsData = (data: any): IReview[] => {
-  return data?.reviews?.data.map((review: any) => ({
+  return data?.reviews?.data?.map((review: any) => ({
     rating_percentage: review.rating_percentage,
     reviewer_name: review.reviewer.name,
     review_ratings: review.review_ratings.map((rating: any) => ({

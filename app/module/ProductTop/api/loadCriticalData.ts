@@ -54,7 +54,7 @@ const loadCriticalData = async ({
 
   ///відображенн availableForSale прикріпленого продукту, відповідно до розміру який вибраний
   relatedProducts = relatedProducts.map(element => {
-    if (!element.product.availableForSale) return element;
+    if (!element?.product?.availableForSale) return element;
     const selectedVariantSize = selectedOptions.find(element => element.name === 'Size' || element.name === 'Розмір')?.value
     if (!selectedVariantSize) return element
     const productVariants = element.product.variants.edges;
@@ -66,7 +66,7 @@ const loadCriticalData = async ({
     return {
       product: {
         ...element.product,
-        availableForSale: typeof (filteredVariants?.node?.availableForSale) == "boolean" ? filteredVariants?.node?.availableForSale : element.product.availableForSale
+        availableForSale: typeof (filteredVariants?.node?.availableForSale) == "boolean" ? filteredVariants?.node?.availableForSale : element?.product?.availableForSale
 
       }
     }
