@@ -1,8 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Input } from './ui/input';
-import { useFetcher, useLoaderData } from '@remix-run/react';
-import { LoaderFunctionArgs, json } from '@remix-run/server-runtime';
-
+import { useFetcher } from '@remix-run/react';
 
 
 export function SubscribeFooter() {

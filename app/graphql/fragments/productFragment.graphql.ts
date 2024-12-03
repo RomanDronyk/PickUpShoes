@@ -23,7 +23,7 @@ export const PRODUCT_FRAGMENT = `#graphql
     selectedVariant: variantBySelectedOptions(selectedOptions: $selectedOptions) {
       ...ProductVariant
     }
-    variants(first: 10) {
+    variants(first: 20) {
       nodes {
         ...ProductVariant
       }

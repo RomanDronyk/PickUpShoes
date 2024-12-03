@@ -10,7 +10,6 @@ import {
   SheetContent,
   SheetTrigger,
 } from './ui/sheet';
-import { useState } from 'react';
 import type { HeaderProps } from './Header';
 import * as SheetPrimitive from '@radix-ui/react-dialog';
 import { Button } from './ui/button';
@@ -26,7 +25,6 @@ export function MobileMenu({
   logo: string | undefined;
   primaryDomainUrl: string;
 }) {
-  const [open, setOpen] = useState(false);
 
   const { publicStoreDomain } = useRootLoaderData();
   return (

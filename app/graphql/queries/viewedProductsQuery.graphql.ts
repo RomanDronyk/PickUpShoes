@@ -26,7 +26,7 @@ export const VIEWED_PRODUCT_QUERY = `#graphql
             currencyCode
           }
         }
-        variants(first: 10) {
+        variants(first: 20) {
           nodes {
             ...ProductVariant
           }

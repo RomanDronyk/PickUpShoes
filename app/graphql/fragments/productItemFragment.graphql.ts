@@ -25,7 +25,7 @@ export const PRODUCT_ITEM_FRAGMENT = `#graphql
         ...MoneyProductItem
       }
     }
-    variants(first: 10) {
+    variants(first: 20) {
       nodes {
         selectedOptions {
           name
@@ -72,7 +72,7 @@ export const PRODUCT_ITEM_FRAGMENT_WITHOUT_VARIANT_FRAGMENT = `#graphql
         ...MoneyProductItem
       }
     }
-    variants(first: 10) {
+    variants(first: 20) {
       nodes {
         selectedOptions {
           name

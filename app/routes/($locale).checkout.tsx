@@ -177,7 +177,7 @@ async function createOrder(data: FormData, context: any) {
     if (!paymentMethod) return json({ error: 'Виберіть спосіб оплатии' }, { status: 405 });
     if (!deliveryMethod) return json({ error: 'Виберіть спосіб доставки' }, { status: 405 });
 
-    let paymentLink;
+    let paymentLink={pageUrl: "/thanks"}
     const generateOrderInShopifyAdminPromise = await generateOrderInShopifyAdmin(context, orderData)
 
     if (paymentMethod == "card") {

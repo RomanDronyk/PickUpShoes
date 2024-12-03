@@ -25,6 +25,18 @@ export const handle = {
   breadcrumb: 'product',
 };
 
+const getUserData = async (storefront: Storefront, customerAccessToken: string) => {
+  if (customerAccessToken === "" || typeof (customerAccessToken) !== "string" || customerAccessToken.length == 0) {
+    throw new Error(`Введіть коректний customerAccessToken`);
+  }
+  return await storefront.query(CUSTOMER_DATA_BY_ACCESS_TOKEN_QUERY, {
+    variables: {
+      customerAccessToken: customerAccessToken
+    }
+  },
+  );
+}
+
 export const action: ActionFunction = async ({ context, request, params }) => {
   const errors: any = {};
   const formData = await request.formData();
@@ -73,17 +85,6 @@ export const action: ActionFunction = async ({ context, request, params }) => {
 };
 
 
-const getUserData = async (storefront: Storefront, customerAccessToken: string) => {
-  if (customerAccessToken === "" || typeof (customerAccessToken) !== "string" || customerAccessToken.length == 0) {
-    throw new Error(`Введіть коректний customerAccessToken`);
-  }
-  return await storefront.query(CUSTOMER_DATA_BY_ACCESS_TOKEN_QUERY, {
-    variables: {
-      customerAccessToken: customerAccessToken
-    }
-  },
-  );
-}
 
 export async function loader(args: LoaderFunctionArgs) {
   const { context } = args;

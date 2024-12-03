@@ -100,7 +100,6 @@ const CheckoutScreen: FC<ICheckoutScreen> = ({ actionErrorMessage, cartsFromCart
   };
   const navigation = useNavigation();
 
-
   return (
     <div className="overflow-hidden max-w-full flex flex-col-reverse contaier gap-[20px] md:gap-[40px] md:grid md:grid-cols-2 lg:grid-cols-[1fr_1fr] md:grid-cols-2 md:gap-y-10 md:gap-x-10 lg:px-24 px-[10px] my-10 w-full mt-[1rem]">
       <Form action="/checkout" method="POST" className='grid gap-[35px] max-w-full overflow-hidden'>

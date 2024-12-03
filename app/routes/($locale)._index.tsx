@@ -169,7 +169,7 @@ const PRODUCT_ITEM_FRAGMENT = `#graphql
         ...MoneyProductItem
       }
     }
-    variants(first: 10) {
+    variants(first: 20) {
       nodes {
         availableForSale
         id

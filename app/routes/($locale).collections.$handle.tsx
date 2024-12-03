@@ -225,7 +225,6 @@ export function PaginatedResourceSection<NodesType>({
         const resoucesMarkup = nodes.map((node, index) =>
           children({ node, index }),
         );
-
         return (
           <div>
             <PreviousLink>

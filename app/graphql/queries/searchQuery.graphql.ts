@@ -8,7 +8,7 @@ export const SEARCH_QUERY = `#graphql
     title
     trackingParameters
     vendor
-    variants(first: 10) {
+    variants(first: 20) {
       nodes {
         id
         image {
