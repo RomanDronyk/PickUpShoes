@@ -117,7 +117,7 @@ export default function Checkout() {
     const [cartsFromCart, setCartsFromCart] = useState<any>([])
 
     const amount = cartData?.cost?.subtotalAmount?.amount || "0"
-
+    console.log(response, "responce from action")
     const urlFromAction = response?.pageUrl;
     const navigate = useNavigate()
 

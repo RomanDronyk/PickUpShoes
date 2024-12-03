@@ -76,15 +76,12 @@ const CheckoutScreen: FC<ICheckoutScreen> = ({ actionErrorMessage, cartsFromCart
       errorMessage: "",
     },
   })
+
   const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
     setIsReady(true);
   }, []);
-
-  if (typeof window === 'undefined') {
-    return null;
-  }
 
   const onInputChange = (value: string | boolean, fieldName: keyof IInputField, id: string) => {
     const elementId = id as keyof IInputState;
@@ -123,7 +120,7 @@ const CheckoutScreen: FC<ICheckoutScreen> = ({ actionErrorMessage, cartsFromCart
           <h2 className="xl:text-[32px] text-[24px] text-left  font-medium mb-[20px]">
             Дані для доставки
           </h2>
-          {isReady && <fieldset className="flex flex-col gap-[15px]">
+          <fieldset className="flex flex-col gap-[15px]">
             <div className='pb-[15px] border-b border-black/20'>
               <Input
                 onBlur={(e) => onInputChange(true, "isBlur", e.target.id)}
@@ -228,7 +225,7 @@ const CheckoutScreen: FC<ICheckoutScreen> = ({ actionErrorMessage, cartsFromCart
               />
               {inputState.userEmail.errorMessage && inputState.userEmail.isBlur && <div className="text-red">{inputState.userEmail.errorMessage}</div>}
             </div>
-          </fieldset>}
+          </fieldset>
 
         </div>
         <div className="register rounded-[20px] border border-black/10 p-[20px_24px] ">

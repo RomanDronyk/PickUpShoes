@@ -4,6 +4,7 @@ import Autocomplete from '@mui/material/Autocomplete';
 import { useState, useEffect } from 'react';
 import style from './style';
 import { IInputField, IInputState } from '~/screens/CheckoutScreen';
+import NoSsr from '@mui/material/NoSsr';
 
 interface IContactType {
   inputState: IInputState,
@@ -12,19 +13,12 @@ interface IContactType {
 
 const ContactType: React.FC<IContactType> = ({ onInputChange, inputState }) => {
   const [open, setOpen] = useState(false);
-  const [isReady, setIsReady] = useState(false);
 
-  useEffect(() => {
-    setIsReady(true);
-  }, []);
-
-  if (typeof window === 'undefined') {
-    return null;
-  }
-  return isReady ? (
+  return  (
 
     <>
-      <Autocomplete
+    <NoSsr>
+    <Autocomplete
         id="contactType"
         sx={style}
         open={open}
@@ -61,12 +55,13 @@ const ContactType: React.FC<IContactType> = ({ onInputChange, inputState }) => {
           />
         )}
       />
+    </NoSsr>
+
       {(!inputState.contactType.value && inputState.contactType.isBlur) && <div className='text-red'>{inputState.contactType.errorMessage}</div>}
 
     </>
 
-  ) : null;
-
+  )
 }
 export default ContactType
 

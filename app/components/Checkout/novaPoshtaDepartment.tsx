@@ -1,9 +1,10 @@
+import React, { useEffect, useState } from 'react';
 import TextField from '@mui/material/TextField';
 import Autocomplete from '@mui/material/Autocomplete';
 import CircularProgress from '@mui/material/CircularProgress';
-import React, { useEffect, useState } from 'react';
 import style from './style';
 import { IInputField, IInputState, INovaDepartment } from '~/screens/CheckoutScreen';
+import NoSsr from '@mui/material/NoSsr';
 
 
 interface INovaPoshtaDepartent {
@@ -15,21 +16,7 @@ const NovaPoshtaDepartent: React.FC<INovaPoshtaDepartent> = ({ inputState, onInp
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [options, setOptions] = useState([])
-  const [isReady, setIsReady] = useState(false);
-
-  useEffect(() => {
-    setIsReady(true);
-  }, []);
-
-  if (typeof window === 'undefined') {
-    return null;
-  }
-
-
-
   const [debounceTimer, setDebounceTimer] = useState<NodeJS.Timeout | null>(null);
-
-
 
   useEffect(() => {
     if (debounceTimer) {
@@ -87,8 +74,10 @@ const NovaPoshtaDepartent: React.FC<INovaPoshtaDepartent> = ({ inputState, onInp
   };
 
 
-  return isReady ? (
+  return  (
     <>
+    <NoSsr>
+
       <Autocomplete
         id="novaDepartment"
         sx={style}
@@ -130,9 +119,11 @@ const NovaPoshtaDepartent: React.FC<INovaPoshtaDepartent> = ({ inputState, onInp
           )
         }}
       />
+    </NoSsr>
+
       {(!inputState.novaDepartment.Description && inputState.novaDepartment.isBlur) && <div className='text-red'>{inputState.novaDepartment.errorMessage}</div>}
     </>
-  ) : null
+  ) 
 }
 
 export default NovaPoshtaDepartent

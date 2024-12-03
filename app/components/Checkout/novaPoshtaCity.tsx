@@ -5,6 +5,7 @@ import CircularProgress from '@mui/material/CircularProgress';
 import { useEffect, useState } from 'react';
 import style from './style';
 import { IInputField, IInputState, INovaCity } from '~/screens/CheckoutScreen';
+import NoSsr from '@mui/material/NoSsr';
 
 
 interface INovaPoshtaCity {
@@ -18,16 +19,8 @@ const NovaPoshtaCity: React.FC<INovaPoshtaCity> = ({ inputState, onInputChange, 
   const [options, setOptions] = useState<INovaCity[]>([]);
   const [inputText, setInputCity] = useState("");
   const [debounceTimer, setDebounceTimer] = useState<NodeJS.Timeout | null>(null);
-  const [isReady, setIsReady] = useState(false)
   const [loading, setLoading] = useState(false)
 
-  useEffect(() => {
-    setIsReady(true);
-  }, []);
-
-  if (typeof window === 'undefined') {
-    return null;
-  }
 
   useEffect(() => {
     if (!open) {
@@ -101,47 +94,51 @@ const NovaPoshtaCity: React.FC<INovaPoshtaCity> = ({ inputState, onInputChange, 
     }
   };
 
-  return isReady ? (
+  return (
     <>
-      <Autocomplete
-        id="novaCity"
-        sx={style}
-        open={open}
-        onOpen={() => {
-          setOpen(true);
-        }}
-        onClose={() => {
-          setOpen(false);
-          onInputChange(true, "isBlur", "novaCity")
-        }}
-        onChange={handleCityChange}
-        isOptionEqualToValue={(option, value) => option.Present === value.Present}
-        getOptionLabel={(option) => option.Present}
-        options={options}
-        loading={loading}
-        noOptionsText="Місто не знайдено"
-        renderInput={(params) => (
-          <TextField
-            {...params}
-            placeholder='Місто'
-            required
-            value={inputText}
-            onChange={(element) => setInputCity(element.target.value)}
-            InputProps={{
-              ...params.InputProps,
-              endAdornment: (
-                <React.Fragment>
-                  {loading ? <CircularProgress color="inherit" size={20} /> : null}
-                  {params.InputProps.endAdornment}
-                </React.Fragment>
-              ),
-            }}
-          />
-        )}
-      />
+      <NoSsr>
+
+        <Autocomplete
+          id="novaCity"
+          sx={style}
+          open={open}
+          onOpen={() => {
+            setOpen(true);
+          }}
+          onClose={() => {
+            setOpen(false);
+            onInputChange(true, "isBlur", "novaCity")
+          }}
+          onChange={handleCityChange}
+          isOptionEqualToValue={(option, value) => option.Present === value.Present}
+          getOptionLabel={(option) => option.Present}
+          options={options}
+          loading={loading}
+          noOptionsText="Місто не знайдено"
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              placeholder='Місто'
+              required
+              value={inputText}
+              onChange={(element) => setInputCity(element.target.value)}
+              InputProps={{
+                ...params.InputProps,
+                endAdornment: (
+                  <React.Fragment>
+                    {loading ? <CircularProgress color="inherit" size={20} /> : null}
+                    {params.InputProps.endAdornment}
+                  </React.Fragment>
+                ),
+              }}
+            />
+          )}
+        />
+      </NoSsr>
+
       {(!inputState.novaCity.MainDescription && inputState.novaCity.isBlur) && <div className='text-red'>{inputState.novaCity.errorMessage}</div>}
     </>
-  ) : null
+  )
 
 }
 export default NovaPoshtaCity
