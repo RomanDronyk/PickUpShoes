@@ -76,7 +76,7 @@ export const ProductsFilter = React.memo(function ProductsFilter({
           />
         </svg>
       </div>
-      {appliedFilters.length > 0 && (
+      {appliedFilters?.length > 0 && (
         <div className="">
           <AppliedFilters filters={appliedFilters} />
         </div>
@@ -117,19 +117,19 @@ function FilterDraw({
         const price = priceFilterValue
           ? (JSON.parse(priceFilterValue || "[]") as { min: number; max: number })
           : {
-            min: initialRangePrice.price.min,
-            max: initialRangePrice.price.max,
+            min: initialRangePrice?.price?.min,
+            max: initialRangePrice?.price?.max,
           };
         return (
           <PriceFilter
             key={filter.id}
-            min={initialRangePrice.price.min}
-            max={initialRangePrice.price.max}
+            min={initialRangePrice?.price?.min}
+            max={initialRangePrice?.price?.max}
             value={price}
           />
         );
       case 'LIST':
-        return <ListFilter appliedFilters={appliedFilters} key={filter.id} filter={filter} />;
+        return <ListFilter appliedFilters={appliedFilters} key={filter?.id} filter={filter} />;
     }
   };
   const [value, setValue] = useState<string[]>([]);
@@ -216,22 +216,22 @@ function PriceFilter({
   value: { min: number; max: number };
 }) {
 
-  const initialRangeValue: any = value ? [value.min, value.max] : [min, max];
+  const initialRangeValue: any = value ? [value?.min, value?.max] : [min, max];
   const [priceRange, setPriceRange] = useState(initialRangeValue);
 
 
   const location = useLocation();
   const params = useMemo(
-    () => new URLSearchParams(location.search),
-    [location.search],
+    () => new URLSearchParams(location?.search),
+    [location?.search],
   );
   const navigate = useNavigate();
   useEffect(() => {
-    const searchParams = new URLSearchParams(location.search);
+    const searchParams = new URLSearchParams(location?.search);
     if (!searchParams.has('filter.price')) {
       setPriceRange(initialRangeValue);
     }
-  }, [location.search, setPriceRange]);
+  }, [location?.search, setPriceRange]);
 
   function debounce(func: (...args: any[]) => void, delay: number) {
     let timeoutId: NodeJS.Timeout;
@@ -368,8 +368,8 @@ const ListFilter: React.FC<ListFilterProps> = ({ filter: newFilter, appliedFilte
 
 
   const params = useMemo(
-    () => new URLSearchParams(location.search),
-    [location.search],
+    () => new URLSearchParams(location?.search),
+    [location?.search],
   );
 
   const exampleValue = filter.values[0];
@@ -579,7 +579,7 @@ function getFilterFromLink(
   filter: Filter,
   location: ReturnType<typeof useLocation>,
 ) {
-  const decodeSearchParams = decodeURIComponent(location.search);
+  const decodeSearchParams = decodeURIComponent(location?.search);
   const arrayDecodeSearchParams = decodeSearchParams
     ? decodeSearchParams.split('&')
     : [];
