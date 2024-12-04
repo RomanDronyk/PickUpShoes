@@ -5,7 +5,7 @@ import { useVariantUrl } from "~/utils"
 import { FetcherWithComponents, Link } from "@remix-run/react"
 import OptionList from "../common/optionList"
 import LoaderNew from "../LoaderNew"
-
+ 
 const CheckoutCart = ({ cartsFromCart }: any) => {
 
     const [loading, setLoading] = useState(false)
