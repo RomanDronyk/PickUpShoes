@@ -59,6 +59,7 @@ export const generageMonoUrl = async (amount: any, products: any, id: string, si
   const MONO_TOKEN = "mcj6m0Oy6AyAVLqfvAHk3jA";
   const MONO_URL = "https://api.monobank.ua/api/merchant/invoice/create"
   try {
+    
     const response = await fetch(MONO_URL, {
       method: "POST",
       headers: {
