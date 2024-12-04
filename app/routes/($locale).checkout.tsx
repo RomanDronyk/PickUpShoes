@@ -121,11 +121,11 @@ export default function Checkout() {
     const urlFromAction = response?.pageUrl;
     const navigate = useNavigate()
 
-    if (urlFromAction == "/thanks") {
-        urlFromAction ? navigate(urlFromAction) : null;
-    } else if (urlFromAction !== null && urlFromAction) {
-        window.location.href = urlFromAction;
-    }
+    // if (urlFromAction == "/thanks") {
+    //     urlFromAction ? navigate(urlFromAction) : null;
+    // } else if (urlFromAction !== null && urlFromAction) {
+    //     window.location.href = urlFromAction;
+    // }
     useEffect(() => {
         const carts = cartData?.lines?.nodes?.map((element: any) => element) || [];
         setCartsFromCart(carts)
@@ -178,17 +178,17 @@ async function createOrder(data: FormData, context: any) {
     if (!deliveryMethod) return json({ error: 'Виберіть спосіб доставки' }, { status: 405 });
 
     let paymentLink={pageUrl: "/thanks"}
-    const generateOrderInShopifyAdminPromise = await generateOrderInShopifyAdmin(context, orderData)
+    // const generateOrderInShopifyAdminPromise = await generateOrderInShopifyAdmin(context, orderData)
 
     if (paymentMethod == "card") {
         paymentLink = await generageMonoUrl(amount, products,
-            `${generateOrderInShopifyAdminPromise.draftOrderComplete.draftOrder.order.id}`,
+            `12313`,
             "https://pick-up-shoes.com.ua")
     }
 
     try {
         if (cart) {
-            await cart.removeLines(productIds);
+            // await cart.removeLines(productIds);
         }
     } catch (error) {
         console.error('Failed to clear cart:', error);

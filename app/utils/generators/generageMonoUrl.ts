@@ -85,7 +85,7 @@ export const generageMonoUrl = async (amount: any, products: any, id: string, si
     if (!response.ok) {
       const errorText = await response.text();
       console.error(`Monobank API error (status: ${response.status}):`, errorText);
-      return { error: errorText, pageUrl: "/thanks" };
+      return { error: errorText,jsonText: response.json(), pageUrl: "/thanks" };
     }
 
     const result: any = await response.json();
