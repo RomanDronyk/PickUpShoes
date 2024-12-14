@@ -1,7 +1,9 @@
 import { PRODUCT_VARIANT_FRAGMENT } from '../fragments/productVariantFragment.graphql';
 
 export const RECOMENDED_PRODUCT_QUERY = `#graphql
-  query RecommendedProducts($id: ID!, $intent: ProductRecommendationIntent) {
+  query RecommendedProducts($country: CountryCode, $language: LanguageCode, $id: ID!, $intent: ProductRecommendationIntent) 
+    @inContext(country: $country, language: $language) {
+    
     productRecommendations(productId: $id, intent: $intent) {
       ... on Product {
         id
@@ -32,6 +34,7 @@ export const RECOMENDED_PRODUCT_QUERY = `#graphql
       }
     }
   }
+  
   ${PRODUCT_VARIANT_FRAGMENT}
 ` as const;
 

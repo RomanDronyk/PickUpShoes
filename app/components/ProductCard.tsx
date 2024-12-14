@@ -6,10 +6,9 @@ import {
 } from '@shopify/hydrogen';
 import { cn } from '~/lib/utils';
 
-import { Link, NavLink, useNavigate } from '@remix-run/react';
-import { useVariantUrl } from '~/utils';
+import { Link, NavLink } from '@remix-run/react';
 import { useMedia } from 'react-use';
-import { useRef, useReducer, useEffect, useState, useContext } from 'react';
+import { useRef, useEffect, useState, useContext } from 'react';
 import { HeaderBasketContext, HeaderContextInterface } from '~/context/HeaderCarts';
 import { Product, ProductVariant } from '@shopify/hydrogen-react/storefront-api-types';
 import HeartIcon from './ui/heartIcon';
@@ -175,18 +174,20 @@ export function ProductCard({
   );
 }
 function ProductOptions({ options, option }: { options?: any, option: VariantOption }) {
-  const colorOption = options?.find((opt: any) => opt.name === "Колір");
+  const colorOption = options?.find((opt: any) => opt.name === "Колір" || opt.name == "Color");
+  const sizeOption = options?.find((opt: any) => opt.name === "Розмір" || opt.name == "Size");
 
   return (
     <div className="product-options" key={option.name}>
       <div className="grid grid-cols-6 gap-x-[5px] gap-y-[10px] items-center place-content-center py-[10px]">
         {option.values.map(({ value, isAvailable, isActive, to }) => {
-          let newLink = to;
-          if (colorOption) {
+          console.log(options, option, 'option value')
+          let newLink = to
+          if (colorOption || sizeOption) {
             // Parse the URL and append the color parameter
             const [baseUrl, queryParams] = to.split('?');
             const searchParams = new URLSearchParams(queryParams);
-            searchParams.set("Колір", colorOption.values[0]);
+            colorOption?.values?.length > 0 && searchParams.set("Color", colorOption.values[0]);
             newLink = `${baseUrl}?${searchParams.toString()}`;
           }
 

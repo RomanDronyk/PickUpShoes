@@ -95,6 +95,8 @@ const loadCriticalData = async ({
       RECOMENDED_PRODUCT_QUERY,
       {
         variables: {
+          language: 'UK',
+          country: 'UA',
           id: product?.id || "0"
         },
       })],

@@ -12,7 +12,7 @@ export default function ViewedProducts({
   products: ViewedProductsQuery["nodes"];
 }) {
 
-
+  console.log(products, 'viewed products')
   return (
     <div className="flex flex-col w-full gap-[30px]  pb-[35px] px-5 md:px-0">
       {products && (

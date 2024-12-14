@@ -9,7 +9,12 @@ const loadDeferredData = ({ context, params }: LoaderFunctionArgs) => {
   // this deffered query resolves, the UI will update.
   const variants = context.storefront
     .query(VARIANTS_QUERY, {
-      variables: { handle: params.handle! },
+      variables: { 
+        handle: 
+        params.handle!,
+        language: 'UK',
+        country: 'UA',
+       },
     })
     .catch((error) => {
       console.error(error);
