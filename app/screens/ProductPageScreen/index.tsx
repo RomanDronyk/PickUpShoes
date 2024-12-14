@@ -4,13 +4,14 @@ import { ProductTabs, ProductTop } from "~/module/ProductTop";
 import RecommendationProducts from '~/components/RecommendationProducts';
 import ViewedProducts from '~/components/ViewedProducts';
 interface IProductPageScreen {
-  loaderData:any
+  loaderData: any
 }
 
 const ProductPageScreen: FC<IProductPageScreen> = ({
   loaderData
 }) => {
-  const  { product, reviewsReal, customerAccessToken, variants, viewedProducts, handle, recommendations, relatedProducts, reviews: Reviews }: any =loaderData;
+  const { product, reviewsReal, customerAccessToken, variants, viewedProducts, handle, recommendations, relatedProducts, reviews: Reviews }: any = loaderData;
+  console.log(product, "product")
   const { descriptionHtml } = product;
 
   const [startCursor, setStartCursor] = useState('')

@@ -61,10 +61,7 @@ export const action = async ({ request, context }: ActionFunctionArgs) => {
 export async function loader({ context, request }: any) {
   const { storefront, session } = context;
   const bestSellers = await storefront.query(BEST_SELLERS_QUERY, {
-    variables: {
-      country: context.storefront.i18n.country,
-      language: context.storefront.i18n.language,
-    },
+    variables: {},
   });
   const customerAccessToken = await session.get('customerAccessToken');
 

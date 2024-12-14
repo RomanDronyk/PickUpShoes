@@ -12,8 +12,6 @@ const loadDeferredData = ({ context, params }: LoaderFunctionArgs) => {
       variables: { 
         handle: 
         params.handle!,
-        language: 'UK',
-        country: 'UA',
        },
     })
     .catch((error) => {

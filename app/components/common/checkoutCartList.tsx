@@ -11,6 +11,7 @@ interface ICheckoutCartList {
 
 const CheckoutCartList: FC<ICheckoutCartList> = ({ carts }: ICheckoutCartList) => {
   const isMobile = useMedia('(max-width: 767px)', false);
+  console.log(carts, "carts")
   return (
     <>
       {carts.length > 0 && carts.map((product: IProduct, index: number) => (

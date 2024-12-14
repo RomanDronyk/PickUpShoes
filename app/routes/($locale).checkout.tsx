@@ -29,9 +29,9 @@ export const loader = async ({ context, request }: { context: AppLoadContext, re
     const cartData = await cart.get();
     const cartNodes: any = cartData?.lines?.nodes;
 
-    if (cartNodes?.length == 0 || !cartNodes?.length) {
-        return redirect("/", 302)
-    }
+    // if (cartNodes?.length == 0 || !cartNodes?.length) {
+    //     return redirect("/", 302)
+    // }
     const productIds = cartNodes?.map((product: any) => product?.merchandise?.product?.id);
 
     const cache = new Map();
@@ -120,12 +120,35 @@ export default function Checkout() {
     console.log(response, "responce from action")
     const urlFromAction = response?.pageUrl;
     const navigate = useNavigate()
+    const generateLink = async () => {
+        if (urlFromAction === "/thanks") {
+            console.log(urlFromAction)
+            urlFromAction ? navigate(urlFromAction) : null;
+        } else if (
+            urlFromAction === "/mono" &&
+            response?.dataFromMono?.products &&
+            response?.dataFromMono?.amount &&
+            response?.dataFromMono?.id
+        ) {
+            console.log(urlFromAction)
+            const link = await generageMonoUrl(
+                response?.dataFromMono?.amount,
+                response?.dataFromMono?.products,
+                response?.dataFromMono?.id,
+                'https://pick-up-shoes.com.ua',
+            );
+            console.log(link, "link mono dats")
+            if (link?.pageUrl) {
+                window.location.href = link?.pageUrl;
 
-    // if (urlFromAction == "/thanks") {
-    //     urlFromAction ? navigate(urlFromAction) : null;
-    // } else if (urlFromAction !== null && urlFromAction) {
-    //     window.location.href = urlFromAction;
-    // }
+            }
+        }
+
+    };
+
+    generateLink();
+
+
     useEffect(() => {
         const carts = cartData?.lines?.nodes?.map((element: any) => element) || [];
         setCartsFromCart(carts)
@@ -177,21 +200,32 @@ async function createOrder(data: FormData, context: any) {
     if (!paymentMethod) return json({ error: 'Виберіть спосіб оплатии' }, { status: 405 });
     if (!deliveryMethod) return json({ error: 'Виберіть спосіб доставки' }, { status: 405 });
 
-    let paymentLink={pageUrl: "/thanks"}
-    // const generateOrderInShopifyAdminPromise = await generateOrderInShopifyAdmin(context, orderData)
-
-    if (paymentMethod == "card") {
-        paymentLink = await generageMonoUrl(amount, products,
-            `12313`,
-            "https://pick-up-shoes.com.ua")
-    }
-
+    const generateOrderInShopifyAdminPromise = await generateOrderInShopifyAdmin(context, orderData)
     try {
         if (cart) {
-            // await cart.removeLines(productIds);
+            await cart.removeLines(productIds);
         }
     } catch (error) {
         console.error('Failed to clear cart:', error);
     }
-    return paymentLink
+
+    if (paymentMethod == "card") {
+        return {
+            dataFromMono: {
+                amount,
+                products,
+                id: generateOrderInShopifyAdminPromise?.draftOrderComplete?.draftOrder?.id,
+                site: "https://pick-up-shoes.com.ua"
+            },
+            pageUrl: "/mono",
+        }
+    } else {
+        return { pageUrl: "/thanks", dataFromMono: {} }
+
+    }
+
+
 }
+
+
+

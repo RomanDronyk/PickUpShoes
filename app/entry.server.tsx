@@ -1,8 +1,6 @@
-
-
 import type { EntryContext } from '@shopify/remix-oxygen';
 import { RemixServer } from '@remix-run/react';
-import { isbot } from "isbot";
+import { isbot } from 'isbot';
 import { renderToReadableStream } from 'react-dom/server';
 import { createContentSecurityPolicy } from '@shopify/hydrogen';
 import { AppLoadContext } from '@remix-run/server-runtime';
@@ -12,7 +10,7 @@ export default async function handleRequest(
   responseStatusCode: number,
   responseHeaders: Headers,
   remixContext: EntryContext,
-  context: AppLoadContext
+  context: AppLoadContext,
 ) {
   const { nonce, header, NonceProvider } = createContentSecurityPolicy({
     shop: {
@@ -20,23 +18,51 @@ export default async function handleRequest(
       storeDomain: context.env.PUBLIC_STORE_DOMAIN,
     },
     imgSrc: [
-      "'self'", "https://imagedelivery.net", "https://cdn.shopify.com", 
-      "https://pick-up-shoes.com.ua/", "http://localhost:3100", "data:", "blob:"
+      "'self'",
+      'https://imagedelivery.net',
+      'https://cdn.shopify.com',
+      'https://pick-up-shoes.com.ua',
+      'http://localhost:3000',
+      'http://localhost:3100',
+      'https://api.monobank.ua',
+      'data:',
+      'blob:',
     ],
     styleSrc: [
-      "'self'", "https://api.ipify.org","https://cdn.shopify.com", "https://apps.hiko.link","https://apps.hiko.software", 
-      "https://monorail-edge.shopifysvc.com", "https://73dd57-2.myshopify.com", 
-      "http://localhost:*"
+      "'self'",
+      'https://api.ipify.org',
+      'https://cdn.shopify.com',
+      'https://apps.hiko.link',
+      'https://apps.hiko.software',
+      'https://monorail-edge.shopifysvc.com',
+      'http://localhost:3000',
+      'http://localhost:3100',
+      'https://73dd57-2.myshopify.com',
+      'https://api.monobank.ua',
     ],
     scriptSrc: [
-      "'self'","https://api.ipify.org", "https://cdn.shopify.com", "https://apps.hiko.link","https://apps.hiko.software", 
-      "https://monorail-edge.shopifysvc.com", "https://73dd57-2.myshopify.com", 
-      "http://localhost:*"
+      "'self'",
+      'https://api.ipify.org',
+      'https://cdn.shopify.com',
+      'https://apps.hiko.link',
+      'https://apps.hiko.software',
+      'https://monorail-edge.shopifysvc.com',
+      'http://localhost:3000',
+      'http://localhost:3100',
+      'https://73dd57-2.myshopify.com',
+      'https://api.monobank.ua',
     ],
     connectSrc: [
-      "'self'", "https://api.ipify.org","https://apps.hiko.link","https://apps.hiko.software", "https://monorail-edge.shopifysvc.com", 
-      "https://73dd57-2.myshopify.com", "http://localhost:*"
-    ]
+      "'self'",
+      'https://api.ipify.org',
+      'https://apps.hiko.link',
+      'https://apps.hiko.software',
+      'https://monorail-edge.shopifysvc.com',
+      'https://73dd57-2.myshopify.com',
+      'http://localhost:3000',
+      'http://localhost:3100',
+      'https://api.monobank.ua',
+    ],
   });
 
   const body = await renderToReadableStream(

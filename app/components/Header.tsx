@@ -68,12 +68,12 @@ export function Header({ header, isLoggedIn, cart }: HeaderProps) {
             <img src={shop.brand?.logo?.image?.url} alt="PickUpShoes" />
           </NavLink>
         </div>
-        {!isMobile && (
+        {/* {!isMobile && (
           <HeaderMenu
             menu={menu}
             primaryDomainUrl={header.shop.primaryDomain.url}
           />
-        )}
+        )} */}
 
         <nav className="header-ctas  flex md:gap-x-[0px] gap-x-2">
           <PredictiveSearchForm

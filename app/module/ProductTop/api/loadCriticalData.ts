@@ -24,8 +24,6 @@ const loadCriticalData = async ({
     storefront.query(PRODUCT_QUERY, {
       variables: {
         handle,
-        language: 'UK',
-        country: 'UA',
         selectedOptions: selectedOptions,
         identifiers: [
           {
@@ -95,8 +93,6 @@ const loadCriticalData = async ({
       RECOMENDED_PRODUCT_QUERY,
       {
         variables: {
-          language: 'UK',
-          country: 'UA',
           id: product?.id || "0"
         },
       })],

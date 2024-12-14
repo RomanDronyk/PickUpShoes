@@ -193,8 +193,7 @@ const PRODUCT_ITEM_FRAGMENT = `#graphql
 
 const BEST_SELLERS = `#graphql 
 ${PRODUCT_ITEM_FRAGMENT}
-query BestSellers($country: CountryCode, $language: LanguageCode) 
-@inContext(country: $country, language: $language){
+query BestSellers{
   collection(handle: "bestsellers"){
     products(first: 10) {
       nodes {

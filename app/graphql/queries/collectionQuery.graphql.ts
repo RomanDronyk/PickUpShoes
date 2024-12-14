@@ -4,8 +4,6 @@ export const COLLECTION_QUERY = `#graphql
   ${PRODUCT_ITEM_FRAGMENT_WITHOUT_VARIANT_FRAGMENT}
   query Collection(
     $handle: String!
-    $country: CountryCode
-    $language: LanguageCode
     $filters: [ProductFilter!]
     $sortKey: ProductCollectionSortKeys!
     $reverse: Boolean
@@ -13,7 +11,7 @@ export const COLLECTION_QUERY = `#graphql
     $last: Int
     $startCursor: String
     $endCursor: String
-  ) @inContext(country: $country, language: $language) {
+  ) {
     collection(handle: $handle) {
       id
       handle

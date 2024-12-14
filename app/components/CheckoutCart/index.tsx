@@ -5,7 +5,7 @@ import { useVariantUrl } from "~/utils"
 import { FetcherWithComponents, Link } from "@remix-run/react"
 import OptionList from "../common/optionList"
 import LoaderNew from "../LoaderNew"
- 
+
 const CheckoutCart = ({ cartsFromCart }: any) => {
 
     const [loading, setLoading] = useState(false)
@@ -48,6 +48,11 @@ const CheckoutCart = ({ cartsFromCart }: any) => {
                                 {cartsFromCart?.merchandise?.price?.amount} грн
                             </h4>
                         </div>
+                        {cartsFromCart?.merchandise?.quantityAvailable === 1 && (
+                            <span className="py-2 w-full inline-flex border-b border-b-black/10">
+                                - Останні в наявності
+                            </span>
+                        )}
                     </div>
                     <CartLineQuantity setNewQuantity={updateQuantity} isAbsolute={true} line={cartsFromCart} />
                 </div>

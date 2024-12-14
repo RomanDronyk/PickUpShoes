@@ -57,6 +57,11 @@ const CheckoutCartMobile = ({ cartsFromCart }: any) => {
                             {cartsFromCart?.merchandise?.price?.amount} грн
                         </h4>
                     </div>
+                    {cartsFromCart?.merchandise?.quantityAvailable === 1 && (
+                        <span className="py-2 w-full inline-flex border-b border-b-black/10">
+                            - Останні в наявності
+                        </span>
+                    )}
                 </div>
                 <div style={{ display: "flex", alignItems: "center", gap: "20px", width: "100%" }}>
                     <CartLineRemoveButton lineIds={[cartsFromCart.id]} />
@@ -75,7 +80,7 @@ function CartLineRemoveButton({ lineIds }: { lineIds: string[] }) {
             action={CartForm.ACTIONS.LinesRemove}
             inputs={{ lineIds }}
         >
-                        {(fetcher: FetcherWithComponents<any>) => (
+            {(fetcher: FetcherWithComponents<any>) => (
                 <>
                     <button
                         disabled={fetcher.state !== 'idle'}

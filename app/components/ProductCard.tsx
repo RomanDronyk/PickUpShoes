@@ -175,16 +175,13 @@ export function ProductCard({
 }
 function ProductOptions({ options, option }: { options?: any, option: VariantOption }) {
   const colorOption = options?.find((opt: any) => opt.name === "Колір" || opt.name == "Color");
-  const sizeOption = options?.find((opt: any) => opt.name === "Розмір" || opt.name == "Size");
 
   return (
     <div className="product-options" key={option.name}>
       <div className="grid grid-cols-6 gap-x-[5px] gap-y-[10px] items-center place-content-center py-[10px]">
         {option.values.map(({ value, isAvailable, isActive, to }) => {
-          console.log(options, option, 'option value')
           let newLink = to
-          if (colorOption || sizeOption) {
-            // Parse the URL and append the color parameter
+          if (colorOption) {
             const [baseUrl, queryParams] = to.split('?');
             const searchParams = new URLSearchParams(queryParams);
             colorOption?.values?.length > 0 && searchParams.set("Color", colorOption.values[0]);
@@ -228,4 +225,10 @@ export function ProductLabel({ label }: { label?: Label }) {
       return '';
   }
 }
+
+
+
+
+
+
 
