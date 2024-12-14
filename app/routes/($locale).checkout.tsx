@@ -1,6 +1,6 @@
 import { useLoaderData, json, MetaFunction, useActionData, useNavigate } from '@remix-run/react';
 import { ActionFunction } from '@remix-run/node';
-import { generageMonoUrl, generateOrderInShopifyAdmin, getRecommendationsById } from '~/utils';
+import { generageMonoUrl, generateOrderInShopifyAdmin } from '~/utils';
 import { AppLoadContext, redirect } from '@shopify/remix-oxygen';
 import CheckoutScreen, { IInputState } from '~/screens/CheckoutScreen';
 import { ICheckoutInputErrors, checkoutInputErrors } from '~/mockMessages';
@@ -29,9 +29,9 @@ export const loader = async ({ context, request }: { context: AppLoadContext, re
     const cartData = await cart.get();
     const cartNodes: any = cartData?.lines?.nodes;
 
-    // if (cartNodes?.length == 0 || !cartNodes?.length) {
-    //     return redirect("/", 302)
-    // }
+    if (cartNodes?.length == 0 || !cartNodes?.length) {
+        return redirect("/", 302)
+    }
     const productIds = cartNodes?.map((product: any) => product?.merchandise?.product?.id);
 
     const cache = new Map();

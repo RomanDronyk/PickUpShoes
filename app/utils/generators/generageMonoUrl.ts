@@ -1,4 +1,3 @@
-import { generateProductForKeycrm } from './generateProductForKeycrm';
 export const generageMonoUrl = async (
   amount: any,
   products: any,

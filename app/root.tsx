@@ -87,7 +87,7 @@ export async function loader({ context, request }: any) {
   } else {
     likedCookes = (await likedProductsCookie.parse(cookieHeader)) || [];
   }
-  
+
 
 
   // let cartPromise = await getUserCart(customerAccessToken?.accessToken, isLoggedIn, context);
@@ -129,7 +129,6 @@ export default function App() {
   const nonce = useNonce();
   const data = useLoaderData<typeof loader>();
   const cache = createCache({ key: 'css', prepend: true });
-
 
   return (
     <html lang="uk">
