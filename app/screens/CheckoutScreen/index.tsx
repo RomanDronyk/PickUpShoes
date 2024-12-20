@@ -51,6 +51,7 @@ const CheckoutScreen: FC<ICheckoutScreen> = ({ actionErrorMessage, cartsFromCart
       StreetsAvailability: false,
       Warehouses: null,
       isBlur: false,
+      value: "",
       errorMessage: checkoutInputErrors.novaCity,
     },
     cityOptions: [],
@@ -185,7 +186,6 @@ const CheckoutScreen: FC<ICheckoutScreen> = ({ actionErrorMessage, cartsFromCart
                 minLength="16"
                 required
                 onChange={(event) => {
-                  console.log(event?.length)
                   if (event) {
                     const key = "userPhone" as keyof ICheckoutInputErrors;
                     (event.length < 13) ? onInputChange(checkoutInputErrors[key], "errorMessage", key) : onInputChange("", "errorMessage", key);
@@ -273,7 +273,7 @@ const CheckoutScreen: FC<ICheckoutScreen> = ({ actionErrorMessage, cartsFromCart
                 {`${amount} грн`}
               </span>
             </div>
-            <div className='hidden flex justify-between gap-[12px] pb-[24px]'>
+            <div className='hidden justify-between gap-[12px] pb-[24px]'>
               {/* <Input
                 id="promo"
                 name="promo"
@@ -371,13 +371,15 @@ export interface INovaCity {
   Warehouses: number | null,
   isBlur: boolean,
   errorMessage: string,
+  value: string,
+
 }
 
 export interface IInputState {
   novaCity: INovaCity;
   cityOptions: string[];
   novaDepartment: INovaDepartment;
-  departmentOption: string[];
+  departmentOption: any[];
   firstName: IInputField;
   lastName: IInputField;
   userPhone: IInputField;

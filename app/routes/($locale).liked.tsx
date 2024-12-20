@@ -113,6 +113,7 @@ export default function Liked() {
   }, [productIds])
 
   const isMobile = useMedia('(max-width: 767px)', false);
+  console.log(products)
 
   return (
     <div className="w-full  flex flex-col  lg:px-24 md:px-12 px-[10px]  mb-8"

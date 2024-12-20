@@ -1,55 +1,31 @@
 
-import React, { useEffect, useState } from 'react';
+import React, { useContext } from 'react';
 import { Money } from '@shopify/hydrogen';
 import { Link, } from '@remix-run/react';
 import { Button } from '../ui/button';
 
 import type { CartApiQueryFragment } from 'storefrontapi.generated';
 import CartLineItem from './CartLineItem';
+import { HeaderBasketContext, HeaderContextInterface } from '~/context/HeaderCarts';
 
 
 const DropDownCartDetail = React.memo(({ cart }: { cart: CartApiQueryFragment | null }) => {
-  const [shopifyCheckoutId, setShopifyCheckoutId] = useState("")
-  // useEffect(()=>{
-  //   const lineItems =  cart?.lines?.nodes?.map(element=>{
-  //     return {
-  //       quantity: element?.quantity,
-  //       variantId: element?.merchandise?.id
-  //     }
-  //   }) 
-  //   if (lineItems) {
-  //     const formData = new FormData();
-  //     formData.append('action', 'create url');
-  //     formData.append('lineItems', JSON.stringify(lineItems)); // Передавайте об'єкти як рядок JSON
-
-  //     fetch('/checkout-api', {
-  //       method: 'POST',
-  //       body: formData
-  //     }).then(response => response.json())
-  //       .then((data:any) =>{
-  //         setShopifyCheckoutId( data?.response?.checkoutCreate?.checkout?.id) 
-  //       })
-  //       .catch(error => console.error('Error:', error));
-  //   }
-  // },[cart])
-
+  const { setCartShow } = useContext(HeaderBasketContext) as HeaderContextInterface;
   const cost = cart?.cost;
   return (
     <div className="dropdown-detail">
       <div className="dropdown-table">
         <div className="dropdown-header pb-4
         "
-        style={{display: "flex",alignItems: "center", justifyContent: "space-between"}}
+          style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}
         >
-          {/* //  grid grid-cols-12 */}
-
           <div className="dropdown-title sm:col-span-8 2xl:col-span-9 lg:col-span-9">
             <span className="font-semibold text-[26px] col-span-6">
               Корзина
             </span>
           </div>
           <div className='xl:pr-[7vw] xl-gap-[50px] gap-[20px] md:pr-[3vw]'
-        style={{display: "flex", alignItems: "center", justifyContent: "space-between"}}
+            style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}
 
           >
             <div className="text-xl text-center w-auto sm:block hidden">
@@ -59,6 +35,9 @@ const DropDownCartDetail = React.memo(({ cart }: { cart: CartApiQueryFragment | 
               Вартість
             </div>
           </div>
+        </div>
+        <div onClick={() => setCartShow(false)} className="absolute top-[30px] right-[30px] cursor-pointer ">
+          x
         </div>
         <ul className="flex flex-col gap-4">
           {cart?.lines?.nodes.map((line: any) => (

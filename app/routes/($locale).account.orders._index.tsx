@@ -10,6 +10,7 @@ import type {
   CustomerOrdersFragment,
   OrderItemFragment,
 } from 'storefrontapi.generated';
+import { Button } from '~/components/ui/button';
 import { CUSTOMER_ORDERS_QUERY } from '~/graphql/queries';
 
 export const handle = {
@@ -17,10 +18,25 @@ export const handle = {
 };
 
 const financialStatusTranslations = {
+  AUTHORIZED: 'Авторизовано',
   PAID: 'Оплачено',
+  PARTIALLY_PAID: 'Частково оплачено',
+  PARTIALLY_REFUNDED: 'Частково повернено',
   PENDING: 'Очікується',
   REFUNDED: 'Повернено',
-  // Додайте інші статуси тут
+  VOIDED: 'Анульовано',
+};
+
+const fulfillmentStatusTranslations = {
+  FULFILLED: 'Виконано',
+  IN_PROGRESS: 'В процесі',
+  ON_HOLD: 'Призупинено',
+  OPEN: 'Відкрите',
+  PARTIALLY_FULFILLED: 'Частково виконано',
+  PENDING_FULFILLMENT: 'Очікується виконання',
+  RESTOCKED: 'Повернуто на склад',
+  SCHEDULED: 'Заплановано',
+  UNFULFILLED: 'Не виконано',
 };
 
 export const meta: MetaFunction = () => {
@@ -89,17 +105,18 @@ function OrdersTable({ orders }: Pick<CustomerOrdersFragment, 'orders'>) {
         <Pagination connection={orders}>
           {({ nodes, isLoading, PreviousLink, NextLink }) => {
             return (
-              <>
-                <PreviousLink>
-                  {isLoading ? 'Loading...' : <span>↑ Load previous</span>}
+              <div className='grid justify-center'>
+                <PreviousLink className='m-[0_auto] w-auto'>
+                  <Button className='my-5' variant={"outline"}>{isLoading ? 'Загрузка...' : <span>↑ Попередня сторінка</span>}</Button>
                 </PreviousLink>
                 {nodes.map((order) => {
                   return <OrderItem key={order.id} order={order} />;
                 })}
-                <NextLink>
-                  {isLoading ? 'Loading...' : <span>Load more ↓</span>}
+                <NextLink className='m-[0_auto] w-auto'>
+                  <Button className='my-5' variant={"outline"}>{isLoading ? 'Загрузка...' : <span>↓ Наступна сторінка</span>}</Button>
+
                 </NextLink>
-              </>
+              </div>
             );
           }}
         </Pagination>
@@ -126,13 +143,16 @@ function OrderItem({ order }: { order: OrderItemFragment }) {
       <div className="grid grid-cols-5 items-center mt-5 pb-5 border-b border-b-black/10">
         <div className="flex gap-[10px] relative">
           <div>
-            <Image
-              data={order.lineItems.nodes[0].variant?.image}
-              aspectRatio="1/1"
-              width={70}
-              height={70}
-              className="rounded-[15px]"
-            />
+            {order.lineItems.nodes[0].variant?.image &&
+              <Image
+                data={order.lineItems.nodes[0].variant?.image}
+                aspectRatio="1/1"
+                width={70}
+                height={70}
+                className="rounded-[15px]"
+              />
+            }
+
           </div>
           <div className="flex flex-col">
             <h4 className="md:text-xl text-lg font-semibold line-clamp-1 pr-[10px] mb-[7px]">
@@ -145,7 +165,6 @@ function OrderItem({ order }: { order: OrderItemFragment }) {
           <div className="absolute top-[0px] bottom-[0px] right-[1px] w-[1px] bg-black/10"></div>
         </div>
         <div className="relative h-[100%] flex items-center justify-center">
-
           <span className="font-semibold text-lg ">
             <Money
               as="span"
@@ -158,7 +177,7 @@ function OrderItem({ order }: { order: OrderItemFragment }) {
           <div className="absolute top-[0px] bottom-[0px] right-[1px] w-[1px] bg-black/10"></div>
         </div>
         <p className="relative h-[100%] flex items-center justify-center ">
-          {financialStatusTranslations[order.financialStatus] || order.financialStatus}
+          {order?.financialStatus && financialStatusTranslations[order?.financialStatus] || order.financialStatus}
           <div className="absolute top-[0px] bottom-[0px] right-[1px] w-[1px] bg-black/10"></div>
         </p>
         <p className="relative h-[100%] flex items-center justify-center ">

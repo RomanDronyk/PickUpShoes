@@ -15,7 +15,6 @@ interface INovaPoshtaDepartent {
 const NovaPoshtaDepartent: React.FC<INovaPoshtaDepartent> = ({ inputState, onInputChange, setInputState }) => {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [options, setOptions] = useState([])
   const [debounceTimer, setDebounceTimer] = useState<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
@@ -39,7 +38,7 @@ const NovaPoshtaDepartent: React.FC<INovaPoshtaDepartent> = ({ inputState, onInp
 
           if (response.ok) {
             const data: any = await response.json();
-            setOptions(data?.department || []);
+            setInputState(prev => ({ ...prev, departmentOption: data?.department || [], }));
           } else {
             console.error("Failed to fetch city data");
           }
@@ -73,57 +72,64 @@ const NovaPoshtaDepartent: React.FC<INovaPoshtaDepartent> = ({ inputState, onInp
     }
   };
 
-
-  return  (
+  const [value, setValue] = useState<any>(null)
+  useEffect(() => {
+    setValue(null)
+  }, [inputState.novaCity.value])
+  return (
     <>
-    <NoSsr>
+      <NoSsr>
+        <Autocomplete
+          id="novaDepartment"
+          sx={style}
+          open={open}
+          onOpen={() => {
+            setOpen(true);
+          }}
+          onClose={() => {
+            onInputChange(true, "isBlur", "novaDepartment")
+            setOpen(false);
+          }}
+          value={value}
 
-      <Autocomplete
-        id="novaDepartment"
-        sx={style}
-        open={open}
-        onOpen={() => {
-          setOpen(true);
-        }}
-        onClose={() => {
-          onInputChange(true, "isBlur", "novaDepartment")
-          setOpen(false);
-        }}
-        isOptionEqualToValue={(option: INovaDepartment, value) => option.Description === value.Description}
-        getOptionLabel={(option: INovaDepartment) => option.Description}
-        options={options}
-        onChange={(event, novaDepartment) => {
-          handleChange(event, novaDepartment)
-        }}
-        loading={loading}
-        noOptionsText="Відділення, не знайдено"
-        renderInput={(params) => {
-          return (
-            <TextField
-              {...params}
-              placeholder='Відділення'
-              value={inputState.novaDepartment.value}
-              required
-              disabled={inputState.novaCity.MainDescription ? false : true}
-              onChange={(element) => onInputChange(element.target.value, "value", "novaDepartment")}
-              InputProps={{
-                ...params.InputProps,
-                endAdornment: (
-                  <React.Fragment >
-                    {loading ? <CircularProgress color="inherit" size={20} /> : null}
-                    {params.InputProps.endAdornment}
-                  </React.Fragment>
-                ),
-              }}
-            />
-          )
-        }}
-      />
-    </NoSsr>
+          isOptionEqualToValue={(option: INovaDepartment, value) => option.Description === value.Description}
+          getOptionLabel={(option: INovaDepartment) => option.Description}
+          options={inputState.departmentOption}
+          onChange={(event, novaDepartment) => {
+            handleChange(event, novaDepartment)
+            setValue(novaDepartment)
+          }}
+          loading={loading}
+          noOptionsText="Відділення, не знайдено"
+          renderInput={(params) => {
+            return (
+              <TextField
+                {...params}
+                placeholder='Відділення'
+                value={inputState.novaDepartment.value}
+                required
+                disabled={inputState.novaCity.MainDescription ? false : true}
+                onChange={(element) => {
+                  onInputChange(element.target.value, "value", "novaDepartment")
+                }}
+                InputProps={{
+                  ...params.InputProps,
+                  endAdornment: (
+                    <React.Fragment >
+                      {loading ? <CircularProgress color="inherit" size={20} /> : null}
+                      {params.InputProps.endAdornment}
+                    </React.Fragment>
+                  ),
+                }}
+              />
+            )
+          }}
+        />
+      </NoSsr>
 
       {(!inputState.novaDepartment.Description && inputState.novaDepartment.isBlur) && <div className='text-red'>{inputState.novaDepartment.errorMessage}</div>}
     </>
-  ) 
+  )
 }
 
 export default NovaPoshtaDepartent

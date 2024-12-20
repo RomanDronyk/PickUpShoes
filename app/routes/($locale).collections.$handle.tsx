@@ -1,4 +1,4 @@
-import { Link, useLoaderData, useNavigate, type MetaFunction } from '@remix-run/react';
+import { useLoaderData, useNavigate, type MetaFunction } from '@remix-run/react';
 import {
   getPaginationVariables,
   Pagination,
@@ -27,6 +27,7 @@ import { COLLECTION_FILTER_QUERY, COLLECTION_QUERY } from '~/graphql/queries';
 import { HEADER_QUERY } from '~/graphql/queries/headerQuery.graphql';
 import { useInView } from "react-intersection-observer";
 import { useEffect, useMemo } from 'react';
+import { Button } from '~/components/ui/button';
 
 export type SortParam =
   | 'price-low-high'
@@ -165,6 +166,7 @@ export default function Collection() {
   const momoizedHeaderPromise = useMemo(() => headerPromise, [headerPromise]);
   const isMobile = useMedia('(max-width: 1024px)', false);
   const { ref, inView, entry } = useInView();
+  console.log(collection)
 
   return (
     <div className="grid lg:grid-cols-[minmax(auto,_300px)_minmax(auto,_1fr)] grid-cols-1 gap-x-5 w-full lg:px-24 md:px-12 px-[10px]  mb-8">
@@ -194,14 +196,21 @@ export default function Collection() {
         </div>
         {isMobile && <AppliedFilters filters={appliedFilters} />}
         <Pagination connection={collection.products}>
-          {({ nodes, NextLink, hasNextPage, nextPageUrl, state }) => (
+          {({ nodes, isLoading, PreviousLink, NextLink, hasNextPage, nextPageUrl, state }) => (
             <>
+              <PreviousLink>
+
+                <Button className='m-[0_auto]' variant={"outline"}>{isLoading ? 'Загрузка...' : <span>↑ Попередня сторінка</span>}</Button>
+              </PreviousLink>
               <ProductsGrid nodes={nodes}
                 inView={inView}
                 hasNextPage={hasNextPage}
                 nextPageUrl={nextPageUrl}
                 state={state} />
-              <NextLink ref={ref}>Load more</NextLink>
+              <NextLink ref={ref}>
+                <Button className='m-[0_auto]' variant={"outline"}>{isLoading ? 'Загрузка...' : <span>↓ Наступна сторінка</span>}</Button>
+              </NextLink>
+
             </>
           )}
         </Pagination>

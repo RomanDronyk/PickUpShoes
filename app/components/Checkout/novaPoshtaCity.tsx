@@ -17,7 +17,6 @@ interface INovaPoshtaCity {
 const NovaPoshtaCity: React.FC<INovaPoshtaCity> = ({ inputState, onInputChange, setInputState }) => {
   const [open, setOpen] = useState(false);
   const [options, setOptions] = useState<INovaCity[]>([]);
-  const [inputText, setInputCity] = useState("");
   const [debounceTimer, setDebounceTimer] = useState<NodeJS.Timeout | null>(null);
   const [loading, setLoading] = useState(false)
 
@@ -32,13 +31,14 @@ const NovaPoshtaCity: React.FC<INovaPoshtaCity> = ({ inputState, onInputChange, 
     if (debounceTimer) {
       clearTimeout(debounceTimer);
     }
+
     const timer = setTimeout(async () => {
-      if (inputText.length > 0) {
+      if (inputState?.novaCity?.value?.length > 0) {
         setOptions([]);
 
         const formData = new FormData();
         formData.append("action", "get city");
-        formData.append("city", inputText);
+        formData.append("city", inputState.novaCity.value);
         setLoading(true)
         try {
           const response = await fetch("/checkout-api", {
@@ -69,7 +69,10 @@ const NovaPoshtaCity: React.FC<INovaPoshtaCity> = ({ inputState, onInputChange, 
         clearTimeout(timer);
       }
     };
-  }, [inputText]);
+  }, [inputState.novaCity.value]);
+  useEffect(() => {
+    console.log(inputState)
+  }, [inputState.departmentOption])
 
   const handleCityChange = (event: React.ChangeEvent<{}>, novaCity: INovaCity | null) => {
     onInputChange(false, "isBlur", "novaCity")// Скидаємо стан blur після вибору міста
@@ -80,14 +83,14 @@ const NovaPoshtaCity: React.FC<INovaPoshtaCity> = ({ inputState, onInputChange, 
       }));
       setInputState(prev => ({
         ...prev,
-        department: {
+        novaDepartment: {
           CityDescription: "",
           SettlementAreaDescription: "",
           PostalCodeUA: "",
           Description: "",
           Ref: "",
           value: "",
-          isBlur: false,
+          isBlur: true,
           errorMessage: prev.novaDepartment.errorMessage,
         }
       }))
@@ -97,7 +100,6 @@ const NovaPoshtaCity: React.FC<INovaPoshtaCity> = ({ inputState, onInputChange, 
   return (
     <>
       <NoSsr>
-
         <Autocomplete
           id="novaCity"
           sx={style}
@@ -109,6 +111,24 @@ const NovaPoshtaCity: React.FC<INovaPoshtaCity> = ({ inputState, onInputChange, 
             setOpen(false);
             onInputChange(true, "isBlur", "novaCity")
           }}
+          onInputChange={(e) => {
+            setInputState(prev => ({
+              ...prev,
+              novaDepartment: {
+                CityDescription: "",
+                SettlementAreaDescription: "",
+                PostalCodeUA: "",
+                Description: "",
+                Ref: "",
+                value: "",
+                isBlur: false,
+                errorMessage: "",
+              },
+              departmentOption: []
+            }));
+          }
+
+          }
           onChange={handleCityChange}
           isOptionEqualToValue={(option, value) => option.Present === value.Present}
           getOptionLabel={(option) => option.Present}
@@ -120,8 +140,8 @@ const NovaPoshtaCity: React.FC<INovaPoshtaCity> = ({ inputState, onInputChange, 
               {...params}
               placeholder='Місто'
               required
-              value={inputText}
-              onChange={(element) => setInputCity(element.target.value)}
+              onChange={(e) => onInputChange(e.target.value, "value", "novaCity")}
+              value={inputState.novaCity.value}
               InputProps={{
                 ...params.InputProps,
                 endAdornment: (

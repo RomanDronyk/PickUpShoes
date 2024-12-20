@@ -113,16 +113,13 @@ export const action: ActionFunction = async ({ request, context }) => {
 export default function Checkout() {
     const { recommendedCarts, cartData, collection } = useLoaderData<typeof loader>();
     const response: any = useActionData<typeof action>();
-    console.log(collection)
     const [cartsFromCart, setCartsFromCart] = useState<any>([])
 
     const amount = cartData?.cost?.subtotalAmount?.amount || "0"
-    console.log(response, "responce from action")
     const urlFromAction = response?.pageUrl;
     const navigate = useNavigate()
     const generateLink = async () => {
         if (urlFromAction === "/thanks") {
-            console.log(urlFromAction)
             urlFromAction ? navigate(urlFromAction) : null;
         } else if (
             urlFromAction === "/mono" &&
@@ -130,7 +127,6 @@ export default function Checkout() {
             response?.dataFromMono?.amount &&
             response?.dataFromMono?.id
         ) {
-            console.log(urlFromAction)
             const link = await generageMonoUrl(
                 response?.dataFromMono?.amount,
                 response?.dataFromMono?.products,

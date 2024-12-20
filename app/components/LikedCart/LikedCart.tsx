@@ -73,6 +73,7 @@ export function LikedCart({ product }: ILikedCart) {
     const imageRef = useRef<HTMLDivElement>(null);
     const variantUrl = useVariantUrl(product.product.handle, product.selectedOptions);
     const [disabled, setDisable] = useState(false)
+
     const isMobile = useMedia('(max-width: 1024px)', false);
 
     if (isMobile) {
@@ -152,18 +153,16 @@ export function LikedCart({ product }: ILikedCart) {
                                     />
                                     <button
                                         type="submit"
-                                        disabled={fetcher.state !== 'idle'}
+                                        disabled={product.inventoryQuantity == 0 || fetcher.state !== 'idle'}
                                         className={cn(
-                                            'bg-black text-white font-medium text-[18px] w-full rounded-[62px] py-[10px] px-[37px] cursor-pointer',
+                                            'bg-black disabled:bg-black/50 disabled:cursor-not-allowed text-white font-medium text-[18px] w-full rounded-[62px] py-[10px] px-[37px] cursor-pointer',
                                             false && 'bg-white text-black border border-black',
                                         )}
                                         onClick={() => {
                                             isMobile ? setCartShowMobile(true) : setCartShow(true)
-
-
                                         }}
                                     >
-                                        {fetcher.state == 'idle' ? "Додати в корзину" : <div className="h-[18px]"><LoaderNew /></div>}
+                                        {product.inventoryQuantity === 0 ? "Немає в наявності" : fetcher.state == 'idle' ? "Додати в корзину" : <div className="h-[18px]"><LoaderNew /></div>}
                                     </button>
                                 </>
                             )}
@@ -247,9 +246,9 @@ export function LikedCart({ product }: ILikedCart) {
                             />
                             <button
                                 type="submit"
-                                disabled={disabled ?? fetcher.state !== 'idle'}
+                                disabled={product.inventoryQuantity == 0 || fetcher.state !== 'idle'}
                                 className={cn(
-                                    'bg-black text-white font-medium text-[18px] w-full rounded-[62px] py-[10px] px-[37px] cursor-pointer',
+                                    ' bg-black disabled:bg-black/50 disabled:cursor-not-allowed text-white font-medium text-[18px] w-full rounded-[62px] py-[10px] px-[37px] cursor-pointer',
                                     false && 'bg-white text-black border border-black',
                                 )}
 
@@ -259,7 +258,8 @@ export function LikedCart({ product }: ILikedCart) {
 
                                 }}
                             >
-                                {fetcher.state == 'idle' ? "Додати в корзину" : <div className="h-[20px]"><LoaderNew /></div>}
+                                {product.inventoryQuantity === 0 ? "Немає в наявності" : fetcher.state == 'idle' ? "Додати в корзину" : <div className="h-[20px]"><LoaderNew /></div>}
+
 
                             </button>
                         </>
