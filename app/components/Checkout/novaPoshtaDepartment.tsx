@@ -96,8 +96,10 @@ const NovaPoshtaDepartent: React.FC<INovaPoshtaDepartent> = ({ inputState, onInp
           getOptionLabel={(option: INovaDepartment) => option.Description}
           options={inputState.departmentOption}
           onChange={(event, novaDepartment) => {
-            handleChange(event, novaDepartment)
-            setValue(novaDepartment)
+            if (inputState.novaCity.MainDescription) {
+              handleChange(event, novaDepartment)
+              setValue(novaDepartment)
+            }
           }}
           loading={loading}
           noOptionsText="Відділення, не знайдено"
@@ -110,7 +112,9 @@ const NovaPoshtaDepartent: React.FC<INovaPoshtaDepartent> = ({ inputState, onInp
                 required
                 disabled={inputState.novaCity.MainDescription ? false : true}
                 onChange={(element) => {
-                  onInputChange(element.target.value, "value", "novaDepartment")
+                  if (inputState.novaCity.MainDescription) {
+                    onInputChange(element.target.value, "value", "novaDepartment")
+                  }
                 }}
                 InputProps={{
                   ...params.InputProps,

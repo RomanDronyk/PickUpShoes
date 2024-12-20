@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react';
 import style from './style';
 import { IInputField, IInputState, INovaCity } from '~/screens/CheckoutScreen';
 import NoSsr from '@mui/material/NoSsr';
+import { checkoutInputErrors } from '~/mockMessages';
 
 
 interface INovaPoshtaCity {
@@ -122,7 +123,26 @@ const NovaPoshtaCity: React.FC<INovaPoshtaCity> = ({ inputState, onInputChange, 
                 Ref: "",
                 value: "",
                 isBlur: false,
-                errorMessage: "",
+                errorMessage: checkoutInputErrors.novaDepartment,
+              },
+              novaCity: {
+                AddressDeliveryAllowed: true,
+                Area: "",
+                DeliveryCity: "",
+                MainDescription: "",
+                ParentRegionCode: "",
+                ParentRegionTypes: "",
+                Present: "",
+                Ref: "",
+                Region: "",
+                RegionTypes: "",
+                RegionTypesCode: "",
+                SettlementTypeCode: "",
+                StreetsAvailability: false,
+                Warehouses: null,
+                isBlur: false,
+                value: "",
+                errorMessage: checkoutInputErrors.novaCity,
               },
               departmentOption: []
             }));
