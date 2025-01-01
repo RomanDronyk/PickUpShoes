@@ -1,15 +1,24 @@
-import { FormProps, useParams } from "@remix-run/react";
-import { useEffect, useRef, useState } from "react";
-import { useFetcher } from "react-router-dom";
-import { SearchIcon } from "../SearchIcon";
-import { PredictiveSearchResults } from "./PredictiveSearchResults";
-import { Drawer, DrawerClose, DrawerContent, DrawerHeader, DrawerTrigger } from "../ui/drawer";
-import { Button } from "../ui/button";
-import { Image } from "@shopify/hydrogen-react";
-import { X } from "lucide-react";
-import clsx from "clsx";
-import { Input } from "../ui/input";
-import { NormalizedPredictiveSearchResults } from "../Search";
+import {FormProps, useParams} from '@remix-run/react';
+import {useEffect, useRef, useState} from 'react';
+import {useFetcher} from 'react-router-dom';
+import {SearchIcon} from '../SearchIcon';
+import {
+  PredictiveSearchResults,
+  usePredictiveSearch,
+} from './PredictiveSearchResults';
+import {
+  Drawer,
+  DrawerClose,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTrigger,
+} from '../ui/drawer';
+import {Button} from '../ui/button';
+import {Image} from '@shopify/hydrogen-react';
+import {X} from 'lucide-react';
+import clsx from 'clsx';
+import {Input} from '../ui/input';
+import {NormalizedPredictiveSearchResults} from '../Search';
 
 type SearchFromProps = {
   action?: FormProps['action'];
@@ -18,7 +27,6 @@ type SearchFromProps = {
   brandLogo?: any;
   [key: string]: unknown;
 };
-
 
 export function PredictiveSearchForm({
   action,
@@ -32,22 +40,30 @@ export function PredictiveSearchForm({
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [focusForm, setFocusForm] = useState<boolean>(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [inputValue, setInputValue] = useState("")
+  const [inputValue, setInputValue] = useState('');
+  const {searchInputRef} = usePredictiveSearch();
 
-  useEffect(()=>{
-    console.log(mobileOpen, "sdlkfjs")
-  },[mobileOpen])
+  useEffect(() => {
+    console.log(mobileOpen, 'sdlkfjs');
+  }, [mobileOpen]);
 
+  function goToSearchResult() {
+    if (!searchInputRef.current) return;
+    setInputValue('');
+    setMobileOpen((prev: boolean) => !prev);
+    searchInputRef.current.blur();
+    searchInputRef.current.value = '';
+  }
   function fetchResults(event: React.ChangeEvent<HTMLInputElement>) {
     const searchAction = action ?? '/api/predictive-search';
     const localizedAction = params.locale
       ? `/${params.locale}${searchAction}`
       : searchAction;
     const newSearchTerm = event.target.value || '';
-    setInputValue(event.target.value)
+    setInputValue(event.target.value);
     fetcher.submit(
-      { q: newSearchTerm, limit: '6' },
-      { method, action: localizedAction },
+      {q: newSearchTerm, limit: '6'},
+      {method, action: localizedAction},
     );
   }
   const classes = clsx({
@@ -62,6 +78,16 @@ export function PredictiveSearchForm({
       setFocusForm(false);
     } else {
       setFocusForm(true);
+    }
+  };
+  const handleKeyPress = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      if (inputRef.current && inputRef.current.value.trim() !== '') {
+        setFocusForm(false);
+        window.location.href = `/search?q=${inputRef.current.value}`;
+        goToSearchResult();
+      }
     }
   };
   if (!isMobile) {
@@ -94,6 +120,7 @@ export function PredictiveSearchForm({
             value={inputValue}
             placeholder="Що ти шукаєш?"
             ref={inputRef}
+            onKeyDown={handleKeyPress}
             onChange={fetchResults}
             onFocus={fetchResults}
             type="search"
@@ -162,6 +189,7 @@ export function PredictiveSearchForm({
                     ref={inputRef}
                     onChange={fetchResults}
                     onFocus={fetchResults}
+                    onKeyPress={handleKeyPress}
                     type="search"
                     className="border-none placeholder:text-lg text-lg h-[52px]"
                   />
@@ -170,7 +198,10 @@ export function PredictiveSearchForm({
               </fetcher.Form>
             </div>
           </DrawerHeader>
-          <PredictiveSearchResults setInputValue={setInputValue} setMobileOpen={setMobileOpen} />
+          <PredictiveSearchResults
+            setInputValue={setInputValue}
+            setMobileOpen={setMobileOpen}
+          />
         </DrawerContent>
       </Drawer>
     );

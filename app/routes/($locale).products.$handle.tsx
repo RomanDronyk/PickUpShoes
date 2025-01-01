@@ -21,9 +21,9 @@ export const meta: MetaFunction<typeof loader> = ({ data }: any) => {
   ];
 };
 
-export const handle = {
-  breadcrumb: 'product',
-};
+// export const handle = {
+//   breadcrumb: 'product',
+// };
 
 const getUserData = async (storefront: Storefront, customerAccessToken: string) => {
   if (customerAccessToken === "" || typeof (customerAccessToken) !== "string" || customerAccessToken.length == 0) {
@@ -63,7 +63,7 @@ export const action: ActionFunction = async ({ context, request, params }) => {
 
   const getUser = await getUserData(context.storefront, customerAccessToken?.accessToken || "")
   try {
-    const result: any = await sendReview(objects, getUser, params?.handle || '');
+    const result: any = await sendReview(objects, getUser, encodeURIComponent(params?.handle || "") || '');
     if (result.status === "success") {
       const mediaFiles = formData.getAll("media_files")
       if (mediaFiles && mediaFiles.length > 0 && mediaFiles[0] instanceof File) {

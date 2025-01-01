@@ -53,6 +53,7 @@ export const PRODUCT_ITEM_FRAGMENT_WITHOUT_VARIANT_FRAGMENT = `#graphql
     currencyCode
   }
   fragment ProductItem on Product {
+    __typename
     id
     handle
     title

@@ -74,7 +74,7 @@ export function SearchForm({ searchTerm }: { searchTerm: string }) {
   return (
     <Form
       method="get"
-      className="flex border border-input rounded-[62px] bg-input items-center px-4 py-[3px]"
+      className="w-full flex border border-input rounded-[62px] bg-input items-center px-4 py-[3px]"
     >
       <SearchIcon />
       <Input

@@ -1,41 +1,7 @@
+import { PRODUCT_ITEM_FRAGMENT_WITHOUT_VARIANT_FRAGMENT } from '../fragments';
 
 export const SEARCH_QUERY = `#graphql
-  fragment SearchProduct on Product {
-    __typename
-    handle
-    id
-    publishedAt
-    title
-    trackingParameters
-    vendor
-    variants(first: 20) {
-      nodes {
-        id
-        image {
-          url
-          altText
-          width
-          height
-        }
-        price {
-          amount
-          currencyCode
-        }
-        compareAtPrice {
-          amount
-          currencyCode
-        }
-        selectedOptions {
-          name
-          value
-        }
-        product {
-          handle
-          title
-        }
-      }
-    }
-  }
+
   query search(
     $country: CountryCode
     $endCursor: String
@@ -56,9 +22,7 @@ export const SEARCH_QUERY = `#graphql
       after: $endCursor
     ) {
       nodes {
-        ...on Product {
-          ...SearchProduct
-        }
+          ...ProductItem
       }
       pageInfo {
         hasNextPage
@@ -69,4 +33,5 @@ export const SEARCH_QUERY = `#graphql
     }
     
   }
+  ${PRODUCT_ITEM_FRAGMENT_WITHOUT_VARIANT_FRAGMENT}
 ` as const;

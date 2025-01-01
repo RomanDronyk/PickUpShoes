@@ -9,8 +9,14 @@ import { cn } from '~/lib/utils';
 import { Link, NavLink } from '@remix-run/react';
 import { useMedia } from 'react-use';
 import { useRef, useEffect, useState, useContext } from 'react';
-import { HeaderBasketContext, HeaderContextInterface } from '~/context/HeaderCarts';
-import { Product, ProductVariant } from '@shopify/hydrogen-react/storefront-api-types';
+import {
+  HeaderBasketContext,
+  HeaderContextInterface,
+} from '~/context/HeaderCarts';
+import {
+  Product,
+  ProductVariant,
+} from '@shopify/hydrogen-react/storefront-api-types';
 import HeartIcon from './ui/heartIcon';
 
 export enum Label {
@@ -25,28 +31,31 @@ export function ProductCard({
   product: Product;
   label?: Label;
 }) {
-  const firstVariant: ProductVariant = product.variants.nodes.find((variant: ProductVariant) => variant.availableForSale) || product.variants.nodes[0];
+  const firstVariant: ProductVariant =
+    product.variants.nodes.find(
+      (variant: ProductVariant) => variant.availableForSale,
+    ) || product.variants.nodes[0];
   const optionsRef = useRef<HTMLDivElement>(null);
   const imageRef = useRef<HTMLDivElement>(null);
   const linkRef = useRef<HTMLAnchorElement>(null);
   const variant = product.variants.nodes[0];
   const isMobile = useMedia('(max-width: 767px)', false);
-  const [isLike, setIsLike] = useState(false)
+  const [isLike, setIsLike] = useState(false);
 
-
-  const {
-    handleLikeToggle,
-    likedCardId,
-  } = useContext(HeaderBasketContext) as HeaderContextInterface;
+  const { handleLikeToggle, likedCardId } = useContext(
+    HeaderBasketContext,
+  ) as HeaderContextInterface;
 
   useEffect(() => {
-    const productIndex = likedCardId.findIndex((item: any) => item === firstVariant?.id);
+    const productIndex = likedCardId.findIndex(
+      (item: any) => item === firstVariant?.id,
+    );
     if (productIndex === -1) {
-      setIsLike(false)
+      setIsLike(false);
     } else {
-      setIsLike(true)
+      setIsLike(true);
     }
-  }, [likedCardId, product])
+  }, [likedCardId, product]);
 
   const percentageAmount = variant.compareAtPrice
     ? (
@@ -57,20 +66,17 @@ export function ProductCard({
     ).toFixed()
     : null;
 
-  const sizeOptions = product.options.filter((option) => {
+  const sizeOptions = product?.options?.filter((option) => {
     return option.name === 'Size' || option.name === 'Розмір';
   });
 
-
-
   const toggleLike = () => {
     if (isLike) {
-      handleLikeToggle(firstVariant.id, "delete")
+      handleLikeToggle(firstVariant.id, 'delete');
     } else {
-      handleLikeToggle(firstVariant.id, "add")
+      handleLikeToggle(firstVariant.id, 'add');
     }
-  }
-
+  };
 
   return (
     <div className="group/card">
@@ -91,7 +97,7 @@ export function ProductCard({
         >
           <HeartIcon isFavorited={isLike} />
         </button>
-        {product.featuredImage && (
+        {product?.featuredImage && (
           <Link
             ref={linkRef}
             to={`/products/${product.handle}`}
@@ -102,7 +108,8 @@ export function ProductCard({
               style={{
                 height: 'var(--image-height)',
               }}
-              ref={imageRef}>
+              ref={imageRef}
+            >
               <Image
                 alt={product.featuredImage.altText || product.title}
                 aspectRatio="1/1"
@@ -112,24 +119,28 @@ export function ProductCard({
               />
               <ProductLabel label={label} />
             </div>
-
           </Link>
         )}
-        {!isMobile && <div
-          ref={optionsRef}
-          className="w-full top-full bg-white  transition-all ease-in-out  duration-100 group-hover/card:bottom-0 group-hover/card:top-[unset] "
-        >
-
-          <VariantSelector
-            handle={product.handle}
-            options={sizeOptions}
-            variants={product.variants.nodes}
+        {!isMobile && (
+          <div
+            ref={optionsRef}
+            className="w-full top-full bg-white  transition-all ease-in-out  duration-100 group-hover/card:bottom-0 group-hover/card:top-[unset] "
           >
-            {({ option }) => <ProductOptions key={option.name} option={option} options={product.options} />}
-
-          </VariantSelector>
-        </div>}
-
+            <VariantSelector
+              handle={encodeURIComponent(product.handle)}
+              options={sizeOptions}
+              variants={product.variants.nodes}
+            >
+              {({ option }) => (
+                <ProductOptions
+                  key={option.name}
+                  option={option}
+                  options={product.options}
+                />
+              )}
+            </VariantSelector>
+          </div>
+        )}
       </div>
       <div className="flex flex-col mt-3">
         <Link to={`/products/${product.handle}`}>
@@ -173,18 +184,27 @@ export function ProductCard({
     </div>
   );
 }
-function ProductOptions({ options, option }: { options?: any, option: VariantOption }) {
-  const colorOption = options?.find((opt: any) => opt.name === "Колір" || opt.name == "Color");
+function ProductOptions({
+  options,
+  option,
+}: {
+  options?: any;
+  option: VariantOption;
+}) {
+  const colorOption = options?.find(
+    (opt: any) => opt.name === 'Колір' || opt.name == 'Color',
+  );
 
   return (
     <div className="product-options" key={option.name}>
       <div className="grid grid-cols-6 gap-x-[5px] gap-y-[10px] items-center place-content-center py-[10px]">
         {option.values.map(({ value, isAvailable, isActive, to }) => {
-          let newLink = to
+          let newLink = to;
           if (colorOption) {
             const [baseUrl, queryParams] = to.split('?');
             const searchParams = new URLSearchParams(queryParams);
-            colorOption?.values?.length > 0 && searchParams.set("Color", colorOption.values[0]);
+            colorOption?.values?.length > 0 &&
+              searchParams.set('Color', colorOption.values[0]);
             newLink = `${baseUrl}?${searchParams.toString()}`;
           }
 
@@ -225,10 +245,3 @@ export function ProductLabel({ label }: { label?: Label }) {
       return '';
   }
 }
-
-
-
-
-
-
-

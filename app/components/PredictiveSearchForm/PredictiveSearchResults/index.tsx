@@ -16,9 +16,9 @@ export function PredictiveSearchResults({ setInputValue, setMobileOpen }: any) {
     if (!searchInputRef.current) return;
     setInputValue("")
     setMobileOpen((prev: boolean) => !prev)
-    // searchInputRef.current.blur();
-    // searchInputRef.current.value = '';
-    // window.location.href = event.currentTarget.href;
+    searchInputRef.current.blur();
+    searchInputRef.current.value = '';
+    window.location.href = event.currentTarget.href;
   }
 
   if (!totalResults) {
@@ -49,18 +49,18 @@ export function PredictiveSearchResults({ setInputValue, setMobileOpen }: any) {
           ))}
         </div>
         {/* view all results /search?q=term */}
-        {/* {searchTerm.current && ( */}
-        {/*   <Link */}
-        {/*     className="flex px-4 py-3 items-center justify-center" */}
-        {/*     onClick={goToSearchResult} */}
-        {/*     to={`/search?q=${searchTerm.current}`} */}
-        {/*   > */}
-        {/*     <p> */}
-        {/*       До всіх результатів <q>{searchTerm.current}</q> */}
-        {/*       &nbsp; → */}
-        {/*     </p> */}
-        {/*   </Link> */}
-        {/* )} */}
+        {searchTerm.current && (
+          <Link
+            className="flex px-4 py-3 items-center justify-center"
+            onClick={goToSearchResult}
+            to={`/search?q=${searchTerm.current}`}
+          >
+            <p>
+              До всіх результатів <q>{searchTerm.current}</q>
+              &nbsp; →
+            </p>
+          </Link>
+        )}
       </motion.div>
     );
   }
@@ -98,7 +98,7 @@ export function PredictiveSearchResults({ setInputValue, setMobileOpen }: any) {
     </motion.div>
   );
 }
-function usePredictiveSearch(): UseSearchReturn {
+export function usePredictiveSearch(): UseSearchReturn {
   const fetchers = useFetchers();
   const searchTerm = useRef<string>('');
   const searchInputRef = useRef<HTMLInputElement | null>(null);

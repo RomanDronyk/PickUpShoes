@@ -19,11 +19,12 @@ const loadCriticalData = async ({
   if (!handle) {
     throw new Error('Expected product handle to be defined');
   }
+  const encodeHandle = encodeURIComponent(handle)
   const selectedOptions = getSelectedProductOptions(request)
   const [{ product }] = await Promise.all([
     storefront.query(PRODUCT_QUERY, {
       variables: {
-        handle,
+        handle: encodeHandle,
         selectedOptions: selectedOptions,
         identifiers: [
           {
@@ -36,10 +37,10 @@ const loadCriticalData = async ({
   ]);
 
 
-  const metafields = product.metafields;
+  const metafields = product?.metafields || [];
   let relatedProducts = [];
-  if (metafields.length !== 0 && metafields[0]) {
-    const findRelatedProducts = metafields.find((element: Metafield) => element?.key == "related_products") || { value: "" }
+  if (metafields?.length !== 0) {
+    const findRelatedProducts = metafields.find((element: Metafield) => element?.key == "related_products") || { value: "[]" }
     const parseMetaValue: any = JSON.parse(findRelatedProducts?.value) || []
     relatedProducts = await Promise.all(parseMetaValue.map((id: string) => {
       return storefront.query(QUERY_RELATED_PRODUCT_BY_ID, {
@@ -118,7 +119,7 @@ const loadCriticalData = async ({
   }
 
   return {
-    handle: product.handle,
+    handle: encodeURIComponent(product.handle),
     relatedProducts,
     cookie,
     product,

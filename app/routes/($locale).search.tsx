@@ -7,7 +7,7 @@ import { SearchResults } from '~/components/Search/SearchResults';
 import { NoSearchResults } from '~/components/NoSearchResults';
 
 export const meta: MetaFunction = () => {
-  return [{ title: `Hydrogen | Search` }];
+  return [{ title: `PickUp - Shoes | Search` }];
 };
 
 export async function loader({ request, context }: LoaderFunctionArgs) {
@@ -49,8 +49,8 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
 export default function SearchPage() {
   const { searchTerm, searchResults }: any = useLoaderData<typeof loader>();
   return (
-    <div className="search">
-      <h1>Search</h1>
+    // <div className="search w-full">
+    <div className="pt-10 grid grid-cols-1 gap-x-5 w-full min-w-full lg:px-24 md:px-12 px-[10px]  mb-8">
       <SearchForm searchTerm={searchTerm} />
       {!searchTerm || !searchResults.totalResults ? (
         <NoSearchResults />
@@ -58,6 +58,6 @@ export default function SearchPage() {
         <SearchResults results={searchResults.results} />
       )}
     </div>
+    // </div>
   );
 }
-

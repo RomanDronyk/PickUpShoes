@@ -1,43 +1,58 @@
-import { Link } from '@remix-run/react';
 import { Pagination } from '@shopify/hydrogen';
-import type { SearchQuery, } from 'storefrontapi.generated';
+import { useInView } from 'react-intersection-observer';
+import type { SearchQuery } from 'storefrontapi.generated';
+import { ProductCard } from '~/components/ProductCard';
+import { Button } from '~/components/ui/button';
+import { ProductsGrid } from '~/routes/($locale).collections.$handle';
 
-
-const SearchResultsProductsGrid = ({ products }: Pick<SearchQuery, 'products'>) => {
+const SearchResultsProductsGrid = ({
+  products,
+}: Pick<SearchQuery, 'products'>) => {
+  const { ref, inView, entry } = useInView();
   return (
-    <div className="search-result">
-      <h2>Products</h2>
+    <div className="py-2 items relative grid justify-center">
       <Pagination connection={products}>
-        {({ nodes, isLoading, NextLink, PreviousLink }) => {
-          const itemsMarkup = nodes.map((product) => (
-            <div className="search-results-item" key={product.id}>
-              <Link prefetch="intent" to={`/products/${product.handle}`}>
-                <span>{product.title}</span>
-              </Link>
-            </div>
-          ));
+        {({
+          nodes,
+          isLoading,
+          PreviousLink,
+          NextLink,
+          hasNextPage,
+          nextPageUrl,
+          state,
+        }) => {
           return (
-            <div>
-              <div>
-                <PreviousLink>
-                  {isLoading ? 'Loading...' : <span>↑ Load previous</span>}
-                </PreviousLink>
-              </div>
-              <div>
-                {itemsMarkup}
-                <br />
-              </div>
-              <div>
-                <NextLink>
-                  {isLoading ? 'Loading...' : <span>Load more ↓</span>}
-                </NextLink>
-              </div>
-            </div>
+            <>
+              <PreviousLink className="m-[0_auto]">
+                <Button variant={'outline'}>
+                  {isLoading ? (
+                    'Загрузка...'
+                  ) : (
+                    <span>↑ Попередня сторінка</span>
+                  )}
+                </Button>
+              </PreviousLink>
+              <ProductsGrid
+                nodes={nodes}
+                inView={inView}
+                hasNextPage={hasNextPage}
+                nextPageUrl={nextPageUrl}
+                state={state}
+              />
+              <NextLink className="m-[0_auto]" ref={ref}>
+                <Button variant={'outline'}>
+                  {isLoading ? (
+                    'Загрузка...'
+                  ) : (
+                    <span>↓ Наступна сторінка</span>
+                  )}
+                </Button>
+              </NextLink>
+            </>
           );
         }}
       </Pagination>
-      <br />
     </div>
   );
-}
+};
 export default SearchResultsProductsGrid;
