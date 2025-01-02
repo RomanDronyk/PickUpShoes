@@ -11,7 +11,6 @@ const ProductPageScreen: FC<IProductPageScreen> = ({
   loaderData
 }) => {
   const { product, reviewsReal, customerAccessToken, variants, viewedProducts, handle, recommendations, relatedProducts, reviews: Reviews }: any = loaderData;
-  console.log(product, "product")
   const { descriptionHtml } = product;
 
   const [startCursor, setStartCursor] = useState('')

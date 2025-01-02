@@ -1,12 +1,16 @@
-import { LoaderFunctionArgs } from "@remix-run/server-runtime";
-import { getSelectedProductOptions } from "@shopify/hydrogen";
-import { SelectedOption } from "@shopify/hydrogen-react/storefront-api-types";
-import { Metafield } from "@shopify/hydrogen/storefront-api-types";
-import { viewedProductsCookie } from "~/cookies.server";
-import { PRODUCT_QUERY, RECOMENDED_PRODUCT_QUERY, VIEWED_PRODUCT_QUERY } from "~/graphql/queries";
-import { QUERY_RELATED_PRODUCT_BY_ID } from "~/routes/($locale).products.$handle";
-import redirectToFirstVariant from "../helpers/redirectToFirstVariant";
-import { filterAvailablesProductOptions } from "~/utils";
+import { LoaderFunctionArgs } from '@remix-run/server-runtime';
+import { getSelectedProductOptions } from '@shopify/hydrogen';
+import { SelectedOption } from '@shopify/hydrogen-react/storefront-api-types';
+import { Metafield } from '@shopify/hydrogen/storefront-api-types';
+import { viewedProductsCookie } from '~/cookies.server';
+import {
+  PRODUCT_QUERY,
+  RECOMENDED_PRODUCT_QUERY,
+  VIEWED_PRODUCT_QUERY,
+} from '~/graphql/queries';
+import { QUERY_RELATED_PRODUCT_BY_ID } from '~/routes/($locale).products.$handle';
+import redirectToFirstVariant from '../helpers/redirectToFirstVariant';
+import { filterAvailablesProductOptions } from '~/utils';
 
 const loadCriticalData = async ({
   context,
@@ -15,66 +19,69 @@ const loadCriticalData = async ({
 }: LoaderFunctionArgs) => {
   const { handle } = params;
   const { storefront } = context;
-  const url = new URL(request.url);
   if (!handle) {
     throw new Error('Expected product handle to be defined');
   }
-  const encodeHandle = encodeURIComponent(handle)
-  const selectedOptions = getSelectedProductOptions(request)
-  const [{ product }] = await Promise.all([
-    storefront.query(PRODUCT_QUERY, {
-      variables: {
-        handle: encodeHandle,
-        selectedOptions: selectedOptions,
-        identifiers: [
-          {
-            "namespace": "shopify--discovery--product_recommendation",
-            "key": "related_products"
-          }
-        ],
-      },
-    }),
-  ]);
-
+  const selectedOptions = getSelectedProductOptions(request);
+  const getProduct = await storefront.query(PRODUCT_QUERY, {
+    variables: {
+      handle: handle,
+      selectedOptions: selectedOptions,
+      identifiers: [
+        {
+          namespace: 'shopify--discovery--product_recommendation',
+          key: 'related_products',
+        },
+      ],
+    },
+  });
+  const { product } = getProduct;
 
   const metafields = product?.metafields || [];
   let relatedProducts = [];
   if (metafields?.length !== 0) {
-    const findRelatedProducts = metafields.find((element: Metafield) => element?.key == "related_products") || { value: "[]" }
-    const parseMetaValue: any = JSON.parse(findRelatedProducts?.value) || []
-    relatedProducts = await Promise.all(parseMetaValue.map((id: string) => {
-      return storefront.query(QUERY_RELATED_PRODUCT_BY_ID, {
-        variables: {
-          id
-        }
-      })
-    }))
+    const findRelatedProducts = metafields.find(
+      (element: Metafield) => element?.key == 'related_products',
+    ) || { value: '[]' };
+    const parseMetaValue: any = JSON.parse(findRelatedProducts?.value) || [];
+    relatedProducts = await Promise.all(
+      parseMetaValue.map((id: string) => {
+        return storefront.query(QUERY_RELATED_PRODUCT_BY_ID, {
+          variables: {
+            id,
+          },
+        });
+      }),
+    );
   }
 
-  ///відображенн availableForSale прикріпленого продукту, відповідно до розміру який вибраний
-  relatedProducts = relatedProducts.map(element => {
+  // /відображенн availableForSale прикріпленого продукту, відповідно до розміру який вибраний
+  relatedProducts = relatedProducts.map((element) => {
     if (!element?.product?.availableForSale) return element;
-    const selectedVariantSize = selectedOptions.find(element => element.name === 'Size' || element.name === 'Розмір')?.value
-    if (!selectedVariantSize) return element
+    const selectedVariantSize = selectedOptions.find(
+      (element) => element.name === 'Size' || element.name === 'Розмір',
+    )?.value;
+    if (!selectedVariantSize) return element;
     const productVariants = element.product.variants.edges;
     const filteredVariants = productVariants.find(({ node }: any) => {
-      return node.selectedOptions.some((selectedOption: any) =>
-        selectedOption.value === selectedVariantSize
-      )
+      return node.selectedOptions.some(
+        (selectedOption: any) => selectedOption.value === selectedVariantSize,
+      );
     });
     return {
       product: {
         ...element.product,
-        availableForSale: typeof (filteredVariants?.node?.availableForSale) == "boolean" ? filteredVariants?.node?.availableForSale : element?.product?.availableForSale
-
-      }
-    }
-  })
+        availableForSale:
+          typeof filteredVariants?.node?.availableForSale == 'boolean'
+            ? filteredVariants?.node?.availableForSale
+            : element?.product?.availableForSale,
+      },
+    };
+  });
 
   if (!product?.id) {
     throw new Response(null, { status: 404 });
   }
-
 
   const cookieHeader = request.headers.get('Cookie');
   const cookie = (await viewedProductsCookie.parse(cookieHeader)) || [];
@@ -90,15 +97,12 @@ const loadCriticalData = async ({
   });
 
   const [{ productRecommendations }] = await Promise.all([
-    storefront.query(
-      RECOMENDED_PRODUCT_QUERY,
-      {
-        variables: {
-          id: product?.id || "0"
-        },
-      })],
-  );
-
+    storefront.query(RECOMENDED_PRODUCT_QUERY, {
+      variables: {
+        id: product?.id || '0',
+      },
+    }),
+  ]);
 
   const firstVariant = product.variants.nodes[0];
   const firstVariantIsDefault = Boolean(
@@ -124,8 +128,9 @@ const loadCriticalData = async ({
     cookie,
     product,
     viewedProducts: filterAvailablesProductOptions(viewed.nodes) || [],
-    recommendations: filterAvailablesProductOptions(productRecommendations) || [],
+    recommendations:
+      filterAvailablesProductOptions(productRecommendations) || [],
   };
-}
+};
 
 export default loadCriticalData;
