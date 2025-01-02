@@ -73,10 +73,11 @@ export const action: ActionFunction = async ({ context, request, params }) => {
     customerAccessToken?.accessToken || '',
   );
   try {
+    console.log(JSON.stringify(getUser, null, 2))
     const result: any = await sendReview(
       objects,
       getUser,
-      encodeURIComponent(params?.handle || '') || '',
+      params?.handle || ""
     );
     if (result.status === 'success') {
       const mediaFiles = formData.getAll('media_files');

@@ -127,7 +127,7 @@ export function ProductCard({
             className="w-full top-full bg-white  transition-all ease-in-out  duration-100 group-hover/card:bottom-0 group-hover/card:top-[unset] "
           >
             <VariantSelector
-              handle={encodeURIComponent(product.handle)}
+              handle={product.handle}
               options={sizeOptions}
               variants={product.variants.nodes}
             >

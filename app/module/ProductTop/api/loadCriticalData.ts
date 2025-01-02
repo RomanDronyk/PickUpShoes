@@ -123,7 +123,7 @@ const loadCriticalData = async ({
   }
 
   return {
-    handle: encodeURIComponent(product.handle),
+    handle: product.handle,
     relatedProducts,
     cookie,
     product,

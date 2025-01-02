@@ -129,7 +129,7 @@ export function normalizePredictiveSearchResults(
       items: predictiveSearch.queries.map((query: PredictiveQueryFragment) => {
         const trackingParams = applyTrackingParams(
           query,
-          `q=${encodeURIComponent(query.text)}`,
+          `q=${query.text}`,
         );
 
         totalResults++;
