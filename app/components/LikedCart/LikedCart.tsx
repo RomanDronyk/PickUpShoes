@@ -65,6 +65,7 @@ export interface ILikedCart {
 
 
 export function LikedCart({ product }: ILikedCart) {
+    if (product == null) return null
     const {
         setCartShow,
         handleLikeToggle,

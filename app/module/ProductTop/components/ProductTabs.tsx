@@ -5,10 +5,10 @@ import { FC } from 'react';
 import { CustomerAccessToken } from '@shopify/hydrogen-react/storefront-api-types';
 
 interface IProductTabs {
-  description: string,
-  customerAccessToken: CustomerAccessToken,
-  reviews: any,
-  children:any
+  description: string;
+  customerAccessToken: CustomerAccessToken;
+  reviews: any;
+  children: any;
 }
 const ProductTabs: FC<IProductTabs> = ({
   description,
@@ -52,9 +52,8 @@ const ProductTabs: FC<IProductTabs> = ({
           value="product-info"
           className="flex items-center mt-[25px]"
         >
-          <div>
-            <h3 className='sm:text-[24px] text-[18px] font-semibold  mb-[20px]'
-            >
+          <div className="w-full">
+            <h3 className="sm:text-[24px] text-[18px] font-semibold  mb-[20px]">
               Опис товару
             </h3>
             <div
@@ -64,8 +63,9 @@ const ProductTabs: FC<IProductTabs> = ({
           </div>
         </TabsContent>
         <TabsContent value="product-payment">
-          <h2 className='sm:text-[24px] text-[18px] font-semibold  mb-[20px]'
-          >Оплата і доставка</h2>
+          <h2 className="sm:text-[24px] text-[18px] font-semibold  mb-[20px]">
+            Оплата і доставка
+          </h2>
           <div className="p-3 sm:p-6 border border-black/10 rounded-[20px] w-full">
             <div className="grid md:grid-cols-[1fr,_minmax(40%,_585px)] gap-x-5">
               <div className="flex flex-col gap-5">
@@ -201,14 +201,12 @@ const ProductTabs: FC<IProductTabs> = ({
             </div>
           </div>
         </TabsContent>
-        <TabsContent value="product-review">
-            {children}
-        </TabsContent>
+        <TabsContent value="product-review">{children}</TabsContent>
         <TabsContent value="product-delivery">
-          <h2 className='sm:text-[24px] text-[18px] font-semibold  mb-[20px]'
-          >Обмін та повернення</h2>
+          <h2 className="sm:text-[24px] text-[18px] font-semibold  mb-[20px]">
+            Обмін та повернення
+          </h2>
           <div className="p-3 sm:p-6 border border-black/10 rounded-[20px] w-full">
-
             <div className="grid md:grid-cols-[4fr_5fr] grid-cols-1 gap-y-5 md:gap-y-0 md:gap-x-5">
               <div className="bg-[#FAFAFA] rounded-[15px] p-5 md:text-xl text-base">
                 <div className="flex items-center text-[21px] sm:text-2xl font-semibold mb-[10px] md:gap-[13px] gap-[8px]">
@@ -311,5 +309,5 @@ const ProductTabs: FC<IProductTabs> = ({
       </Tabs>
     </div>
   );
-}
-export default ProductTabs
+};
+export default ProductTabs;

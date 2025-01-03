@@ -38,25 +38,24 @@ export const meta: MetaFunction = () => {
   return [{ title: 'Profile' }];
 };
 
-
 export async function loader({ context }: LoaderFunctionArgs) {
   const { cart } = context;
   const customerAccessToken = await context.session.get('customerAccessToken');
   if (!customerAccessToken) {
     return redirect('/account/login');
   }
-  const userCartId = await getUserCartId(customerAccessToken.accessToken, context)
+  const userCartId = await getUserCartId(
+    customerAccessToken.accessToken,
+    context,
+  );
 
   if (userCartId) {
-    console.log('ldskjf', userCartId)
-    const headers = cart.setCartId(userCartId)
+    console.log('ldskjf', userCartId);
+    const headers = cart.setCartId(userCartId);
     return json({}, { headers });
   }
 
-
-
   return json({});
-
 }
 
 export const CUSTOMER_UPDATE_MUTATION_NEW = `#graphql
@@ -78,7 +77,6 @@ export const CUSTOMER_UPDATE_MUTATION_NEW = `#graphql
   }
 ` as const;
 
-
 export async function action({ request, context }: ActionFunctionArgs) {
   const { session, storefront } = context;
 
@@ -93,10 +91,9 @@ export async function action({ request, context }: ActionFunctionArgs) {
     return json({ error: 'Unauthorized' }, { status: 401 });
   }
   const action = form.get('action');
-  if (action == "update profile") {
+  if (action == 'update profile') {
     const acceptsMarketing = form.get('acceptsMarketing');
     const customer: CustomerUpdateInput = {};
-
 
     for (const [key, value] of form.entries()) {
       const validInputKeys = [
@@ -129,15 +126,16 @@ export async function action({ request, context }: ActionFunctionArgs) {
     );
     const { userErrors } = customerUpdate;
     if (userErrors?.length) {
-      return json(
-        { error: userErrors[0].message },
-        { status: 400 },
-      );
+      return json({ error: userErrors[0].message }, { status: 400 });
     }
 
     if (!customerUpdate?.customer) {
       return json(
-        { error: "Customer profile update failed.", userErrors: userErrors ? userErrors : [], customerUpdate: customerUpdate ? customerUpdate : [] },
+        {
+          error: 'Customer profile update failed.',
+          userErrors: userErrors ? userErrors : [],
+          customerUpdate: customerUpdate ? customerUpdate : [],
+        },
         { status: 400 },
       );
     }
@@ -146,11 +144,8 @@ export async function action({ request, context }: ActionFunctionArgs) {
       error: null,
       customer: customerUpdate?.customer,
     });
-
-
-
   }
-  if (action == "update password") {
+  if (action == 'update password') {
     try {
       const password = getPassword(form);
       const customer: CustomerUpdateInput = {};
@@ -214,16 +209,9 @@ export async function action({ request, context }: ActionFunctionArgs) {
       return json({ error: error.message, customer: null }, { status: 400 });
     }
   } else {
-    return json({ error: "Не правильний action", customer: null }, { status: 400 });
-
+    return json({ error: 'Не правильний action', customer: null }, { status: 400 });
   }
-
-
-
-
 }
-
-
 
 export default function AccountProfile() {
   const account = useOutletContext<{ customer: CustomerFragment }>();
@@ -231,16 +219,14 @@ export default function AccountProfile() {
   const action = useActionData<ActionResponse>();
   const customer = action?.customer ?? account?.customer;
 
-  console.log(action)
-  ///функція для обновлення данних які приходять з root.tsx loader
-  const { revalidate } = useRevalidator()
+  const { revalidate } = useRevalidator();
   useEffect(() => {
-    revalidate()
-  }, [])
+    revalidate();
+  }, []);
 
   return (
-    <div className="contaier grid md:grid-cols-2 grid-cols-1 gap-y-10 gap-x-10 my-10 w-full mt-0">
-      <div className="account-profile rounded-[20px] border border-black/10 p-6">
+    <div className="grid md:grid-cols-2 grid-cols-1 gap-y-10 gap-x-10 my-10 w-full mt-0">
+      <div className="account-profile self-start rounded-[20px] border border-black/10 p-6">
         <h2 className="md:text-[32px] text-xl font-medium mb-[25px]">
           Особиста інформація
         </h2>
@@ -252,7 +238,7 @@ export default function AccountProfile() {
             >
               Ім`я
             </label>
-            <input type='hidden' name='action' value="update profile" />
+            <input type="hidden" name="action" value="update profile" />
             <Input
               id="firstName"
               name="firstName"
@@ -330,9 +316,8 @@ export default function AccountProfile() {
           </fieldset>
 
           {action?.error ? (
-            <p className='text-red py-5 pxy-5'>
-              <small >{action.error}</small>
-
+            <p className="text-red py-5 pxy-5">
+              <small>{action.error}</small>
             </p>
           ) : (
             <br />
@@ -362,7 +347,7 @@ export default function AccountProfile() {
           </Button>
         </Form>
       </div>
-      <div className="account-password rounded-[20px] border border-black/10 p-6">
+      <div className="account-password self-start rounded-[20px] border border-black/10 p-6">
         <h2 className="md:text-[32px] text-xl  font-medium ">Зміна паролю</h2>
 
         <span className="mb-[25px] inline-flex">
@@ -376,7 +361,7 @@ export default function AccountProfile() {
             >
               Поточний пароль
             </label>
-            <input type='hidden' name='action' value="update password" />
+            <input type="hidden" name="action" value="update password" />
 
             <Input
               id="currentPassword"
@@ -449,9 +434,6 @@ export default function AccountProfile() {
     </div>
   );
 }
-
-
-
 
 function getPassword(form: FormData): string | undefined {
   let password;

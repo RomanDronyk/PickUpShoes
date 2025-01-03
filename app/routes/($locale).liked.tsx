@@ -113,7 +113,7 @@ export default function Liked() {
   }, [productIds])
 
   const isMobile = useMedia('(max-width: 767px)', false);
-  console.log(products)
+  console.log(products, "liked producst")
 
   return (
     <div className="w-full  flex flex-col  lg:px-24 md:px-12 px-[10px]  mb-8"
@@ -126,7 +126,7 @@ export default function Liked() {
       <div className={isMobile ? "flex flex-col min-h-[100px] relative  " : 'flex flex-col min-h-[100px] relative  justify-center  register rounded-[20px] border border-black/10 p-6 my-[12px] mb-[34px]'}>
         {products.length > 0 ?
           <div style={{ display: "grid", gap: 18 }}>
-            {products.map((product: { productVariant: IVariant }) => <LikedCart key={product.productVariant.id} product={product.productVariant} />)}
+            {products.map((product: { productVariant: IVariant }) => <LikedCart key={product?.productVariant?.id} product={product?.productVariant} />)}
           </div>
           :
           <h2 className="text-gray-500 text-2xl  font-semibold left-1/2 opacity-70 absolute text-center top-[50%] transform -translate-x-1/2 -translate-y-1/2">

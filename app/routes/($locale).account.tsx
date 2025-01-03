@@ -114,7 +114,7 @@ function AccountLayout({
     : 'Інформація про обліковий запис';
 
   return (
-    <div className="account lg:px-24 sm:px-10 px-[10px] pt-[1rem] w-full overflow-x-hidden">
+    <div className="account lg:px-24 sm:px-10 px-[10px] pt-[1rem] w-full">
       <h1 className="md:text-[32px] sm:text-[28px] text-[22px] font-medium px-[10px] sm:px-0">
         Особистий кабінет
       </h1>
@@ -153,24 +153,23 @@ function AccountMenu() {
   }
 
   return (
-    <ScrollArea className="scrollbar-none overflow-scroll w-full">
+    <ScrollArea className="overflow-scroll w-full">
       <nav
         role="navigation"
-        className="flex flex-row justify-between min-w-0 shrink-0 gap-2 border-b border-b-[#666666] min-w-[700px] "
+        className="flex flex-row justify-between shrink-0 gap-2 border-b border-b-[#666666] min-w-[700px] "
       >
         <NavLink to="/account/profile" className={isActiveStyle}>
           Особиста інформація
         </NavLink>
-        {/* <NavLink to="/account/userLike" className={isActiveStyle}>
-          Вподобане
-        </NavLink> */}
         <NavLink to="/account/orders" className={isActiveStyle}>
           Історія замовлень
         </NavLink>
         <NavLink to="/account/liked" className={isActiveStyle}>
-        Вподобане
-
-      </NavLink>
+          Вподобане
+        </NavLink>
+        <NavLink to="/account/addresses" className={isActiveStyle}>
+          Адреси
+        </NavLink>
       </nav>
       <ScrollBar orientation="horizontal" className="scrollbar-none" />
     </ScrollArea>

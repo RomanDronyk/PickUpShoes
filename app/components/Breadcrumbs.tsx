@@ -19,6 +19,7 @@ export const breadcrumbsSchema = z.enum([
   'profile',
   "liked",
   "likes",
+  "addresses",
   "likedsd",
   "checkout"
 ]);
@@ -101,12 +102,22 @@ export function Breadcrumbs() {
         break;
       case 'likes':
         pages.push({
-          href: `/account/liked`,
+          href: `/account/profile`,
           name: 'Особистий кабінет',
         });
         pages.push({
           href: `/account/liked`,
           name: 'Вподобані',
+        });
+        break;
+      case 'addresses':
+        pages.push({
+          href: `/account/profile`,
+          name: 'Особистий кабінет',
+        });
+        pages.push({
+          href: `/account/addresses`,
+          name: 'Адреси',
         });
         break;
       case "checkout":

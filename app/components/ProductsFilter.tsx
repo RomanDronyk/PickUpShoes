@@ -58,7 +58,7 @@ export const ProductsFilter = React.memo(function ProductsFilter({
 }) {
 
   return (
-    <div className="flex flex-col gap-6 border border-black/10 rounded-[20px] py-5 px-6 ">
+    <div className="flex sticky top-3 flex-col gap-6 border border-black/10 rounded-[20px] py-5 px-6 ">
       <div className=" border-b-black/10 flex justify-between items-center">
         <div className="font-semibold text-xl">Фільтрація товару</div>
 

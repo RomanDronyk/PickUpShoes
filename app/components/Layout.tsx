@@ -29,7 +29,7 @@ export function Layout({
   isLoggedIn,
 }: LayoutProps) {
   return (
-    <div className="min-h-full overflow-hidden  flex flex-col">
+    <div className="min-h-full  flex flex-col">
 
       {header && <Header header={header} cart={cart} isLoggedIn={isLoggedIn} />}
 
