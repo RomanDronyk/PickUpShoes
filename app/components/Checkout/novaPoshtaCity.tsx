@@ -8,25 +8,34 @@ import { IInputField, IInputState, INovaCity } from '~/screens/CheckoutScreen';
 import NoSsr from '@mui/material/NoSsr';
 import { checkoutInputErrors } from '~/mockMessages';
 
-
 interface INovaPoshtaCity {
-  inputState: IInputState,
-  onInputChange: (value: string | boolean, fieldName: keyof IInputField, id: string) => void
-  setInputState: React.Dispatch<React.SetStateAction<IInputState>>,
+  inputState: IInputState;
+  onInputChange: (
+    value: string | boolean,
+    fieldName: keyof IInputField,
+    id: string,
+  ) => void;
+  setInputState: React.Dispatch<React.SetStateAction<IInputState>>;
 }
 
-const NovaPoshtaCity: React.FC<INovaPoshtaCity> = ({ inputState, onInputChange, setInputState }) => {
+const NovaPoshtaCity: React.FC<INovaPoshtaCity> = ({
+  inputState,
+  onInputChange,
+  setInputState,
+}) => {
   const [open, setOpen] = useState(false);
-  const [options, setOptions] = useState<INovaCity[]>([]);
-  const [debounceTimer, setDebounceTimer] = useState<NodeJS.Timeout | null>(null);
-  const [loading, setLoading] = useState(false)
+  const [debounceTimer, setDebounceTimer] = useState<NodeJS.Timeout | null>(
+    null,
+  );
+  const [loading, setLoading] = useState(false);
 
+  // const loading = false
 
-  useEffect(() => {
-    if (!open) {
-      setOptions([]);
-    }
-  }, [open]);
+  // useEffect(() => {
+  //   if (!open) {
+  //     setInputState(prev => ({ ...prev, cityOptions: [] }));
+  //   }
+  // }, [open]);
 
   useEffect(() => {
     if (debounceTimer) {
@@ -35,30 +44,33 @@ const NovaPoshtaCity: React.FC<INovaPoshtaCity> = ({ inputState, onInputChange, 
 
     const timer = setTimeout(async () => {
       if (inputState?.novaCity?.value?.length > 0) {
-        setOptions([]);
+        setInputState((prev) => ({ ...prev, cityOptions: [] }));
 
         const formData = new FormData();
-        formData.append("action", "get city");
-        formData.append("city", inputState.novaCity.value);
-        setLoading(true)
+        formData.append('action', 'get city');
+        formData.append('city', inputState.novaCity.value);
+        setLoading(true);
         try {
-          const response = await fetch("/checkout-api", {
-            method: "POST",
+          const response = await fetch('/checkout-api', {
+            method: 'POST',
             body: formData,
           });
 
           if (response.ok) {
             const data: any = await response.json();
-            setOptions(data?.cities || []);
+            setInputState((prev) => ({
+              ...prev,
+              cityOptions: data?.cities || [],
+            }));
+            console.log('dslkfjsldkfjs;dlkfjsd;lfkj');
           } else {
-            console.error("Failed to fetch city data");
+            console.error('Failed to fetch city data');
           }
-          setLoading(false)
-
+          setLoading(false);
         } catch (error) {
-          setLoading(false)
+          setLoading(false);
 
-          console.error("Error occurred while fetching:", error);
+          console.error('Error occurred while fetching:', error);
         }
       }
     }, 500);
@@ -71,30 +83,30 @@ const NovaPoshtaCity: React.FC<INovaPoshtaCity> = ({ inputState, onInputChange, 
       }
     };
   }, [inputState.novaCity.value]);
-  useEffect(() => {
-    console.log(inputState)
-  }, [inputState.departmentOption])
 
-  const handleCityChange = (event: React.ChangeEvent<{}>, novaCity: INovaCity | null) => {
-    onInputChange(false, "isBlur", "novaCity")// Скидаємо стан blur після вибору міста
+  const handleCityChange = (
+    event: React.ChangeEvent<{}>,
+    novaCity: INovaCity | null,
+  ) => {
+    onInputChange(false, 'isBlur', 'novaCity'); // Скидаємо стан blur після вибору міста
     if (novaCity) {
-      setInputState(prev => ({
+      setInputState((prev) => ({
         ...prev,
-        novaCity: { ...novaCity, isBlur: true, errorMessage: "" },
+        novaCity: { ...novaCity, isBlur: true, errorMessage: '' },
       }));
-      setInputState(prev => ({
+      setInputState((prev) => ({
         ...prev,
         novaDepartment: {
-          CityDescription: "",
-          SettlementAreaDescription: "",
-          PostalCodeUA: "",
-          Description: "",
-          Ref: "",
-          value: "",
+          CityDescription: '',
+          SettlementAreaDescription: '',
+          PostalCodeUA: '',
+          Description: '',
+          Ref: '',
+          value: '',
           isBlur: true,
           errorMessage: prev.novaDepartment.errorMessage,
-        }
-      }))
+        },
+      }));
     }
   };
 
@@ -110,63 +122,67 @@ const NovaPoshtaCity: React.FC<INovaPoshtaCity> = ({ inputState, onInputChange, 
           }}
           onClose={() => {
             setOpen(false);
-            onInputChange(true, "isBlur", "novaCity")
+            onInputChange(true, 'isBlur', 'novaCity');
           }}
           onInputChange={(e) => {
-            setInputState(prev => ({
+            setInputState((prev) => ({
               ...prev,
               novaDepartment: {
-                CityDescription: "",
-                SettlementAreaDescription: "",
-                PostalCodeUA: "",
-                Description: "",
-                Ref: "",
-                value: "",
+                CityDescription: '',
+                SettlementAreaDescription: '',
+                PostalCodeUA: '',
+                Description: '',
+                Ref: '',
+                value: '',
                 isBlur: false,
                 errorMessage: checkoutInputErrors.novaDepartment,
               },
               novaCity: {
                 AddressDeliveryAllowed: true,
-                Area: "",
-                DeliveryCity: "",
-                MainDescription: "",
-                ParentRegionCode: "",
-                ParentRegionTypes: "",
-                Present: "",
-                Ref: "",
-                Region: "",
-                RegionTypes: "",
-                RegionTypesCode: "",
-                SettlementTypeCode: "",
+                Area: '',
+                DeliveryCity: '',
+                MainDescription: '',
+                ParentRegionCode: '',
+                ParentRegionTypes: '',
+                Present: '',
+                Ref: '',
+                Region: '',
+                RegionTypes: '',
+                RegionTypesCode: '',
+                SettlementTypeCode: '',
                 StreetsAvailability: false,
                 Warehouses: null,
                 isBlur: false,
-                value: "",
+                value: '',
                 errorMessage: checkoutInputErrors.novaCity,
               },
-              departmentOption: []
+              departmentOption: [],
             }));
-          }
-
-          }
+          }}
           onChange={handleCityChange}
-          isOptionEqualToValue={(option, value) => option.Present === value.Present}
+          isOptionEqualToValue={(option, value) =>
+            option.Present === value.Present
+          }
           getOptionLabel={(option) => option.Present}
-          options={options}
+          options={inputState?.cityOptions}
           loading={loading}
           noOptionsText="Місто не знайдено"
           renderInput={(params) => (
             <TextField
               {...params}
-              placeholder='Місто'
+              placeholder="Місто"
               required
-              onChange={(e) => onInputChange(e.target.value, "value", "novaCity")}
+              onChange={(e) =>
+                onInputChange(e.target.value, 'value', 'novaCity')
+              }
               value={inputState.novaCity.value}
               InputProps={{
                 ...params.InputProps,
                 endAdornment: (
                   <React.Fragment>
-                    {loading ? <CircularProgress color="inherit" size={20} /> : null}
+                    {loading ? (
+                      <CircularProgress color="inherit" size={20} />
+                    ) : null}
                     {params.InputProps.endAdornment}
                   </React.Fragment>
                 ),
@@ -176,9 +192,10 @@ const NovaPoshtaCity: React.FC<INovaPoshtaCity> = ({ inputState, onInputChange, 
         />
       </NoSsr>
 
-      {(!inputState.novaCity.MainDescription && inputState.novaCity.isBlur) && <div className='text-red'>{inputState.novaCity.errorMessage}</div>}
+      {!inputState.novaCity.MainDescription && inputState.novaCity.isBlur && (
+        <div className="text-red">{inputState.novaCity.errorMessage}</div>
+      )}
     </>
-  )
-
-}
-export default NovaPoshtaCity
+  );
+};
+export default NovaPoshtaCity;

@@ -1,20 +1,20 @@
-import { useLoaderData, type MetaFunction } from '@remix-run/react';
+import {useLoaderData, type MetaFunction} from '@remix-run/react';
 import {
   ActionFunction,
   defer,
   json,
   type LoaderFunctionArgs,
 } from '@shopify/remix-oxygen';
-import { viewedProductsCookie } from '~/cookies.server';
-import { loadCriticalData, loadDeferredData } from '~/module/ProductTop';
+import {viewedProductsCookie} from '~/cookies.server';
+import {loadCriticalData, loadDeferredData} from '~/module/ProductTop';
 import fetchProductReviewsEasy from '~/module/Reviews/api/fetchProductReviewsEasy';
-import { Storefront } from '@shopify/hydrogen';
+import {Storefront} from '@shopify/hydrogen';
 import sendReview from '~/module/Reviews/api/sendReview';
 import sendReviewImages from '~/module/Reviews/api/sendReviewImages';
-import { transformReviewsData } from '~/module/Reviews';
+import {transformReviewsData} from '~/module/Reviews';
 import ProductPageScreen from '~/screens/ProductPageScreen';
 
-export const meta: MetaFunction<typeof loader> = ({ data }: any) => {
+export const meta: MetaFunction<typeof loader> = ({data}: any) => {
   return [
     {
       title: `PickUpShoes | ${data?.product?.title ?? ''}`,
@@ -24,9 +24,9 @@ export const meta: MetaFunction<typeof loader> = ({ data }: any) => {
   ];
 };
 
-// export const handle = {
-//   breadcrumb: 'product',
-// };
+export const handle = {
+  breadcrumb: 'product',
+};
 
 const getUserData = async (
   storefront: Storefront,
@@ -46,7 +46,7 @@ const getUserData = async (
   });
 };
 
-export const action: ActionFunction = async ({ context, request, params }) => {
+export const action: ActionFunction = async ({context, request, params}) => {
   const errors: any = {};
   const formData = await request.formData();
   const content = String(formData.get('content'));
@@ -65,7 +65,7 @@ export const action: ActionFunction = async ({ context, request, params }) => {
   }
 
   if (Object.keys(errors).length > 0) {
-    return json({ errors });
+    return json({errors});
   }
 
   const getUser = await getUserData(
@@ -73,11 +73,11 @@ export const action: ActionFunction = async ({ context, request, params }) => {
     customerAccessToken?.accessToken || '',
   );
   try {
-    console.log(JSON.stringify(getUser, null, 2))
+    console.log(JSON.stringify(getUser, null, 2));
     const result: any = await sendReview(
       objects,
       getUser,
-      params?.handle || ""
+      params?.handle || '',
     );
     if (result.status === 'success') {
       const mediaFiles = formData.getAll('media_files');
@@ -95,20 +95,20 @@ export const action: ActionFunction = async ({ context, request, params }) => {
         await sendReviewImages(`${result?.review_id}` || '', imageData);
       }
     }
-    return json({ message: 'success' });
+    return json({message: 'success'});
   } catch (error) {
     console.error(error);
-    return json({ error: 'Помилка при створенні відгуку' }, { status: 500 });
+    return json({error: 'Помилка при створенні відгуку'}, {status: 500});
   }
 };
 
 export async function loader(args: LoaderFunctionArgs) {
-  const { context } = args;
-  const { session } = context;
+  const {context} = args;
+  const {session} = context;
   const customerAccessToken = session.get('customerAccessToken');
   const deferredData = loadDeferredData(args);
   const criticalData = await loadCriticalData(args);
-  const { cookie, product } = criticalData;
+  const {cookie, product} = criticalData;
 
   const getProductId = product.id.split('/');
   const getReviews = await fetchProductReviewsEasy(
@@ -127,7 +127,7 @@ export async function loader(args: LoaderFunctionArgs) {
   };
   return defer(
     {
-      customerAccessToken: customerAccessToken || { accessToken: null },
+      customerAccessToken: customerAccessToken || {accessToken: null},
       reviews: reviews,
       reviewsReal: reviewDataForPaginations,
       ...deferredData,

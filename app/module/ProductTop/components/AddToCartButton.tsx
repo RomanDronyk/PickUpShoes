@@ -1,8 +1,8 @@
-import { FetcherWithComponents } from "@remix-run/react";
-import { CartForm } from "@shopify/hydrogen";
-import { CartLineInput } from "@shopify/hydrogen-react/storefront-api-types";
-import LoaderNew from "~/components/LoaderNew";
-import { cn } from "~/lib/utils";
+import {FetcherWithComponents} from '@remix-run/react';
+import {CartForm} from '@shopify/hydrogen';
+import {CartLineInput} from '@shopify/hydrogen-react/storefront-api-types';
+import LoaderNew from '~/components/LoaderNew';
+import {cn} from '~/lib/utils';
 
 const AddToCartButton = ({
   analytics,
@@ -21,7 +21,7 @@ const AddToCartButton = ({
     <div>
       <CartForm
         route="/cart"
-        inputs={{ lines }}
+        inputs={{lines}}
         action={CartForm.ACTIONS.LinesAdd}
       >
         {(fetcher: FetcherWithComponents<any>) => (
@@ -40,14 +40,18 @@ const AddToCartButton = ({
                 disabled && 'bg-white text-black border border-black',
               )}
             >
-              {fetcher.state == 'idle' ?
+              {fetcher.state == 'idle' ? (
                 children
-                : <div className='h-[18px]'> <LoaderNew /></div>}
+              ) : (
+                <div className="h-[18px]">
+                  <LoaderNew />
+                </div>
+              )}
             </button>
           </>
         )}
       </CartForm>
     </div>
   );
-}
+};
 export default AddToCartButton;

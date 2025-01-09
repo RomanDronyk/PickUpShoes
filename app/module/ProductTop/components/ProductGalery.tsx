@@ -4,12 +4,25 @@ import {
   CarouselContent,
   CarouselItem,
 } from '~/components/ui/carousel';
-import { MediaFile } from '@shopify/hydrogen-react';
-import { cn } from '~/lib/utils';
-import { useContext, useEffect, useState } from 'react';
-import { HeaderBasketContext, HeaderContextInterface } from '~/context/HeaderCarts';
-import { ProductFragment } from 'storefrontapi.generated';
-const ProductGalery = ({ selectedVariantId, product, objGalery, media }: { selectedVariantId: any, product: any, objGalery: any, media: ProductFragment['media'] }) => {
+import {MediaFile} from '@shopify/hydrogen-react';
+import {cn} from '~/lib/utils';
+import {useContext, useEffect, useState} from 'react';
+import {
+  HeaderBasketContext,
+  HeaderContextInterface,
+} from '~/context/HeaderCarts';
+import {ProductFragment} from 'storefrontapi.generated';
+const ProductGalery = ({
+  selectedVariantId,
+  product,
+  objGalery,
+  media,
+}: {
+  selectedVariantId: any;
+  product: any;
+  objGalery: any;
+  media: ProductFragment['media'];
+}) => {
   const {
     selectedIndex,
     api,
@@ -25,33 +38,33 @@ const ProductGalery = ({ selectedVariantId, product, objGalery, media }: { selec
     api.on('select', onSelect);
   }, [api, onSelect]);
 
-  const [isLike, setIsLike] = useState(false)
-  const {
-    likedCardId,
-    handleLikeToggle,
-  } = useContext(HeaderBasketContext) as HeaderContextInterface;
+  const [isLike, setIsLike] = useState(false);
+  const {likedCardId, handleLikeToggle} = useContext(
+    HeaderBasketContext,
+  ) as HeaderContextInterface;
 
   useEffect(() => {
-    const productIndex = likedCardId.findIndex((item: any) => item === product?.selectedVariant?.id);
+    const productIndex = likedCardId.findIndex(
+      (item: any) => item === product?.selectedVariant?.id,
+    );
     if (productIndex === -1) {
-      setIsLike(false)
+      setIsLike(false);
     } else {
-      setIsLike(true)
-
+      setIsLike(true);
     }
-  }, [likedCardId, product])
+  }, [likedCardId, product]);
 
   const toggleLike = () => {
     if (isLike) {
-      handleLikeToggle(selectedVariantId, "delete")
+      handleLikeToggle(selectedVariantId, 'delete');
     } else {
-      handleLikeToggle(selectedVariantId, "add")
+      handleLikeToggle(selectedVariantId, 'add');
     }
-  }
+  };
 
   return (
     <div className="">
-      <div className='sticky top-3  xl:relative flex flex-col-reverse gap-y-5 gap-x-[14px]'>
+      <div className="sticky top-3  xl:relative flex flex-col-reverse gap-y-5 gap-x-[14px]">
         <Carousel
           setApi={setThumbApi}
           opts={{
@@ -83,12 +96,11 @@ const ProductGalery = ({ selectedVariantId, product, objGalery, media }: { selec
                   data={item}
                   className="w-full rounded-[20px]"
                 />
-
               </CarouselItem>
             ))}
           </CarouselContent>
         </Carousel>
-        <div className='relative'>
+        <div className="relative">
           <Carousel
             setApi={setApi}
             opts={{
@@ -117,16 +129,14 @@ const ProductGalery = ({ selectedVariantId, product, objGalery, media }: { selec
           <button
             onClick={toggleLike}
             className=" absolute p-2 rounded-full bg-white shadow-lg  top-[1.35rem] right-5 p-2"
-            style={{ zIndex: 32 }}
+            style={{zIndex: 32}}
             aria-label="Add to wishlist"
           >
             <HeartIcon isFavorited={isLike} />
           </button>
         </div>
       </div>
-
-
     </div>
   );
-}
+};
 export default ProductGalery;

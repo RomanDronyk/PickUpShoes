@@ -32,6 +32,7 @@ const ContactType: React.FC<IContactType> = ({ onInputChange, inputState }) => {
         isOptionEqualToValue={(option, value) => option.name === value.name}
         getOptionLabel={(option) => option.name}
         options={contactType}
+        defaultValue={contactType[1]}
         onChange={(event, selectedOption) => {
           onInputChange(selectedOption?.name || "", "value", "contactType")
           onInputChange("", "errorMessage", "contactType")

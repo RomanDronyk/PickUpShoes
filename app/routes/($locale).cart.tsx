@@ -1,4 +1,8 @@
-import { Await, FetcherWithComponents, type MetaFunction } from '@remix-run/react';
+import {
+  Await,
+  FetcherWithComponents,
+  type MetaFunction,
+} from '@remix-run/react';
 import { Suspense } from 'react';
 import { CartForm } from '@shopify/hydrogen';
 import { json, type ActionFunctionArgs } from '@shopify/remix-oxygen';
@@ -22,7 +26,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
   const { action, inputs } = CartForm.getFormInput(formData);
 
   if (!action) {
-    return json({ error: "No action provided" })
+    return json({ error: 'No action provided' });
   }
 
   let status = 200;
@@ -54,19 +58,20 @@ export async function action({ request, context }: ActionFunctionArgs) {
     case CartForm.ACTIONS.BuyerIdentityUpdate: {
       result = await cart.updateBuyerIdentity({
         ...inputs.buyerIdentity,
-        customerAccessToken: inputs.buyerIdentity.customerAccessToken ? inputs.buyerIdentity.customerAccessToken : customerAccessToken?.accessToken,
+        customerAccessToken: inputs.buyerIdentity.customerAccessToken
+          ? inputs.buyerIdentity.customerAccessToken
+          : customerAccessToken?.accessToken,
       });
       break;
     }
     default:
-      return json({ error: `${action} cart action is not defined` })
+      return json({ error: `${action} cart action is not defined` });
   }
 
   const resultCartId = result.cart.id;
   if (customerAccessToken?.accessToken) {
-    syncUserCart(customerAccessToken.accessToken, resultCartId, context)
+    await syncUserCart(customerAccessToken.accessToken, resultCartId, context);
   }
-
 
   const headers = cart.setCartId(result.cart.id);
   const { cart: cartResult, errors } = result;
@@ -102,16 +107,13 @@ export default function Cart() {
           errorElement={<div>An error occurred</div>}
         >
           {(cart) => {
-            console.log(cart)
+            console.log(cart);
             return <CartMain layout="page" cart={cart} />;
           }}
         </Await>
       </Suspense>
-      <div >
-        <CartForm
-          route="/cart"
-          action={CartForm.ACTIONS.BuyerIdentityUpdate}
-        >
+      <div>
+        <CartForm route="/cart" action={CartForm.ACTIONS.BuyerIdentityUpdate}>
           {(fetcher: FetcherWithComponents<any>) => (
             <>
               <button
@@ -119,12 +121,11 @@ export default function Cart() {
                 disabled={fetcher.state !== 'idle'}
                 className={cn(
                   'bg-black text-white font-medium text-[18px] w-full rounded-[62px] py-[15px] cursor-pointer',
-                  fetcher.state !== 'idle' && 'bg-white text-black border border-black',
+                  fetcher.state !== 'idle' &&
+                  'bg-white text-black border border-black',
                 )}
               >
-                {fetcher.state == 'idle' ?
-                  "Обновить"
-                  : "Загрузка"}
+                {fetcher.state == 'idle' ? 'Обновить' : 'Загрузка'}
               </button>
             </>
           )}
