@@ -434,7 +434,7 @@ function AddressForm({
         <Input
           id="company"
           name="company"
-          type="text"
+          type="hidden"
           autoComplete="organization"
           defaultValue={address?.company ?? ''}
           placeholder="Компанія"

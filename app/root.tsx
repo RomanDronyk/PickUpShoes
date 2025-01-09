@@ -1,5 +1,4 @@
-
-import { useNonce } from '@shopify/hydrogen';
+import {useNonce} from '@shopify/hydrogen';
 import {
   defer,
   type SerializeFrom,
@@ -19,15 +18,14 @@ import {
   type ShouldRevalidateFunction,
 } from '@remix-run/react';
 import favicon from '../public/favicon.ico';
-import { Layout } from '~/components/Layout';
+import {Layout} from '~/components/Layout';
 import styles from 'app/styles/tailwind.css';
-import { google } from 'worker-auth-providers';
 import HeaderContext from '~/context/HeaderCarts';
-import { CacheProvider } from '@emotion/react';
+import {CacheProvider} from '@emotion/react';
 import createCache from '@emotion/cache';
 import NotFoundScreen from './screens/NotFoundScreen';
-import { likedProductsCookie } from './cookies.server';
-import { getUserCartId, getUserLikedCartIds, validateCustomerAccessToken } from './utils';
+import {likedProductsCookie} from './cookies.server';
+import {getUserLikedCartIds, validateCustomerAccessToken} from './utils';
 
 export const shouldRevalidate: ShouldRevalidateFunction = ({
   formMethod,
@@ -49,7 +47,7 @@ export const shouldRevalidate: ShouldRevalidateFunction = ({
 
 export function links() {
   return [
-    { rel: 'stylesheet', href: styles },
+    {rel: 'stylesheet', href: styles},
     // {rel: 'stylesheet', href: vaulStyles},
     {
       rel: 'preconnect',
@@ -59,7 +57,7 @@ export function links() {
       rel: 'preconnect',
       href: 'https://shop.app',
     },
-    { rel: 'icon', type: 'image/svg+xml', href: favicon },
+    {rel: 'icon', type: 'image/svg+xml', href: favicon},
   ];
 }
 
@@ -68,13 +66,13 @@ export const useRootLoaderData = () => {
   return root?.data as SerializeFrom<typeof loader>;
 };
 
-export async function loader({ context, request }: any) {
-  const { storefront, session, cart } = context;
+export async function loader({context, request}: any) {
+  const {storefront, session, cart} = context;
   const customerAccessToken = await session.get('customerAccessToken');
   const publicStoreDomain = context.env.PUBLIC_STORE_DOMAIN;
 
   // validate the customer access token is valid
-  const { isLoggedIn, headers } = await validateCustomerAccessToken(
+  const {isLoggedIn, headers} = await validateCustomerAccessToken(
     session,
     customerAccessToken,
   );
@@ -82,16 +80,16 @@ export async function loader({ context, request }: any) {
   let likedCookes = (await likedProductsCookie.parse(cookieHeader)) || [];
 
   if (isLoggedIn && customerAccessToken?.accessToken) {
-    likedCookes = await getUserLikedCartIds(customerAccessToken?.accessToken, context)
-
+    likedCookes = await getUserLikedCartIds(
+      customerAccessToken?.accessToken,
+      context,
+    );
   } else {
     likedCookes = (await likedProductsCookie.parse(cookieHeader)) || [];
   }
 
-
-
   // let cartPromise = await getUserCart(customerAccessToken?.accessToken, isLoggedIn, context);
-  let cartPromise = cart.get()
+  let cartPromise = cart.get();
 
   // defer the footer query (below the fold)
   const footerPromise = await storefront.query(FOOTER_QUERY, {
@@ -120,7 +118,7 @@ export async function loader({ context, request }: any) {
     {
       headers: {
         ...headers,
-      }
+      },
     },
   );
 }
@@ -128,7 +126,7 @@ export async function loader({ context, request }: any) {
 export default function App() {
   const nonce = useNonce();
   const data = useLoaderData<typeof loader>();
-  const cache = createCache({ key: 'css', prepend: true });
+  const cache = createCache({key: 'css', prepend: true});
 
   return (
     <html lang="uk">
@@ -200,7 +198,6 @@ export function ErrorBoundary() {
  * );
  * ```
  */
-
 
 const MENU_FRAGMENT = `#graphql
   fragment MenuItem on MenuItem {

@@ -1,18 +1,18 @@
-import { Form, useNavigation } from '@remix-run/react';
+import {Form, useNavigation} from '@remix-run/react';
 import CheckoutCartList from '~/components/common/checkoutCartList';
 import CheckoutRecommendationList from '~/components/common/checkoutRecommendationList';
-import { Input } from '~/components/ui/input';
+import {Input} from '~/components/ui/input';
 import PhoneInput from 'react-phone-number-input/input';
 import ContactType from '~/components/Checkout/contactType';
 import NovaPoshtaCity from '~/components/Checkout/novaPoshtaCity';
 import NovaPoshtaDepartent from '~/components/Checkout/novaPoshtaDepartment';
-import { Button } from '~/components/ui/button';
-import { FC, useState } from 'react';
+import {Button} from '~/components/ui/button';
+import {FC, useState} from 'react';
 import ua from 'react-phone-number-input/locale/ua';
-import { emailValidation } from '~/utils';
-import { ICheckoutInputErrors, checkoutInputErrors } from '~/mockMessages';
+import {emailValidation} from '~/utils';
+import {ICheckoutInputErrors, checkoutInputErrors} from '~/mockMessages';
 import LoaderNew from '~/components/LoaderNew';
-import { Customer } from '@shopify/hydrogen-react/storefront-api-types';
+import {Customer} from '@shopify/hydrogen-react/storefront-api-types';
 
 const CheckoutScreen: FC<ICheckoutScreen> = ({
   actionErrorMessage,
@@ -59,7 +59,7 @@ const CheckoutScreen: FC<ICheckoutScreen> = ({
       Warehouses: null,
       isBlur: false,
       value: '',
-      errorMessage: "",
+      errorMessage: '',
     },
     novaDepartment: {
       CityDescription: customer?.defaultAddress?.city || '',
@@ -69,12 +69,12 @@ const CheckoutScreen: FC<ICheckoutScreen> = ({
       Ref: '',
       value: '',
       isBlur: false,
-      errorMessage: "",
+      errorMessage: '',
     },
     userEmail: {
       value: customer?.email || '',
       isBlur: false,
-      errorMessage: customer?.email ? "" : checkoutInputErrors.userEmail,
+      errorMessage: customer?.email ? '' : checkoutInputErrors.userEmail,
     },
     userPromo: {
       value: '',
@@ -106,7 +106,11 @@ const CheckoutScreen: FC<ICheckoutScreen> = ({
   const addressesForRendering = [
     customer?.defaultAddress,
     ...(customer?.addresses.nodes
-      .filter((address) => address?.id !== customer.defaultAddress?.id && address.address1 !== null)
+      .filter(
+        (address) =>
+          address?.id !== customer.defaultAddress?.id &&
+          address.address1 !== null,
+      )
       .slice(0, 4) || []),
   ];
 
@@ -130,7 +134,7 @@ const CheckoutScreen: FC<ICheckoutScreen> = ({
         PostalCodeUA: findExistedAddress?.zip || '',
         errorMessage: '',
       },
-      novaCity: { ...prev.novaCity, errorMessage: '' },
+      novaCity: {...prev.novaCity, errorMessage: ''},
       firstName: {
         ...prev.firstName,
         value: findExistedAddress?.firstName || '',
@@ -138,12 +142,12 @@ const CheckoutScreen: FC<ICheckoutScreen> = ({
       lastName: {
         ...prev.lastName,
         value: findExistedAddress?.lastName || '',
-        errorMessage: "",
+        errorMessage: '',
       },
       userPhone: {
         ...prev.userPhone,
         value: findExistedAddress?.phone || '',
-        errorMessage: "",
+        errorMessage: '',
       },
     }));
   };
@@ -156,21 +160,21 @@ const CheckoutScreen: FC<ICheckoutScreen> = ({
           method="POST"
           className="grid sticky top-3 gap-[35px] max-w-full overflow-hidden"
         >
-          <div style={{ position: 'absolute', zIndex: -10, opacity: 0 }}>
+          <div style={{position: 'absolute', zIndex: -10, opacity: 0}}>
             <input
-              style={{ width: '0% !important' }}
+              style={{width: '0% !important'}}
               type="hidden"
               name="inputState"
               value={JSON.stringify(inputState)}
             />
             <input
-              style={{ width: '0% !important' }}
+              style={{width: '0% !important'}}
               type="hidden"
               name="products"
               value={JSON.stringify(cartsFromCart)}
             />
             <input
-              style={{ width: '0% !important' }}
+              style={{width: '0% !important'}}
               type="hidden"
               name="amount"
               value={amount.replace('.0', '')}
@@ -181,7 +185,9 @@ const CheckoutScreen: FC<ICheckoutScreen> = ({
             <h2 className="xl:text-[32px] text-[24px] text-left  font-medium mb-[20px]">
               Дані для доставки
             </h2>
-            {(customer && customer.defaultAddress?.address1 && customer.defaultAddress.city) ? (
+            {customer &&
+            customer.defaultAddress?.address1 &&
+            customer.defaultAddress.city ? (
               <>
                 {addressesForRendering.map((address, index) => {
                   return (
@@ -201,7 +207,7 @@ const CheckoutScreen: FC<ICheckoutScreen> = ({
                         className="mr-2"
                       />
                       <label
-                        style={{ cursor: 'pointer' }}
+                        style={{cursor: 'pointer'}}
                         htmlFor={address?.id}
                         className="font-normal text-[16px]"
                       >
@@ -225,7 +231,7 @@ const CheckoutScreen: FC<ICheckoutScreen> = ({
                     className="mr-2"
                   />
                   <label
-                    style={{ cursor: 'pointer' }}
+                    style={{cursor: 'pointer'}}
                     htmlFor="create-new-address"
                     className="font-normal text-[16px]"
                   >
@@ -271,7 +277,7 @@ const CheckoutScreen: FC<ICheckoutScreen> = ({
                     className="mr-2"
                   />
                   <label
-                    style={{ cursor: 'pointer' }}
+                    style={{cursor: 'pointer'}}
                     htmlFor="delivery1"
                     className="font-normal text-[16px]"
                   >
@@ -292,7 +298,7 @@ const CheckoutScreen: FC<ICheckoutScreen> = ({
                     className="mr-2"
                   />
                   <label
-                    style={{ cursor: 'pointer' }}
+                    style={{cursor: 'pointer'}}
                     htmlFor="delivery2"
                     className="font-normal text-[16px]"
                   >
@@ -387,7 +393,7 @@ const CheckoutScreen: FC<ICheckoutScreen> = ({
                 {navigation.state == 'idle' ? (
                   <>
                     Замовити
-                    <span style={{ marginLeft: 15 }}>
+                    <span style={{marginLeft: 15}}>
                       <svg
                         width="16"
                         height="16"
@@ -436,7 +442,7 @@ const CheckoutScreen: FC<ICheckoutScreen> = ({
   );
 };
 
-const FormInputs = ({ onInputChange, inputState, setInputState, customer }) => {
+const FormInputs = ({onInputChange, inputState, setInputState, customer}) => {
   return (
     <fieldset className="flex flex-col gap-[15px]">
       <div className="pb-[15px] border-b border-black/20">
@@ -558,12 +564,12 @@ const FormInputs = ({ onInputChange, inputState, setInputState, customer }) => {
           onChange={(event) => {
             const key = event.target.id as keyof ICheckoutInputErrors;
             event.target.value.length === 3 ||
-              !emailValidation(event.target.value)
+            !emailValidation(event.target.value)
               ? onInputChange(
-                checkoutInputErrors[key],
-                'errorMessage',
-                event.target.id,
-              )
+                  checkoutInputErrors[key],
+                  'errorMessage',
+                  event.target.id,
+                )
               : onInputChange('', 'errorMessage', event.target.id);
             onInputChange(event.target.value, 'value', event.target.id);
           }}
