@@ -2,8 +2,6 @@ import { UPDATE_CUSTOMER_METAFIELDS_MUTATION } from "~/graphql/mutations";
 import { CUSTOMER_DATA_BY_ACCESS_TOKEN_QUERY } from "~/graphql/queries";
 
 export const syncUserLikedCart = async (accessToken: string, cartIds: string[], context: any) => {
-
-  console.log(JSON.stringify(cartIds, null,2), 'cartIds')
   if (!isArrayOfStrings(cartIds) || accessToken === undefined || accessToken === "") {
     throw Error("Options not correct")
   }
@@ -29,7 +27,6 @@ export const syncUserLikedCart = async (accessToken: string, cartIds: string[], 
       }
     }
   })
-  console.log(JSON.stringify(updateUserMetaField, null,2), "updateUserMetaField")
   return updateUserMetaField
 }
 function isArrayOfStrings(arr: any[]): boolean {

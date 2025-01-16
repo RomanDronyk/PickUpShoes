@@ -25,7 +25,7 @@ export type HeaderProps = Pick<
   'header' | 'cart' | 'isLoggedIn' | 'favorites'
 >;
 
-export function Header({header, isLoggedIn, cart}: HeaderProps) {
+export function Header({header, cart}: HeaderProps) {
   const {shop, menu} = header;
   const {cartShow, count, setCartShow} = useContext(
     HeaderBasketContext,
@@ -154,7 +154,6 @@ export function Header({header, isLoggedIn, cart}: HeaderProps) {
             <Suspense>
               <Await resolve={cart}>
                 {(cart) => {
-                  if (!cart) return <MobileCart cart={cart} />;
                   return <MobileCart cart={cart} />;
                 }}
               </Await>
@@ -189,20 +188,14 @@ export function Header({header, isLoggedIn, cart}: HeaderProps) {
             </NavLink>
           </Button>
         </nav>
-        {!isMobile && (
-          <Suspense>
-            <Await resolve={cart}>
-              {(cart) => <DropDownCart cart={cart} />}
-            </Await>
-          </Suspense>
-        )}
+        {!isMobile && <DropDownCart cart={cart} />}
       </div>
     </header>
   );
 }
 
 function CartBadge({count = 0}: {count: number}) {
-  const {cartShow, setCartShow} = useContext(
+  const {setCartShow} = useContext(
     HeaderBasketContext,
   ) as HeaderContextInterface;
 
@@ -262,12 +255,10 @@ export function HeaderMenu({
   primaryDomainUrl: HeaderQuery['shop']['primaryDomain']['url'];
 }) {
   const {publicStoreDomain} = useRootLoaderData();
-  const rootLoaderData = useRootLoaderData();
   // const {
   //   setLikedCardId,
   // } = useContext(HeaderBasketContext) as HeaderContextInterface;
   // useEffect(() => {
-  console.log(rootLoaderData, menu, 'testing aslkfj');
   // rootLoaderData?.likeProductIds ? setLikedCardId(rootLoaderData?.likeProductIds) : setLikedCardId([])
   // }, [rootLoaderData?.likeProductIds])
   return (
@@ -275,13 +266,6 @@ export function HeaderMenu({
       <NavigationMenuList>
         {menu?.items?.map((item) => {
           if (!item?.url) return null;
-          // if the url is internal, we strip the domain
-          const url =
-            item?.url.includes('myshopify.com') ||
-            item?.url.includes(publicStoreDomain) ||
-            item?.url.includes(primaryDomainUrl)
-              ? new URL(item?.url)?.pathname
-              : item?.url;
           return (
             <NavigationMenuItem key={item?.id}>
               <NavigationMenuTrigger className="font-normal">
@@ -331,5 +315,3 @@ function activeLinkStyle({
     color: isPending ? 'grey' : 'black',
   };
 }
-
-function SubMenu() {}

@@ -1,11 +1,11 @@
 export const getUserLikedCartIds = async (accessToken: string, context: any) => {
-  const { storefront, admin } = context;
+  const { storefront } = context;
   const { customer } = await storefront.query(GET_USER_DATA_BY_ACCESS_TOKEN, {
     variables: {
       customerAccessToken: accessToken,
     },
   })
-  if(!customer){
+  if (!customer) {
     return []
   }
   const getCustomer = await context.admin(GET_ALL_CUSTOMER_FIELDS, {
@@ -14,8 +14,7 @@ export const getUserLikedCartIds = async (accessToken: string, context: any) => 
     }
   })
   const customerLikedCart = getCustomer?.customer?.metafield?.value || "[]"
-  console.log(customerLikedCart, "dlskfjslkdj")
-  const parseCustomerLikedCart = customerLikedCart? JSON.parse(customerLikedCart): [];
+  const parseCustomerLikedCart = customerLikedCart ? JSON.parse(customerLikedCart) : [];
   return parseCustomerLikedCart || [];
 
 }

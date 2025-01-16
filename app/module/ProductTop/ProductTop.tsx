@@ -1,16 +1,14 @@
-import { FC, useCallback, useState } from "react";
-import ProductGalery from "./components/ProductGalery"
-import ProductMain from "./components/ProductMain"
-import {
-  type CarouselApi
-} from '~/components/ui/carousel';
-import { useMedia } from "react-use";
+import {FC, useCallback, useState} from 'react';
+import ProductGalery from './components/ProductGalery';
+import ProductMain from './components/ProductMain';
+import {type CarouselApi} from '~/components/ui/carousel';
+import {useMedia} from 'react-use';
 
 interface IProductPageTopView {
-  handle: string,
-  variants: any,
-  relatedProducts: any,
-  product: any,
+  handle: string;
+  variants: any;
+  relatedProducts: any;
+  product: any;
 }
 
 const ProductTop: FC<IProductPageTopView> = ({
@@ -19,7 +17,7 @@ const ProductTop: FC<IProductPageTopView> = ({
   relatedProducts,
   product,
 }) => {
-  const { selectedVariant, descriptionHtml } = product;
+  const {selectedVariant, descriptionHtml} = product;
 
   const [selectedIndex, setSelectedIndex] = useState<number | undefined>(0);
   const [api, setApi] = useState<CarouselApi>();
@@ -35,14 +33,11 @@ const ProductTop: FC<IProductPageTopView> = ({
     [api],
   );
 
-
   const onSelect = useCallback(() => {
     if (!api) return;
     setSelectedIndex(api.selectedScrollSnap());
     thumbApi?.scrollTo(api.selectedScrollSnap());
   }, [api, thumbApi, setSelectedIndex]);
-
-
 
   const objGalery = {
     selectedIndex,
@@ -54,12 +49,17 @@ const ProductTop: FC<IProductPageTopView> = ({
     isWide,
     handleThumbClick,
     onSelect,
-  }
+  };
 
   return (
     <>
       <div className="sm:grid sm:grid-cols-2 flex flex-col gap-y-5 gap-x-10">
-        <ProductGalery selectedVariantId={selectedVariant.id} product={product} objGalery={objGalery} media={product?.media} />
+        <ProductGalery
+          selectedVariantId={selectedVariant.id}
+          product={product}
+          objGalery={objGalery}
+          media={product?.media}
+        />
         <ProductMain
           handle={handle}
           selectedVariant={selectedVariant}
@@ -69,7 +69,6 @@ const ProductTop: FC<IProductPageTopView> = ({
         />
       </div>
     </>
-
-  )
-}
-export default ProductTop
+  );
+};
+export default ProductTop;

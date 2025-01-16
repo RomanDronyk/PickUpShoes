@@ -1,8 +1,12 @@
-import { Link } from "@remix-run/react";
-import { Image, Money } from "@shopify/hydrogen-react";
-import { useMedia } from "react-use";
-import { NormalizedPredictiveSearch, NormalizedPredictiveSearchResultItem, NormalizedPredictiveSearchResults } from "~/components/Search";
-import { useVariantUrl } from "~/utils";
+import {Link} from '@remix-run/react';
+import {Image, Money} from '@shopify/hydrogen-react';
+import {useMedia} from 'react-use';
+import {
+  NormalizedPredictiveSearch,
+  NormalizedPredictiveSearchResultItem,
+  NormalizedPredictiveSearchResults,
+} from '~/components/Search';
+import {useVariantUrl} from '~/utils';
 
 type UseSearchReturn = NormalizedPredictiveSearch & {
   searchInputRef: React.MutableRefObject<HTMLInputElement | null>;
@@ -20,21 +24,17 @@ type SearchResultItemProps = Pick<SearchResultTypeProps, 'goToSearchResult'> & {
   item: NormalizedPredictiveSearchResultItem;
 };
 
-
-export function SearchResultItem({ goToSearchResult, item }: SearchResultItemProps) {
+export function SearchResultItem({
+  goToSearchResult,
+  item,
+}: SearchResultItemProps) {
   const isMobile = useMedia('(max-width: 767px)', false);
-  const productUrl = useVariantUrl(item.handle, item.variants.nodes[0].selectedOptions);
-  console.log(productUrl)
-  console.log(item)
   return (
     <li
       key={item.id}
       className="border-b border-b-black/30 pb-5 md:pb-[10px] last-of-type:border-none"
     >
-      <Link
-        onClick={goToSearchResult}
-        to={item.url}
-        className="flex w-full">
+      <Link onClick={goToSearchResult} to={item.url} className="flex w-full">
         {item.image?.url && (
           <Image
             alt={item.image.altText ?? ''}

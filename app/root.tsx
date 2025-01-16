@@ -1,8 +1,8 @@
 import {useNonce} from '@shopify/hydrogen';
 import {
+  LoaderFunctionArgs,
   defer,
   type SerializeFrom,
-  type LoaderFunctionArgs,
 } from '@shopify/remix-oxygen';
 import {
   Links,
@@ -12,14 +12,14 @@ import {
   LiveReload,
   useMatches,
   useRouteError,
-  useLoaderData,
   ScrollRestoration,
   isRouteErrorResponse,
   type ShouldRevalidateFunction,
+  useRouteLoaderData,
 } from '@remix-run/react';
 import favicon from '../public/favicon.ico';
 import {Layout} from '~/components/Layout';
-import styles from 'app/styles/tailwind.css';
+import tailwindCss from 'app/styles/tailwind.css';
 import HeaderContext from '~/context/HeaderCarts';
 import {CacheProvider} from '@emotion/react';
 import createCache from '@emotion/cache';
@@ -27,28 +27,26 @@ import NotFoundScreen from './screens/NotFoundScreen';
 import {likedProductsCookie} from './cookies.server';
 import {getUserLikedCartIds, validateCustomerAccessToken} from './utils';
 
+export type RootLoader = typeof loader;
+
 export const shouldRevalidate: ShouldRevalidateFunction = ({
   formMethod,
   currentUrl,
   nextUrl,
+  defaultShouldRevalidate,
 }) => {
   // revalidate when a mutation is performed e.g add to cart, login...
-  if (formMethod && formMethod !== 'GET') {
-    return true;
-  }
+  if (formMethod && formMethod !== 'GET') return true;
 
   // revalidate when manually revalidating via useRevalidator
-  if (currentUrl.toString() === nextUrl.toString()) {
-    return true;
-  }
+  if (currentUrl.toString() === nextUrl.toString()) return true;
 
-  return false;
+  return defaultShouldRevalidate;
 };
 
 export function links() {
   return [
-    {rel: 'stylesheet', href: styles},
-    // {rel: 'stylesheet', href: vaulStyles},
+    {rel: 'stylesheet', href: tailwindCss},
     {
       rel: 'preconnect',
       href: 'https://cdn.shopify.com',
@@ -66,10 +64,12 @@ export const useRootLoaderData = () => {
   return root?.data as SerializeFrom<typeof loader>;
 };
 
-export async function loader({context, request}: any) {
-  const {storefront, session, cart} = context;
-  const customerAccessToken = await session.get('customerAccessToken');
-  const publicStoreDomain = context.env.PUBLIC_STORE_DOMAIN;
+export async function loader(args: LoaderFunctionArgs) {
+  const deferredData = loadDeferredData(args);
+  const {context, request} = args;
+  const {storefront, session, env} = context;
+
+  const customerAccessToken = session.get('customerAccessToken');
 
   // validate the customer access token is valid
   const {isLoggedIn, headers} = await validateCustomerAccessToken(
@@ -88,19 +88,8 @@ export async function loader({context, request}: any) {
     likedCookes = (await likedProductsCookie.parse(cookieHeader)) || [];
   }
 
-  // let cartPromise = await getUserCart(customerAccessToken?.accessToken, isLoggedIn, context);
-  let cartPromise = cart.get();
-
-  // defer the footer query (below the fold)
-  const footerPromise = await storefront.query(FOOTER_QUERY, {
-    variables: {
-      footerMenuHandle: 'footer', // Adjust to your footer menu handle
-      secondMenuHandle: 'footer-info',
-    },
-  });
-
   // await the header query (above the fold)
-  const headerPromise = await storefront.query(HEADER_QUERY, {
+  const header = await storefront.query(HEADER_QUERY, {
     variables: {
       headerMenuHandle: 'main-menu', // Adjust to your header menu handle
     },
@@ -108,12 +97,11 @@ export async function loader({context, request}: any) {
 
   return defer(
     {
+      ...deferredData,
       likeProductIds: likedCookes,
-      cart: cartPromise,
-      footer: footerPromise,
-      header: headerPromise,
+      header: header,
       isLoggedIn,
-      publicStoreDomain,
+      publicStoreDomain: env.PUBLIC_STORE_DOMAIN,
     },
     {
       headers: {
@@ -123,9 +111,30 @@ export async function loader({context, request}: any) {
   );
 }
 
+function loadDeferredData({context}: LoaderFunctionArgs) {
+  const {storefront, cart} = context;
+  const footer = storefront
+    .query(FOOTER_QUERY, {
+      variables: {
+        footerMenuHandle: 'footer', // Adjust to your footer menu handle
+        secondMenuHandle: 'footer-info',
+      },
+    })
+    .catch((error) => {
+      // Log query errors, but don't throw them so the page can still render
+      console.error(error);
+      return null;
+    });
+
+  return {
+    cart: cart.get(),
+    footer,
+  };
+}
+
 export default function App() {
+  const data = useRouteLoaderData<RootLoader>('root');
   const nonce = useNonce();
-  const data = useLoaderData<typeof loader>();
   const cache = createCache({key: 'css', prepend: true});
 
   return (
@@ -136,18 +145,20 @@ export default function App() {
         <Meta />
         <Links />
       </head>
-      <CacheProvider value={cache}>
-        <HeaderContext>
-          <body className="font-sans">
-            <Layout {...data}>
-              <Outlet />
-            </Layout>
-            <ScrollRestoration nonce={nonce} />
-            <Scripts nonce={nonce} />
-            <LiveReload nonce={nonce} />
-          </body>
-        </HeaderContext>
-      </CacheProvider>
+      <body className="font-sans">
+        {data && (
+          <CacheProvider value={cache}>
+            <HeaderContext>
+              <Layout {...data}>
+                <Outlet />
+              </Layout>
+              <ScrollRestoration nonce={nonce} />
+              <Scripts nonce={nonce} />
+              <LiveReload nonce={nonce} />
+            </HeaderContext>
+          </CacheProvider>
+        )}
+      </body>
     </html>
   );
 }

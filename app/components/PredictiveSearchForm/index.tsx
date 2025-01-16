@@ -43,10 +43,6 @@ export function PredictiveSearchForm({
   const [inputValue, setInputValue] = useState('');
   const {searchInputRef} = usePredictiveSearch();
 
-  useEffect(() => {
-    console.log(mobileOpen, 'sdlkfjs');
-  }, [mobileOpen]);
-
   function goToSearchResult() {
     if (!searchInputRef.current) return;
     setInputValue('');

@@ -1,5 +1,5 @@
-import type { CustomerFragment } from 'storefrontapi.generated';
-import type { CustomerUpdateInput } from '@shopify/hydrogen/storefront-api-types';
+import type {CustomerFragment} from 'storefrontapi.generated';
+import type {CustomerUpdateInput} from '@shopify/hydrogen/storefront-api-types';
 import {
   json,
   redirect,
@@ -14,11 +14,11 @@ import {
   useRevalidator,
   type MetaFunction,
 } from '@remix-run/react';
-import { Button } from '~/components/ui/button';
-import { Input } from '~/components/ui/input';
-import { CUSTOMER_UPDATE_MUTATION } from '~/graphql/mutations';
-import { getUserCartId } from '~/utils';
-import { useEffect } from 'react';
+import {Button} from '~/components/ui/button';
+import {Input} from '~/components/ui/input';
+import {CUSTOMER_UPDATE_MUTATION} from '~/graphql/mutations';
+import {getUserCartId} from '~/utils';
+import {useEffect} from 'react';
 
 export const handle = {
   breadcrumb: 'profile',
@@ -35,11 +35,11 @@ export type ActionResponse = {
 };
 
 export const meta: MetaFunction = () => {
-  return [{ title: 'Profile' }];
+  return [{title: 'Profile'}];
 };
 
-export async function loader({ context }: LoaderFunctionArgs) {
-  const { cart } = context;
+export async function loader({context}: LoaderFunctionArgs) {
+  const {cart} = context;
   const customerAccessToken = await context.session.get('customerAccessToken');
   if (!customerAccessToken) {
     return redirect('/account/login');
@@ -50,9 +50,8 @@ export async function loader({ context }: LoaderFunctionArgs) {
   );
 
   if (userCartId) {
-    console.log('ldskjf', userCartId);
     const headers = cart.setCartId(userCartId);
-    return json({}, { headers });
+    return json({}, {headers});
   }
 
   return json({});
@@ -77,18 +76,18 @@ export const CUSTOMER_UPDATE_MUTATION_NEW = `#graphql
   }
 ` as const;
 
-export async function action({ request, context }: ActionFunctionArgs) {
-  const { session, storefront } = context;
+export async function action({request, context}: ActionFunctionArgs) {
+  const {session, storefront} = context;
 
   if (request.method !== 'PUT') {
-    return json({ error: 'Method not allowed' }, { status: 405 });
+    return json({error: 'Method not allowed'}, {status: 405});
   }
 
   const form = await request.formData();
   const formName = form.get('formName');
   const customerAccessToken = await session.get('customerAccessToken');
   if (!customerAccessToken) {
-    return json({ error: 'Unauthorized' }, { status: 401 });
+    return json({error: 'Unauthorized'}, {status: 401});
   }
   const action = form.get('action');
   if (action == 'update profile') {
@@ -115,7 +114,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
     }
     customer.acceptsMarketing = acceptsMarketing === 'on' ? true : false;
 
-    const { customerUpdate } = await storefront.mutate(
+    const {customerUpdate} = await storefront.mutate(
       CUSTOMER_UPDATE_MUTATION_NEW,
       {
         variables: {
@@ -124,9 +123,9 @@ export async function action({ request, context }: ActionFunctionArgs) {
         },
       },
     );
-    const { userErrors } = customerUpdate;
+    const {userErrors} = customerUpdate;
     if (userErrors?.length) {
-      return json({ error: userErrors[0].message }, { status: 400 });
+      return json({error: userErrors[0].message}, {status: 400});
     }
 
     if (!customerUpdate?.customer) {
@@ -136,7 +135,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
           userErrors: userErrors ? userErrors : [],
           customerUpdate: customerUpdate ? customerUpdate : [],
         },
-        { status: 400 },
+        {status: 400},
       );
     }
 
@@ -184,8 +183,8 @@ export async function action({ request, context }: ActionFunctionArgs) {
       // check for mutation errors
       if (updated.customerUpdate?.customerUserErrors?.length) {
         return json(
-          { error: updated.customerUpdate?.customerUserErrors[0] },
-          { status: 400 },
+          {error: updated.customerUpdate?.customerUserErrors[0]},
+          {status: 400},
         );
       }
 
@@ -198,7 +197,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
       }
 
       return json(
-        { error: null, customer: updated.customerUpdate?.customer },
+        {error: null, customer: updated.customerUpdate?.customer},
         {
           headers: {
             'Set-Cookie': await session.commit(),
@@ -206,20 +205,20 @@ export async function action({ request, context }: ActionFunctionArgs) {
         },
       );
     } catch (error: any) {
-      return json({ error: error.message, customer: null }, { status: 400 });
+      return json({error: error.message, customer: null}, {status: 400});
     }
   } else {
-    return json({ error: 'Не правильний action', customer: null }, { status: 400 });
+    return json({error: 'Не правильний action', customer: null}, {status: 400});
   }
 }
 
 export default function AccountProfile() {
-  const account = useOutletContext<{ customer: CustomerFragment }>();
-  const { state } = useNavigation();
+  const account = useOutletContext<{customer: CustomerFragment}>();
+  const {state} = useNavigation();
   const action = useActionData<ActionResponse>();
   const customer = action?.customer ?? account?.customer;
 
-  const { revalidate } = useRevalidator();
+  const {revalidate} = useRevalidator();
   useEffect(() => {
     revalidate();
   }, []);

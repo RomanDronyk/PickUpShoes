@@ -1,5 +1,5 @@
-import type { MailingAddressInput } from '@shopify/hydrogen/storefront-api-types';
-import type { AddressFragment, CustomerFragment } from 'storefrontapi.generated';
+import type {MailingAddressInput} from '@shopify/hydrogen/storefront-api-types';
+import type {AddressFragment, CustomerFragment} from 'storefrontapi.generated';
 import {
   json,
   redirect,
@@ -13,8 +13,8 @@ import {
   useOutletContext,
   type MetaFunction,
 } from '@remix-run/react';
-import { Button } from '~/components/ui/button';
-import { Input } from '~/components/ui/input';
+import {Button} from '~/components/ui/button';
+import {Input} from '~/components/ui/input';
 
 export type ActionResponse = {
   addressId?: string | null;
@@ -26,15 +26,15 @@ export type ActionResponse = {
 };
 
 export const meta: MetaFunction = () => {
-  return [{ title: 'Addresses' }];
+  return [{title: 'Addresses'}];
 };
 
 export const handle = {
   breadcrumb: 'addresses',
 };
 
-export async function loader({ context }: LoaderFunctionArgs) {
-  const { session } = context;
+export async function loader({context}: LoaderFunctionArgs) {
+  const {session} = context;
   const customerAccessToken = await session.get('customerAccessToken');
   if (!customerAccessToken) {
     return redirect('/account/login');
@@ -42,8 +42,8 @@ export async function loader({ context }: LoaderFunctionArgs) {
   return json({});
 }
 
-export async function action({ request, context }: ActionFunctionArgs) {
-  const { storefront, session } = context;
+export async function action({request, context}: ActionFunctionArgs) {
+  const {storefront, session} = context;
 
   try {
     const form = await request.formData();
@@ -57,9 +57,9 @@ export async function action({ request, context }: ActionFunctionArgs) {
 
     const customerAccessToken = await session.get('customerAccessToken');
     if (!customerAccessToken) {
-      return json({ error: { [addressId]: 'Unauthorized' } }, { status: 401 });
+      return json({error: {[addressId]: 'Unauthorized'}}, {status: 401});
     }
-    const { accessToken } = customerAccessToken;
+    const {accessToken} = customerAccessToken;
 
     const defaultAddress = form.has('defaultAddress')
       ? String(form.get('defaultAddress')) === 'on'
@@ -89,10 +89,10 @@ export async function action({ request, context }: ActionFunctionArgs) {
       case 'POST': {
         // handle new address creation
         try {
-          const { customerAddressCreate } = await storefront.mutate(
+          const {customerAddressCreate} = await storefront.mutate(
             CREATE_ADDRESS_MUTATION,
             {
-              variables: { customerAccessToken: accessToken, address },
+              variables: {customerAccessToken: accessToken, address},
             },
           );
 
@@ -110,7 +110,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
 
           if (defaultAddress) {
             const createdAddressId = decodeURIComponent(createdAddress.id);
-            const { customerDefaultAddressUpdate } = await storefront.mutate(
+            const {customerDefaultAddressUpdate} = await storefront.mutate(
               UPDATE_DEFAULT_ADDRESS_MUTATION,
               {
                 variables: {
@@ -126,19 +126,19 @@ export async function action({ request, context }: ActionFunctionArgs) {
             }
           }
 
-          return json({ error: null, createdAddress, defaultAddress });
+          return json({error: null, createdAddress, defaultAddress});
         } catch (error: unknown) {
           if (error instanceof Error) {
-            return json({ error: { [addressId]: error.message } }, { status: 400 });
+            return json({error: {[addressId]: error.message}}, {status: 400});
           }
-          return json({ error: { [addressId]: error } }, { status: 400 });
+          return json({error: {[addressId]: error}}, {status: 400});
         }
       }
 
       case 'PUT': {
         // handle address updates
         try {
-          const { customerAddressUpdate } = await storefront.mutate(
+          const {customerAddressUpdate} = await storefront.mutate(
             UPDATE_ADDRESS_MUTATION,
             {
               variables: {
@@ -157,7 +157,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
           }
 
           if (defaultAddress) {
-            const { customerDefaultAddressUpdate } = await storefront.mutate(
+            const {customerDefaultAddressUpdate} = await storefront.mutate(
               UPDATE_DEFAULT_ADDRESS_MUTATION,
               {
                 variables: {
@@ -173,22 +173,22 @@ export async function action({ request, context }: ActionFunctionArgs) {
             }
           }
 
-          return json({ error: null, updatedAddress, defaultAddress });
+          return json({error: null, updatedAddress, defaultAddress});
         } catch (error: unknown) {
           if (error instanceof Error) {
-            return json({ error: { [addressId]: error.message } }, { status: 400 });
+            return json({error: {[addressId]: error.message}}, {status: 400});
           }
-          return json({ error: { [addressId]: error } }, { status: 400 });
+          return json({error: {[addressId]: error}}, {status: 400});
         }
       }
 
       case 'DELETE': {
         // handles address deletion
         try {
-          const { customerAddressDelete } = await storefront.mutate(
+          const {customerAddressDelete} = await storefront.mutate(
             DELETE_ADDRESS_MUTATION,
             {
-              variables: { customerAccessToken: accessToken, id: addressId },
+              variables: {customerAccessToken: accessToken, id: addressId},
             },
           );
 
@@ -196,47 +196,43 @@ export async function action({ request, context }: ActionFunctionArgs) {
             const error = customerAddressDelete.customerUserErrors[0];
             throw new Error(error.message);
           }
-          return json({ error: null, deletedAddress: addressId });
+          return json({error: null, deletedAddress: addressId});
         } catch (error: unknown) {
           if (error instanceof Error) {
-            return json({ error: { [addressId]: error.message } }, { status: 400 });
+            return json({error: {[addressId]: error.message}}, {status: 400});
           }
-          return json({ error: { [addressId]: error } }, { status: 400 });
+          return json({error: {[addressId]: error}}, {status: 400});
         }
       }
 
       default: {
         return json(
-          { error: { [addressId]: 'Method not allowed' } },
-          { status: 405 },
+          {error: {[addressId]: 'Method not allowed'}},
+          {status: 405},
         );
       }
     }
   } catch (error: unknown) {
     if (error instanceof Error) {
-      return json({ error: error.message }, { status: 400 });
+      return json({error: error.message}, {status: 400});
     }
-    return json({ error }, { status: 400 });
+    return json({error}, {status: 400});
   }
 }
 
 export default function Addresses() {
-  const { customer } = useOutletContext<{ customer: CustomerFragment }>();
-  const { defaultAddress, addresses } = customer;
-  console.log(defaultAddress, "sdlkfjs")
-
+  const {customer} = useOutletContext<{customer: CustomerFragment}>();
+  const {defaultAddress, addresses} = customer;
   return (
     <div className="grid md:grid-cols-2 grid-cols-1 gap-y-10 gap-x-10 my-10 w-full mt-0">
-      <div
-        className=''
-      >
-        <div className='sticky top-3 flex flex-col gap-5'>
-          {defaultAddress &&
+      <div className="">
+        <div className="sticky top-3 flex flex-col gap-5">
+          {defaultAddress && (
             <ExistDefaultAddress
               address={defaultAddress}
               defaultAddress={defaultAddress}
             />
-          }
+          )}
           <NewAddressForm />
         </div>
       </div>
@@ -252,21 +248,16 @@ function ExistDefaultAddress({
   address,
   defaultAddress,
 }: {
-  address: any
-  defaultAddress: any
+  address: any;
+  defaultAddress: any;
 }) {
   return (
-    <div
-      className="w-full account-profile self-start  rounded-[20px] border border-black/10 p-6"
-    >
+    <div className="w-full account-profile self-start  rounded-[20px] border border-black/10 p-6">
       <h2 className="md:text-[32px] text-xl font-medium mb-[25px]">
         Адреса за замовчуванням
       </h2>
-      <AddressForm
-        address={address}
-        defaultAddress={defaultAddress}
-      >
-        {({ stateForMethod }) => (
+      <AddressForm address={address} defaultAddress={defaultAddress}>
+        {({stateForMethod}) => (
           <div className="flex gap-4">
             <Button
               disabled={stateForMethod('PUT') !== 'idle'}
@@ -280,15 +271,13 @@ function ExistDefaultAddress({
               formMethod="DELETE"
               type="submit"
             >
-              {stateForMethod('DELETE') !== 'idle'
-                ? 'Видалення'
-                : 'Видалити'}
+              {stateForMethod('DELETE') !== 'idle' ? 'Видалення' : 'Видалити'}
             </Button>
           </div>
         )}
       </AddressForm>
     </div>
-  )
+  );
 }
 
 function NewAddressForm() {
@@ -307,14 +296,12 @@ function NewAddressForm() {
   } as AddressFragment;
 
   return (
-    <div
-      className="w-full account-profile self-start  rounded-[20px] border border-black/10 p-6"
-    >
+    <div className="w-full account-profile self-start  rounded-[20px] border border-black/10 p-6">
       <h2 className="md:text-[32px] text-xl font-medium mb-[25px]">
         Добавити нову адресу
       </h2>
       <AddressForm address={newAddress} defaultAddress={null}>
-        {({ stateForMethod }) => (
+        {({stateForMethod}) => (
           <div>
             <Button
               disabled={stateForMethod('POST') !== 'idle'}
@@ -335,12 +322,8 @@ function ExistingAddresses({
   defaultAddress,
 }: Pick<CustomerFragment, 'addresses' | 'defaultAddress'>) {
   return (
-    <div
-    >
-      <div
-        className="account-profile sticky top-3 self-start  rounded-[20px] border border-black/10 p-6"
-      >
-
+    <div>
+      <div className="account-profile sticky top-3 self-start  rounded-[20px] border border-black/10 p-6">
         <h2 className="md:text-[32px] text-xl font-medium mb-[25px]">
           Існуючі адреси
         </h2>
@@ -353,14 +336,16 @@ function ExistingAddresses({
               address={address}
               defaultAddress={defaultAddress}
             >
-              {({ stateForMethod }) => (
+              {({stateForMethod}) => (
                 <div className="flex gap-4">
                   <Button
                     disabled={stateForMethod('PUT') !== 'idle'}
                     formMethod="PUT"
                     type="submit"
                   >
-                    {stateForMethod('PUT') !== 'idle' ? 'Збереження' : 'Зберегти'}
+                    {stateForMethod('PUT') !== 'idle'
+                      ? 'Збереження'
+                      : 'Зберегти'}
                   </Button>
                   <Button
                     disabled={stateForMethod('DELETE') !== 'idle'}
@@ -374,12 +359,9 @@ function ExistingAddresses({
                 </div>
               )}
             </AddressForm>
-            {(index) !== (array.length - 1) &&
-              <div
-                className="grid grid-cols-4 my-10 border-b border-b-black/10"
-              >
-              </div>
-            }
+            {index !== array.length - 1 && (
+              <div className="grid grid-cols-4 my-10 border-b border-b-black/10"></div>
+            )}
           </>
         ))}
       </div>
@@ -400,7 +382,7 @@ function AddressForm({
   defaultAddress: CustomerFragment['defaultAddress'];
   address: AddressFragment;
 }) {
-  const { state, formMethod } = useNavigation();
+  const {state, formMethod} = useNavigation();
   const action = useActionData<ActionResponse>();
   const error = action?.error?.[address?.id];
   const isDefaultAddress = defaultAddress?.id === address?.id;

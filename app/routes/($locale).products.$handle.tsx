@@ -73,7 +73,6 @@ export const action: ActionFunction = async ({context, request, params}) => {
     customerAccessToken?.accessToken || '',
   );
   try {
-    console.log(JSON.stringify(getUser, null, 2));
     const result: any = await sendReview(
       objects,
       getUser,

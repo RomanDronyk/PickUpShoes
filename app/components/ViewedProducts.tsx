@@ -1,18 +1,12 @@
 import {ProductCard} from './ProductCard';
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-} from './ui/carousel';
+import {Carousel, CarouselContent, CarouselItem} from './ui/carousel';
 import type {ViewedProductsQuery} from 'storefrontapi.generated';
 
 export default function ViewedProducts({
   products,
 }: {
-  products: ViewedProductsQuery["nodes"];
+  products: ViewedProductsQuery['nodes'];
 }) {
-
-  console.log(products, 'viewed products')
   return (
     <div className="flex flex-col w-full gap-[30px]  pb-[35px] px-5 md:px-0">
       {products && (
@@ -25,7 +19,7 @@ export default function ViewedProducts({
           <Carousel>
             <CarouselContent>
               {products &&
-                products.map((item:ViewedProductsQuery["nodes"][0]) => (
+                products.map((item: ViewedProductsQuery['nodes'][0]) => (
                   <CarouselItem
                     key={item?.id}
                     className="md:basis-1/4 basis-3/4 ml-1 px-3"

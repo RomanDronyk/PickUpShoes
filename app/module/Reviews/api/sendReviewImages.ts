@@ -1,8 +1,8 @@
 async function sendReviewImages(reviewId: string, formData: any) {
-  if(reviewId==="" || typeof(reviewId)!=="string" || reviewId.length==0){
+  if (reviewId === "" || typeof (reviewId) !== "string" || reviewId.length == 0) {
     throw new Error(`Введіть коректний reviewId`);
   }
-  const url ="https://73dd57-2.myshopify.com/apps/easyreviews-proxy/online_store/reviews_image"
+  const url = "https://73dd57-2.myshopify.com/apps/easyreviews-proxy/online_store/reviews_image"
 
   const response = await fetch(`${url}/${reviewId}`, {
     method: "POST",
@@ -16,7 +16,6 @@ async function sendReviewImages(reviewId: string, formData: any) {
 
   // Обробка відповіді
   if (!response.ok) {
-    console.log(JSON.stringify(response.statusText, null, 2), "23423");
     throw new Error(`Помилка при відправці фото для відгуків: ${response.statusText}`);
   }
 

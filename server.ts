@@ -82,7 +82,7 @@ export default {
       const handleRequest = createRequestHandler({
         build: remixBuild,
         mode: process.env.NODE_ENV,
-        getLoadContext: () => ({admin, session, storefront, cart, env, waitUntil }),
+        getLoadContext: () => ({ admin, session, storefront, cart, env, waitUntil }),
       });
 
       const response = await handleRequest(request);
@@ -95,7 +95,6 @@ export default {
          */
         return storefrontRedirect({ request, response, storefront });
       }
-
       return response;
     } catch (error) {
       // eslint-disable-next-line no-console

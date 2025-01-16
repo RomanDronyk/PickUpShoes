@@ -1,32 +1,60 @@
+import {useContext} from 'react';
+import {Money, useOptimisticCart} from '@shopify/hydrogen';
+import {Link} from '@remix-run/react';
+import {Button} from '../ui/button';
 
-import React, { useContext } from 'react';
-import { Money } from '@shopify/hydrogen';
-import { Link, } from '@remix-run/react';
-import { Button } from '../ui/button';
-
-import type { CartApiQueryFragment } from 'storefrontapi.generated';
+import type {CartApiQueryFragment} from 'storefrontapi.generated';
 import CartLineItem from './CartLineItem';
-import { HeaderBasketContext, HeaderContextInterface } from '~/context/HeaderCarts';
+import {
+  HeaderBasketContext,
+  HeaderContextInterface,
+} from '~/context/HeaderCarts';
+import EmptyCart from '../ui/emptyCart';
 
+const DropDownCartDetail = ({
+  cart: originalCart,
+}: {
+  cart: CartApiQueryFragment | null;
+}) => {
+  const {setCartShow} = useContext(
+    HeaderBasketContext,
+  ) as HeaderContextInterface;
 
-const DropDownCartDetail = React.memo(({ cart }: { cart: CartApiQueryFragment | null }) => {
-  const { setCartShow } = useContext(HeaderBasketContext) as HeaderContextInterface;
+  const cart = useOptimisticCart(originalCart);
   const cost = cart?.cost;
+  const cartHasItems = cart?.totalQuantity! > 0;
+
+  console.log(originalCart, 'originalCart');
+  console.log(cart, 'optimistic ui');
+
+  if (!cartHasItems) {
+    return <EmptyCart />;
+  }
+
   return (
     <div className="dropdown-detail">
       <div className="dropdown-table">
-        <div className="dropdown-header pb-4
+        <div
+          className="dropdown-header pb-4
         "
-          style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+          }}
         >
           <div className="dropdown-title sm:col-span-8 2xl:col-span-9 lg:col-span-9">
             <span className="font-semibold text-[26px] col-span-6">
               Корзина
             </span>
           </div>
-          <div className='xl:pr-[7vw] xl-gap-[50px] gap-[20px] md:pr-[3vw]'
-            style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}
-
+          <div
+            className="xl:pr-[7vw] xl-gap-[50px] gap-[20px] md:pr-[3vw]"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+            }}
           >
             <div className="text-xl text-center w-auto sm:block hidden">
               Кількість
@@ -36,30 +64,43 @@ const DropDownCartDetail = React.memo(({ cart }: { cart: CartApiQueryFragment | 
             </div>
           </div>
         </div>
-        <div onClick={() => setCartShow(false)} className="absolute top-[30px] right-[30px] cursor-pointer ">
+        <div
+          onClick={() => setCartShow(false)}
+          className="absolute top-[30px] right-[30px] cursor-pointer"
+        >
           x
         </div>
-        <ul className="flex flex-col gap-4">
-          {cart?.lines?.nodes.map((line: any) => (
-            <CartLineItem key={line.id} line={line} />
-          ))}
-        </ul>
+        <div aria-labelledby="cart-lines">
+          <ul className="flex flex-col gap-4">
+            {(cart?.lines?.nodes ?? []).map((line) => (
+              <CartLineItem
+                onClick={() => setCartShow(false)}
+                key={line?.id}
+                line={line}
+              />
+            ))}
+          </ul>
+        </div>
       </div>
       <div className="dropdown-bottom mt-12 flex flex-col gap-4">
         <div className="flex items-center justify-end font-bold text-black text-[22px]">
           <span className="mr-4">Підсумок: </span>
-          <Money
-            as="span"
-            withoutCurrency
-            withoutTrailingZeros
-            data={cost?.totalAmount || { currencyCode: "UAH", amount: "0" }}
-          />
+          {cost?.totalAmount && (
+            <Money
+              as="span"
+              withoutCurrency
+              withoutTrailingZeros
+              data={cost?.totalAmount || {currencyCode: 'UAH', amount: '0'}}
+            />
+          )}
           &nbsp;грн
         </div>
         <div className="dropdown-checkout flex items-center justify-end">
-          <Link to={`/checkout` || ""} onClick={() => console.log(cart?.checkoutUrl)} className="flex gap-5">
+          <Link to={`/checkout` || ''} className="flex gap-5">
             <Button className="rounded-[60px] px-[55px]">
-              <span className="font-medium text-2xl pr-2">Оформити замовлення</span>
+              <span className="font-medium text-2xl pr-2">
+                Оформити замовлення
+              </span>
               <svg
                 width="23"
                 height="23"
@@ -78,6 +119,5 @@ const DropDownCartDetail = React.memo(({ cart }: { cart: CartApiQueryFragment | 
       </div>
     </div>
   );
-});
-
-export default DropDownCartDetail
+};
+export default DropDownCartDetail;

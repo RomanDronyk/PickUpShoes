@@ -1,77 +1,98 @@
-import { CartForm, Image, Money } from '@shopify/hydrogen';
-import type { CartLineUpdateInput } from '@shopify/hydrogen/storefront-api-types';
-import { FetcherWithComponents, Link } from '@remix-run/react';
-import type { CartApiQueryFragment } from 'storefrontapi.generated';
-import { useVariantUrl } from '~/utils';
+import {
+  CartForm,
+  OptimisticCartLine,
+  useOptimisticCart,
+} from '@shopify/hydrogen';
+import {Link} from '@remix-run/react';
+import type {CartApiQueryFragment} from 'storefrontapi.generated';
+import {useAside} from '~/components/Aside';
+import {useVariantUrl} from '~/utils';
+import {Image, ProductPrice} from '@shopify/hydrogen-react';
+import {CartLineUpdateInput} from '@shopify/hydrogen-react/storefront-api-types';
+import {CartSummary} from './CartSummary';
 
-type CartLine = CartApiQueryFragment['lines']['nodes'][0];
+export type CartLayout = 'page' | 'aside';
 
-type CartMainProps = {
+export type CartMainProps = {
   cart: CartApiQueryFragment | null;
-  layout: 'page' | 'aside';
+  layout: CartLayout;
 };
 
-export function CartMain({ layout, cart }: CartMainProps) {
+/**
+ * The main cart component that displays the cart items and summary.
+ * It is used by both the /cart route and the cart aside dialog.
+ */
+export function CartMain({layout, cart: originalCart}: CartMainProps) {
+  // The useOptimisticCart hook applies pending actions to the cart
+  // so the user immediately sees feedback when they modify the cart.
+  console.log(originalCart, 'original cart');
+  const cart = useOptimisticCart(originalCart);
+  console.log(cart, 'optimistic ui');
+
   const linesCount = Boolean(cart?.lines?.nodes?.length || 0);
   const withDiscount =
     cart &&
-    Boolean(cart.discountCodes.filter((code) => code.applicable).length);
+    Boolean(cart?.discountCodes?.filter((code) => code.applicable)?.length);
   const className = `cart-main ${withDiscount ? 'with-discount' : ''}`;
+  const cartHasItems = cart?.totalQuantity! > 0;
 
   return (
     <div className={className}>
       <CartEmpty hidden={linesCount} layout={layout} />
-      <CartDetails cart={cart} layout={layout} />
+      <div className="cart-details">
+        <div aria-labelledby="cart-lines">
+          <ul>
+            {(cart?.lines?.nodes ?? []).map((line) => (
+              <CartLineItem key={line.id} line={line} layout={layout} />
+            ))}
+          </ul>
+        </div>
+        {cartHasItems && <CartSummary cart={cart} layout={layout} />}
+      </div>
     </div>
   );
 }
 
-function CartDetails({ layout, cart }: CartMainProps) {
-  const cartHasItems = !!cart && cart.totalQuantity > 0;
-
-  return (
-    <div className="cart-details">
-      <CartLines lines={cart?.lines} layout={layout} />
-      {cartHasItems && (
-        <CartSummary cost={cart.cost} layout={layout}>
-          <CartDiscounts discountCodes={cart.discountCodes} />
-          <CartCheckoutActions checkoutUrl={cart.checkoutUrl} />
-        </CartSummary>
-      )}
-    </div>
-  );
-}
-
-function CartLines({
-  lines,
-  layout,
+function CartEmpty({
+  hidden = false,
 }: {
-  layout: CartMainProps['layout'];
-  lines: CartApiQueryFragment['lines'] | undefined;
+  hidden: boolean;
+  layout?: CartMainProps['layout'];
 }) {
-  if (!lines) return null;
-
+  const {close} = useAside();
   return (
-    <div aria-labelledby="cart-lines">
-      <ul>
-        {lines.nodes.map((line) => (
-          <CartLineItem key={line.id} line={line} layout={layout} />
-        ))}
-      </ul>
+    <div hidden={hidden}>
+      <br />
+      <p>
+        Looks like you haven&rsquo;t added anything yet, let&rsquo;s get you
+        started!
+      </p>
+      <br />
+      <Link to="/collections" onClick={close} prefetch="viewport">
+        Continue shopping →
+      </Link>
     </div>
   );
 }
 
-function CartLineItem({
+type CartLine = OptimisticCartLine<CartApiQueryFragment>;
+
+/**
+ * A single line item in the cart. It displays the product image, title, price.
+ * It also provides controls to update the quantity or remove the line item.
+ */
+export function CartLineItem({
   layout,
   line,
 }: {
-  layout: CartMainProps['layout'];
+  layout: CartLayout;
   line: CartLine;
 }) {
-  const { id, merchandise } = line;
-  const { product, title, image, selectedOptions } = merchandise;
+  const {id, merchandise} = line;
+  const {product, title, image, selectedOptions} = merchandise;
   const lineItemUrl = useVariantUrl(product.handle, selectedOptions);
+  const {close} = useAside();
+
   return (
     <li key={id} className="cart-line">
       {image && (
@@ -91,17 +112,14 @@ function CartLineItem({
           to={lineItemUrl}
           onClick={() => {
             if (layout === 'aside') {
-              // close the drawer
-              window.location.href = lineItemUrl;
+              close();
             }
           }}
         >
           <p>
             <strong>{product.title}</strong>
           </p>
-          <p></p>
         </Link>
-        <CartLinePrice line={line} as="span" />
         <ul>
           {selectedOptions.map((option) => (
             <li key={option.name}>
@@ -117,74 +135,24 @@ function CartLineItem({
   );
 }
 
-function CartCheckoutActions({ checkoutUrl }: { checkoutUrl: string }) {
-  if (!checkoutUrl) return null;
-
-  return (
-    <div>
-      <a href={checkoutUrl} target="_self">
-        <p>Continue to Checkout &rarr;</p>
-      </a>
-      <br />
-    </div>
-  );
-}
-
-export function CartSummary({
-  cost,
-  layout,
-  children = null,
-}: {
-  children?: React.ReactNode;
-  cost: CartApiQueryFragment['cost'];
-  layout: CartMainProps['layout'];
-}) {
-  const className =
-    layout === 'page' ? 'cart-summary-page' : 'cart-summary-aside';
-
-  return (
-    <div aria-labelledby="cart-summary" className={className}>
-      <h4>Totals</h4>
-      <dl className="cart-subtotal">
-        <dt>Subtotal</dt>
-        <dd>
-          {cost?.subtotalAmount?.amount ? (
-            <Money data={cost?.subtotalAmount} />
-          ) : (
-            '-'
-          )}
-        </dd>
-      </dl>
-      {children}
-    </div>
-  );
-}
-
-function CartLineRemoveButton({ lineIds }: { lineIds: string[] }) {
-  return (
-    <CartForm
-      route="/cart"
-      action={CartForm.ACTIONS.LinesRemove}
-      inputs={{ lineIds }}
-    >
-      <button type="submit">Remove</button>
-    </CartForm>
-  );
-}
-
-function CartLineQuantity({ line }: { line: CartLine }) {
+/**
+ * Provides the controls to update the quantity of a line item in the cart.
+ * These controls are disabled when the line item is new, and the server
+ * hasn't yet responded that it was successfully added to the cart.
+ */
+function CartLineQuantity({line}: {line: CartLine}) {
   if (!line || typeof line?.quantity === 'undefined') return null;
-  const { id: lineId, quantity } = line;
+  const {id: lineId, quantity, isOptimistic} = line;
   const prevQuantity = Number(Math.max(0, quantity - 1).toFixed(0));
   const nextQuantity = Number((quantity + 1).toFixed(0));
 
   return (
-    <div className="cart-line-quantiy">
+    <div className="cart-line-quantity">
       <small>Quantity: {quantity} &nbsp;&nbsp;</small>
-      <CartLineUpdateButton lines={[{ id: lineId, quantity: prevQuantity }]}>
+      <CartLineUpdateButton lines={[{id: lineId, quantity: prevQuantity}]}>
         <button
           aria-label="Decrease quantity"
-          disabled={quantity <= 1}
+          disabled={quantity <= 1 || !!isOptimistic}
           name="decrease-quantity"
           value={prevQuantity}
         >
@@ -192,131 +160,43 @@ function CartLineQuantity({ line }: { line: CartLine }) {
         </button>
       </CartLineUpdateButton>
       &nbsp;
-      <CartLineUpdateButton lines={[{ id: lineId, quantity: nextQuantity }]}>
+      <CartLineUpdateButton lines={[{id: lineId, quantity: nextQuantity}]}>
         <button
           aria-label="Increase quantity"
           name="increase-quantity"
           value={nextQuantity}
+          disabled={!!isOptimistic}
         >
           <span>&#43;</span>
         </button>
       </CartLineUpdateButton>
       &nbsp;
-      <CartLineRemoveButton lineIds={[lineId]} />
+      <CartLineRemoveButton lineIds={[lineId]} disabled={!!isOptimistic} />
     </div>
   );
 }
 
-function CartLinePrice({
-  line,
-  priceType = 'regular',
-  ...passthroughProps
+/**
+ * A button that removes a line item from the cart. It is disabled
+ * when the line item is new, and the server hasn't yet responded
+ * that it was successfully added to the cart.
+ */
+function CartLineRemoveButton({
+  lineIds,
+  disabled,
 }: {
-  line: CartLine;
-  priceType?: 'regular' | 'compareAt';
-  [key: string]: any;
-}) {
-  if (!line?.cost?.amountPerQuantity || !line?.cost?.totalAmount) return null;
-
-  const moneyV2 =
-    priceType === 'regular'
-      ? line.cost.totalAmount
-      : line.cost.compareAtAmountPerQuantity;
-
-  if (moneyV2 == null) {
-    return null;
-  }
-
-  return (
-    <div>
-      <Money withoutTrailingZeros {...passthroughProps} data={moneyV2} />
-    </div>
-  );
-}
-
-export function CartEmpty({
-  hidden = false,
-  layout = 'aside',
-}: {
-  hidden: boolean;
-  layout?: CartMainProps['layout'];
-}) {
-  return (
-    <div hidden={hidden}>
-      <br />
-      <p>
-        Looks like you haven&rsquo;t added anything yet, let&rsquo;s get you
-        started!
-      </p>
-      <br />
-      <Link
-        to="/collections"
-        onClick={() => {
-          if (layout === 'aside') {
-            window.location.href = '/collections';
-          }
-        }}
-      >
-        Continue shopping →
-      </Link>
-    </div>
-  );
-}
-
-function CartDiscounts({
-  discountCodes,
-}: {
-  discountCodes: CartApiQueryFragment['discountCodes'];
-}) {
-  const codes: string[] =
-    discountCodes
-      ?.filter((discount) => discount.applicable)
-      ?.map(({ code }) => code) || [];
-
-  return (
-    <div>
-      {/* Have existing discount, display it with a remove option */}
-      <dl hidden={!codes.length}>
-        <div>
-          <dt>Discount(s)</dt>
-          <UpdateDiscountForm>
-            <div className="cart-discount">
-              <code>{codes?.join(', ')}</code>
-              &nbsp;
-              <button>Remove</button>
-            </div>
-          </UpdateDiscountForm>
-        </div>
-      </dl>
-
-      {/* Show an input to apply a discount */}
-      <UpdateDiscountForm discountCodes={codes}>
-        <div>
-          <input type="text" name="discountCode" placeholder="Discount code" />
-          &nbsp;
-          <button type="submit">Apply</button>
-        </div>
-      </UpdateDiscountForm>
-    </div>
-  );
-}
-
-function UpdateDiscountForm({
-  discountCodes,
-  children,
-}: {
-  discountCodes?: string[];
-  children: React.ReactNode;
+  lineIds: string[];
+  disabled: boolean;
 }) {
   return (
     <CartForm
       route="/cart"
-      action={CartForm.ACTIONS.DiscountCodesUpdate}
-      inputs={{
-        discountCodes: discountCodes || [],
-      }}
+      action={CartForm.ACTIONS.LinesRemove}
+      inputs={{lineIds}}
     >
-      {children}
+      <button disabled={disabled} type="submit">
+        Remove
+      </button>
     </CartForm>
   );
 }
@@ -332,7 +212,7 @@ function CartLineUpdateButton({
     <CartForm
       route="/cart"
       action={CartForm.ACTIONS.LinesUpdate}
-      inputs={{ lines }}
+      inputs={{lines}}
     >
       {children}
     </CartForm>

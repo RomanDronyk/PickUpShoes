@@ -1,5 +1,5 @@
-async function sendReview(objects: any, user: any, handle:string) {
-  if(handle==="" || typeof(handle)!=="string" || handle.length==0){
+async function sendReview(objects: any, user: any, handle: string) {
+  if (handle === "" || typeof (handle) !== "string" || handle.length == 0) {
     throw new Error(`Введіть коректний handle`);
   }
 
@@ -35,7 +35,6 @@ async function sendReview(objects: any, user: any, handle:string) {
 
   // Обробка відповіді
   if (!response.ok) {
-    console.log(JSON.stringify(response.statusText, null, 2), "23423");
     throw new Error(`Помилка при відправці відгуку: ${response.statusText}`);
   }
 

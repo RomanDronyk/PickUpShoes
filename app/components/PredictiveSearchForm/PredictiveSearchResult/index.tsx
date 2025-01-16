@@ -1,5 +1,9 @@
-import { NormalizedPredictiveSearch, NormalizedPredictiveSearchResultItem, NormalizedPredictiveSearchResults } from "~/components/Search";
-import { SearchResultItem } from "../SearchResultItem";
+import {
+  NormalizedPredictiveSearch,
+  NormalizedPredictiveSearchResultItem,
+  NormalizedPredictiveSearchResults,
+} from '~/components/Search';
+import {SearchResultItem} from '../SearchResultItem';
 
 type SearchResultTypeProps = {
   goToSearchResult: (event: React.MouseEvent<HTMLAnchorElement>) => void;
@@ -8,12 +12,10 @@ type SearchResultTypeProps = {
   type: NormalizedPredictiveSearchResults[number]['type'];
 };
 
-
 type UseSearchReturn = NormalizedPredictiveSearch & {
   searchInputRef: React.MutableRefObject<HTMLInputElement | null>;
   searchTerm: React.MutableRefObject<string>;
 };
-
 
 export function PredictiveSearchResult({
   goToSearchResult,
@@ -21,11 +23,6 @@ export function PredictiveSearchResult({
   searchTerm,
   type,
 }: SearchResultTypeProps) {
-  const isSuggestions = type === 'queries';
-  const categoryUrl = `/search?q=${searchTerm.current
-    }&type=${pluralToSingularSearchType(type)}`;
-  console.log(categoryUrl, isSuggestions)
-
   return (
     <div
       className="predictive-search-result px-4 py-3 overflow-y-auto"

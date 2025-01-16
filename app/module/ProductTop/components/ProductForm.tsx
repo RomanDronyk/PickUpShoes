@@ -14,6 +14,7 @@ import {Product as ProductType} from '@shopify/hydrogen-react/storefront-api-typ
 import ProductOptions from './ProductOptions';
 import AddToCartButton from './AddToCartButton';
 import RelatedProducts from './RelatedProducts';
+import {CartLineRemoveButton} from '~/components/DropdownCart/CartLineRemoveButton';
 
 interface IProductForm {
   product: ProductFragment;
@@ -83,6 +84,7 @@ const ProductForm: FC<IProductForm> = ({
                   {
                     merchandiseId: selectedVariant.id,
                     quantity: 1,
+                    selectedVariant,
                   },
                 ]
               : []

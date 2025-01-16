@@ -1,8 +1,8 @@
-import { useMatches, Link } from '@remix-run/react';
-import { ChevronRight } from 'lucide-react';
-import { z } from 'zod';
+import {useMatches, Link} from '@remix-run/react';
+import {ChevronRight} from 'lucide-react';
+import {z} from 'zod';
 
-const PoliciesTitle: { [key: string]: string } = {
+const PoliciesTitle: {[key: string]: string} = {
   'refund-policy': 'Обмін та повернення',
   'privacy-policy': 'Політика конфіденційності',
   'terms-of-service': 'Угода користувача',
@@ -17,11 +17,11 @@ export const breadcrumbsSchema = z.enum([
   'login',
   'orders',
   'profile',
-  "liked",
-  "likes",
-  "addresses",
-  "likedsd",
-  "checkout"
+  'liked',
+  'likes',
+  'addresses',
+  'likedsd',
+  'checkout',
 ]);
 export type TBreadcrumbsType = z.infer<typeof breadcrumbsSchema>;
 
@@ -29,7 +29,7 @@ export function Breadcrumbs() {
   const matches = useMatches();
   const deepsRoute: any = matches.at(-1);
 
-  const pages: { href: string; name: string }[] = [{ href: '/', name: 'Головна' }];
+  const pages: {href: string; name: string}[] = [{href: '/', name: 'Головна'}];
 
   const parsedBreadcrumbType = breadcrumbsSchema.safeParse(
     deepsRoute?.handle?.breadcrumb,
@@ -40,20 +40,20 @@ export function Breadcrumbs() {
       case 'collection':
         pages.push({
           href: `/collections/${deepsRoute?.data?.collection?.handle}`,
-          name: `${deepsRoute?.data?.collection?.title ? deepsRoute?.data?.collection?.title : "sladkjf"}`,
+          name: `${deepsRoute?.data?.collection?.title ? deepsRoute?.data?.collection?.title : 'sladkjf'}`,
         });
         break;
       case 'product':
         const collection = deepsRoute?.data?.product?.collections?.nodes.at(0);
 
         pages.push({
-          href: `/collections/${collection?.handle || ""}`,
-          name: `${collection?.title || ""}`,
+          href: `/collections/${collection?.handle || ''}`,
+          name: `${collection?.title || ''}`,
         });
 
         pages.push({
-          href: `/products/${deepsRoute?.data?.product?.handle || ""}`,
-          name: `${deepsRoute?.data?.product?.title || ""}`,
+          href: `/products/${deepsRoute?.data?.product?.handle || ''}`,
+          name: `${deepsRoute?.data?.product?.title || ''}`,
         });
 
         break;
@@ -120,7 +120,7 @@ export function Breadcrumbs() {
           name: 'Адреси',
         });
         break;
-      case "checkout":
+      case 'checkout':
         pages.push({
           href: `/checkout`,
           name: 'Кошик',
@@ -129,18 +129,20 @@ export function Breadcrumbs() {
           href: `/checkout`,
           name: 'Оформити замовлення',
         });
-        break
+        break;
       default:
         break;
     }
-
   } else {
     return null;
   }
 
   return (
     <nav aria-label="Breadcrumbs" className="my-5 lg:px-24 md:px-10 px-[10px]">
-      <ol role="list" className="gap-[10px] flex items-center sm:text-base text-[12px]">
+      <ol
+        role="list"
+        className="gap-[10px] flex items-center sm:text-base text-[12px]"
+      >
         {pages.map((page, index) => {
           const currentPage = index === pages.length - 1;
           const homePage = page.href === '/';
