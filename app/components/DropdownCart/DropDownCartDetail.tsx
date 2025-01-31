@@ -72,13 +72,14 @@ const DropDownCartDetail = ({
         </div>
         <div aria-labelledby="cart-lines">
           <ul className="flex flex-col gap-4">
-            {(cart?.lines?.nodes ?? []).map((line) => (
-              <CartLineItem
-                onClick={() => setCartShow(false)}
-                key={line?.id}
-                line={line}
-              />
-            ))}
+            {cart?.lines?.nodes &&
+              (cart?.lines?.nodes).map((line) => (
+                <CartLineItem
+                  onClick={() => setCartShow(false)}
+                  key={line?.id}
+                  line={line}
+                />
+              ))}
           </ul>
         </div>
       </div>
