@@ -11,10 +11,10 @@ import type {
   FilterValue,
   ProductFilter,
 } from '@shopify/hydrogen/storefront-api-types';
-import { ChevronDown } from 'lucide-react';
-import React, { useEffect, useMemo, useState } from 'react';
-import { useDebounce } from 'react-use';
-import type { SortParam } from '~/routes/($locale).collections.$handle';
+import {ChevronDown} from 'lucide-react';
+import React, {useEffect, useMemo, useState} from 'react';
+import {useDebounce} from 'react-use';
+import type {SortParam} from '~/routes/($locale).collections.$handle';
 import {
   Accordion,
   AccordionContent,
@@ -28,14 +28,14 @@ import {
   SheetTrigger,
   SheetContent,
 } from './ui/sheet';
-import { Button } from './ui/button';
-import { Command, CommandGroup, CommandItem, CommandList } from './ui/command';
-import { Input } from './ui/input';
-import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
-import { Slider } from './ui/slider';
-import { ToggleGroup, ToggleGroupItem } from './ui/toggle-group';
-import { cn } from '~/lib/utils';
-import { useRootLoaderData } from '~/root';
+import {Button} from './ui/button';
+import {Command, CommandGroup, CommandItem, CommandList} from './ui/command';
+import {Input} from './ui/input';
+import {Popover, PopoverContent, PopoverTrigger} from './ui/popover';
+import {Slider} from './ui/slider';
+import {ToggleGroup, ToggleGroupItem} from './ui/toggle-group';
+import {cn} from '~/lib/utils';
+import {useRootLoaderData} from '~/root';
 
 export const FILTER_URL_PREFIX = 'filter.';
 
@@ -54,11 +54,10 @@ export const ProductsFilter = React.memo(function ProductsFilter({
   filters: Filter[] | any;
   initialFilters: Filter[] | any;
   appliedFilters?: AppliedFilter[] | any;
-  headerPromise?: any
+  headerPromise?: any;
 }) {
-
   return (
-    <div className="flex sticky top-3 flex-col gap-6 border border-black/10 rounded-[20px] py-5 px-6 ">
+    <div className="flex flex-col gap-6 border border-black/10 rounded-[20px] py-5 px-6 ">
       <div className=" border-b-black/10 flex justify-between items-center">
         <div className="font-semibold text-xl">Фільтрація товару</div>
 
@@ -81,10 +80,15 @@ export const ProductsFilter = React.memo(function ProductsFilter({
           <AppliedFilters filters={appliedFilters} />
         </div>
       )}
-      <FilterDraw headerPromise={headerPromise} appliedFilters={appliedFilters} initial={initialFilters} filters={filters} />
+      <FilterDraw
+        headerPromise={headerPromise}
+        appliedFilters={appliedFilters}
+        initial={initialFilters}
+        filters={filters}
+      />
     </div>
   );
-})
+});
 
 function FilterDraw({
   filters,
@@ -97,29 +101,37 @@ function FilterDraw({
   initial: Filter[];
   headerPromise: any;
 }) {
-  const { menu, shop } = headerPromise;
+  const {menu, shop} = headerPromise;
 
   const [params] = useSearchParams();
 
-  const [initialFilterPrice, setInitialFilterPrice] = useState<any>(initial.find((item: any) => item.type === 'PRICE_RANGE'))
-  const [initialRangePrice, setInitialRangePrice] = useState<any>(JSON.parse(initialFilterPrice?.values[0].input || "[]"))
+  const [initialFilterPrice, setInitialFilterPrice] = useState<any>(
+    initial.find((item: any) => item.type === 'PRICE_RANGE'),
+  );
+  const [initialRangePrice, setInitialRangePrice] = useState<any>(
+    JSON.parse(initialFilterPrice?.values[0].input || '[]'),
+  );
 
   useEffect(() => {
-    setInitialFilterPrice(initial.find((item: any) => item.type === 'PRICE_RANGE'))
-    setInitialRangePrice(JSON.parse(initialFilterPrice?.values[0].input || "[]"));
-  }, [params])
-  const { publicStoreDomain } = useRootLoaderData();
+    setInitialFilterPrice(
+      initial.find((item: any) => item.type === 'PRICE_RANGE'),
+    );
+    setInitialRangePrice(
+      JSON.parse(initialFilterPrice?.values[0].input || '[]'),
+    );
+  }, [params]);
+  const {publicStoreDomain} = useRootLoaderData();
 
   const markup = (filter: Filter | any) => {
     switch (filter.type) {
       case 'PRICE_RANGE':
         const priceFilterValue = params.get(`${FILTER_URL_PREFIX}price`);
         const price = priceFilterValue
-          ? (JSON.parse(priceFilterValue || "[]") as { min: number; max: number })
+          ? (JSON.parse(priceFilterValue || '[]') as {min: number; max: number})
           : {
-            min: initialRangePrice?.price?.min,
-            max: initialRangePrice?.price?.max,
-          };
+              min: initialRangePrice?.price?.min,
+              max: initialRangePrice?.price?.max,
+            };
         return (
           <PriceFilter
             key={filter.id}
@@ -129,7 +141,13 @@ function FilterDraw({
           />
         );
       case 'LIST':
-        return <ListFilter appliedFilters={appliedFilters} key={filter?.id} filter={filter} />;
+        return (
+          <ListFilter
+            appliedFilters={appliedFilters}
+            key={filter?.id}
+            filter={filter}
+          />
+        );
     }
   };
   const [value, setValue] = useState<string[]>([]);
@@ -141,7 +159,7 @@ function FilterDraw({
 
   const location = useLocation();
   useEffect(() => {
-    const newValue = location?.pathname || ""
+    const newValue = location?.pathname || '';
     setValue([newValue]);
   }, [location?.pathname]);
 
@@ -213,12 +231,10 @@ function PriceFilter({
 }: {
   min: number;
   max: number;
-  value: { min: number; max: number };
+  value: {min: number; max: number};
 }) {
-
   const initialRangeValue: any = value ? [value?.min, value?.max] : [min, max];
   const [priceRange, setPriceRange] = useState(initialRangeValue);
-
 
   const location = useLocation();
   const params = useMemo(
@@ -259,10 +275,10 @@ function PriceFilter({
         return;
       }
       const price = {
-        ...(priceRange[0] === undefined ? { min: 0 } : { min: priceRange[0] }),
-        ...(priceRange[1] === undefined ? {} : { max: priceRange[1] }),
+        ...(priceRange[0] === undefined ? {min: 0} : {min: priceRange[0]}),
+        ...(priceRange[1] === undefined ? {} : {max: priceRange[1]}),
       };
-      const newParams = filterInputToParams({ price }, params);
+      const newParams = filterInputToParams({price}, params);
       navigate(`${location.pathname}?${newParams.toString()}`);
     }, 500);
 
@@ -305,10 +321,9 @@ function PriceFilter({
   );
 }
 
-
 interface IFilter {
   label: string;
-  values: { id: string; input: string; label: string }[];
+  values: {id: string; input: string; label: string}[];
   id: string;
 }
 
@@ -318,47 +333,49 @@ interface IProductFilter {
 
 interface ListFilterProps {
   filter: IFilter;
-  appliedFilters: any
+  appliedFilters: any;
 }
 
-const ListFilter: React.FC<ListFilterProps> = ({ filter: newFilter, appliedFilters }) => {
+const ListFilter: React.FC<ListFilterProps> = ({
+  filter: newFilter,
+  appliedFilters,
+}) => {
   const [value, setValue] = useState<string[]>([]);
   const [filterValues, setFilterValues] = useState<any>([]);
   const location = useLocation();
   const navigate = useNavigate();
   const matches = useMatches();
   const [filter, setFilters] = useState(() => {
-    const newValues = newFilter.values.map(value => {
-      if (value.id.slice(-1) === ".") {
-        return { ...value, id: value.id + value.label }
+    const newValues = newFilter.values.map((value) => {
+      if (value.id.slice(-1) === '.') {
+        return {...value, id: value.id + value.label};
       } else {
-        return value
+        return value;
       }
-    })
-    return { ...newFilter, values: newValues }
-  })
-
+    });
+    return {...newFilter, values: newValues};
+  });
 
   if (appliedFilters) {
-
     useEffect(() => {
       const appliedLabels = appliedFilters.map((filter: any) => {
         const label = filter.label.toLowerCase();
         if (label.includes(' ')) {
-          return label.split(' ').join('-')
+          return label.split(' ').join('-');
         } else if (label.includes('.')) {
-          return label.split('.').join('-')
+          return label.split('.').join('-');
         } else {
-          return label
+          return label;
         }
       });
 
       const updatedValue = value.filter((val: any) => {
         const lastSegment = val.split('.').pop().toLowerCase();
-        const normalizedLastSegment = lastSegment.includes('-') ? lastSegment : lastSegment.split('.').join('-');
+        const normalizedLastSegment = lastSegment.includes('-')
+          ? lastSegment
+          : lastSegment.split('.').join('-');
         return appliedLabels.includes(normalizedLastSegment);
       });
-
 
       if (updatedValue.length !== value.length) {
         setValue(updatedValue);
@@ -366,36 +383,36 @@ const ListFilter: React.FC<ListFilterProps> = ({ filter: newFilter, appliedFilte
     }, [appliedFilters]);
   }
 
-
   const params = useMemo(
     () => new URLSearchParams(location?.search),
     [location?.search],
   );
 
   const exampleValue = filter.values[0];
-  const exampleValueObj = JSON.parse(exampleValue.input || "[]") as IProductFilter;
+  const exampleValueObj = JSON.parse(
+    exampleValue.input || '[]',
+  ) as IProductFilter;
   const filterKey: string = Object.keys(exampleValueObj)[0];
 
   const catalogMatch = matches.find(
     (match) => match.id === 'routes/($locale).collections.$handle',
   );
 
-
-  const filtersValue: any = catalogMatch?.data && (catalogMatch.data as { appliedFilters: { filter: any }[] }).appliedFilters.map(
-    (filter: any) => {
-      return JSON.stringify(filter.filter || "[]");
-    },
-  );
-
+  const filtersValue: any =
+    catalogMatch?.data &&
+    (catalogMatch.data as {appliedFilters: {filter: any}[]}).appliedFilters.map(
+      (filter: any) => {
+        return JSON.stringify(filter.filter || '[]');
+      },
+    );
 
   const calculatedValues = filter.values.filter((value) =>
-    filtersValue.includes(value.input)
+    filtersValue.includes(value.input),
   );
 
   const handleChange = (value: string[]) => {
     setValue(value);
   };
-
 
   useDebounce(
     () => {
@@ -410,7 +427,6 @@ const ListFilter: React.FC<ListFilterProps> = ({ filter: newFilter, appliedFilte
         const link = getFilterLink(selectedItems, params, location);
         navigate(`${link}`);
       }
-
     },
     0,
     [value],
@@ -420,7 +436,7 @@ const ListFilter: React.FC<ListFilterProps> = ({ filter: newFilter, appliedFilte
     const appliedValues = calculatedValues.map((item) => item.id);
     const newValue = new Set(value.concat(appliedValues));
     setValue([...newValue]);
-    setFilterValues(filter.values)
+    setFilterValues(filter.values);
   }, []);
 
   return (
@@ -436,41 +452,41 @@ const ListFilter: React.FC<ListFilterProps> = ({ filter: newFilter, appliedFilte
             <div>
               <ToggleGroup
                 type="multiple"
-                className={` ${filter.id === 'fitler.v.option.color'
-                  ? 'grid grid-cols-5 gap-[15px]'
-                  : 'flex flex-wrap justify-start'
-                  }`}
+                className={` ${
+                  filter.id === 'fitler.v.option.color'
+                    ? 'grid grid-cols-5 gap-[15px]'
+                    : 'flex flex-wrap justify-start'
+                }`}
                 onValueChange={handleChange}
                 value={value}
-
               >
                 {filter.id !== 'filter.v.option.color'
                   ? filterValues.map((filterItem: any) => (
-                    <ToggleGroupItem
-                      key={filterItem.id}
-                      value={filterItem.id}
-                      className={cn(
-                        'data-[state=on]:bg-black data-[state=on]:text-white rounded-[62px] text-black/60  bg-[#F0F0F0] px-5 py-1',
-                      )}
-                    >
-                      <span>{filterItem.label}</span>
-                    </ToggleGroupItem>
-                  ))
-                  : filterValues.map((filterItem: any) => {
-                    const colorClass = {
-                      backgroundColor: `var(--filter-${filterItem.label.toLowerCase()})`,
-                    };
-                    return (
                       <ToggleGroupItem
                         key={filterItem.id}
                         value={filterItem.id}
                         className={cn(
-                          `data-[state=on]:before:content-colorFilterActive data-[state=on]:before:absolute data-[state=on]:before:top-2/4 data-[state=on]:before:left-2/4 data-[state=on]:before:-translate-x-2/4 data-[state=on]:before:-translate-y-2/4 relative  rounded-full border box-border w-[37px] h-[37px]`,
+                          'data-[state=on]:bg-black data-[state=on]:text-white rounded-[62px] text-black/60  bg-[#F0F0F0] px-5 py-1',
                         )}
-                        style={colorClass}
-                      ></ToggleGroupItem>
-                    );
-                  })}
+                      >
+                        <span>{filterItem.label}</span>
+                      </ToggleGroupItem>
+                    ))
+                  : filterValues.map((filterItem: any) => {
+                      const colorClass = {
+                        backgroundColor: `var(--filter-${filterItem.label.toLowerCase()})`,
+                      };
+                      return (
+                        <ToggleGroupItem
+                          key={filterItem.id}
+                          value={filterItem.id}
+                          className={cn(
+                            `data-[state=on]:before:content-colorFilterActive data-[state=on]:before:absolute data-[state=on]:before:top-2/4 data-[state=on]:before:left-2/4 data-[state=on]:before:-translate-x-2/4 data-[state=on]:before:-translate-y-2/4 relative  rounded-full border box-border w-[37px] h-[37px]`,
+                          )}
+                          style={colorClass}
+                        ></ToggleGroupItem>
+                      );
+                    })}
               </ToggleGroup>
             </div>
           </AccordionContent>
@@ -478,11 +494,11 @@ const ListFilter: React.FC<ListFilterProps> = ({ filter: newFilter, appliedFilte
       </Accordion>
     </div>
   );
-}
+};
 
 export default ListFilter;
 
-export function AppliedFilters({ filters = [] }: { filters: AppliedFilter[] }) {
+export function AppliedFilters({filters = []}: {filters: AppliedFilter[]}) {
   const [params] = useSearchParams();
   const location = useLocation();
   return (
@@ -493,7 +509,6 @@ export function AppliedFilters({ filters = [] }: { filters: AppliedFilter[] }) {
             <Button
               key={`${filter.label}-${JSON.stringify(filter.filter || [])}`}
               variant="ghost"
-
               className="bg-[#535353] rounded-2xl px-[10px] py-[3px] text-white hover:bg-[#535353]/60"
             >
               <Link
@@ -529,18 +544,23 @@ function filterInputToParams(
 ) {
   const input =
     typeof rawInput === 'string'
-      ? (JSON.parse(rawInput || "[]") as ProductFilter)
+      ? (JSON.parse(rawInput || '[]') as ProductFilter)
       : rawInput;
 
   Object.entries(input).forEach(([key, value]) => {
-    if (params.has(`${FILTER_URL_PREFIX}${key}`, JSON.stringify(value || "[]"))) {
+    if (
+      params.has(`${FILTER_URL_PREFIX}${key}`, JSON.stringify(value || '[]'))
+    ) {
       return;
     }
     if (key === 'price') {
       // For price, we want to overwrite
-      params.set(`${FILTER_URL_PREFIX}${key}`, JSON.stringify(value || "[]"));
+      params.set(`${FILTER_URL_PREFIX}${key}`, JSON.stringify(value || '[]'));
     } else {
-      params.append(`${FILTER_URL_PREFIX}${key}`, JSON.stringify(value || "[]"));
+      params.append(
+        `${FILTER_URL_PREFIX}${key}`,
+        JSON.stringify(value || '[]'),
+      );
     }
   });
 
@@ -555,19 +575,28 @@ function getFilterLink(
   rawInput.forEach((item) => {
     const input =
       typeof item.input === 'string'
-        ? (JSON.parse(item.input || "[]") as ProductFilter)
+        ? (JSON.parse(item.input || '[]') as ProductFilter)
         : rawInput;
     Object.entries(input).forEach(([key, value]) => {
       if (
-        paramsClone.has(`${FILTER_URL_PREFIX}${key}`, JSON.stringify(value || "[]"))
+        paramsClone.has(
+          `${FILTER_URL_PREFIX}${key}`,
+          JSON.stringify(value || '[]'),
+        )
       ) {
         return;
       }
       if (key === 'price') {
         // For price, we want to overwrite
-        paramsClone.set(`${FILTER_URL_PREFIX}${key}`, JSON.stringify(value || "[]"));
+        paramsClone.set(
+          `${FILTER_URL_PREFIX}${key}`,
+          JSON.stringify(value || '[]'),
+        );
       } else {
-        paramsClone.append(`${FILTER_URL_PREFIX}${key}`, JSON.stringify(value || "[]"));
+        paramsClone.append(
+          `${FILTER_URL_PREFIX}${key}`,
+          JSON.stringify(value || '[]'),
+        );
       }
     });
   });
@@ -594,7 +623,7 @@ function getSortLink(
   return `${location.pathname}?${params.toString()}`;
 }
 // Sort menu component
-const sortMenu: { value: string; label: string }[] = [
+const sortMenu: {value: string; label: string}[] = [
   {
     label: 'Популярністю',
     value: 'best-selling',
@@ -669,7 +698,7 @@ function getAppliedFilterLink(
 
   Object.entries(filter.filter).forEach(([key, value]) => {
     const fullKey = FILTER_URL_PREFIX + key;
-    paramsClone.delete(fullKey, JSON.stringify(value || "[]"));
+    paramsClone.delete(fullKey, JSON.stringify(value || '[]'));
   });
   return `${location.pathname}?${paramsClone.toString()}`;
 }
@@ -680,7 +709,7 @@ export function MobileFilters({
   initialFilters,
   headerPromise,
 }: {
-  appliedFilters?: any
+  appliedFilters?: any;
   headerPromise?: any;
   filters: Filter[] | any;
   initialFilters: Filter[] | any;
@@ -728,7 +757,12 @@ export function MobileFilters({
             </svg>
           </div>
         </SheetHeader>
-        <FilterDraw headerPromise={headerPromise} appliedFilters={appliedFilters} filters={filters} initial={initialFilters} />
+        <FilterDraw
+          headerPromise={headerPromise}
+          appliedFilters={appliedFilters}
+          filters={filters}
+          initial={initialFilters}
+        />
         <SheetClose asChild>
           <Button className="font-medium text-base text-white rounded-[30px] bg-black w-full mt-9 py-3">
             <span>Застосувати фільтри</span>
