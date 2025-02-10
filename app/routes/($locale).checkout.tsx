@@ -14,6 +14,7 @@ import {useEffect, useState} from 'react';
 import {COLLECTION_QUERY, CUSTOMER_QUERY} from '~/graphql/queries';
 import {CollectionQuery} from 'storefrontapi.generated';
 import {getPaginationVariables} from '@shopify/hydrogen';
+import {Customer} from '@shopify/hydrogen-react/storefront-api-types';
 
 export const handle: {breadcrumb: string} = {
   breadcrumb: 'checkout',
@@ -160,6 +161,9 @@ export const action: ActionFunction = async ({request, context}) => {
     switch (actionType) {
       case 'create order':
         const result: any = await createOrder(formData, context, inputState);
+        if (result.pageUrl === '/thanks') {
+          return redirect('/thanks');
+        }
         return json(result);
       default:
         return json({error: 'Invalid action'}, {status: 400});
@@ -179,29 +183,27 @@ export default function Checkout() {
 
   const amount = cartData?.cost?.subtotalAmount?.amount || '0';
   const urlFromAction = response?.pageUrl;
-  const navigate = useNavigate();
-  const generateLink = async () => {
-    if (urlFromAction === '/thanks') {
-      urlFromAction ? navigate(urlFromAction) : null;
-    } else if (
+  useEffect(() => {
+    if (
       urlFromAction === '/mono' &&
       response?.dataFromMono?.products &&
       response?.dataFromMono?.amount &&
       response?.dataFromMono?.id
     ) {
-      const link = await generageMonoUrl(
-        response?.dataFromMono?.amount,
-        response?.dataFromMono?.products,
-        response?.dataFromMono?.id,
-        'https://pick-up-shoes.com.ua',
-      );
-      if (link?.pageUrl) {
-        window.location.href = link?.pageUrl;
-      }
+      const generateLink = async () => {
+        const link = await generageMonoUrl(
+          response?.dataFromMono?.amount,
+          response?.dataFromMono?.products,
+          response?.dataFromMono?.id,
+          'https://pick-up-shoes.com.ua',
+        );
+        if (link?.pageUrl) {
+          window.location.href = link?.pageUrl;
+        }
+      };
+      generateLink();
     }
-  };
-
-  generateLink();
+  }, [urlFromAction, response]);
 
   useEffect(() => {
     const carts = cartData?.lines?.nodes?.map((element: any) => element) || [];
@@ -211,7 +213,7 @@ export default function Checkout() {
   return (
     <>
       <CheckoutScreen
-        customer={customer}
+        customer={customer as Customer}
         actionErrorMessage={response?.error}
         recommendedCarts={recommendedCarts}
         cartsFromCart={cartsFromCart}

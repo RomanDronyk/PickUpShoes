@@ -10,6 +10,7 @@ import {
   HeaderContextInterface,
 } from '~/context/HeaderCarts';
 import EmptyCart from '../ui/emptyCart';
+import {CartLine} from '@shopify/hydrogen-react/storefront-api-types';
 
 const DropDownCartDetail = ({
   cart: originalCart,
@@ -77,7 +78,7 @@ const DropDownCartDetail = ({
                 <CartLineItem
                   onClick={() => setCartShow(false)}
                   key={line?.id}
-                  line={line}
+                  line={line as CartLine}
                 />
               ))}
           </ul>
@@ -97,7 +98,7 @@ const DropDownCartDetail = ({
           &nbsp;грн
         </div>
         <div className="dropdown-checkout flex items-center justify-end">
-          <Link to={`/checkout` || ''} className="flex gap-5">
+          <Link to={`/checkout`} className="flex gap-5">
             <Button className="rounded-[60px] px-[55px]">
               <span className="font-medium text-2xl pr-2">
                 Оформити замовлення

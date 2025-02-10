@@ -84,6 +84,8 @@ const CheckoutScreen: FC<ICheckoutScreen> = ({
     cityOptions: [],
     departmentOption: [],
   });
+  const navigation = useNavigation();
+
   const onInputChange = (
     value: string | boolean,
     fieldName: keyof IInputField,
@@ -100,8 +102,6 @@ const CheckoutScreen: FC<ICheckoutScreen> = ({
       }));
     }
   };
-  const navigation = useNavigation();
-  console.log(customer);
 
   const addressesForRendering = [
     customer?.defaultAddress,
@@ -442,7 +442,12 @@ const CheckoutScreen: FC<ICheckoutScreen> = ({
   );
 };
 
-const FormInputs = ({onInputChange, inputState, setInputState, customer}) => {
+const FormInputs = ({
+  onInputChange,
+  inputState,
+  setInputState,
+  customer,
+}: any) => {
   return (
     <fieldset className="flex flex-col gap-[15px]">
       <div className="pb-[15px] border-b border-black/20">
