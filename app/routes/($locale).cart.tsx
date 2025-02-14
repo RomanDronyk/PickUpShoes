@@ -6,6 +6,7 @@ import {
   type LoaderFunctionArgs,
   type ActionFunctionArgs,
 } from '@shopify/remix-oxygen';
+import {Aside} from '~/components/Aside';
 import {CartMain} from '~/components/Cart';
 import {syncUserCart} from '~/utils/syncUserCart';
 
@@ -114,8 +115,10 @@ export default function Cart() {
 
   return (
     <div className="cart">
-      <h1>Cart</h1>
-      <CartMain layout="page" cart={cart} />
+      <Aside.Provider>
+        <h1>Cart</h1>
+        <CartMain layout="page" cart={cart} />
+      </Aside.Provider>
     </div>
   );
 }

@@ -1,6 +1,6 @@
 import {Await, Link, NavLink, useLocation} from '@remix-run/react';
 import {Suspense, useContext, useEffect, useState} from 'react';
-import type {HeaderQuery} from 'storefrontapi.generated';
+import type {CartApiQueryFragment, HeaderQuery} from 'storefrontapi.generated';
 import {useRootLoaderData} from '~/root';
 import {DropDownCart} from './DropdownCart/DropdownCart';
 import type {LayoutProps} from './Layout';
@@ -255,12 +255,6 @@ export function HeaderMenu({
   primaryDomainUrl: HeaderQuery['shop']['primaryDomain']['url'];
 }) {
   const {publicStoreDomain} = useRootLoaderData();
-  // const {
-  //   setLikedCardId,
-  // } = useContext(HeaderBasketContext) as HeaderContextInterface;
-  // useEffect(() => {
-  // rootLoaderData?.likeProductIds ? setLikedCardId(rootLoaderData?.likeProductIds) : setLikedCardId([])
-  // }, [rootLoaderData?.likeProductIds])
   return (
     <NavigationMenu className="md:flex hidden">
       <NavigationMenuList>

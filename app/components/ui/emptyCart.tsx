@@ -7,11 +7,17 @@ import {
   HeaderContextInterface,
 } from '~/context/HeaderCarts';
 
-export default function EmptyCart({setOpen}: {setOpen?: any}) {
+export default function EmptyCart({
+  hidden,
+  setOpen,
+}: {
+  hidden: boolean;
+  setOpen?: any;
+}) {
   const {setCartShow} = useContext(
     HeaderBasketContext,
   ) as HeaderContextInterface;
-
+  if (hidden) return null;
   return (
     <div className="flex flex-col gap-5 min-h-52 h-full items-center justify-center">
       <h3 className="font-semibold text-[26px]">Схоже твоя корзина порожня</h3>

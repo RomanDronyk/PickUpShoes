@@ -8,7 +8,7 @@ import {
 } from './ui/drawer';
 import type {CartApiQueryFragment} from 'storefrontapi.generated';
 import type {CartLineUpdateInput} from '@shopify/hydrogen/storefront-api-types';
-import {FetcherWithComponents, Link} from '@remix-run/react';
+import {FetcherWithComponents, Link, useFetcher} from '@remix-run/react';
 import {Button} from './ui/button';
 import {Minus, Plus, X} from 'lucide-react';
 import {
@@ -19,7 +19,7 @@ import {
   OptimisticCartLine,
   useOptimisticCart,
 } from '@shopify/hydrogen';
-import {useContext} from 'react';
+import {useContext, useEffect} from 'react';
 import {useVariantUrl} from '~/utils';
 import EmptyCart from './ui/emptyCart';
 import {
@@ -39,6 +39,7 @@ export function MobileCart({
   const {cartShowMobile: open, setCartShowMobile: setOpen} = useContext(
     HeaderBasketContext,
   ) as HeaderContextInterface;
+  const linesCount = Boolean(cart?.lines?.nodes?.length || 0);
 
   return (
     <Drawer open={open} onOpenChange={setOpen} direction="right">
@@ -88,11 +89,8 @@ export function MobileCart({
       </DrawerTrigger>
       <DrawerContent className="h-[90%] px-5">
         <div className="overflow-y-auto overflow-x-hidden">
-          {cart?.lines?.nodes?.length > 0 ? (
-            <MobileCartDetail setOpen={setOpen} cart={cart} />
-          ) : (
-            <EmptyCart setOpen={setOpen} />
-          )}
+          <MobileCartDetail setOpen={setOpen} cart={cart} />
+          <EmptyCart hidden={linesCount} setOpen={setOpen} />
         </div>
       </DrawerContent>
     </Drawer>
@@ -118,8 +116,12 @@ function MobileCartDetail({
         </DrawerClose>
       </DrawerHeader>
       <div className="flex flex-col gap-y-5">
-        {cart?.lines?.nodes?.map((line) => (
-          <MobileCartLine setOpen={setOpen} key={line.id} line={line} />
+        {(cart?.lines?.nodes ?? []).map((line) => (
+          <MobileCartLine
+            setOpen={setOpen}
+            key={line.id}
+            line={line as CartLine}
+          />
         ))}
       </div>
       <DrawerFooter className="px-0">
@@ -138,7 +140,7 @@ function MobileCartDetail({
         <Button asChild className="rounded-[60px] px-[55px]">
           <Link
             onClick={() => setOpen(false)}
-            to={'/checkout' || ''}
+            to={'/checkout'}
             className="flex gap-5"
           >
             <span className="font-medium text-2xl pr-2">
@@ -170,12 +172,12 @@ function MobileCartLine({
   setOpen: any;
   line: CartLine | undefined;
 }) {
-  const {id, merchandise} = line;
+  const {id, merchandise, isOptimistic} = line;
   const {product, title, image, selectedOptions, quantityAvailable, sku} =
     merchandise;
   const lineItemUrl = useVariantUrl(product.handle, selectedOptions);
   return (
-    <div className="border rounded-[20px] border-black/10 p-[15px]">
+    <div key={id} className="border rounded-[20px] border-black/10 p-[15px]">
       <div className="flex justify-between flex-wrap">
         <div className="flex gap-x-[13px] max-w-[80%]">
           {image && (
@@ -199,7 +201,7 @@ function MobileCartLine({
             </span>
           </Link>
         </div>
-        <CartLineRemoveButton lineIds={[line.id]} />
+        <CartLineRemoveButton disabled={!!isOptimistic} lineIds={[id]} />
       </div>
       <div>
         <div className="text-base">
@@ -352,7 +354,62 @@ function CartLineUpdateButton({
     </CartForm>
   );
 }
-function CartLineRemoveButton({lineIds}: {lineIds: string[]}) {
+
+function CartLineRemoveButtonFetcher({lineIds}: {lineIds: string[]}) {
+  const fetcher = useFetcher();
+  useEffect(() => {
+    if (fetcher.state === 'submitting') {
+      console.log('Запит на видалення відправлено');
+    } else if (fetcher.state === 'loading') {
+      console.log('Запит на видалення обробляється');
+    } else if (fetcher.state === 'idle' && fetcher.data) {
+      console.log('Запит на видалення успішно завершено');
+    }
+  }, [fetcher.state, fetcher.data]);
+
+  return (
+    <fetcher.Form
+      method="post"
+      action="/cart"
+      onSubmit={(e) => {
+        e.preventDefault();
+        const formData = new FormData(e.currentTarget);
+        const data = {
+          action: 'LinesRemove',
+          inputs: {
+            lineIds: lineIds,
+          },
+        };
+        formData.set('cartFormInput', JSON.stringify(data));
+        fetcher.submit(formData, {
+          action: '/cart',
+          method: 'post',
+        });
+      }}
+    >
+      <Button
+        type="submit"
+        className="bg-[#B3B3B3] self-center w-[25px] h-[25px] p-[6px] rounded-full"
+      >
+        {fetcher.state === 'idle' ? (
+          <X size={16} />
+        ) : (
+          <div className="h-[16px]">
+            <LoaderNew />
+          </div>
+        )}
+      </Button>
+    </fetcher.Form>
+  );
+}
+
+function CartLineRemoveButton({
+  lineIds,
+  disabled,
+}: {
+  lineIds: string[];
+  disabled: boolean;
+}) {
   return (
     <CartForm
       route="/cart"
@@ -363,6 +420,7 @@ function CartLineRemoveButton({lineIds}: {lineIds: string[]}) {
         <>
           <Button
             type="submit"
+            disabled={disabled}
             className="bg-[#B3B3B3] self-center w-[25px] h-[25px] p-[6px] rounded-full"
           >
             {fetcher.state == 'idle' ? (
