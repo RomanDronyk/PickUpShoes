@@ -59,6 +59,7 @@ export async function loader({ request, params, context }: LoaderFunctionArgs) {
     searchParams.get('sort') as SortParam,
   );
 
+
   const filters = [...searchParams.entries()].reduce(
     (filters, [key, value]) => {
       if (key.startsWith(FILTER_URL_PREFIX)) {
