@@ -11,7 +11,7 @@ export function filterAvailablesProductOptions(products: any) {
         variant.selectedOptions.forEach((selectedOption: any) => {
           const optionValues = optionMap.get(selectedOption.name);
           if (optionValues) {
-            optionValues.add(selectedOption.value); 
+            optionValues.add(selectedOption.value);
           }
         });
       }
@@ -19,7 +19,7 @@ export function filterAvailablesProductOptions(products: any) {
 
     product.options = product.options.map((option: any) => ({
       name: option.name,
-      values: Array.from(optionMap.get(option.name)), 
+      values: Array.from(optionMap.get(option.name)),
     }));
   });
 

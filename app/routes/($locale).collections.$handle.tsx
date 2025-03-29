@@ -1,30 +1,30 @@
-import {useLoaderData, useNavigate, type MetaFunction} from '@remix-run/react';
-import {getPaginationVariables, Pagination} from '@shopify/hydrogen';
+import { useLoaderData, useNavigate, type MetaFunction } from '@remix-run/react';
+import { getPaginationVariables, Pagination } from '@shopify/hydrogen';
 import type {
   ProductFilter,
   Collection,
   ProductCollectionSortKeys,
   Filter,
 } from '@shopify/hydrogen/storefront-api-types';
-import {defer, redirect, type LoaderFunctionArgs} from '@shopify/remix-oxygen';
+import { defer, redirect, type LoaderFunctionArgs } from '@shopify/remix-oxygen';
 import type {
   CollectionQuery,
   CollectionFiltersQuery,
 } from 'storefrontapi.generated';
-import {ProductCard} from '~/components/ProductCard';
+import { ProductCard } from '~/components/ProductCard';
 import {
   ProductsFilter,
   SortProducts,
   AppliedFilters,
   MobileFilters,
 } from '~/components/ProductsFilter';
-import {filterAvailablesProductOptions, parseAsCurrency} from '~/utils';
-import {useMedia} from 'react-use';
-import {COLLECTION_FILTER_QUERY, COLLECTION_QUERY} from '~/graphql/queries';
-import {HEADER_QUERY} from '~/graphql/queries/headerQuery.graphql';
-import {useInView} from 'react-intersection-observer';
-import {useEffect, useMemo} from 'react';
-import {Button} from '~/components/ui/button';
+import { filterAvailablesProductOptions, parseAsCurrency } from '~/utils';
+import { useMedia } from 'react-use';
+import { COLLECTION_FILTER_QUERY, COLLECTION_QUERY } from '~/graphql/queries';
+import { HEADER_QUERY } from '~/graphql/queries/headerQuery.graphql';
+import { useInView } from 'react-intersection-observer';
+import { useEffect, useMemo } from 'react';
+import { Button } from '~/components/ui/button';
 
 export type SortParam =
   | 'price-low-high'
@@ -35,18 +35,17 @@ export type SortParam =
 
 export const FILTER_URL_PREFIX = 'filter.';
 
-export const handle: {breadcrumb: string} = {
+export const handle: { breadcrumb: string } = {
   breadcrumb: 'collection',
 };
 
-export const meta: MetaFunction<typeof loader> = ({data}) => {
-  return [{title: `PickUpShoes | ${data?.collection.title ?? ''} Collection`}];
+export const meta: MetaFunction<typeof loader> = ({ data }) => {
+  return [{ title: `PickUpShoes | ${data?.collection.title ?? ''} Collection` }];
 };
 
-export async function loader({request, params, context}: LoaderFunctionArgs) {
-  const {handle} = params;
-  const {storefront} = context;
-
+export async function loader({ request, params, context }: LoaderFunctionArgs) {
+  const { handle } = params;
+  const { storefront } = context;
   if (!handle) {
     return redirect('/collections/catalog');
   }
@@ -56,7 +55,7 @@ export async function loader({request, params, context}: LoaderFunctionArgs) {
   });
   const locale = context.storefront.i18n;
   const searchParams = new URL(request.url).searchParams;
-  const {sortKey, reverse} = getSortValuesFromParam(
+  const { sortKey, reverse } = getSortValuesFromParam(
     searchParams.get('sort') as SortParam,
   );
 
@@ -64,23 +63,36 @@ export async function loader({request, params, context}: LoaderFunctionArgs) {
     (filters, [key, value]) => {
       if (key.startsWith(FILTER_URL_PREFIX)) {
         const filterKey = key.substring(FILTER_URL_PREFIX.length);
+        let parsedValue;
+        try {
+          parsedValue = JSON.parse(value || `[]`);
+        } catch (error) {
+          parsedValue = [];
+          console.error("Error parsing filter value:", error);
+        }
         filters.push({
-          [filterKey]: JSON.parse(value || `[]`),
+          [filterKey]: parsedValue,
         });
       }
       return filters;
     },
     [] as ProductFilter[],
   );
+  // if (filters.length !== 0) {
+  filters.push({
+    available: true,
+  })
+  // }
+  console.log(JSON.stringify(filters, null, 2), 'filters')
 
-  const {collection: filtersCollection} =
+  const { collection: filtersCollection } =
     await storefront.query<CollectionFiltersQuery>(COLLECTION_FILTER_QUERY, {
       variables: {
         handle,
         first: 1,
       },
     });
-  const {collection} = await storefront.query<CollectionQuery>(
+  const { collection } = await storefront.query<CollectionQuery>(
     COLLECTION_QUERY,
     {
       variables: {
@@ -109,44 +121,45 @@ export async function loader({request, params, context}: LoaderFunctionArgs) {
     },
   });
 
-  const appliedFilters = filters
-    .map((filter) => {
-      const foundValue = allFilterValues.find((value) => {
-        const valueInput = JSON.parse(value.input as string) as ProductFilter;
-        if (valueInput.price && filter.price) {
-          return true;
-        }
-        return JSON.stringify(valueInput) === JSON.stringify(filter);
-      });
-      if (!foundValue) {
-        console.error('Could not find filter value for filter', filter);
-        return null;
+  const appliedFilters = filters.filter((filter) => !filter.available).map((filter) => {
+    const foundValue = allFilterValues.find((value) => {
+      const valueInput = JSON.parse(value.input as string) as ProductFilter;
+      if (valueInput.price && filter.price) {
+        return true;
       }
-      if (foundValue.id === 'filter.v.price') {
-        const input = JSON.parse(foundValue.input as string) as ProductFilter;
-        const min = parseAsCurrency(input.price?.min ?? 0, locale);
-        const max = input.price?.max
-          ? parseAsCurrency(input.price.max, locale)
-          : '';
-        const label = min && max ? `${min} - ${max}` : 'Price';
+      return JSON.stringify(valueInput) === JSON.stringify(filter);
+    });
+    if (!foundValue) {
+      console.error('Could not find filter value for filter', filter);
+      return null;
+    }
+    if (foundValue.id === 'filter.v.price') {
+      const input = JSON.parse(foundValue.input as string) as ProductFilter;
+      const min = parseAsCurrency(input.price?.min ?? 0, locale);
+      const max = input.price?.max
+        ? parseAsCurrency(input.price.max, locale)
+        : '';
+      const label = min && max ? `${min} - ${max}` : 'Price';
 
-        return {
-          filter,
-          label,
-          name: foundValue.label,
-        };
-      }
       return {
         filter,
-        label: foundValue.label,
+        label,
+        name: foundValue.label,
       };
-    })
+    }
+    return {
+      filter,
+      label: foundValue.label,
+    };
+  })
     .filter((filter): filter is NonNullable<typeof filter> => filter !== null);
   return defer({
     collection: {
       ...collection,
       products: {
         ...collection.products,
+        filters: collection.products.filters.filter((filter) => filter.id !== "filter.v.availability"),
+
         nodes: filterAvailablesProductOptions(collection.products.nodes),
       },
     },
@@ -181,7 +194,8 @@ export default function Collection() {
   );
   const momoizedHeaderPromise = useMemo(() => headerPromise, [headerPromise]);
   const isMobile = useMedia('(max-width: 1024px)', false);
-  const {ref, inView, entry} = useInView();
+  const { ref, inView, entry } = useInView();
+  console.log(collection.products.filters, 'filters')
 
   return (
     <div className="grid lg:grid-cols-[minmax(auto,_300px)_minmax(auto,_1fr)] grid-cols-1 gap-x-5 w-full lg:px-24 md:px-12 px-[10px]  mb-8">
@@ -256,14 +270,14 @@ export function PaginatedResourceSection<NodesType>({
   resourcesClassName,
 }: {
   connection: React.ComponentProps<typeof Pagination<NodesType>>['connection'];
-  children: React.FunctionComponent<{node: NodesType; index: number}>;
+  children: React.FunctionComponent<{ node: NodesType; index: number }>;
   resourcesClassName?: string;
 }) {
   return (
     <Pagination connection={connection}>
-      {({nodes, isLoading, PreviousLink, NextLink}) => {
+      {({ nodes, isLoading, PreviousLink, NextLink }) => {
         const resoucesMarkup = nodes.map((node, index) =>
-          children({node, index}),
+          children({ node, index }),
         );
         return (
           <div>
@@ -307,7 +321,7 @@ export function ProductsGrid({
   const availableProducts = nodes.filter((product: any) =>
     product.variants.nodes.some((variant: any) => {
       if (variant.availableForSale) {
-        return {...variant, product};
+        return { ...variant, product };
       }
     }),
   );

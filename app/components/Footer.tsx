@@ -272,6 +272,7 @@ export function Footer({menu: footerMenu, shop}: Footer) {
           </h3>
           <ul className="flex flex-col gap-4 lg:text-lg sm:text-sm text-lg">
             <li>
+              ч
               <span>
                 м.Коломия, вулиця Петлюри
                 <br />, будинок 42
