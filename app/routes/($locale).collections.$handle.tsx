@@ -6,7 +6,7 @@ import type {
   ProductCollectionSortKeys,
   Filter,
 } from '@shopify/hydrogen/storefront-api-types';
-import { defer, redirect, type LoaderFunctionArgs } from '@shopify/remix-oxygen';
+import { json, redirect, type LoaderFunctionArgs } from '@shopify/remix-oxygen';
 import type {
   CollectionQuery,
   CollectionFiltersQuery,
@@ -46,13 +46,16 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => {
 export async function loader({ request, params, context }: LoaderFunctionArgs) {
   const { handle } = params;
   const { storefront } = context;
-  if (!handle) {
-    return redirect('/collections/catalog');
-  }
 
   const paginationVariables = getPaginationVariables(request, {
     pageBy: 8,
   });
+
+  if (!handle) {
+    return redirect('/collections/catalog');
+  }
+
+
   const locale = context.storefront.i18n;
   const searchParams = new URL(request.url).searchParams;
   const { sortKey, reverse } = getSortValuesFromParam(
@@ -79,12 +82,10 @@ export async function loader({ request, params, context }: LoaderFunctionArgs) {
     },
     [] as ProductFilter[],
   );
-  // if (filters.length !== 0) {
+
   filters.push({
     available: true,
   })
-  // }
-  console.log(JSON.stringify(filters, null, 2), 'filters')
 
   const { collection: filtersCollection } =
     await storefront.query<CollectionFiltersQuery>(COLLECTION_FILTER_QUERY, {
@@ -154,7 +155,7 @@ export async function loader({ request, params, context }: LoaderFunctionArgs) {
     };
   })
     .filter((filter): filter is NonNullable<typeof filter> => filter !== null);
-  return defer({
+  return json({
     collection: {
       ...collection,
       products: {
@@ -196,7 +197,6 @@ export default function Collection() {
   const momoizedHeaderPromise = useMemo(() => headerPromise, [headerPromise]);
   const isMobile = useMedia('(max-width: 1024px)', false);
   const { ref, inView, entry } = useInView();
-  console.log(collection.products.filters, 'filters')
 
   return (
     <div className="grid lg:grid-cols-[minmax(auto,_300px)_minmax(auto,_1fr)] grid-cols-1 gap-x-5 w-full lg:px-24 md:px-12 px-[10px]  mb-8">
@@ -219,6 +219,7 @@ export default function Collection() {
           ) : (
             <MobileFilters
               headerPromise={headerPromise}
+              appliedFilters={appliedFilters}
               filters={collection.products.filters as Filter[]}
               initialFilters={filtersCollection?.products.filters as Filter[]}
             />

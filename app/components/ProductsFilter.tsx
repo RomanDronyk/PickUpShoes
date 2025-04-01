@@ -11,10 +11,10 @@ import type {
   FilterValue,
   ProductFilter,
 } from '@shopify/hydrogen/storefront-api-types';
-import {ChevronDown} from 'lucide-react';
-import React, {useEffect, useMemo, useState} from 'react';
-import {useDebounce} from 'react-use';
-import type {SortParam} from '~/routes/($locale).collections.$handle';
+import { ChevronDown } from 'lucide-react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { useDebounce } from 'react-use';
+import type { SortParam } from '~/routes/($locale).collections.$handle';
 import {
   Accordion,
   AccordionContent,
@@ -28,14 +28,13 @@ import {
   SheetTrigger,
   SheetContent,
 } from './ui/sheet';
-import {Button} from './ui/button';
-import {Command, CommandGroup, CommandItem, CommandList} from './ui/command';
-import {Input} from './ui/input';
-import {Popover, PopoverContent, PopoverTrigger} from './ui/popover';
-import {Slider} from './ui/slider';
-import {ToggleGroup, ToggleGroupItem} from './ui/toggle-group';
-import {cn} from '~/lib/utils';
-import {useRootLoaderData} from '~/root';
+import { Button } from './ui/button';
+import { Command, CommandGroup, CommandItem, CommandList } from './ui/command';
+import { Input } from './ui/input';
+import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
+import { Slider } from './ui/slider';
+import { ToggleGroup, ToggleGroupItem } from './ui/toggle-group';
+import { cn } from '~/lib/utils';
 
 export const FILTER_URL_PREFIX = 'filter.';
 
@@ -101,8 +100,9 @@ function FilterDraw({
   initial: Filter[];
   headerPromise: any;
 }) {
-  const {menu, shop} = headerPromise;
+  const { menu, shop } = headerPromise;
 
+  const location = useLocation();
   const [params] = useSearchParams();
 
   const [initialFilterPrice, setInitialFilterPrice] = useState<any>(
@@ -112,26 +112,16 @@ function FilterDraw({
     JSON.parse(initialFilterPrice?.values[0].input || '[]'),
   );
 
-  useEffect(() => {
-    setInitialFilterPrice(
-      initial.find((item: any) => item.type === 'PRICE_RANGE'),
-    );
-    setInitialRangePrice(
-      JSON.parse(initialFilterPrice?.values[0].input || '[]'),
-    );
-  }, [params]);
-  const {publicStoreDomain} = useRootLoaderData();
-
   const markup = (filter: Filter | any) => {
     switch (filter.type) {
       case 'PRICE_RANGE':
         const priceFilterValue = params.get(`${FILTER_URL_PREFIX}price`);
         const price = priceFilterValue
-          ? (JSON.parse(priceFilterValue || '[]') as {min: number; max: number})
+          ? (JSON.parse(priceFilterValue || '[]') as { min: number; max: number })
           : {
-              min: initialRangePrice?.price?.min,
-              max: initialRangePrice?.price?.max,
-            };
+            min: initialRangePrice?.price?.min,
+            max: initialRangePrice?.price?.max,
+          };
         return (
           <PriceFilter
             key={filter.id}
@@ -150,74 +140,23 @@ function FilterDraw({
         );
     }
   };
-  const [value, setValue] = useState<string[]>([]);
-  const navigate = useNavigate();
 
-  const handleChange = (value: string[]) => {
-    setValue(value);
-  };
-
-  const location = useLocation();
   useEffect(() => {
-    const newValue = location?.pathname || '';
-    setValue([newValue]);
-  }, [location?.pathname]);
+    setInitialFilterPrice(
+      initial.find((item: any) => item.type === 'PRICE_RANGE'),
+    );
+    setInitialRangePrice(
+      JSON.parse(initialFilterPrice?.values[0].input || '[]'),
+    );
+  }, [params]);
+
+  // useEffect(() => {
+  //   const newValue = location?.pathname || '';
+  // }, [location?.pathname]);
 
   return (
     <div className="flex flex-col">
       <div className="md:flex flex-col hidden">
-        {/* {menu && menu?.items.map((item: any) => {
-          return (
-            <Accordion key={item.id} type="single" collapsible className="w-full">
-              <AccordionItem value="sizes" >
-                <AccordionTrigger className="font-normal">
-                  {item.title}
-                </AccordionTrigger>
-                <AccordionContent>
-                  <ToggleGroup
-                    type="single"
-                    className='flex flex-wrap justify-start'
-                    onValueChange={handleChange}
-                    value={value}
-                  >
-                    <ul className="grid gap-[10px] justify-start w-[390px]">
-                      {item.items.map((menuItem: any) => {
-                        const url =
-                          menuItem.url?.includes('myshopify.com') ||
-                            menuItem.url?.includes(publicStoreDomain) ||
-                            menuItem.url?.includes("primaryDomainUrl")
-                            ? new URL(menuItem.url).pathname
-                            : menuItem.url;
-
-                        return (
-                          <li key={menuItem.id} className='hover:cursor-pointer'>
-                            <ToggleGroupItem
-                              value={url}
-                              asChild
-                              style={{ background: "none !important", textTransform: "capitalize", height: "auto" }}
-                              className={cn(
-                                'data-[state=on]:bg-none hover:bg-[transparent] hover:text-black/80  grid justify-start  w-full data-[state=on]:bg-[transparent] data-[state=on]:text-black text-black/60',
-                              )}
-                            >
-                              <Link
-                                to={url}
-
-                              >
-                                {menuItem.title}
-                              </Link>
-                            </ToggleGroupItem>
-                          </li>
-                        );
-                      })}
-                    </ul>
-                  </ToggleGroup>
-                </AccordionContent>
-              </AccordionItem>
-            </Accordion>
-
-          )
-        }
-        )} */}
       </div>
       {filters.map((item, index) => markup(item))}
     </div>
@@ -231,7 +170,7 @@ function PriceFilter({
 }: {
   min: number;
   max: number;
-  value: {min: number; max: number};
+  value: { min: number; max: number };
 }) {
   const initialRangeValue: any = value ? [value?.min, value?.max] : [min, max];
   const [priceRange, setPriceRange] = useState(initialRangeValue);
@@ -275,10 +214,10 @@ function PriceFilter({
         return;
       }
       const price = {
-        ...(priceRange[0] === undefined ? {min: 0} : {min: priceRange[0]}),
-        ...(priceRange[1] === undefined ? {} : {max: priceRange[1]}),
+        ...(priceRange[0] === undefined ? { min: 0 } : { min: priceRange[0] }),
+        ...(priceRange[1] === undefined ? {} : { max: priceRange[1] }),
       };
-      const newParams = filterInputToParams({price}, params);
+      const newParams = filterInputToParams({ price }, params);
       navigate(`${location.pathname}?${newParams.toString()}`);
     }, 500);
 
@@ -323,7 +262,7 @@ function PriceFilter({
 
 interface IFilter {
   label: string;
-  values: {id: string; input: string; label: string}[];
+  values: { id: string; input: string; label: string }[];
   id: string;
 }
 
@@ -345,43 +284,17 @@ const ListFilter: React.FC<ListFilterProps> = ({
   const location = useLocation();
   const navigate = useNavigate();
   const matches = useMatches();
+
   const [filter, setFilters] = useState(() => {
-    const newValues = newFilter.values.map((value) => {
-      if (value.id.slice(-1) === '.') {
-        return {...value, id: value.id + value.label};
+    const newValues = newFilter.values.map((filterValue) => {
+      if (filterValue.id.slice(-1) === '.') {
+        return { ...filterValue, id: filterValue.id + filterValue.label };
       } else {
-        return value;
+        return filterValue;
       }
     });
-    return {...newFilter, values: newValues};
+    return { ...newFilter, values: newValues };
   });
-
-  if (appliedFilters) {
-    useEffect(() => {
-      const appliedLabels = appliedFilters.map((filter: any) => {
-        const label = filter.label.toLowerCase();
-        if (label.includes(' ')) {
-          return label.split(' ').join('-');
-        } else if (label.includes('.')) {
-          return label.split('.').join('-');
-        } else {
-          return label;
-        }
-      });
-
-      const updatedValue = value.filter((val: any) => {
-        const lastSegment = val.split('.').pop().toLowerCase();
-        const normalizedLastSegment = lastSegment.includes('-')
-          ? lastSegment
-          : lastSegment.split('.').join('-');
-        return appliedLabels.includes(normalizedLastSegment);
-      });
-
-      if (updatedValue.length !== value.length) {
-        setValue(updatedValue);
-      }
-    }, [appliedFilters]);
-  }
 
   const params = useMemo(
     () => new URLSearchParams(location?.search),
@@ -400,37 +313,42 @@ const ListFilter: React.FC<ListFilterProps> = ({
 
   const filtersValue: any =
     catalogMatch?.data &&
-    (catalogMatch.data as {appliedFilters: {filter: any}[]}).appliedFilters.map(
+    (catalogMatch.data as { appliedFilters: { filter: any }[] }).appliedFilters.map(
       (filter: any) => {
         return JSON.stringify(filter.filter || '[]');
       },
     );
 
-  const calculatedValues = filter.values.filter((value) =>
-    filtersValue.includes(value.input),
+  const calculatedValues = filter.values.filter((filterToCalculate) =>
+    filtersValue.includes(filterToCalculate.input),
   );
 
-  const handleChange = (value: string[]) => {
-    setValue(value);
+  const handleChange = (valueToChange: string[]) => {
+    setValue(valueToChange);
+    updateUrl(valueToChange)
   };
 
-  useDebounce(
-    () => {
-      if (value.length === 0) {
-        params.delete(`${FILTER_URL_PREFIX}${filterKey}`);
-        navigate(`${location.pathname}?${params.toString()}`);
-        return;
-      } else {
-        const selectedItems: any = filter.values.filter((item) =>
-          value.includes(item.id),
-        );
-        const link = getFilterLink(selectedItems, params, location);
-        navigate(`${link}`);
-      }
-    },
-    0,
-    [value],
-  );
+  const updateUrl = (valueToUpdate: string[]) => {
+    if (valueToUpdate.length === 0) {
+      params.delete(`${FILTER_URL_PREFIX}${filterKey}`);
+      navigate(`${location.pathname}?${params.toString()}`);
+      return;
+    } else {
+      const selectedItems: any = filter.values.filter((item) =>
+        valueToUpdate.includes(item.id),
+      );
+      const link = getFilterLink(selectedItems, params, location);
+      navigate(`${link}`);
+    }
+  }
+
+  // useDebounce(
+  //   () => {
+  //     // updateUrl(value)
+  //   },
+  //   0,
+  //   [value],
+  // );
 
   useEffect(() => {
     const appliedValues = calculatedValues.map((item) => item.id);
@@ -438,6 +356,32 @@ const ListFilter: React.FC<ListFilterProps> = ({
     setValue([...newValue]);
     setFilterValues(filter.values);
   }, []);
+
+  useEffect(() => {
+    const appliedLabels = appliedFilters.map((filter: any) => {
+      const label = filter.label.toLowerCase();
+      if (label.includes(' ')) {
+        return label.split(' ').join('-');
+      } else if (label.includes('.')) {
+        return label.split('.').join('-');
+      } else {
+        return label;
+      }
+    });
+
+    const updatedValue = value.filter((val: any) => {
+      const lastSegment = val.split('.').pop().toLowerCase();
+      const normalizedLastSegment = lastSegment.includes('-')
+        ? lastSegment
+        : lastSegment.split('.').join('-');
+      return appliedLabels.includes(normalizedLastSegment);
+    });
+
+    if (updatedValue.length !== value.length) {
+      setValue(updatedValue);
+      updateUrl(updatedValue);
+    }
+  }, [appliedFilters]);
 
   return (
     <div className="md:pb-6">
@@ -452,41 +396,40 @@ const ListFilter: React.FC<ListFilterProps> = ({
             <div>
               <ToggleGroup
                 type="multiple"
-                className={` ${
-                  filter.id === 'fitler.v.option.color'
-                    ? 'grid grid-cols-5 gap-[15px]'
-                    : 'flex flex-wrap justify-start'
-                }`}
+                className={` ${filter.id === 'fitler.v.option.color'
+                  ? 'grid grid-cols-5 gap-[15px]'
+                  : 'flex flex-wrap justify-start'
+                  }`}
                 onValueChange={handleChange}
                 value={value}
               >
                 {filter.id !== 'filter.v.option.color'
                   ? filterValues.map((filterItem: any) => (
+                    <ToggleGroupItem
+                      key={filterItem.id}
+                      value={filterItem.id}
+                      className={cn(
+                        'data-[state=on]:bg-black data-[state=on]:text-white rounded-[62px] text-black/60  bg-[#F0F0F0] px-5 py-1',
+                      )}
+                    >
+                      <span>{filterItem.label}</span>
+                    </ToggleGroupItem>
+                  ))
+                  : filterValues.map((filterItem: any) => {
+                    const colorClass = {
+                      backgroundColor: `var(--filter-${filterItem.label.toLowerCase()})`,
+                    };
+                    return (
                       <ToggleGroupItem
                         key={filterItem.id}
                         value={filterItem.id}
                         className={cn(
-                          'data-[state=on]:bg-black data-[state=on]:text-white rounded-[62px] text-black/60  bg-[#F0F0F0] px-5 py-1',
+                          `data-[state=on]:before:content-colorFilterActive data-[state=on]:before:absolute data-[state=on]:before:top-2/4 data-[state=on]:before:left-2/4 data-[state=on]:before:-translate-x-2/4 data-[state=on]:before:-translate-y-2/4 relative  rounded-full border box-border w-[37px] h-[37px]`,
                         )}
-                      >
-                        <span>{filterItem.label}</span>
-                      </ToggleGroupItem>
-                    ))
-                  : filterValues.map((filterItem: any) => {
-                      const colorClass = {
-                        backgroundColor: `var(--filter-${filterItem.label.toLowerCase()})`,
-                      };
-                      return (
-                        <ToggleGroupItem
-                          key={filterItem.id}
-                          value={filterItem.id}
-                          className={cn(
-                            `data-[state=on]:before:content-colorFilterActive data-[state=on]:before:absolute data-[state=on]:before:top-2/4 data-[state=on]:before:left-2/4 data-[state=on]:before:-translate-x-2/4 data-[state=on]:before:-translate-y-2/4 relative  rounded-full border box-border w-[37px] h-[37px]`,
-                          )}
-                          style={colorClass}
-                        ></ToggleGroupItem>
-                      );
-                    })}
+                        style={colorClass}
+                      ></ToggleGroupItem>
+                    );
+                  })}
               </ToggleGroup>
             </div>
           </AccordionContent>
@@ -498,7 +441,7 @@ const ListFilter: React.FC<ListFilterProps> = ({
 
 export default ListFilter;
 
-export function AppliedFilters({filters = []}: {filters: AppliedFilter[]}) {
+export function AppliedFilters({ filters = [] }: { filters: AppliedFilter[] }) {
   const [params] = useSearchParams();
   const location = useLocation();
   return (
@@ -623,7 +566,7 @@ function getSortLink(
   return `${location.pathname}?${params.toString()}`;
 }
 // Sort menu component
-const sortMenu: {value: string; label: string}[] = [
+const sortMenu: { value: string; label: string }[] = [
   {
     label: 'Популярністю',
     value: 'best-selling',

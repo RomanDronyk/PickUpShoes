@@ -1,6 +1,6 @@
-import {VariantSelector} from '@shopify/hydrogen';
-import {FC, useContext} from 'react';
-import {useMedia} from 'react-use';
+import { VariantSelector } from '@shopify/hydrogen';
+import { FC, useContext } from 'react';
+import { useMedia } from 'react-use';
 import type {
   ProductFragment,
   ProductVariantFragment,
@@ -10,18 +10,17 @@ import {
   HeaderBasketContext,
   HeaderContextInterface,
 } from '~/context/HeaderCarts';
-import {Product as ProductType} from '@shopify/hydrogen-react/storefront-api-types';
+import { Product as ProductType } from '@shopify/hydrogen-react/storefront-api-types';
 import ProductOptions from './ProductOptions';
 import AddToCartButton from './AddToCartButton';
 import RelatedProducts from './RelatedProducts';
-import {CartLineRemoveButton} from '~/components/DropdownCart/CartLineRemoveButton';
 
 interface IProductForm {
   product: ProductFragment;
   selectedVariant: ProductFragment['selectedVariant'];
   variants: Array<ProductVariantFragment>;
   handle: string;
-  relatedProducts: {product: ProductType}[];
+  relatedProducts: { product: ProductType }[];
 }
 
 const ProductForm: FC<IProductForm> = ({
@@ -31,7 +30,7 @@ const ProductForm: FC<IProductForm> = ({
   relatedProducts,
   handle,
 }) => {
-  const {setCartShow, setCartShowMobile} = useContext(
+  const { setCartShow, setCartShowMobile } = useContext(
     HeaderBasketContext,
   ) as HeaderContextInterface;
   const isMobile = useMedia('(max-width: 767px)', false);
@@ -54,7 +53,7 @@ const ProductForm: FC<IProductForm> = ({
             options={product.options}
             variants={variants}
           >
-            {({option}) => <ProductOptions key={option.name} option={option} />}
+            {({ option }) => <ProductOptions key={option.name} option={option} />}
           </VariantSelector>
         </div>
         {product?.productType == 'Кросівки' && (
@@ -81,12 +80,12 @@ const ProductForm: FC<IProductForm> = ({
           lines={
             selectedVariant
               ? [
-                  {
-                    merchandiseId: selectedVariant.id,
-                    quantity: 1,
-                    selectedVariant,
-                  },
-                ]
+                {
+                  merchandiseId: selectedVariant.id,
+                  quantity: 1,
+                  selectedVariant,
+                },
+              ]
               : []
           }
         >
