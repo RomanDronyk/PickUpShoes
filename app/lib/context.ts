@@ -1,7 +1,8 @@
-import { createHydrogenContext } from '@shopify/hydrogen';
-import { AppSession } from '~/lib/session';
-import { CART_QUERY_FRAGMENT } from '~/lib/fragments';
-import { getLocaleFromRequest } from '~/lib/i18n';
+import {createHydrogenContext} from '@shopify/hydrogen';
+import {AppSession} from '~/lib/session';
+import {CART_QUERY_FRAGMENT} from '~/lib/fragments';
+import {getLocaleFromRequest} from '~/lib/i18n';
+import {createAdminClient} from '~/utils/createAdminClient';
 
 /**
  * The context implementation is separate from server.ts
@@ -25,7 +26,14 @@ export async function createAppLoadContext(
     AppSession.init(request, [env.SESSION_SECRET]),
   ]);
 
-
+  /**
+   * Create Hydrogen's Admin API client.
+   */
+  const {admin} = createAdminClient({
+    privateAdminToken: env.PRIVATE_ADMIN_API_TOKEN,
+    storeDomain: `https://${env.PUBLIC_STORE_DOMAIN}`,
+    adminApiVersion: env.PRIVATE_ADMIN_API_VERSION || '2023-01',
+  });
 
   const hydrogenContext = createHydrogenContext({
     env,
@@ -41,6 +49,7 @@ export async function createAppLoadContext(
 
   return {
     ...hydrogenContext,
+    admin,
     // declare additional Remix loader context
   };
 }

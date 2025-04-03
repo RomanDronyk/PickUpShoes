@@ -6,11 +6,11 @@ import {
   DrawerTrigger,
   DrawerFooter,
 } from './ui/drawer';
-import type {CartApiQueryFragment} from 'storefrontapi.generated';
-import type {CartLineUpdateInput} from '@shopify/hydrogen/storefront-api-types';
-import {FetcherWithComponents, Link, useFetcher} from '@remix-run/react';
-import {Button} from './ui/button';
-import {Minus, Plus, X} from 'lucide-react';
+import type { CartApiQueryFragment } from 'storefrontapi.generated';
+import type { CartLineUpdateInput } from '@shopify/hydrogen/storefront-api-types';
+import { FetcherWithComponents, Link, useFetcher, useRevalidator } from '@remix-run/react';
+import { Button } from './ui/button';
+import { Minus, Plus, X } from 'lucide-react';
 import {
   CartForm,
   Image,
@@ -19,15 +19,15 @@ import {
   OptimisticCartLine,
   useOptimisticCart,
 } from '@shopify/hydrogen';
-import {useContext, useEffect} from 'react';
-import {useVariantUrl} from '~/utils';
+import { useContext, useEffect, useState } from 'react';
+import { useVariantUrl } from '~/utils';
 import EmptyCart from './ui/emptyCart';
 import {
   HeaderBasketContext,
   HeaderContextInterface,
 } from '~/context/HeaderCarts';
 import OptionList from './common/optionList';
-import type {CartLine as CartLineBlock} from '@shopify/hydrogen/storefront-api-types';
+import type { CartLine as CartLineBlock } from '@shopify/hydrogen/storefront-api-types';
 import LoaderNew from './LoaderNew';
 type CartLine = OptimisticCartLine<CartLineBlock>;
 export function MobileCart({
@@ -36,7 +36,7 @@ export function MobileCart({
   cart: CartApiQueryFragment | null | any;
 }) {
   const cart = useOptimisticCart(originalCart);
-  const {cartShowMobile: open, setCartShowMobile: setOpen} = useContext(
+  const { cartShowMobile: open, setCartShowMobile: setOpen } = useContext(
     HeaderBasketContext,
   ) as HeaderContextInterface;
   const linesCount = Boolean(cart?.lines?.nodes?.length || 0);
@@ -89,7 +89,7 @@ export function MobileCart({
       </DrawerTrigger>
       <DrawerContent className="h-[90%] px-5">
         <div className="overflow-y-auto overflow-x-hidden">
-          <MobileCartDetail setOpen={setOpen} cart={cart} />
+          {cart.lines.nodes.length > 0 && <MobileCartDetail setOpen={setOpen} cart={cart} />}
           <EmptyCart hidden={linesCount} setOpen={setOpen} />
         </div>
       </DrawerContent>
@@ -115,7 +115,7 @@ function MobileCartDetail({
           </Button>
         </DrawerClose>
       </DrawerHeader>
-      <div className="flex flex-col gap-y-5">
+      <div className="flex flex-col gap-y-5" aria-labelledby="cart-lines">
         {(cart?.lines?.nodes ?? []).map((line) => (
           <MobileCartLine
             setOpen={setOpen}
@@ -165,15 +165,15 @@ function MobileCartDetail({
   );
 }
 
-function MobileCartLine({
+export function MobileCartLine({
   line,
   setOpen,
 }: {
   setOpen: any;
   line: CartLine | undefined;
 }) {
-  const {id, merchandise, isOptimistic} = line;
-  const {product, title, image, selectedOptions, quantityAvailable, sku} =
+  const { id, merchandise, isOptimistic } = line;
+  const { product, title, image, selectedOptions, quantityAvailable, sku } =
     merchandise;
   const lineItemUrl = useVariantUrl(product.handle, selectedOptions);
   return (
@@ -221,15 +221,15 @@ function MobileCartLine({
   );
 }
 
-function CartLineQuantity({line}: {line: CartLine}) {
+function CartLineQuantity({ line }: { line: CartLine }) {
   if (!line || typeof line?.quantity === 'undefined') return null;
-  const {id: lineId, quantity} = line;
+  const { id: lineId, quantity } = line;
   const prevQuantity = Number(Math.max(0, quantity - 1).toFixed(0));
   const nextQuantity = Number((quantity + 1).toFixed(0));
 
   return (
     <div className="flex self-center items-center justify-center gap-5 text-lg text-black bg-input rounded-[62px] px-5 py-2 max-[385px]:self-end max-[385px]:mb-3">
-      <CartLineUpdateButton lines={[{id: lineId, quantity: prevQuantity}]}>
+      <CartLineUpdateButton lines={[{ id: lineId, quantity: prevQuantity }]}>
         <button
           aria-label="Зменшити кількість"
           disabled={quantity <= 1}
@@ -241,7 +241,7 @@ function CartLineQuantity({line}: {line: CartLine}) {
         </button>
       </CartLineUpdateButton>
       <span className="text-sm">{quantity}</span>
-      <CartLineUpdateButton lines={[{id: lineId, quantity: nextQuantity}]}>
+      <CartLineUpdateButton lines={[{ id: lineId, quantity: nextQuantity }]}>
         <button
           className="flex flex-col items-center cursor-pointer"
           aria-label="Збільшити кількість"
@@ -283,7 +283,7 @@ function CartLinePrice({
   function percentageDiscount(line: CartLine) {
     const {
       quantity,
-      cost: {amountPerQuantity, totalAmount, compareAtAmountPerQuantity},
+      cost: { amountPerQuantity, totalAmount, compareAtAmountPerQuantity },
     } = line;
 
     if (compareAtAmountPerQuantity) {
@@ -338,7 +338,7 @@ function CartLineUpdateButton({
     <CartForm
       route="/cart"
       action={CartForm.ACTIONS.LinesUpdate}
-      inputs={{lines}}
+      inputs={{ lines }}
     >
       {(fetcher: FetcherWithComponents<any>) => (
         <>
@@ -355,7 +355,7 @@ function CartLineUpdateButton({
   );
 }
 
-function CartLineRemoveButtonFetcher({lineIds}: {lineIds: string[]}) {
+function CartLineRemoveButtonFetcher({ lineIds }: { lineIds: string[] }) {
   const fetcher = useFetcher();
   useEffect(() => {
     if (fetcher.state === 'submitting') {
@@ -410,29 +410,42 @@ function CartLineRemoveButton({
   lineIds: string[];
   disabled: boolean;
 }) {
+  const [isRemoving, setIsRemoving] = useState(false);
+  const revalidator = useRevalidator();
+  const handleRemove = async () => {
+    setIsRemoving(true)
+    const formData = new FormData();
+    formData.append('cartFormInput', JSON.stringify({
+      action: CartForm.ACTIONS.LinesRemove,
+      inputs: { lineIds }
+    }));
+
+    await fetch("/cart", {
+      body: formData,
+      method: "POST"
+    });
+
+
+
+    revalidator.revalidate();
+
+  }
   return (
-    <CartForm
-      route="/cart"
-      action={CartForm.ACTIONS.LinesRemove}
-      inputs={{lineIds}}
-    >
-      {(fetcher: FetcherWithComponents<any>) => (
-        <>
-          <Button
-            type="submit"
-            disabled={disabled}
-            className="bg-[#B3B3B3] self-center w-[25px] h-[25px] p-[6px] rounded-full"
-          >
-            {fetcher.state == 'idle' ? (
-              <X size={16} />
-            ) : (
-              <div className="h-[16px]">
-                <LoaderNew />
-              </div>
-            )}
-          </Button>
-        </>
-      )}
-    </CartForm>
+    <>
+      <Button
+        type="submit"
+        disabled={disabled || isRemoving}
+        onClick={handleRemove}
+        className="bg-[#B3B3B3] self-center w-[25px] h-[25px] p-[6px] rounded-full"
+      >
+        {!(disabled || isRemoving) ? (
+          <X size={16} />
+        ) : (
+          <div className="h-[16px]">
+            <LoaderNew />
+          </div>
+        )}
+      </Button>
+    </>
   );
 }

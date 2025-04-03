@@ -1,23 +1,23 @@
-import {useContext} from 'react';
-import {Money, useOptimisticCart} from '@shopify/hydrogen';
-import {Link} from '@remix-run/react';
-import {Button} from '../ui/button';
+import { useContext, useState } from 'react';
+import { Money, useOptimisticCart } from '@shopify/hydrogen';
+import { Link } from '@remix-run/react';
+import { Button } from '../ui/button';
 
-import type {CartApiQueryFragment} from 'storefrontapi.generated';
+import type { CartApiQueryFragment } from 'storefrontapi.generated';
 import CartLineItem from './CartLineItem';
 import {
   HeaderBasketContext,
   HeaderContextInterface,
 } from '~/context/HeaderCarts';
 import EmptyCart from '../ui/emptyCart';
-import {CartLine} from '@shopify/hydrogen-react/storefront-api-types';
+import { CartLine } from '@shopify/hydrogen-react/storefront-api-types';
 
 const DropDownCartDetail = ({
   cart: originalCart,
 }: {
   cart: CartApiQueryFragment | null;
 }) => {
-  const {setCartShow} = useContext(
+  const { setCartShow } = useContext(
     HeaderBasketContext,
   ) as HeaderContextInterface;
 
@@ -25,8 +25,7 @@ const DropDownCartDetail = ({
   const cost = cart?.cost;
   const cartHasItems = cart?.totalQuantity! > 0;
 
-  console.log(originalCart, 'originalCart');
-  console.log(cart, 'optimistic ui');
+
 
   if (!cartHasItems) {
     return <EmptyCart />;
@@ -71,8 +70,8 @@ const DropDownCartDetail = ({
         >
           x
         </div>
-        <div aria-labelledby="cart-lines">
-          <ul className="flex flex-col gap-4">
+        <div >
+          <ul className="flex flex-col gap-4" key={"cart-lines"} aria-labelledby="cart-lines">
             {cart?.lines?.nodes &&
               (cart?.lines?.nodes).map((line) => (
                 <CartLineItem
@@ -92,7 +91,7 @@ const DropDownCartDetail = ({
               as="span"
               withoutCurrency
               withoutTrailingZeros
-              data={cost?.totalAmount || {currencyCode: 'UAH', amount: '0'}}
+              data={cost?.totalAmount || { currencyCode: 'UAH', amount: '0' }}
             />
           )}
           &nbsp;грн

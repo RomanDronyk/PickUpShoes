@@ -1,20 +1,20 @@
-import {NavLink, Link} from '@remix-run/react';
-import type {FooterQuery, HeaderQuery} from 'storefrontapi.generated';
-import {useRootLoaderData} from '~/root';
+import { NavLink, Link } from '@remix-run/react';
+import type { FooterQuery, HeaderQuery } from 'storefrontapi.generated';
+import { useRootLoaderData } from '~/root';
 import footerLogo from '../assets/images/footer-logo.svg';
-import {SubscribeFooter} from './SubscribeFooter';
+import { SubscribeFooter } from './SubscribeFooter';
 
 type Footer = {
   menu: FooterQuery;
-  shop: HeaderQuery['shop'];
+  shop: HeaderQuery['shop'] | undefined;
 };
 
-export function Footer({menu: footerMenu, shop}: Footer) {
-  const {menu, secondMenu} = footerMenu || {menu: [], secondMenu: []};
+export function Footer({ menu: footerMenu, shop }: Footer) {
+  const { menu, secondMenu } = footerMenu || { menu: [], secondMenu: [] };
   return (
     <footer className="bg-black pt-[81px] text-placeholderText">
       <div
-        style={{gridTemplateColumns: '1.7fr 1fr 1fr 1fr ', gap: '96px'}}
+        style={{ gridTemplateColumns: '1.7fr 1fr 1fr 1fr ', gap: '96px' }}
         className="flex md:grid justify-between lg:px-24  px-5 sm:px-12 lg:flex-row flex-col sm:grid sm:grid-cols-2  sm:gap-y-[30px] gap-x-[20px] gap-y-[45px]"
       >
         <div className="flex flex-col gap-4">
@@ -191,7 +191,7 @@ export function Footer({menu: footerMenu, shop}: Footer) {
                   />
                   <mask
                     id="mask0_877_869"
-                    style={{maskType: 'luminance'}}
+                    style={{ maskType: 'luminance' }}
                     maskUnits="userSpaceOnUse"
                     x="8"
                     y="9"
@@ -236,7 +236,7 @@ export function Footer({menu: footerMenu, shop}: Footer) {
                   />
                   <mask
                     id="mask0_877_4922"
-                    style={{maskType: 'luminance'}}
+                    style={{ maskType: 'luminance' }}
                     maskUnits="userSpaceOnUse"
                     x="8"
                     y="9"
@@ -334,7 +334,7 @@ function FooterMenu({
   menu: FooterQuery['menu'];
   primaryDomainUrl: HeaderQuery['shop']['primaryDomain']['url'];
 }) {
-  const {publicStoreDomain} = useRootLoaderData();
+  const { publicStoreDomain } = useRootLoaderData();
   return (
     <div>
       <h3 className="font-semibold text-[22px] md:text-xl lg:text-[22px]">
@@ -346,8 +346,8 @@ function FooterMenu({
           // if the url is internal, we strip the domain
           const url =
             item.url.includes('myshopify.com') ||
-            item.url.includes(publicStoreDomain) ||
-            item.url.includes(primaryDomainUrl)
+              item.url.includes(publicStoreDomain) ||
+              item.url.includes(primaryDomainUrl)
               ? new URL(item.url).pathname
               : item.url;
           const isExternal = !url.startsWith('/');

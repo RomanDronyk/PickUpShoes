@@ -1,6 +1,6 @@
-import {useFetcher} from '@remix-run/react';
-import React, {useState, useEffect, createContext, ReactNode} from 'react';
-import {useLocation} from 'react-use';
+import { useFetcher } from '@remix-run/react';
+import React, { useState, useEffect, createContext, ReactNode } from 'react';
+import { useLocation } from 'react-use';
 
 export const HeaderBasketContext = createContext({});
 interface HeaderContextProps {
@@ -21,7 +21,7 @@ export interface HeaderContextInterface {
   handleLikeToggle: (productId: string, actionType: 'add' | 'delete') => void;
 }
 
-const HeaderContext = ({children}: HeaderContextProps) => {
+const HeaderContext = ({ children }: HeaderContextProps) => {
   const [cartShow, setCartShow] = useState(false);
   const [cartShowMobile, setCartShowMobile] = useState(false);
   const fetcher = useFetcher();
@@ -47,7 +47,7 @@ const HeaderContext = ({children}: HeaderContextProps) => {
     formData.append('id', productId);
 
     // Використовуємо fetcher для відправки запиту на сервер
-    fetcher.submit(formData, {method: 'post', action: '/liked'});
+    fetcher.submit(formData, { method: 'post', action: '/liked' });
 
     // Обробка результату в залежності від fetcher.state
     if (fetcher.state === 'idle') {

@@ -3,13 +3,14 @@ import {
   OptimisticCartLine,
   useOptimisticCart,
 } from '@shopify/hydrogen';
-import {Link} from '@remix-run/react';
-import type {CartApiQueryFragment} from 'storefrontapi.generated';
-import {useAside} from '~/components/Aside';
-import {useVariantUrl} from '~/utils';
-import {Image, ProductPrice} from '@shopify/hydrogen-react';
-import {CartLineUpdateInput} from '@shopify/hydrogen-react/storefront-api-types';
-import {CartSummary} from './CartSummary';
+import { Link, useFetcher, useRevalidator } from '@remix-run/react';
+import type { CartApiQueryFragment } from 'storefrontapi.generated';
+import { useAside } from '~/components/Aside';
+import { useVariantUrl } from '~/utils';
+import { Image } from '@shopify/hydrogen-react';
+import { CartLineUpdateInput } from '@shopify/hydrogen-react/storefront-api-types';
+import { CartSummary } from './CartSummary';
+import { useEffect, useRef, useState } from 'react';
 
 export type CartLayout = 'page' | 'aside';
 
@@ -22,10 +23,12 @@ export type CartMainProps = {
  * The main cart component that displays the cart items and summary.
  * It is used by both the /cart route and the cart aside dialog.
  */
-export function CartMain({layout, cart: originalCart}: CartMainProps) {
+export function CartMain({ layout, cart: originalCart }: CartMainProps) {
   // The useOptimisticCart hook applies pending actions to the cart
-  // so the user immediately sees feedback when they modify the cart.
-  const cart = useOptimisticCart(originalCart);
+  const cart = originalCart;
+
+  // Add a key to force re-render when cart changes
+  const cartKey = cart?.id || 'empty-cart';
 
   const linesCount = Boolean(cart?.lines?.nodes?.length || 0);
   const withDiscount =
@@ -35,11 +38,11 @@ export function CartMain({layout, cart: originalCart}: CartMainProps) {
   const cartHasItems = cart?.totalQuantity! > 0;
 
   return (
-    <div className={className}>
+    <div className={className} >
       <CartEmpty hidden={linesCount} layout={layout} />
       <div className="cart-details">
         <div aria-labelledby="cart-lines">
-          <ul>
+          <ul key={cartKey}>
             {(cart?.lines?.nodes ?? []).map((line) => (
               <CartLineItem key={line.id} line={line} layout={layout} />
             ))}
@@ -57,7 +60,7 @@ function CartEmpty({
   hidden: boolean;
   layout?: CartMainProps['layout'];
 }) {
-  const {close} = useAside();
+  const { close } = useAside();
   return (
     <div hidden={hidden}>
       <br />
@@ -86,10 +89,10 @@ export function CartLineItem({
   layout: CartLayout;
   line: CartLine;
 }) {
-  const {id, merchandise} = line;
-  const {product, title, image, selectedOptions} = merchandise;
+  const { id, merchandise } = line;
+  const { product, title, image, selectedOptions } = merchandise;
   const lineItemUrl = useVariantUrl(product.handle, selectedOptions);
-  const {close} = useAside();
+  const { close } = useAside();
 
   return (
     <li key={id} className="cart-line">
@@ -138,16 +141,16 @@ export function CartLineItem({
  * These controls are disabled when the line item is new, and the server
  * hasn't yet responded that it was successfully added to the cart.
  */
-function CartLineQuantity({line}: {line: CartLine}) {
+function CartLineQuantity({ line }: { line: CartLine }) {
   if (!line || typeof line?.quantity === 'undefined') return null;
-  const {id: lineId, quantity, isOptimistic} = line;
+  const { id: lineId, quantity, isOptimistic } = line;
   const prevQuantity = Number(Math.max(0, quantity - 1).toFixed(0));
   const nextQuantity = Number((quantity + 1).toFixed(0));
 
   return (
     <div className="cart-line-quantity">
       <small>Quantity: {quantity} &nbsp;&nbsp;</small>
-      <CartLineUpdateButton lines={[{id: lineId, quantity: prevQuantity}]}>
+      <CartLineUpdateButton lines={[{ id: lineId, quantity: prevQuantity }]}>
         <button
           aria-label="Decrease quantity"
           disabled={quantity <= 1 || !!isOptimistic}
@@ -158,7 +161,7 @@ function CartLineQuantity({line}: {line: CartLine}) {
         </button>
       </CartLineUpdateButton>
       &nbsp;
-      <CartLineUpdateButton lines={[{id: lineId, quantity: nextQuantity}]}>
+      <CartLineUpdateButton lines={[{ id: lineId, quantity: nextQuantity }]}>
         <button
           aria-label="Increase quantity"
           name="increase-quantity"
@@ -181,23 +184,69 @@ function CartLineQuantity({line}: {line: CartLine}) {
  */
 function CartLineRemoveButton({
   lineIds,
-  disabled,
+  disabled
 }: {
   lineIds: string[];
   disabled: boolean;
 }) {
+  const [isRemoving, setIsRemoving] = useState(false);
+  const revalidator = useRevalidator();
+  const handleRemove = async () => {
+    setIsRemoving(true)
+    const formData = new FormData();
+    formData.append('cartFormInput', JSON.stringify({
+      action: CartForm.ACTIONS.LinesRemove,
+      inputs: { lineIds }
+    }));
+
+    await fetch("/cart", {
+      body: formData,
+      method: "POST"
+    });
+
+    setIsRemoving(false);
+
+    revalidator.revalidate();
+
+  }
+
   return (
-    <CartForm
-      route="/cart"
-      action={CartForm.ACTIONS.LinesRemove}
-      inputs={{lineIds}}
-    >
-      <button disabled={disabled} type="submit">
-        Remove
+    <div style={{ display: 'inline' }}>
+      <button
+        type="submit"
+        disabled={disabled || isRemoving}
+        onClick={handleRemove}
+      >
+        {isRemoving ? 'Removing...' : 'Remove'}
       </button>
-    </CartForm>
+    </div>
   );
 }
+
+export default CartLineRemoveButton;
+
+
+// function CartLineRemoveButton({
+//   lineIds,
+//   disabled,
+//   onClick
+// }: {
+//   lineIds: string[];
+//   onClick?: any,
+//   disabled: boolean;
+// }) {
+//   return (
+//     <CartForm
+//       route="/cart"
+//       action={CartForm.ACTIONS.LinesRemove}
+//       inputs={{ lineIds }}
+//     >
+//       <button onClick={onClick} disabled={disabled} type="submit">
+//         Remove
+//       </button>
+//     </CartForm>
+//   );
+// }
 
 function CartLineUpdateButton({
   children,
@@ -210,7 +259,7 @@ function CartLineUpdateButton({
     <CartForm
       route="/cart"
       action={CartForm.ACTIONS.LinesUpdate}
-      inputs={{lines}}
+      inputs={{ lines }}
     >
       {children}
     </CartForm>

@@ -23,7 +23,7 @@ export function MobileMenu({
 }: {
   menu: HeaderProps['header']['menu'];
   logo: string | undefined;
-  primaryDomainUrl: string;
+  primaryDomainUrl: string | undefined | null;
 }) {
 
   const { publicStoreDomain } = useRootLoaderData();

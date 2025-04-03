@@ -1,4 +1,4 @@
-import {useNonce} from '@shopify/hydrogen';
+import { CartForm, useNonce, useOptimisticCart } from '@shopify/hydrogen';
 import {
   LoaderFunctionArgs,
   defer,
@@ -16,16 +16,17 @@ import {
   isRouteErrorResponse,
   type ShouldRevalidateFunction,
   useRouteLoaderData,
+  Link,
 } from '@remix-run/react';
 import favicon from '../public/favicon.ico';
-import {Layout} from '~/components/Layout';
+import { Layout as PageLayout } from '~/components/Layout';
 import tailwindCss from 'app/styles/tailwind.css';
 import HeaderContext from '~/context/HeaderCarts';
-import {CacheProvider} from '@emotion/react';
+import { CacheProvider } from '@emotion/react';
 import createCache from '@emotion/cache';
 import NotFoundScreen from './screens/NotFoundScreen';
-import {likedProductsCookie} from './cookies.server';
-import {getUserLikedCartIds, validateCustomerAccessToken} from './utils';
+import { likedProductsCookie } from './cookies.server';
+import { getUserLikedCartIds, validateCustomerAccessToken } from './utils';
 
 export type RootLoader = typeof loader;
 
@@ -46,7 +47,7 @@ export const shouldRevalidate: ShouldRevalidateFunction = ({
 
 export function links() {
   return [
-    {rel: 'stylesheet', href: tailwindCss},
+    { rel: 'stylesheet', href: tailwindCss },
     {
       rel: 'preconnect',
       href: 'https://cdn.shopify.com',
@@ -55,7 +56,7 @@ export function links() {
       rel: 'preconnect',
       href: 'https://shop.app',
     },
-    {rel: 'icon', type: 'image/svg+xml', href: favicon},
+    { rel: 'icon', type: 'image/svg+xml', href: favicon },
   ];
 }
 
@@ -66,13 +67,12 @@ export const useRootLoaderData = () => {
 
 export async function loader(args: LoaderFunctionArgs) {
   const deferredData = loadDeferredData(args);
-  const {context, request} = args;
-  const {storefront, session, env} = context;
-
+  const { context, request } = args;
+  const { storefront, session, env } = context;
   const customerAccessToken = session.get('customerAccessToken');
 
   // validate the customer access token is valid
-  const {isLoggedIn, headers} = await validateCustomerAccessToken(
+  const { isLoggedIn, headers } = await validateCustomerAccessToken(
     session,
     customerAccessToken,
   );
@@ -111,8 +111,8 @@ export async function loader(args: LoaderFunctionArgs) {
   );
 }
 
-function loadDeferredData({context}: LoaderFunctionArgs) {
-  const {storefront, cart} = context;
+function loadDeferredData({ context }: LoaderFunctionArgs) {
+  const { storefront, cart } = context;
   const footer = storefront
     .query(FOOTER_QUERY, {
       variables: {
@@ -132,10 +132,11 @@ function loadDeferredData({context}: LoaderFunctionArgs) {
   };
 }
 
-export default function App() {
+
+export function Layout({ children }: { children?: React.ReactNode }) {
   const data = useRouteLoaderData<RootLoader>('root');
   const nonce = useNonce();
-  const cache = createCache({key: 'css', prepend: true});
+  const cache = createCache({ key: 'css', prepend: true });
 
   return (
     <html lang="uk">
@@ -146,21 +147,31 @@ export default function App() {
         <Links />
       </head>
       <body className="font-sans">
-        {data && (
-          <CacheProvider value={cache}>
+        <CacheProvider value={cache}>
+
+          {data ? (
             <HeaderContext>
-              <Layout {...data}>
-                <Outlet />
-              </Layout>
+              <PageLayout  {...data}>
+                {children}
+              </PageLayout>
               <ScrollRestoration nonce={nonce} />
-              <Scripts nonce={nonce} />
-              <LiveReload nonce={nonce} />
+
             </HeaderContext>
-          </CacheProvider>
-        )}
+          ) : (
+            children
+          )}
+
+        </CacheProvider>
+        <Scripts nonce={nonce} />
+        <LiveReload nonce={nonce} />
       </body>
     </html>
   );
+}
+
+
+export default function App() {
+  return <Outlet />;
 }
 
 export function ErrorBoundary() {

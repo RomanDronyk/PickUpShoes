@@ -1,7 +1,7 @@
-import {Link} from '@remix-run/react';
-import {Button} from './button';
-import {ArrowRight} from 'lucide-react';
-import {useContext} from 'react';
+import { Link } from '@remix-run/react';
+import { Button } from './button';
+import { ArrowRight } from 'lucide-react';
+import { useContext } from 'react';
 import {
   HeaderBasketContext,
   HeaderContextInterface,
@@ -11,10 +11,10 @@ export default function EmptyCart({
   hidden,
   setOpen,
 }: {
-  hidden: boolean;
+  hidden?: boolean;
   setOpen?: any;
 }) {
-  const {setCartShow} = useContext(
+  const { setCartShow } = useContext(
     HeaderBasketContext,
   ) as HeaderContextInterface;
   if (hidden) return null;

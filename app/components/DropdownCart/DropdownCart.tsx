@@ -1,15 +1,15 @@
-import {Suspense, useContext} from 'react';
-import {motion} from 'framer-motion';
-import type {CartApiQueryFragment} from 'storefrontapi.generated';
-import type {Variants} from 'framer-motion';
+import { Suspense, useContext } from 'react';
+import { motion } from 'framer-motion';
+import type { CartApiQueryFragment } from 'storefrontapi.generated';
+import type { Variants } from 'framer-motion';
 import {
   HeaderBasketContext,
   HeaderContextInterface,
 } from '~/context/HeaderCarts';
 import DropDownCartDetail from './DropDownCartDetail';
-import {Await} from '@remix-run/react';
+import { Await } from '@remix-run/react';
 type DropdownCartProps = {
-  cart: CartApiQueryFragment | null;
+  cart: Promise<CartApiQueryFragment | null>
 };
 
 const cartVariants = {
@@ -35,12 +35,12 @@ const cartVariants = {
     },
   },
 } satisfies Variants;
-export const DropDownCart = ({cart}: DropdownCartProps) => {
-  const {cartShow} = useContext(HeaderBasketContext) as HeaderContextInterface;
+export const DropDownCart = ({ cart }: DropdownCartProps) => {
+  const { cartShow } = useContext(HeaderBasketContext) as HeaderContextInterface;
 
   return (
     <motion.div
-      style={{top: '-500px'}}
+      style={{ top: '-500px' }}
       initial={true}
       variants={cartVariants}
       animate={cartShow ? 'open' : 'closed'}

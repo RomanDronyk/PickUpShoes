@@ -1,14 +1,14 @@
-import {Await, Link, NavLink, useLocation} from '@remix-run/react';
-import {Suspense, useContext, useEffect, useState} from 'react';
-import type {CartApiQueryFragment, HeaderQuery} from 'storefrontapi.generated';
-import {useRootLoaderData} from '~/root';
-import {DropDownCart} from './DropdownCart/DropdownCart';
-import type {LayoutProps} from './Layout';
-import {MobileCart} from './MobileCart';
-import {MobileMenu} from './MobileMenu';
-import {Button} from './ui/button';
-import {HeaderContextInterface} from '~/context/HeaderCarts';
-import {HeaderBasketContext} from '~/context/HeaderCarts';
+import { Await, Link, NavLink, useLocation } from '@remix-run/react';
+import { Suspense, useContext, useEffect, useState } from 'react';
+import type { CartApiQueryFragment, HeaderQuery } from 'storefrontapi.generated';
+import { useRootLoaderData } from '~/root';
+import { DropDownCart } from './DropdownCart/DropdownCart';
+import type { LayoutProps } from './Layout';
+import { MobileCart } from './MobileCart';
+import { MobileMenu } from './MobileMenu';
+import { Button } from './ui/button';
+import { HeaderContextInterface } from '~/context/HeaderCarts';
+import { HeaderBasketContext } from '~/context/HeaderCarts';
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -17,21 +17,21 @@ import {
   NavigationMenuList,
   NavigationMenuTrigger,
 } from './ui/navigation-menu';
-import {useMedia} from 'react-use';
-import {PredictiveSearchForm} from './PredictiveSearchForm';
+import { useMedia } from 'react-use';
+import { PredictiveSearchForm } from './PredictiveSearchForm';
 
 export type HeaderProps = Pick<
   LayoutProps,
   'header' | 'cart' | 'isLoggedIn' | 'favorites'
 >;
 
-export function Header({header, cart}: HeaderProps) {
-  const {shop, menu} = header;
-  const {cartShow, count, setCartShow} = useContext(
+export function Header({ header, cart }: HeaderProps) {
+  const { shop, menu } = header;
+  const { cartShow, count, setCartShow } = useContext(
     HeaderBasketContext,
   ) as HeaderContextInterface;
 
-  const {key} = useLocation();
+  const { key } = useLocation();
   const isMobile = useMedia('(max-width: 767px)', false);
   const [animate, setAnimate] = useState(false);
 
@@ -54,7 +54,7 @@ export function Header({header, cart}: HeaderProps) {
             <MobileMenu
               menu={menu}
               logo={shop?.brand?.logo?.image?.url}
-              primaryDomainUrl={header.shop.primaryDomain.url}
+              primaryDomainUrl={header?.shop?.primaryDomain?.url}
             />
           )}
           <NavLink
@@ -68,7 +68,7 @@ export function Header({header, cart}: HeaderProps) {
         {!isMobile && (
           <HeaderMenu
             menu={menu}
-            primaryDomainUrl={header.shop.primaryDomain.url}
+            primaryDomainUrl={header?.shop?.primaryDomain?.url}
           />
         )}
 
@@ -80,7 +80,7 @@ export function Header({header, cart}: HeaderProps) {
           <Button
             asChild
             className="relative px-2 py-2 max-sm:w-[23px] max-sm:h-[18px]"
-            style={{minWidth: 20, height: '100%'}}
+            style={{ minWidth: 20, height: '100%' }}
             variant="ghost"
           >
             <NavLink
@@ -188,14 +188,14 @@ export function Header({header, cart}: HeaderProps) {
             </NavLink>
           </Button>
         </nav>
-        {!isMobile && <DropDownCart cart={cart} />}
+        {!isMobile && cart && <DropDownCart cart={cart} />}
       </div>
     </header>
   );
 }
 
-function CartBadge({count = 0}: {count: number}) {
-  const {setCartShow} = useContext(
+function CartBadge({ count = 0 }: { count: number }) {
+  const { setCartShow } = useContext(
     HeaderBasketContext,
   ) as HeaderContextInterface;
 
@@ -252,9 +252,9 @@ export function HeaderMenu({
   primaryDomainUrl,
 }: {
   menu: HeaderProps['header']['menu'];
-  primaryDomainUrl: HeaderQuery['shop']['primaryDomain']['url'];
+  primaryDomainUrl: HeaderQuery['shop']['primaryDomain']['url'] | null | undefined;
 }) {
-  const {publicStoreDomain} = useRootLoaderData();
+  const { publicStoreDomain } = useRootLoaderData();
   return (
     <NavigationMenu className="md:flex hidden">
       <NavigationMenuList>
@@ -271,8 +271,8 @@ export function HeaderMenu({
                     {item?.items?.map((menuItem) => {
                       const url =
                         menuItem?.url?.includes('myshopify.com') ||
-                        menuItem?.url?.includes(publicStoreDomain) ||
-                        menuItem?.url?.includes(primaryDomainUrl)
+                          menuItem?.url?.includes(publicStoreDomain) ||
+                          menuItem?.url?.includes(primaryDomainUrl)
                           ? new URL(menuItem?.url)?.pathname
                           : menuItem?.url;
 

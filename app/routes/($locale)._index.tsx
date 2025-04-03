@@ -1,48 +1,19 @@
 import { defer, type LoaderFunctionArgs } from '@shopify/remix-oxygen';
-import { Await, useLoaderData, Link, type MetaFunction, Form, useActionData } from '@remix-run/react';
-import { Suspense } from 'react';
+import { useLoaderData, type MetaFunction } from '@remix-run/react';
 import BlockNewsletter from '~/components/BlockNewsletter';
-import { Image, Money } from '@shopify/hydrogen';
-
-import type {
-  FeaturedCollectionFragment,
-  RecommendedProductsQuery,
-  BestSellersQuery,
-} from 'storefrontapi.generated';
-
 import { Hero } from '~/components/Hero';
 import { MainCollections } from '~/components/MainCollections';
 import BestSellers from '~/components/BestSellers';
 import NewProducts from '~/components/NewProducts';
-
 import { filterAvailablesProductOptions } from '~/utils';
-
-
 
 export const handle: { breadcrumb: string } = {
   breadcrumb: 'home',
 };
 
-
 export const meta: MetaFunction = () => {
   return [{ title: 'PickupShoes | Головна' }];
 };
-
-
-export default function Homepage() {
-  const { heroCollection, mainCollections, bestSellers, newProducts, storefront } =
-    useLoaderData<typeof loader>();
-  return (
-    <div className="home w-full flex flex-col items-center justify-center gap-y-[58px]">
-      <Hero heroData={heroCollection} />
-      <MainCollections collection={mainCollections} />
-      <BestSellers items={bestSellers} />
-      <NewProducts items={newProducts} />
-      {/* <RecommendationProducts recommended={recommendedProducts} /> */}
-      <BlockNewsletter />
-    </div>
-  );
-}
 
 export async function loader({ context }: LoaderFunctionArgs) {
   const { storefront } = context;
@@ -84,62 +55,17 @@ export async function loader({ context }: LoaderFunctionArgs) {
 }
 
 
-function FeaturedCollection({
-  collection,
-}: {
-  collection: FeaturedCollectionFragment;
-}) {
-  if (!collection) return null;
-  const image = collection?.image;
-  return (
-    <Link
-      className="featured-collection"
-      to={`/collections/${collection.handle}`}
-    >
-      {image && (
-        <div className="featured-collection-image">
-          <Image data={image} sizes="100vw" />
-        </div>
-      )}
-      <h1>{collection.title}</h1>
-    </Link>
-  );
-}
+export default function Homepage() {
+  const { heroCollection, mainCollections, bestSellers, newProducts, storefront } =
+    useLoaderData<typeof loader>();
 
-function RecommendedProducts({
-  products,
-}: {
-  products: Promise<RecommendedProductsQuery>;
-}) {
   return (
-    <div className="recommended-products">
-      <h2>Recommended Products</h2>
-      <Suspense fallback={<div>Loading...</div>}>
-        <Await resolve={products}>
-          {({ products }) => (
-            <div className="recommended-products-grid">
-              {products.nodes.map((product: any) => (
-                <Link
-                  key={product.id}
-                  className="recommended-product"
-                  to={`/products/${product.handle}`}
-                >
-                  <Image
-                    data={product.images.nodes[0]}
-                    aspectRatio="1/1"
-                    sizes="(min-width: 45em) 20vw, 50vw"
-                  />
-                  <h4>{product.title}</h4>
-                  <small>
-                    <Money data={product.priceRange.minVariantPrice} />
-                  </small>
-                </Link>
-              ))}
-            </div>
-          )}
-        </Await>
-      </Suspense>
-      <br />
+    <div className="home w-full flex flex-col items-center justify-center gap-y-[58px]">
+      <Hero heroData={heroCollection} />
+      <MainCollections collection={mainCollections} />
+      <BestSellers items={bestSellers} />
+      <NewProducts items={newProducts} />
+      <BlockNewsletter />
     </div>
   );
 }
