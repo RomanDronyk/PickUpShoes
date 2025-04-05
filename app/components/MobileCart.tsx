@@ -89,7 +89,7 @@ export function MobileCart({
       </DrawerTrigger>
       <DrawerContent className="h-[90%] px-5">
         <div className="overflow-y-auto overflow-x-hidden">
-          {cart.lines.nodes.length > 0 && <MobileCartDetail setOpen={setOpen} cart={cart} />}
+          {linesCount && <MobileCartDetail setOpen={setOpen} cart={cart} />}
           <EmptyCart hidden={linesCount} setOpen={setOpen} />
         </div>
       </DrawerContent>
