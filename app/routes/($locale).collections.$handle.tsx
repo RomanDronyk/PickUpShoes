@@ -1,4 +1,4 @@
-import { useLoaderData, useNavigate, type MetaFunction } from '@remix-run/react';
+import { useLoaderData, useNavigate, useSearchParams, type MetaFunction } from '@remix-run/react';
 import { getPaginationVariables, Pagination } from '@shopify/hydrogen';
 import type {
   ProductFilter,
@@ -47,6 +47,7 @@ export async function loader({ request, params, context }: LoaderFunctionArgs) {
   const { handle } = params;
   const { storefront } = context;
 
+
   const paginationVariables = getPaginationVariables(request, {
     pageBy: 8,
   });
@@ -54,6 +55,7 @@ export async function loader({ request, params, context }: LoaderFunctionArgs) {
   if (!handle) {
     return redirect('/collections/catalog');
   }
+
 
 
   const locale = context.storefront.i18n;

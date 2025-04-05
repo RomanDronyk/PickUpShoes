@@ -13,7 +13,6 @@ import type {
 } from '@shopify/hydrogen/storefront-api-types';
 import { ChevronDown } from 'lucide-react';
 import React, { useEffect, useMemo, useState } from 'react';
-import { useDebounce } from 'react-use';
 import type { SortParam } from '~/routes/($locale).collections.$handle';
 import {
   Accordion,
@@ -150,15 +149,11 @@ function FilterDraw({
     );
   }, [params]);
 
-  // useEffect(() => {
-  //   const newValue = location?.pathname || '';
-  // }, [location?.pathname]);
-
   return (
     <div className="flex flex-col">
       <div className="md:flex flex-col hidden">
       </div>
-      {filters.map((item, index) => markup(item))}
+      {filters.map((item) => markup(item))}
     </div>
   );
 }
@@ -329,6 +324,13 @@ const ListFilter: React.FC<ListFilterProps> = ({
   };
 
   const updateUrl = (valueToUpdate: string[]) => {
+    const isChangingFilters = true; // Ми _використовуємо_ цю функцію ТІЛЬКИ при зміні фільтрів
+
+    if (isChangingFilters) {
+      params.delete('cursor'); // Очистити курсор при зміні фільтрів
+      params.delete('direction'); // (опційно) очистити direction також
+    }
+
     if (valueToUpdate.length === 0) {
       params.delete(`${FILTER_URL_PREFIX}${filterKey}`);
       navigate(`${location.pathname}?${params.toString()}`);
@@ -342,13 +344,6 @@ const ListFilter: React.FC<ListFilterProps> = ({
     }
   }
 
-  // useDebounce(
-  //   () => {
-  //     // updateUrl(value)
-  //   },
-  //   0,
-  //   [value],
-  // );
 
   useEffect(() => {
     const appliedValues = calculatedValues.map((item) => item.id);
@@ -547,15 +542,6 @@ function getFilterLink(
   return `${location.pathname}?${paramsClone.toString()}`;
 }
 
-function getFilterFromLink(
-  filter: Filter,
-  location: ReturnType<typeof useLocation>,
-) {
-  const decodeSearchParams = decodeURIComponent(location?.search);
-  const arrayDecodeSearchParams = decodeSearchParams
-    ? decodeSearchParams.split('&')
-    : [];
-}
 //create URL for sort products
 function getSortLink(
   sort: SortParam | string,

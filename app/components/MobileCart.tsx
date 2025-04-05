@@ -424,9 +424,6 @@ function CartLineRemoveButton({
       body: formData,
       method: "POST"
     });
-
-
-
     revalidator.revalidate();
 
   }
