@@ -170,7 +170,7 @@ export function MobileCartLine({
   setOpen,
 }: {
   setOpen: any;
-  line: CartLine | undefined;
+  line: CartLine;
 }) {
   const { id, merchandise, isOptimistic } = line;
   const { product, title, image, selectedOptions, quantityAvailable, sku } =
