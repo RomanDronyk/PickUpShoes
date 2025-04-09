@@ -321,6 +321,7 @@ const ListFilter: React.FC<ListFilterProps> = ({
   const handleChange = (valueToChange: string[]) => {
     setValue(valueToChange);
     updateUrl(valueToChange)
+    console.log(valueToChange)
   };
 
   const updateUrl = (valueToUpdate: string[]) => {
@@ -574,9 +575,12 @@ export function SortProducts() {
   const location = useLocation();
   const navigate = useNavigate();
 
+
   const handleSort = (newValue: SortParam | string) => {
     setValue(newValue === value ? value : newValue);
     setOpen(false);
+    params.delete('cursor'); // Очистити курсор при зміні фільтрів
+    params.delete('direction'); // (опційно) очистити direction також
     navigate(getSortLink(newValue, params, location));
   };
 
